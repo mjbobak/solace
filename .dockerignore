@@ -1,0 +1,50 @@
+# Secrets and keys
+
+# Development files
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.egg-info/
+dist-python/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation and non-essential files
+docs/
+*.md
+!README.md
+
+# Test files
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+backend/tests/
+
+# CI/CD
+.github/
+
+# Environment files
+.env*
+!.env.docker
+
+# Logs
+*.log
+logs/

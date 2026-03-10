@@ -1,0 +1,36 @@
+{
+  "inputs": [
+    {
+      "description": "Select which version component to bump",
+      "id": "bumpVersionDigit",
+      "options": ["major", "minor", "patch", "post"],
+      "type": "pickString"
+    },
+    {
+      "description": "Select the type of change",
+      "id": "kaclChangeType",
+      "options": [
+        "Added",
+        "Changed",
+        "Deprecated",
+        "Removed",
+        "Fixed",
+        "Security"
+      ],
+      "type": "pickString"
+    },
+    {
+      "description": "Select what version to release",
+      "id": "kaclReleaseDigit",
+      "options": ["major", "minor", "patch"],
+      "type": "pickString"
+    },
+    {
+      "description": "What has changed?",
+      "id": "kaclChangeText",
+      "type": "promptString"
+    }
+  ],
+  "tasks": [],
+  "version": "2.0.0"
+}

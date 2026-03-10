@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignoreDependencies": ["autoprefixer", "tailwindcss", "prettier"],
+  "entry": ["src/app/main.tsx", "src/app/Routes.tsx"],
+  "project": ["src/**/*.{ts,tsx,js,jsx}"],
+  "ignore": [
+    "**/*.test.{ts,tsx}",
+    "**/*.spec.{ts,tsx}",
+    "**/test-utils/**",
+    "**/__tests__/**"
+  ]
+}
