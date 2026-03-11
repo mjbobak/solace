@@ -13,6 +13,12 @@ export const BulkAccountDropdown: React.FC<BulkAccountDropdownProps> = ({
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const triggerClassName =
+    'inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40';
+  const menuClassName =
+    'absolute bottom-full right-0 z-20 mb-2 max-h-[300px] min-w-[220px] overflow-y-auto rounded-2xl border border-white/10 bg-[#565761] py-2 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.7)]';
+  const menuItemClassName =
+    'w-full px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/10';
 
   const handleSelect = (account: string) => {
     onSelectAccount(account);
@@ -24,7 +30,7 @@ export const BulkAccountDropdown: React.FC<BulkAccountDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+        className={triggerClassName}
       >
         <span>Change Account</span>
         <LuChevronDown size={16} />
@@ -37,12 +43,12 @@ export const BulkAccountDropdown: React.FC<BulkAccountDropdownProps> = ({
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 min-w-[200px] max-h-[300px] overflow-y-auto">
+          <div className={menuClassName}>
             {accounts.map((account) => (
               <button
                 key={account}
                 onClick={() => handleSelect(account)}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className={menuItemClassName}
               >
                 {account}
               </button>

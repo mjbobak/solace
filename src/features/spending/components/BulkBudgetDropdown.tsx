@@ -17,6 +17,12 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const triggerClassName =
+    'inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40';
+  const menuClassName =
+    'absolute bottom-full right-0 z-20 mb-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#565761] shadow-[0_18px_40px_-24px_rgba(0,0,0,0.7)]';
+  const menuItemClassName =
+    'w-full px-4 py-3 text-left text-sm text-white transition-colors hover:bg-white/10';
 
   // Auto-focus search input when dropdown opens
   useEffect(() => {
@@ -69,7 +75,7 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+        className={triggerClassName}
       >
         <span>Change Budget</span>
         <LuChevronDown size={16} />
@@ -85,9 +91,9 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
             }}
             aria-hidden="true"
           />
-          <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 z-20 min-w-[250px] max-h-[400px] overflow-hidden flex flex-col">
+          <div className={menuClassName}>
             {/* Search Input - Sticky at top */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-2 z-30">
+            <div className="sticky top-0 z-30 border-b border-white/10 bg-[#565761] p-3">
               <div className="relative">
                 <input
                   ref={searchInputRef}
@@ -95,12 +101,12 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search budgets..."
-                  className="w-full px-3 py-2 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 pr-8 text-sm text-white placeholder:text-white/45 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/10"
                 />
                 {searchQuery && (
                   <button
                     onClick={handleClearSearch}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white"
                     aria-label="Clear search"
                   >
                     <LuX size={14} />
@@ -110,16 +116,16 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
             </div>
 
             {/* Scrollable content area */}
-            <div className="overflow-y-auto py-1">
+            <div className="overflow-y-auto py-2">
               {filteredGroupedBudgets.size === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-gray-500">
+                <div className="px-4 py-8 text-center text-sm text-white/60">
                   No budgets found matching "{searchQuery}"
                 </div>
               ) : (
                 Array.from(filteredGroupedBudgets.entries()).map(
                   ([category, categoryBudgets]) => (
                     <div key={category}>
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 bg-gray-50 sticky top-0">
+                      <div className="sticky top-0 bg-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/55">
                         {category}
                       </div>
                       {categoryBudgets.map((budget) => (
@@ -132,12 +138,12 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
                               category,
                             )
                           }
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          className={menuItemClassName}
                         >
                           <div className="font-medium">
                             {budget.expense_label}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-white/55">
                             {budget.expense_type}
                           </div>
                         </button>

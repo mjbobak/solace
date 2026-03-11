@@ -13,9 +13,7 @@ import type {
   SpendingEntry,
   SpendingFilters as SpendingFiltersType,
 } from '@/features/spending/types/spendingView';
-import { hasSpreadPayment } from '@/features/spending/utils/spreadPayments';
 import { BulkActionBar } from '@/shared/components/BulkActionBar';
-import { Button } from '@/shared/components/Button';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Table } from '@/shared/components/data/Table';
 import type { SortState } from '@/shared/components/data/Table';
@@ -40,7 +38,7 @@ import { getSpendingTableColumns } from './spendingTableColumns';
 import { SpreadPaymentModal } from './SpreadPaymentModal';
 
 interface PendingBulkOperation {
-  type: 'delete' | 'category' | 'account' | 'spread';
+  type: 'delete' | 'category' | 'account';
   value?: string | { id: number; label: string; category: string };
 }
 
@@ -459,13 +457,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     ]);
   };
 
-  const handleBulkRemoveSpread = () => {
-    setPendingOperations((prev) => [
-      ...prev.filter((op) => op.type !== 'spread'),
-      { type: 'spread', value: 'remove' },
-    ]);
-  };
-
   // Save button handler
   const handleSave = () => {
     if (pendingOperations.length === 0) return;
@@ -497,9 +488,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
               selectedIds,
               op.value as string,
             );
-            break;
-          case 'spread':
-            await bulkOps.handleBulkRemoveSpread(selectedIds);
             break;
         }
       }
@@ -548,9 +536,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
         case 'account':
           label = `Account: ${op.value}`;
           break;
-        case 'spread':
-          label = 'Payment Spread: Remove';
-          break;
       }
 
       return {
@@ -560,14 +545,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       };
     });
   };
-
-  const selectedTransactions = useMemo(
-    () => transactions.filter((transaction) => selection.selectedIds.has(transaction.id)),
-    [selection.selectedIds, transactions],
-  );
-  const hasSelectedSpreadPayments = selectedTransactions.some((transaction) =>
-    hasSpreadPayment(transaction),
-  );
 
   const handleSaveSpread = useCallback(
     async (id: string, updates: Partial<SpendingEntry>) => {
@@ -619,15 +596,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
             accounts={availableAccounts}
             onSelectAccount={handleBulkAccountSelect}
           />
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleBulkRemoveSpread}
-            disabled={bulkOps.isLoading || !hasSelectedSpreadPayments}
-            className="px-3 py-1.5 text-xs"
-          >
-            Remove Spread
-          </Button>
         </BulkActionBar>
 
         <Table

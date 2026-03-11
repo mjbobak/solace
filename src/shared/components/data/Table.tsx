@@ -95,6 +95,9 @@ export function Table<T>({
   sortState: controlledSortState,
   onSortChange,
 }: TableProps<T>) {
+  const checkboxClassName =
+    'h-4 w-4 cursor-pointer rounded-md border border-gray-300 bg-gray-100 accent-gray-500 transition-colors';
+
   const [internalSortState, setInternalSortState] = useState<SortState>({
     column: null,
     direction: null,
@@ -221,7 +224,7 @@ export function Table<T>({
                       data.every((row) => selectedIds.has(rowKey(row)))
                     }
                     onChange={() => onSelectAll?.()}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                    className={checkboxClassName}
                     aria-label="Select all"
                   />
                 </div>
@@ -297,7 +300,7 @@ export function Table<T>({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => onSelectionChange?.(rowKey(row))}
-                        className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                        className={checkboxClassName}
                         aria-label={`Select row`}
                       />
                     </div>
