@@ -1,13 +1,9 @@
 /**
  * Main orchestrator component for the financial infographic dashboard
- * Manages global state (period) and renders all sections
+ * Renders all infographic sections
  */
 
-import React, { useState } from 'react';
-
-import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
-
-import type { Period } from '../types/infographic';
+import React from 'react';
 
 import { EmergencyRunwaySection } from './EmergencyRunwaySection';
 import { FinancialHealthSection } from './FinancialHealthSection';
@@ -16,24 +12,13 @@ import { SpendingAnalysisSection } from './SpendingAnalysisSection';
 import { SpendingPulseSection } from './SpendingPulseSection';
 
 export const DashboardInfographic: React.FC = () => {
-  const [period, setPeriod] = useState<Period>('monthly');
+  const period = 'monthly';
 
   return (
     <div>
       <main className="surface-card mx-auto max-w-6xl px-6">
-        <div className="py-12">
-          <ToggleButtonGroup
-            options={[
-              { value: 'monthly' as const, label: 'Monthly' },
-              { value: 'annual' as const, label: 'Annual' },
-            ]}
-            value={period}
-            onChange={setPeriod}
-          />
-        </div>
-
         <div id="financial-health">
-          <FinancialHealthSection period={period} />
+          <FinancialHealthSection />
         </div>
 
         <div id="spending-analysis">

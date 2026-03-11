@@ -10,28 +10,43 @@ import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { useBudgetCalculations } from '@/features/budget/hooks/useBudgetCalculations';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
 import { dashboardMetrics } from '@/features/home/services/mockDashboardData';
-import { statusPalette } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 
 import { useIncomeAnalysis } from '../hooks/useIncomeAnalysis';
-import type { Period } from '../types/infographic';
 
 import { ScrollAnimatedSection } from './ScrollAnimatedSection';
 import { SectionNarrative } from './SectionNarrative';
 
-interface FinancialHealthSectionProps {
-  period: Period;
-}
+const PLANNED_VALUE_STACK_CLASSES = {
+  annualClassName: 'text-indigo-700',
+  monthlyClassName: 'text-indigo-700/75',
+};
 
-export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
-  period,
-}) => {
+const CurrencyStack = ({
+  monthlyAmount,
+  annualClassName = 'text-app',
+  monthlyClassName = 'text-muted',
+}: {
+  monthlyAmount: number;
+  annualClassName?: string;
+  monthlyClassName?: string;
+}) => (
+  <div className="flex flex-col leading-tight">
+    <span className={`text-sm font-bold ${annualClassName}`}>
+      {formatCurrency(monthlyAmount * 12, '$')}
+    </span>
+    <span className={`text-xs ${monthlyClassName}`}>
+      {formatCurrency(monthlyAmount, '$')}
+    </span>
+  </div>
+);
+
+export const FinancialHealthSection: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
-  // Get income breakdown (salary vs bonus)
   const incomeAnalysis = useIncomeAnalysis();
   const annualNetIncome = incomeAnalysis.totalIncome;
-  const income = period === 'monthly' ? annualNetIncome / 12 : annualNetIncome;
+  const monthlyIncome = annualNetIncome / 12;
 
   // Match budget page calculations so savings/investing stays in sync.
   const { budgetEntries } = useBudgetData(
@@ -41,35 +56,29 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   );
   const budgetCalculations = useBudgetCalculations(budgetEntries);
   const monthlyTotalBudgeted = budgetCalculations.budgeted;
-  const totalBudgeted =
-    period === 'annual' ? monthlyTotalBudgeted * 12 : monthlyTotalBudgeted;
 
   // Investment calculation (from budget data)
   const monthlyInvestments = budgetEntries
     .filter((entry) => isInvestmentCategory(entry.expenseCategory))
     .reduce((sum, entry) => sum + entry.budgeted, 0);
-  const investments =
-    period === 'annual' ? monthlyInvestments * 12 : monthlyInvestments;
 
-  // Savings calculation
-  const savings = income - totalBudgeted;
+  const monthlySavings = monthlyIncome - monthlyTotalBudgeted;
+  const monthlySpending = dashboardMetrics.monthlySpending;
+  const monthlyWealthContribution =
+    Math.abs(monthlySavings) + monthlyInvestments;
 
-  // Spending (adjust for period)
-  const spending =
-    period === 'annual'
-      ? dashboardMetrics.monthlySpending * 12
-      : dashboardMetrics.monthlySpending;
-
-  // Helper function for percentage calculation
   const getPercentage = (value: number) =>
-    income > 0 ? ((value / income) * 100).toFixed(1) : '0.0';
+    monthlyIncome > 0 ? ((value / monthlyIncome) * 100).toFixed(1) : '0.0';
 
-  const salaryAmount =
-    incomeAnalysis.typeBreakdown.find((entry) => entry.type === 'base_pay')
-      ?.amount || 0;
-  const bonusAmount =
-    incomeAnalysis.typeBreakdown.find((entry) => entry.type === 'bonus')
-      ?.amount || 0;
+  const incomeTypeAmounts = incomeAnalysis.typeBreakdown.reduce(
+    (amounts, entry) => {
+      amounts[entry.type] = entry.amount;
+      return amounts;
+    },
+    {} as Record<string, number>,
+  );
+  const salaryAmount = incomeTypeAmounts.base_pay ?? 0;
+  const bonusAmount = incomeTypeAmounts.bonus ?? 0;
 
   return (
     <ScrollAnimatedSection className="py-12 px-6 space-y-8">
@@ -97,10 +106,7 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
           <div className="h-6" />
 
           <div className="mb-3">
-            <p className="mb-1 text-sm font-bold text-app">
-              {formatCurrency(income, '$')}
-            </p>
-            <p className="text-xs text-muted"></p>
+            <CurrencyStack monthlyAmount={monthlyIncome} />
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3 border-t pt-4 section-divider">
@@ -132,11 +138,9 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
           <div className="h-6" />
 
           <div>
-            <p className="mb-1 text-sm font-bold text-app">
-              {formatCurrency(spending, '$')}
-            </p>
+            <CurrencyStack monthlyAmount={monthlySpending} />
             <p className="text-xs text-muted">
-              {getPercentage(spending)}% of income
+              {getPercentage(monthlySpending)}% of income
             </p>
           </div>
         </div>
@@ -156,14 +160,14 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Planned Savings
               </p>
-              <p
-                className="mb-1 text-sm font-bold"
-                style={{ color: statusPalette.budget }}
-              >
-                {formatCurrency(Math.abs(savings), '$')}
-              </p>
+              <div className="mb-1">
+                <CurrencyStack
+                  monthlyAmount={Math.abs(monthlySavings)}
+                  {...PLANNED_VALUE_STACK_CLASSES}
+                />
+              </div>
               <p className="text-xs text-muted">
-                {getPercentage(Math.abs(savings))}%
+                {getPercentage(Math.abs(monthlySavings))}%
               </p>
             </div>
 
@@ -171,14 +175,14 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Planned Investments
               </p>
-              <p
-                className="mb-1 text-sm font-bold"
-                style={{ color: statusPalette.budget }}
-              >
-                {formatCurrency(investments, '$')}
-              </p>
+              <div className="mb-1">
+                <CurrencyStack
+                  monthlyAmount={monthlyInvestments}
+                  {...PLANNED_VALUE_STACK_CLASSES}
+                />
+              </div>
               <p className="text-xs text-muted">
-                {getPercentage(investments)}%
+                {getPercentage(monthlyInvestments)}%
               </p>
             </div>
 
@@ -186,14 +190,14 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Total Going to Wealth
               </p>
-              <p
-                className="mb-1 text-sm font-bold"
-                style={{ color: statusPalette.budget }}
-              >
-                {formatCurrency(Math.abs(savings) + investments, '$')}
-              </p>
+              <div className="mb-1">
+                <CurrencyStack
+                  monthlyAmount={monthlyWealthContribution}
+                  {...PLANNED_VALUE_STACK_CLASSES}
+                />
+              </div>
               <p className="text-xs text-muted">
-                {getPercentage(Math.abs(savings) + investments)}%
+                {getPercentage(monthlyWealthContribution)}%
               </p>
             </div>
           </div>
