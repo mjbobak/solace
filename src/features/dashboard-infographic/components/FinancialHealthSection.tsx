@@ -6,8 +6,8 @@
 import React from 'react';
 import { LuTrendingDown, LuPiggyBank, LuDollarSign } from 'react-icons/lu';
 
+import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { useBudgetCalculations } from '@/features/budget/hooks/useBudgetCalculations';
-import { mockBudgetData } from '@/features/budget/services/mockBudgetData';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
 import { dashboardMetrics } from '@/features/home/services/mockDashboardData';
 import { statusPalette } from '@/shared/theme';
@@ -26,19 +26,26 @@ interface FinancialHealthSectionProps {
 export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   period,
 }) => {
+  const currentYear = new Date().getFullYear();
+
   // Get income breakdown (salary vs bonus)
   const incomeAnalysis = useIncomeAnalysis();
   const annualNetIncome = incomeAnalysis.totalIncome;
   const income = period === 'monthly' ? annualNetIncome / 12 : annualNetIncome;
 
-  // Budget calculations
-  const budgetCalculations = useBudgetCalculations(mockBudgetData);
+  // Match budget page calculations so savings/investing stays in sync.
+  const { budgetEntries } = useBudgetData(
+    currentYear,
+    'monthly_current_month',
+    false,
+  );
+  const budgetCalculations = useBudgetCalculations(budgetEntries);
   const monthlyTotalBudgeted = budgetCalculations.budgeted;
   const totalBudgeted =
     period === 'annual' ? monthlyTotalBudgeted * 12 : monthlyTotalBudgeted;
 
   // Investment calculation (from budget data)
-  const monthlyInvestments = mockBudgetData
+  const monthlyInvestments = budgetEntries
     .filter((entry) => isInvestmentCategory(entry.expenseCategory))
     .reduce((sum, entry) => sum + entry.budgeted, 0);
   const investments =
