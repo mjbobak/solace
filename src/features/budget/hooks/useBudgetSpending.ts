@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { spendingService } from '@/features/spending/services/spendingService';
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
 import { getMonthlyTransactionImpacts } from '@/features/spending/utils/spreadPayments';
+import { getMonthIndexFromDateOnly } from '@/shared/utils/dateOnly';
 
 import type { SpendBasis } from '../types/budgetView';
 
@@ -167,7 +168,7 @@ export function useBudgetSpending(
         continue;
       }
 
-      const monthIndex = new Date(transaction.transactionDate).getMonth();
+      const monthIndex = getMonthIndexFromDateOnly(transaction.transactionDate);
       buckets[monthIndex] += transaction.amount;
     }
 

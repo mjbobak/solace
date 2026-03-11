@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { incomeApiService } from '@/features/income/services/incomeApiService';
-import type { IncomeEntry } from '@/features/income/types/income';
+import type { IncomeYearProjection } from '@/features/income/types/income';
 
 import {
   buildTopLevelSankeyData,
@@ -17,24 +17,25 @@ export function useSankeyData(
   viewMode: SankeyViewMode,
   period: SankeyPeriod,
 ): SankeyData {
-  const [incomeData, setIncomeData] = useState<IncomeEntry[]>([]);
+  const [incomeProjection, setIncomeProjection] = useState<IncomeYearProjection | null>(null);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const fetchIncomeData = async () => {
       try {
-        const data = await incomeApiService.getAllIncomes();
-        setIncomeData(data);
+        const data = await incomeApiService.getYearProjection(currentYear);
+        setIncomeProjection(data);
       } catch (error) {
         console.error('Failed to fetch income data for Sankey:', error);
       }
     };
 
-    fetchIncomeData();
-  }, []);
+    void fetchIncomeData();
+  }, [currentYear]);
 
   return useMemo(() => {
     return viewMode === 'top-level'
-      ? buildTopLevelSankeyData(period, incomeData)
-      : buildDetailedSankeyData(period, incomeData);
-  }, [viewMode, period, incomeData]);
+      ? buildTopLevelSankeyData(period, incomeProjection)
+      : buildDetailedSankeyData(period, incomeProjection);
+  }, [incomeProjection, period, viewMode]);
 }

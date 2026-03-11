@@ -1,3 +1,4 @@
+import { toDateOnlyString } from '@/shared/utils/dateOnly';
 import type { SpendingEntry } from '../types/spendingView';
 
 const ACCOUNTS = [
@@ -68,10 +69,11 @@ function generateMockData(): SpendingEntry[] {
         data.push({
           id: `TXN-${String(id).padStart(4, '0')}`,
           account,
-          transactionDate: transactionDate.toISOString().split('T')[0],
-          postDate: postDate.toISOString().split('T')[0],
+          transactionDate: toDateOnlyString(transactionDate),
+          postDate: toDateOnlyString(postDate),
           description: merchant,
-          category,
+          budgetLabel: category,
+          budgetCategory: category,
           amount: Math.round(amount * 100) / 100,
           isAccrual,
         });
@@ -82,9 +84,7 @@ function generateMockData(): SpendingEntry[] {
   }
 
   return data.sort(
-    (a, b) =>
-      new Date(b.transactionDate).getTime() -
-      new Date(a.transactionDate).getTime(),
+    (a, b) => b.transactionDate.localeCompare(a.transactionDate),
   );
 }
 

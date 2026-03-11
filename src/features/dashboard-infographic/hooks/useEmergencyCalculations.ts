@@ -6,12 +6,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { mockBudgetData } from '@/features/budget/services/mockBudgetData';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
-import { calculateAnnualNet } from '@/features/income/types/income';
-import type { IncomeEntry } from '@/features/income/types/income';
+import type { IncomeYearProjection } from '@/features/income/types/income';
 
 import {
   RUNWAY_THRESHOLDS,
-  PERSON_IDENTIFIERS,
   RUNWAY_SCENARIO_LABELS,
 } from '../constants/emergencyRunwayConfig';
 import type {
@@ -26,13 +24,14 @@ function getRunwayColor(months: number): RunwayColor {
 }
 
 export function useEmergencyCalculations(): EmergencyRunwayData {
-  const [incomeData, setIncomeData] = useState<IncomeEntry[]>([]);
+  const [incomeProjection, setIncomeProjection] = useState<IncomeYearProjection | null>(null);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const fetchIncomeData = async () => {
       try {
-        const data = await incomeApiService.getAllIncomes();
-        setIncomeData(data);
+        const data = await incomeApiService.getYearProjection(currentYear);
+        setIncomeProjection(data);
       } catch (error) {
         console.error(
           'Failed to fetch income data for emergency calculations:',
@@ -42,7 +41,7 @@ export function useEmergencyCalculations(): EmergencyRunwayData {
     };
 
     fetchIncomeData();
-  }, []);
+  }, [currentYear]);
 
   return useMemo(() => {
     // Calculate essential monthly spending (ESSENTIAL category only)
@@ -51,27 +50,11 @@ export function useEmergencyCalculations(): EmergencyRunwayData {
       .reduce((sum, item) => sum + item.budgeted, 0);
 
     // Calculate income by person
-    let personAIncome = 0;
-    let personBIncome = 0;
-
-    incomeData.forEach((entry: IncomeEntry) => {
-      // Calculate monthly income (always use net for living expense calculations)
-      const annualNet = calculateAnnualNet(entry);
-      const amount = annualNet / 12;
-
-      const isPersonA = PERSON_IDENTIFIERS.personA.some((id) =>
-        entry.stream.includes(id),
-      );
-      const isPersonB = PERSON_IDENTIFIERS.personB.some((id) =>
-        entry.stream.includes(id),
-      );
-
-      if (isPersonA) {
-        personAIncome += amount;
-      } else if (isPersonB) {
-        personBIncome += amount;
-      }
-    });
+    const sources = incomeProjection?.sources ?? [];
+    const personA = sources[0];
+    const personB = sources[1];
+    const personAIncome = personA ? personA.totals.committedNet / 12 : 0;
+    const personBIncome = personB ? personB.totals.committedNet / 12 : 0;
 
     // Emergency fund balance
     const emergencyFund = 18000; // Will be added to dashboardMetrics
@@ -92,7 +75,9 @@ export function useEmergencyCalculations(): EmergencyRunwayData {
       scenarios: [
         {
           scenario: 'personA',
-          label: RUNWAY_SCENARIO_LABELS.personA,
+          label: personA
+            ? `${personA.name} loses income`
+            : RUNWAY_SCENARIO_LABELS.personA,
           monthlyIncome: personBIncome,
           essentialSpending: monthlyEssentials,
           emergencyFund,
@@ -101,7 +86,9 @@ export function useEmergencyCalculations(): EmergencyRunwayData {
         },
         {
           scenario: 'personB',
-          label: RUNWAY_SCENARIO_LABELS.personB,
+          label: personB
+            ? `${personB.name} loses income`
+            : RUNWAY_SCENARIO_LABELS.personB,
           monthlyIncome: personAIncome,
           essentialSpending: monthlyEssentials,
           emergencyFund,
@@ -121,5 +108,5 @@ export function useEmergencyCalculations(): EmergencyRunwayData {
       emergencyFundBalance: emergencyFund,
       monthlyEssentials,
     };
-  }, [incomeData]);
+  }, [incomeProjection]);
 }

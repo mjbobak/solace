@@ -29,10 +29,12 @@ export const IncomeAnalysisSection: React.FC<
     value: item.amount,
   }));
 
-  const narrative = `You earn $${incomeData.totalIncome.toLocaleString()} from ${
-    incomeData.streamBreakdown.length
-  } income sources. Your largest source is ${incomeData.streamBreakdown[0]
-    ?.stream} at ${incomeData.streamBreakdown[0]?.percentage.toFixed(
+  const narrative = `You plan ${incomeData.totalIncome.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  })} of net income across ${incomeData.sourceBreakdown.length} income sources. Your largest source is ${incomeData.sourceBreakdown[0]
+    ?.source} at ${incomeData.sourceBreakdown[0]?.percentage.toFixed(
     1,
   )}% of total income.`;
 

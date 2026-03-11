@@ -26,13 +26,10 @@ interface FinancialHealthSectionProps {
 export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   period,
 }) => {
-  // Income calculations (fixed for now, same as BudgetView)
-  const ANNUAL_NET_INCOME = 200000;
-  const monthlyNetIncome = ANNUAL_NET_INCOME / 12;
-  const income = period === 'monthly' ? monthlyNetIncome : ANNUAL_NET_INCOME;
-
   // Get income breakdown (salary vs bonus)
   const incomeAnalysis = useIncomeAnalysis();
+  const annualNetIncome = incomeAnalysis.totalIncome;
+  const income = period === 'monthly' ? annualNetIncome / 12 : annualNetIncome;
 
   // Budget calculations
   const budgetCalculations = useBudgetCalculations(mockBudgetData);
@@ -60,13 +57,12 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   const getPercentage = (value: number) =>
     income > 0 ? ((value / income) * 100).toFixed(1) : '0.0';
 
-  // Extract salary and bonus from income analysis
   const salaryAmount =
-    incomeAnalysis.streamBreakdown.find((s) => s.stream === 'Salary')?.amount ||
-    0;
+    incomeAnalysis.typeBreakdown.find((entry) => entry.type === 'base_pay')
+      ?.amount || 0;
   const bonusAmount =
-    incomeAnalysis.streamBreakdown.find((s) => s.stream === 'Bonus')?.amount ||
-    0;
+    incomeAnalysis.typeBreakdown.find((entry) => entry.type === 'bonus')
+      ?.amount || 0;
 
   return (
     <ScrollAnimatedSection className="py-12 px-6 space-y-8">
