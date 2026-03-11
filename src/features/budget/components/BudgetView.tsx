@@ -11,6 +11,7 @@ import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { useBudgetFiltering } from '@/features/budget/hooks/useBudgetFiltering';
 import { useBudgetOperations } from '@/features/budget/hooks/useBudgetOperations';
 import { useCustomOptions } from '@/features/budget/hooks/useCustomOptions';
+import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type {
   ExpenseTypeFilter,
   BudgetEntry,
@@ -32,7 +33,6 @@ import {
 } from '@/shared/utils/searchParams';
 import { getYearFromDateOnly } from '@/shared/utils/dateOnly';
 
-const ANNUAL_NET_INCOME = 200000;
 const SPEND_BASIS_OPTIONS: ReadonlyArray<{
   value: SpendBasis;
   label: string;
@@ -110,6 +110,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
   const [editingItem, setEditingItem] = useState<BudgetEntry | undefined>(
     undefined,
   );
+  const [plannedAnnualNetIncome, setPlannedAnnualNetIncome] = useState(0);
 
   const [normalizeAccrual] = useState<boolean>(true);
   const [yearOptions, setYearOptions] = useState<string[]>([
@@ -155,6 +156,20 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
   }, [currentYear]);
 
   React.useEffect(() => {
+    const loadPlannedIncome = async () => {
+      try {
+        const projection = await incomeApiService.getYearProjection(selectedYear);
+        setPlannedAnnualNetIncome(projection.totals.plannedNet);
+      } catch (err) {
+        console.error('Failed to load planned income projection:', err);
+        setPlannedAnnualNetIncome(0);
+      }
+    };
+
+    void loadPlannedIncome();
+  }, [selectedYear]);
+
+  React.useEffect(() => {
     if (error) {
       toast.error(`Failed to load data: ${error}`);
       console.error('Data loading error:', error);
@@ -187,7 +202,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
   });
   const customOptions = useCustomOptions();
 
-  const income = ANNUAL_NET_INCOME / 12;
+  const income = plannedAnnualNetIncome / 12;
 
   const investments = budgetEntries
     .filter((entry) => isInvestmentCategory(entry.expenseCategory))
