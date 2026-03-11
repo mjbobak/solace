@@ -6,6 +6,7 @@
 import React from 'react';
 
 import { DonutChart, LineChart } from '@/shared/components/charts';
+import { statusPalette } from '@/shared/theme';
 
 import { useIncomeAnalysis } from '../hooks/useIncomeAnalysis';
 import type { Period } from '../types/infographic';
@@ -36,19 +37,15 @@ export const IncomeAnalysisSection: React.FC<
   )}% of total income.`;
 
   return (
-    <ScrollAnimatedSection className="py-12 px-6 space-y-8 border-t border-gray-200">
+    <ScrollAnimatedSection className="space-y-8 border-t section-divider px-6 py-12">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Income Analysis
-        </h2>
+        <h2 className="mb-4 text-2xl font-bold text-app">Income Analysis</h2>
         <SectionNarrative text={narrative} highlight={true} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Income Sources
-          </h3>
+          <h3 className="page-section-title">Income Sources</h3>
           {donutData.length > 0 ? (
             <DonutChart
               data={donutData}
@@ -57,26 +54,24 @@ export const IncomeAnalysisSection: React.FC<
               height={300}
             />
           ) : (
-            <div className="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No income data available</p>
+            <div className="chart-empty-state h-80">
+              <p className="text-muted">No income data available</p>
             </div>
           )}
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Income Trend
-          </h3>
+          <h3 className="page-section-title">Income Trend</h3>
           {incomeData.trend.length > 0 ? (
             <LineChart
               data={incomeData.trend}
               xAxisKey="month"
-              lines={[{ dataKey: 'income', stroke: '#10b981' }]}
+              lines={[{ dataKey: 'income', stroke: statusPalette.income }]}
               height={300}
             />
           ) : (
-            <div className="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No trend data available</p>
+            <div className="chart-empty-state h-80">
+              <p className="text-muted">No trend data available</p>
             </div>
           )}
         </div>

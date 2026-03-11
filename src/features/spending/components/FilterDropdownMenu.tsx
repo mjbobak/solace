@@ -90,7 +90,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
             return (
               <label
                 key={year.value}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
+                className="dropdown-check-option group"
               >
                 <input
                   type="checkbox"
@@ -100,30 +100,28 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
                       year: handleToggleSelection(filters.year, year.value),
                     });
                   }}
-                  className="w-4 h-4 text-slate-900 bg-white border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:ring-offset-0 cursor-pointer"
+                  className="checkbox-input"
                 />
-                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
+                <span className="text-app text-sm transition-colors">
                   {year.label}
                 </span>
-                {isSelected && (
-                  <span className="ml-auto text-slate-900">✓</span>
-                )}
+                {isSelected && <span className="ml-auto text-brand">✓</span>}
               </label>
             );
           })}
           {filters.year.length > 0 && (
-            <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+            <div className="mt-2 flex gap-2 border-t section-divider pt-2">
               <button
                 type="button"
                 onClick={() => onFiltersChange({ year: [] })}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"
+                className="dropdown-action-secondary flex-1"
               >
                 Clear All
               </button>
               <button
                 type="button"
                 onClick={() => setExpandedSection(null)}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 transition-colors"
+                className="dropdown-action-primary flex-1"
               >
                 Done
               </button>
@@ -142,7 +140,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
             return (
               <label
                 key={month.value}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
+                className="dropdown-check-option group"
               >
                 <input
                   type="checkbox"
@@ -152,30 +150,28 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
                       month: handleToggleSelection(filters.month, month.value),
                     });
                   }}
-                  className="w-4 h-4 text-slate-900 bg-white border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:ring-offset-0 cursor-pointer"
+                  className="checkbox-input"
                 />
-                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
+                <span className="text-app text-sm transition-colors">
                   {month.label}
                 </span>
-                {isSelected && (
-                  <span className="ml-auto text-slate-900">✓</span>
-                )}
+                {isSelected && <span className="ml-auto text-brand">✓</span>}
               </label>
             );
           })}
           {filters.month.length > 0 && (
-            <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+            <div className="mt-2 flex gap-2 border-t section-divider pt-2">
               <button
                 type="button"
                 onClick={() => onFiltersChange({ month: [] })}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"
+                className="dropdown-action-secondary flex-1"
               >
                 Clear All
               </button>
               <button
                 type="button"
                 onClick={() => setExpandedSection(null)}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 transition-colors"
+                className="dropdown-action-primary flex-1"
               >
                 Done
               </button>
@@ -194,7 +190,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
             return (
               <label
                 key={option.value}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
+                className="dropdown-check-option group"
               >
                 <input
                   type="checkbox"
@@ -207,30 +203,28 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
                       ),
                     });
                   }}
-                  className="w-4 h-4 text-slate-900 bg-white border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:ring-offset-0 cursor-pointer"
+                  className="checkbox-input"
                 />
-                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
+                <span className="text-app text-sm transition-colors">
                   {option.label}
                 </span>
-                {isSelected && (
-                  <span className="ml-auto text-slate-900">✓</span>
-                )}
+                {isSelected && <span className="ml-auto text-brand">✓</span>}
               </label>
             );
           })}
           {filters.accrualStatus.length > 0 && (
-            <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+            <div className="mt-2 flex gap-2 border-t section-divider pt-2">
               <button
                 type="button"
                 onClick={() => onFiltersChange({ accrualStatus: [] })}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"
+                className="dropdown-action-secondary flex-1"
               >
                 Clear All
               </button>
               <button
                 type="button"
                 onClick={() => setExpandedSection(null)}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 transition-colors"
+                className="dropdown-action-primary flex-1"
               >
                 Done
               </button>
@@ -245,7 +239,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
       component: (
         <div className="space-y-3 px-1">
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1.5">
+            <label className="dropdown-label mb-1.5 block">
               Minimum ($)
             </label>
             <Input
@@ -263,7 +257,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1.5">
+            <label className="dropdown-label mb-1.5 block">
               Maximum ($)
             </label>
             <Input
@@ -295,29 +289,29 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
 
   return (
     <div ref={dropdownRef} className="relative">
-      {/* Trigger Button */}
       <button
         type="button"
         onClick={handleToggle}
-        className="group inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all focus:outline-none focus:ring-0 focus:border-slate-300"
+        className="dropdown-trigger group inline-flex w-auto items-center gap-2"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
-        <LuSlidersHorizontal className="w-4 h-4 text-slate-500 group-hover:text-slate-700 transition-colors" />
+        <LuSlidersHorizontal className="dropdown-icon h-4 w-4 transition-colors" />
         <span>Filters</span>
         {activeFilterCount > 0 && (
-          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 bg-slate-900 text-white text-xs font-semibold rounded-full">
+          <span className="status-chip status-chip-brand min-h-[18px] min-w-[18px] justify-center rounded-full px-1.5 py-0 text-[11px]">
             {activeFilterCount}
           </span>
         )}
         <LuChevronDown
-          className={`w-4 h-4 text-slate-400 transition-transform ${
+          className={`dropdown-icon h-4 w-4 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="dropdown-panel absolute left-0 top-full z-50 mt-2 w-72 animate-in overflow-hidden fade-in slide-in-from-top-2 duration-200">
           <div className="p-2">
             {filterSections.map((section, index) => (
               <div
@@ -327,11 +321,11 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSectionClick(section.id)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors group"
+                  className="dropdown-option flex w-full items-center justify-between font-medium"
                 >
                   <span>{section.label}</span>
                   <LuChevronDown
-                    className={`w-4 h-4 text-slate-400 transition-transform ${
+                    className={`dropdown-icon h-4 w-4 transition-transform ${
                       expandedSection === section.id ? 'rotate-180' : ''
                     }`}
                   />

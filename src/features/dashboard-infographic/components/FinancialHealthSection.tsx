@@ -10,6 +10,7 @@ import { useBudgetCalculations } from '@/features/budget/hooks/useBudgetCalculat
 import { mockBudgetData } from '@/features/budget/services/mockBudgetData';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
 import { dashboardMetrics } from '@/features/home/services/mockDashboardData';
+import { statusPalette } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 
 import { useIncomeAnalysis } from '../hooks/useIncomeAnalysis';
@@ -70,7 +71,7 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   return (
     <ScrollAnimatedSection className="py-12 px-6 space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        <h2 className="mb-4 text-2xl font-bold text-app">
           Financial Health Overview
         </h2>
         <SectionNarrative
@@ -80,13 +81,12 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {/* Card 1: Total Income */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+        <div className="surface-card surface-card-hover p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-lg">
-              <LuDollarSign className="w-5 h-5 text-emerald-600" />
+            <div className="icon-tile icon-tile-success p-2">
+              <LuDollarSign className="h-5 w-5" />
             </div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
               Income
             </h3>
           </div>
@@ -94,35 +94,34 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
           <div className="h-6" />
 
           <div className="mb-3">
-            <p className="text-sm font-bold text-gray-900 mb-1">
+            <p className="mb-1 text-sm font-bold text-app">
               {formatCurrency(income, '$')}
             </p>
-            <p className="text-xs text-gray-500"></p>
+            <p className="text-xs text-muted"></p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-4 mt-3 border-t border-gray-100">
+          <div className="mt-3 grid grid-cols-2 gap-3 border-t pt-4 section-divider">
             <div>
-              <p className="text-xs text-gray-400 mb-1">Salary</p>
-              <p className="text-xs font-bold text-gray-900">
+              <p className="mb-1 text-xs text-muted">Salary</p>
+              <p className="text-xs font-bold text-app">
                 {formatCurrency(salaryAmount, '$')}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 mb-1">Bonus</p>
-              <p className="text-xs font-bold text-gray-900">
+              <p className="mb-1 text-xs text-muted">Bonus</p>
+              <p className="text-xs font-bold text-app">
                 {formatCurrency(bonusAmount, '$')}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Card 2: Total Spending */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+        <div className="surface-card surface-card-hover p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg">
-              <LuTrendingDown className="w-5 h-5 text-blue-600" />
+            <div className="icon-tile icon-tile-danger p-2">
+              <LuTrendingDown className="h-5 w-5" />
             </div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
               Spending
             </h3>
           </div>
@@ -130,59 +129,64 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
           <div className="h-6" />
 
           <div>
-            <p className="text-sm font-bold text-gray-900 mb-1">
+            <p className="mb-1 text-sm font-bold text-app">
               {formatCurrency(spending, '$')}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               {getPercentage(spending)}% of income
             </p>
           </div>
         </div>
 
-        {/* Card 3: Savings & Investing */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 border border-gray-200 lg:col-span-3">
+        <div className="surface-card p-5 lg:col-span-3">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg">
-              <LuPiggyBank className="w-5 h-5 text-blue-600" />
+            <div className="icon-tile icon-tile-brand p-2">
+              <LuPiggyBank className="h-5 w-5" />
             </div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
               Savings & Investing
             </h3>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Planned Savings
               </p>
-              <p className="text-sm font-bold text-gray-900 mb-1">
+              <p className="mb-1 text-sm font-bold text-app">
                 {formatCurrency(Math.abs(savings), '$')}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 {getPercentage(Math.abs(savings))}%
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Planned Investments
               </p>
-              <p className="text-sm font-bold text-gray-900 mb-1">
+              <p
+                className="mb-1 text-sm font-bold"
+                style={{ color: statusPalette.budget }}
+              >
                 {formatCurrency(investments, '$')}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 {getPercentage(investments)}%
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Total Going to Wealth
               </p>
-              <p className="text-sm font-bold text-gray-900 mb-1">
+              <p
+                className="mb-1 text-sm font-bold"
+                style={{ color: statusPalette.budget }}
+              >
                 {formatCurrency(Math.abs(savings) + investments, '$')}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 {getPercentage(Math.abs(savings) + investments)}%
               </p>
             </div>

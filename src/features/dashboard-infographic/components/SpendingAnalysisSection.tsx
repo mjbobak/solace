@@ -7,6 +7,7 @@ import React from 'react';
 
 import { categoryData } from '@/features/home/services/mockDashboardData';
 import { DonutChart, BarChart } from '@/shared/components/charts';
+import { statusPalette } from '@/shared/theme';
 
 import type { Period } from '../types/infographic';
 
@@ -34,9 +35,9 @@ export const SpendingAnalysisSection: React.FC<
   } at $${topCategory.value.toLocaleString()} (${topPercentage}% of total). Your top 5 categories account for most of your spending.`;
 
   return (
-    <ScrollAnimatedSection className="py-12 px-6 space-y-8 border-t border-gray-200">
+    <ScrollAnimatedSection className="space-y-8 border-t section-divider px-6 py-12">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        <h2 className="mb-4 text-2xl font-bold text-app">
           Spending Analysis
         </h2>
         <SectionNarrative text={narrative} highlight={true} />
@@ -44,9 +45,7 @@ export const SpendingAnalysisSection: React.FC<
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            All Categories
-          </h3>
+          <h3 className="page-section-title">All Categories</h3>
           {categoryData.length > 0 ? (
             <DonutChart
               data={categoryData}
@@ -55,27 +54,25 @@ export const SpendingAnalysisSection: React.FC<
               height={300}
             />
           ) : (
-            <div className="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No data available</p>
+            <div className="chart-empty-state h-80">
+              <p className="text-muted">No data available</p>
             </div>
           )}
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Top Spending Categories
-          </h3>
+          <h3 className="page-section-title">Top Spending Categories</h3>
           {topCategories.length > 0 ? (
             <BarChart
               data={topCategories}
               xAxisKey="name"
-              bars={[{ dataKey: 'value', fill: '#f43f5e' }]}
+              bars={[{ dataKey: 'value', fill: statusPalette.spending }]}
               height={300}
               orientation="vertical"
             />
           ) : (
-            <div className="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No data available</p>
+            <div className="chart-empty-state h-80">
+              <p className="text-muted">No data available</p>
             </div>
           )}
         </div>

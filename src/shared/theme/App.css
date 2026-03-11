@@ -1,147 +1,758 @@
 @import 'tailwindcss';
 
-@theme {
-  /* Modern color palette for Home App Launcher */
-  --color-gradient-start: #f8f9fa;
-  --color-gradient-end: #e9ecef;
-  --color-page-bg: linear-gradient(
-    to right,
-    var(--color-gradient-start),
-    var(--color-gradient-end)
-  );
-  --color-card-bg: oklch(100% 0 0);
-  --color-accent: oklch(60% 0.18 250);
-  --color-text-primary: oklch(25% 0.01 250);
-  --color-text-secondary: oklch(50% 0.01 250);
-  --color-border: oklch(92% 0.004 250);
-  --color-hover-bg: oklch(96% 0.01 250);
-  --color-button-light: oklch(98% 0.01 200);
-  --color-button-light-hover: oklch(95% 0.02 200);
+:root {
+  color-scheme: light;
+  --color-page: oklch(98% 0.01 250);
+  --color-page-accent: oklch(73% 0.17 255);
+  --color-surface: oklch(100% 0 0 / 0.72);
+  --color-surface-elevated: oklch(100% 0 0 / 0.9);
+  --color-surface-subtle: oklch(96% 0.01 250);
+  --color-text: oklch(23% 0.02 250);
+  --color-text-muted: oklch(49% 0.02 250);
+  --color-border: oklch(89% 0.01 250 / 0.95);
+  --color-brand: oklch(57% 0.2 258);
+  --color-brand-muted: oklch(94% 0.03 256);
+  --color-success: oklch(66% 0.17 155);
+  --color-warning: oklch(79% 0.14 86);
+  --color-danger: oklch(62% 0.23 28);
+  --color-focus: oklch(57% 0.2 258 / 0.22);
+  --color-overlay: oklch(18% 0.02 255 / 0.36);
+  --color-overlay-strong: oklch(30% 0.02 255 / 0.94);
+  --color-inverse: oklch(99% 0 0);
+  --color-chart-1: oklch(57% 0.2 258);
+  --color-chart-2: oklch(66% 0.17 155);
+  --color-chart-3: oklch(79% 0.14 86);
+  --color-chart-4: oklch(62% 0.23 28);
+  --color-chart-5: oklch(68% 0.18 315);
+  --color-chart-6: oklch(71% 0.14 205);
+}
 
-  /* Chart color palette */
-  --color-chart-1: oklch(60% 0.18 250); /* Primary blue */
-  --color-chart-2: oklch(65% 0.2 150); /* Green */
-  --color-chart-3: oklch(70% 0.18 350); /* Pink */
-  --color-chart-4: oklch(65% 0.2 50); /* Orange */
-  --color-chart-5: oklch(60% 0.15 280); /* Purple */
-  --color-chart-6: oklch(65% 0.18 180); /* Cyan */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-page: oklch(18% 0.02 255);
+  --color-page-accent: oklch(73% 0.16 258);
+  --color-surface: oklch(22% 0.02 255 / 0.82);
+  --color-surface-elevated: oklch(26% 0.02 255 / 0.94);
+  --color-surface-subtle: oklch(30% 0.02 255);
+  --color-text: oklch(96% 0.01 250);
+  --color-text-muted: oklch(74% 0.02 250);
+  --color-border: oklch(37% 0.02 255 / 0.95);
+  --color-brand: oklch(72% 0.16 258);
+  --color-brand-muted: oklch(31% 0.06 256);
+  --color-success: oklch(73% 0.15 154);
+  --color-warning: oklch(81% 0.12 88);
+  --color-danger: oklch(69% 0.19 28);
+  --color-focus: oklch(72% 0.16 258 / 0.28);
+  --color-overlay: oklch(3% 0.01 255 / 0.56);
+  --color-overlay-strong: oklch(16% 0.02 255 / 0.96);
+  --color-inverse: oklch(16% 0.02 255);
+  --color-chart-1: oklch(72% 0.16 258);
+  --color-chart-2: oklch(73% 0.15 154);
+  --color-chart-3: oklch(81% 0.12 88);
+  --color-chart-4: oklch(69% 0.19 28);
+  --color-chart-5: oklch(77% 0.15 314);
+  --color-chart-6: oklch(76% 0.12 204);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-text);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 @layer components {
-  .page-background {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-gradient-start) 20%, transparent),
-      color-mix(in srgb, var(--color-gradient-end) 20%, transparent)
-    );
+  .app-shell {
+    @apply min-h-screen pt-16 transition-colors duration-200;
+    background:
+      radial-gradient(
+        circle at top right,
+        color-mix(in srgb, var(--color-page-accent) 14%, transparent),
+        transparent 30%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-page-accent) 9%, transparent),
+        transparent 42%
+      ),
+      var(--color-page);
   }
 
-  .button-simple {
-    @apply bg-white text-gray-700 font-semibold py-2 px-6 rounded-md border border-gray-200 hover:bg-gray-200 focus:outline-none transition transform duration-150 ease-in-out active:scale-97 flex items-center w-35 justify-center text-center gap-2 shadow-sm;
+  .app-page-center {
+    @apply flex min-h-screen items-center justify-center px-4;
+    background:
+      radial-gradient(
+        circle at top left,
+        color-mix(in srgb, var(--color-page-accent) 16%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-brand) 10%, transparent),
+        transparent 50%
+      ),
+      var(--color-page);
+  }
+
+  .page-content {
+    @apply px-8 py-6;
+  }
+
+  .page-header {
+    @apply mb-6 flex items-center justify-between gap-4;
+  }
+
+  .page-title {
+    @apply text-3xl font-bold;
+    color: var(--color-text);
+  }
+
+  .page-section-title {
+    @apply mb-4 text-lg font-semibold;
+    color: var(--color-text);
+  }
+
+  .text-app {
+    color: var(--color-text);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .text-brand {
+    color: var(--color-brand);
+  }
+
+  .text-success {
+    color: var(--color-success);
+  }
+
+  .text-warning {
+    color: var(--color-warning);
+  }
+
+  .text-danger {
+    color: var(--color-danger);
+  }
+
+  .border-app {
+    border-color: var(--color-border);
+  }
+
+  .section-divider {
+    border-color: var(--color-border);
+  }
+
+  .surface-card {
+    @apply rounded-2xl border p-6 transition-all duration-200;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: 0 24px 60px -36px color-mix(in srgb, var(--color-text) 28%, transparent);
+  }
+
+  .surface-card-hover:hover {
+    box-shadow: 0 28px 64px -34px color-mix(in srgb, var(--color-brand) 24%, transparent);
+  }
+
+  .surface-card-soft {
+    @apply rounded-2xl border p-5;
+    background: var(--color-surface);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    box-shadow: 0 16px 38px -30px color-mix(in srgb, var(--color-text) 22%, transparent);
+  }
+
+  .surface-subtle {
+    @apply rounded-xl border;
+    background: var(--color-surface-subtle);
+    border-color: color-mix(in srgb, var(--color-border) 84%, transparent);
+  }
+
+  .login-card {
+    @apply w-full max-w-md rounded-2xl border p-8;
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    border-color: var(--color-border);
+    box-shadow: 0 28px 80px -48px color-mix(in srgb, var(--color-text) 34%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  .modal-backdrop {
+    background: var(--color-overlay);
+    backdrop-filter: blur(6px);
+  }
+
+  .modal-panel {
+    @apply relative flex w-full flex-col overflow-hidden rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: 0 28px 70px -34px color-mix(in srgb, var(--color-text) 38%, transparent);
+  }
+
+  .modal-header {
+    @apply flex items-center justify-between border-b px-6 py-5;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .icon-button {
+    @apply rounded-lg p-1 transition-colors;
+    color: var(--color-text-muted);
+  }
+
+  .icon-button:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 44%, transparent);
+    color: var(--color-text);
+  }
+
+  .button-base {
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .button-primary {
-    background-color: var(--color-button-light);
-    @apply text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    color: var(--color-inverse);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand) 90%, white 10%),
+      color-mix(in srgb, var(--color-brand) 72%, black 28%)
+    );
+    box-shadow: 0 18px 38px -24px color-mix(in srgb, var(--color-brand) 72%, transparent);
   }
 
   .button-primary:hover:not(:disabled) {
-    background-color: var(--color-button-light-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 22px 42px -22px color-mix(in srgb, var(--color-brand) 68%, transparent);
   }
 
   .button-secondary {
-    background-color: var(--color-button-light);
-    @apply text-gray-800 font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 24px -20px color-mix(in srgb, var(--color-text) 20%, transparent);
   }
 
   .button-secondary:hover:not(:disabled) {
-    background-color: var(--color-button-light-hover);
+    background: color-mix(in srgb, var(--color-brand-muted) 40%, var(--color-surface) 60%);
   }
 
   .button-danger {
-    @apply bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700;
+    color: var(--color-inverse);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-danger) 90%, white 10%),
+      color-mix(in srgb, var(--color-danger) 72%, black 28%)
+    );
+    box-shadow: 0 18px 38px -24px color-mix(in srgb, var(--color-danger) 68%, transparent);
   }
 
-  /* Checkerboard pattern for color picker */
-  .bg-checkerboard {
-    background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
-      linear-gradient(-45deg, #ccc 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #ccc 75%),
-      linear-gradient(-45deg, transparent 75%, #ccc 75%);
-    background-size: 8px 8px;
-    background-position:
-      0 0,
-      0 4px,
-      4px -4px,
-      -4px 0px;
+  .button-danger:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 22px 42px -22px color-mix(in srgb, var(--color-danger) 66%, transparent);
   }
 
-  /* Form component utilities */
   .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-  }
-
-  .form-error {
-    @apply mt-1 text-sm text-red-500;
+    @apply mb-1 block text-sm font-medium;
+    color: var(--color-text-muted);
   }
 
   .form-input {
-    @apply w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300;
+    @apply w-full rounded-lg border px-3 py-2 transition-colors duration-150 focus:outline-none;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .form-input::placeholder {
+    color: color-mix(in srgb, var(--color-text-muted) 82%, transparent);
+  }
+
+  .form-input:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 20%, var(--color-border));
+  }
+
+  .form-input:focus {
+    border-color: color-mix(in srgb, var(--color-brand) 72%, white 28%);
+    box-shadow: 0 0 0 4px var(--color-focus);
   }
 
   .form-input-error {
-    @apply w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 border-red-500;
+    border-color: color-mix(in srgb, var(--color-danger) 72%, white 28%);
   }
 
-  /* Table styles */
-  .table-container {
-    @apply w-full overflow-x-auto;
+  .form-error {
+    @apply mt-1 text-sm;
+    color: var(--color-danger);
+  }
+
+  .input-required {
+    color: var(--color-danger);
+  }
+
+  .checkbox-input {
+    @apply h-4 w-4 cursor-pointer rounded-md border transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    accent-color: var(--color-brand);
+  }
+
+  .checkbox-input:focus {
+    box-shadow: 0 0 0 3px var(--color-focus);
+    outline: none;
+  }
+
+  .dropdown-trigger {
+    @apply flex w-full items-center justify-between rounded-full border px-4 py-2.5 text-left text-sm font-medium transition-all duration-150 focus:outline-none;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .dropdown-trigger:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 32%, var(--color-surface-elevated) 68%);
+    border-color: color-mix(in srgb, var(--color-brand) 24%, var(--color-border));
+  }
+
+  .dropdown-panel {
+    @apply overflow-hidden rounded-xl border;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: 0 20px 52px -30px color-mix(in srgb, var(--color-text) 34%, transparent);
+  }
+
+  .dropdown-panel-header {
+    @apply border-b px-4 py-3;
+    background: color-mix(in srgb, var(--color-surface-subtle) 88%, transparent);
+    border-color: color-mix(in srgb, var(--color-border) 78%, transparent);
+  }
+
+  .dropdown-label {
+    @apply text-xs font-medium;
+    color: var(--color-text-muted);
+  }
+
+  .dropdown-icon {
+    color: color-mix(in srgb, var(--color-text-muted) 82%, transparent);
+  }
+
+  .dropdown-option {
+    @apply rounded-lg px-3 py-2.5 text-left text-sm transition-colors;
+    color: var(--color-text);
+  }
+
+  .dropdown-option:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 42%, transparent);
+  }
+
+  .dropdown-check-option {
+    @apply flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors;
+  }
+
+  .dropdown-check-option:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 42%, transparent);
+  }
+
+  .dropdown-option-active {
+    background: color-mix(in srgb, var(--color-brand-muted) 80%, var(--color-surface-elevated) 20%);
+    color: var(--color-brand);
+  }
+
+  .dropdown-action-primary {
+    @apply rounded-md px-3 py-1.5 text-xs font-semibold transition-colors;
+    color: var(--color-inverse);
+    background: var(--color-brand);
+  }
+
+  .dropdown-action-primary:hover {
+    background: color-mix(in srgb, var(--color-brand) 86%, black 14%);
+  }
+
+  .dropdown-action-secondary {
+    @apply rounded-md px-3 py-1.5 text-xs font-semibold transition-colors;
+    color: var(--color-text-muted);
+    background: color-mix(in srgb, var(--color-surface-subtle) 92%, transparent);
+  }
+
+  .dropdown-action-secondary:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 48%, transparent);
+    color: var(--color-text);
+  }
+
+  .filter-chip {
+    @apply inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium;
+    background: color-mix(in srgb, var(--color-brand-muted) 82%, transparent);
+    border-color: color-mix(in srgb, var(--color-brand) 18%, var(--color-border));
+    color: var(--color-text);
+  }
+
+  .filter-chip-dismiss {
+    @apply rounded p-0.5 transition-colors;
+  }
+
+  .filter-chip-dismiss:hover {
+    background: color-mix(in srgb, var(--color-brand) 10%, transparent);
+  }
+
+  .status-chip {
+    @apply inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium;
+  }
+
+  .status-chip-brand {
+    background: color-mix(in srgb, var(--color-brand-muted) 82%, transparent);
+    border-color: color-mix(in srgb, var(--color-brand) 20%, var(--color-border));
+    color: var(--color-brand);
+  }
+
+  .status-chip-success {
+    background: color-mix(in srgb, var(--color-success) 16%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 24%, var(--color-border));
+    color: var(--color-success);
+  }
+
+  .status-chip-warning {
+    background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+    border-color: color-mix(in srgb, var(--color-warning) 24%, var(--color-border));
+    color: color-mix(in srgb, var(--color-warning) 88%, var(--color-text) 12%);
+  }
+
+  .status-chip-danger {
+    background: color-mix(in srgb, var(--color-danger) 16%, transparent);
+    border-color: color-mix(in srgb, var(--color-danger) 24%, var(--color-border));
+    color: var(--color-danger);
+  }
+
+  .status-chip-neutral {
+    background: color-mix(in srgb, var(--color-surface-subtle) 92%, transparent);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .icon-tile {
+    @apply flex items-center justify-center rounded-xl p-3;
+  }
+
+  .icon-tile-brand {
+    background: color-mix(in srgb, var(--color-brand) 12%, transparent);
+    color: var(--color-brand);
+  }
+
+  .icon-tile-success {
+    background: color-mix(in srgb, var(--color-success) 14%, transparent);
+    color: var(--color-success);
+  }
+
+  .icon-tile-danger {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: var(--color-danger);
+  }
+
+  .icon-tile-warning {
+    background: color-mix(in srgb, var(--color-warning) 16%, transparent);
+    color: color-mix(in srgb, var(--color-warning) 86%, var(--color-text) 14%);
+  }
+
+  .table-shell {
+    @apply w-full overflow-x-auto rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
   }
 
   .table-base {
     @apply w-full border-collapse;
   }
 
-  .table-header {
-    @apply bg-gray-50 border-b border-gray-200;
+  .table-head {
+    background: color-mix(in srgb, var(--color-surface-subtle) 90%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
   }
 
   .table-header-cell {
-    @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+    @apply px-3 py-1 text-[11px] font-medium uppercase tracking-wider;
+    color: var(--color-text-muted);
+  }
+
+  .table-sortable:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 38%, transparent);
   }
 
   .table-row {
-    @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+    @apply h-10 align-middle transition-colors;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 74%, transparent);
+  }
+
+  .table-row-striped {
+    background: color-mix(in srgb, var(--color-surface-subtle) 65%, transparent);
+  }
+
+  .table-row-hover:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 46%, transparent);
+  }
+
+  .table-row-selected {
+    background: color-mix(in srgb, var(--color-brand-muted) 78%, var(--color-surface-elevated) 22%);
   }
 
   .table-cell {
-    @apply px-4 py-3 text-sm text-gray-900;
+    @apply px-3 py-1 text-[11px];
+    color: var(--color-text);
   }
 
-  /* Chart container */
-  .chart-container {
-    @apply w-full bg-white rounded-lg p-4 shadow-sm border border-gray-200;
+  .table-skeleton {
+    background: color-mix(in srgb, var(--color-border) 78%, transparent);
   }
 
-  .chart-loading {
-    @apply flex items-center justify-center h-64 text-gray-400;
+  .table-highlight-dot {
+    background: var(--color-success);
   }
 
-  /* File upload zone */
-  .upload-zone {
-    @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors;
+  .chart-shell {
+    @apply w-full rounded-xl border p-4;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
   }
 
-  .upload-zone-active {
-    @apply border-2 border-dashed border-indigo-500 bg-indigo-50 rounded-lg p-8 text-center transition-colors;
+  .chart-empty-state {
+    @apply flex items-center justify-center rounded-xl border text-sm;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
   }
 
-  .upload-zone:hover {
-    @apply border-gray-400 bg-gray-50;
+  .chart-loading-text {
+    color: var(--color-text-muted);
+  }
+
+  .app-nav {
+    @apply fixed left-0 right-0 top-0 z-50 flex h-16 items-center gap-8 px-6 transition-all duration-200;
+    color: var(--color-text);
+  }
+
+  .app-nav-scrolled {
+    background: color-mix(in srgb, var(--color-surface-elevated) 86%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .app-nav-link {
+    @apply flex h-10 items-center border-b-4 px-2 text-sm font-medium transition-all duration-200;
+    border-color: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .app-nav-link:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 24%, transparent);
+    color: var(--color-text);
+  }
+
+  .app-nav-link-active {
+    border-color: color-mix(in srgb, var(--color-brand) 48%, transparent);
+    color: var(--color-text);
+  }
+
+  .theme-toggle-group {
+    @apply inline-flex items-center rounded-full border p-1;
+    background: color-mix(in srgb, var(--color-surface-elevated) 88%, transparent);
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .theme-toggle-button {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150;
+    color: var(--color-text-muted);
+  }
+
+  .theme-toggle-button:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 44%, transparent);
+    color: var(--color-text);
+  }
+
+  .theme-toggle-button-active {
+    background: var(--color-surface-elevated);
+    color: var(--color-brand);
+    box-shadow: 0 10px 22px -18px color-mix(in srgb, var(--color-brand) 68%, transparent);
+  }
+
+  .toggle-group {
+    @apply inline-flex rounded-full border p-[2px];
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+    background: color-mix(in srgb, var(--color-surface-elevated) 88%, transparent);
+    box-shadow: 0 12px 28px -24px color-mix(in srgb, var(--color-text) 28%, transparent);
+  }
+
+  .toggle-group-inner {
+    @apply inline-flex rounded-full p-[2px];
+    background: color-mix(in srgb, var(--color-surface-subtle) 72%, transparent);
+  }
+
+  .toggle-group-contrast {
+    background: color-mix(in srgb, var(--color-brand) 22%, var(--color-surface-elevated) 78%);
+    border-color: color-mix(in srgb, var(--color-brand) 20%, var(--color-border));
+  }
+
+  .toggle-group-contrast .toggle-group-inner {
+    background: color-mix(in srgb, var(--color-brand-muted) 46%, transparent);
+  }
+
+  .toggle-group-pill {
+    background: color-mix(in srgb, var(--color-overlay-strong) 80%, transparent);
+    border-color: color-mix(in srgb, var(--color-inverse) 8%, transparent);
+  }
+
+  .toggle-group-pill .toggle-group-inner {
+    background: color-mix(in srgb, var(--color-inverse) 4%, transparent);
+  }
+
+  .toggle-option {
+    @apply rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-150 focus-visible:outline-none;
+    color: var(--color-text-muted);
+  }
+
+  .toggle-option:hover {
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-brand-muted) 34%, transparent);
+  }
+
+  .toggle-option:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-focus);
+  }
+
+  .toggle-option-active {
+    background: var(--color-surface-elevated);
+    color: var(--color-text);
+    box-shadow: 0 10px 20px -18px color-mix(in srgb, var(--color-text) 30%, transparent);
+  }
+
+  .toggle-group-contrast .toggle-option-active {
+    background: var(--color-brand);
+    color: var(--color-inverse);
+    box-shadow: 0 14px 28px -20px color-mix(in srgb, var(--color-brand) 62%, transparent);
+  }
+
+  .toggle-group-pill .toggle-option {
+    color: color-mix(in srgb, var(--color-inverse) 78%, transparent);
+  }
+
+  .toggle-group-pill .toggle-option:hover {
+    color: var(--color-inverse);
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+  }
+
+  .toggle-group-pill .toggle-option-active {
+    background: color-mix(in srgb, var(--color-chart-6) 82%, white 18%);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar {
+    @apply rounded-2xl border px-4 py-4;
+    background: color-mix(in srgb, var(--color-overlay-strong) 92%, transparent);
+    border-color: color-mix(in srgb, var(--color-border) 28%, transparent);
+    box-shadow: 0 18px 40px -24px color-mix(in srgb, black 70%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .bulk-toolbar-control {
+    @apply inline-flex items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-control:hover {
+    background: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+  }
+
+  .bulk-toolbar-chip {
+    @apply inline-flex items-center gap-2 rounded-xl border px-3 text-xs font-semibold;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-menu {
+    @apply rounded-2xl border;
+    background: color-mix(in srgb, var(--color-overlay-strong) 96%, transparent);
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    box-shadow: 0 18px 40px -24px color-mix(in srgb, black 70%, transparent);
+  }
+
+  .bulk-toolbar-menu-item {
+    @apply w-full px-4 py-3 text-left text-sm transition-colors;
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-menu-item:hover {
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+  }
+
+  .bulk-toolbar-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors;
+    background: var(--color-inverse);
+    color: var(--color-brand);
+  }
+
+  .bulk-toolbar-primary:hover {
+    background: color-mix(in srgb, var(--color-inverse) 88%, transparent);
+  }
+
+  .bulk-toolbar-input {
+    @apply w-full rounded-xl border px-3 py-2 text-sm focus:outline-none;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-input::placeholder {
+    color: color-mix(in srgb, var(--color-inverse) 46%, transparent);
+  }
+
+  .bulk-toolbar-input:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-inverse) 14%, transparent);
+  }
+
+  .app-loader {
+    @apply flex min-h-screen items-center justify-center;
+  }
+
+  .spinner-ring {
+    @apply h-12 w-12 animate-spin rounded-full border-2;
+    border-color: color-mix(in srgb, var(--color-brand) 18%, transparent);
+    border-top-color: var(--color-brand);
+  }
+
+  .checkerboard {
+    background-image:
+      linear-gradient(
+        45deg,
+        color-mix(in srgb, var(--color-border) 75%, transparent) 25%,
+        transparent 25%
+      ),
+      linear-gradient(
+        -45deg,
+        color-mix(in srgb, var(--color-border) 75%, transparent) 25%,
+        transparent 25%
+      ),
+      linear-gradient(
+        45deg,
+        transparent 75%,
+        color-mix(in srgb, var(--color-border) 75%, transparent) 75%
+      ),
+      linear-gradient(
+        -45deg,
+        transparent 75%,
+        color-mix(in srgb, var(--color-border) 75%, transparent) 75%
+      );
+    background-position:
+      0 0,
+      0 4px,
+      4px -4px,
+      -4px 0;
+    background-size: 8px 8px;
   }
 }
 
-/* Smooth animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

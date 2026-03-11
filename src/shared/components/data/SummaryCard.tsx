@@ -1,3 +1,5 @@
+import { statusPalette } from '@/shared/theme';
+
 interface SummaryCardProps {
   label: string;
   value: string | number;
@@ -12,22 +14,22 @@ export function SummaryCard({
   const getVariantClasses = (v: string) => {
     switch (v) {
       case 'positive':
-        return 'text-emerald-600';
+        return statusPalette.income;
       case 'negative':
-        return 'text-rose-600';
+        return statusPalette.spending;
       case 'warning':
-        return 'text-indigo-600';
+        return statusPalette.budget;
       default:
-        return 'text-gray-900';
+        return 'var(--color-text)';
     }
   };
 
   return (
     <div>
-      <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
-      <p className={`text-2xl font-bold ${getVariantClasses(variant)}`}>
+      <p className="text-2xl font-bold" style={{ color: getVariantClasses(variant) }}>
         {value}
       </p>
     </div>

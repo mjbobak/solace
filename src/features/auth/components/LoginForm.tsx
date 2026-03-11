@@ -30,8 +30,8 @@ export const LoginForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="page-title">Welcome Back</h1>
+        <p className="mt-2 text-sm text-muted">
           Sign in to access your finance dashboard
         </p>
       </div>
@@ -69,7 +69,7 @@ export const LoginForm: React.FC = () => {
         Sign In
       </Button>
 
-      <div className="mt-4 text-center text-sm text-gray-500">
+      <div className="mt-4 text-center text-sm text-muted">
         <p>Development credentials:</p>
         <p className="font-mono">admin / admin123</p>
       </div>

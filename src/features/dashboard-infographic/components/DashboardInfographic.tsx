@@ -20,9 +20,7 @@ export const DashboardInfographic: React.FC = () => {
 
   return (
     <div>
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 bg-white rounded-2xl shadow-lg">
-        {/* Period Toggle */}
+      <main className="surface-card mx-auto max-w-6xl px-6">
         <div className="py-12">
           <ToggleButtonGroup
             options={[
@@ -34,33 +32,27 @@ export const DashboardInfographic: React.FC = () => {
           />
         </div>
 
-        {/* Financial Health Section */}
         <div id="financial-health">
           <FinancialHealthSection period={period} />
         </div>
 
-        {/* Spending Analysis Section */}
         <div id="spending-analysis">
           <SpendingAnalysisSection period={period} />
         </div>
 
-        {/* Spending Pulse Section */}
         <div id="spending-pulse">
           <SpendingPulseSection period={period} />
         </div>
 
-        {/* Emergency Runway Section */}
         <div id="emergency-runway">
           <EmergencyRunwaySection period={period} />
         </div>
 
-        {/* Money Flow Section */}
         <div id="money-flow">
           <MoneyFlowSection period={period} />
         </div>
       </main>
 
-      {/* Bottom padding for comfortable scrolling */}
       <div className="h-20" />
     </div>
   );

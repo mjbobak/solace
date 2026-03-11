@@ -6,6 +6,8 @@ import {
   Rectangle,
 } from 'recharts';
 
+import { chartPalette, chartTheme } from '@/shared/theme';
+
 interface SankeyChartProps {
   data: {
     nodes: Array<{ name: string; fill?: string }>;
@@ -35,7 +37,7 @@ interface NodeProps {
 
 const CustomNode: React.FC<NodeProps> = (props) => {
   const { x = 0, y = 0, width = 0, height = 0, payload } = props;
-  const fill = payload?.fill || '#6366f1'; // Default to indigo if no fill specified
+  const fill = payload?.fill || chartPalette[0];
 
   return (
     <Rectangle
@@ -59,11 +61,8 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-gray-400">
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="chart-loading-text">
           <div className="animate-pulse">Loading chart...</div>
         </div>
       </div>
@@ -72,11 +71,8 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
 
   if (error) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-red-500 text-sm">{error}</div>
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="text-danger text-sm">{error}</div>
       </div>
     );
   }
@@ -89,17 +85,14 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
     data.links.length === 0
   ) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-gray-400 text-sm">No data available</div>
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="text-sm text-muted">No data available</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-white rounded-lg p-4 border border-gray-200">
+    <div className="chart-shell">
       <ResponsiveContainer width="100%" height={height}>
         <RechartsSankey
           data={data}
@@ -109,10 +102,11 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
         >
           <Tooltip
             contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              fontSize: '12px',
+              backgroundColor: chartTheme.tooltipBackground,
+              border: `1px solid ${chartTheme.tooltipBorder}`,
+              borderRadius: chartTheme.tooltipBorderRadius,
+              color: chartTheme.tooltipText,
+              fontSize: chartTheme.fontSize,
             }}
             formatter={(value) => `$${Number(value).toLocaleString()}`}
           />

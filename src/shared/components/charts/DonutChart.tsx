@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { chartPalette, chartTheme } from '@/shared/theme';
+
 interface ChartDataEntry {
   [key: string]: string | number;
 }
@@ -30,16 +32,7 @@ interface DonutChartProps extends BaseChartProps {
   showPercentage?: boolean;
 }
 
-const DEFAULT_COLORS = [
-  '#6366f1', // Indigo
-  '#10b981', // Green
-  '#f59e0b', // Amber
-  '#ef4444', // Red
-  '#8b5cf6', // Purple
-  '#06b6d4', // Cyan
-  '#ec4899', // Pink
-  '#f97316', // Orange
-];
+const DEFAULT_COLORS = [...chartPalette, 'var(--color-brand)', 'var(--color-warning)'];
 
 export const DonutChart: React.FC<DonutChartProps> = ({
   data,
@@ -56,11 +49,8 @@ export const DonutChart: React.FC<DonutChartProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-gray-400">
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="chart-loading-text">
           <div className="animate-pulse">Loading chart...</div>
         </div>
       </div>
@@ -69,22 +59,16 @@ export const DonutChart: React.FC<DonutChartProps> = ({
 
   if (error) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-red-500 text-sm">{error}</div>
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="text-danger text-sm">{error}</div>
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-gray-400 text-sm">No data available</div>
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="text-sm text-muted">No data available</div>
       </div>
     );
   }
@@ -96,14 +80,14 @@ export const DonutChart: React.FC<DonutChartProps> = ({
   );
 
   // Custom label renderer for percentages
-  const renderLabel = (entry: ChartDataEntry) => {
+  const renderLabel = (entry: any) => {
     if (!showPercentage) return null;
-    const percent = ((entry[dataKey] / total) * 100).toFixed(1);
+    const percent = ((Number(entry[dataKey] ?? 0) / total) * 100).toFixed(1);
     return `${percent}%`;
   };
 
   return (
-    <div className="w-full bg-white rounded-lg p-4 border border-gray-200">
+    <div className="chart-shell">
       <ResponsiveContainer width="100%" height={height}>
         <PieChart>
           <Pie
@@ -130,10 +114,11 @@ export const DonutChart: React.FC<DonutChartProps> = ({
               return [`${value} (${percent}%)`, ''];
             }}
             contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              fontSize: '12px',
+              backgroundColor: chartTheme.tooltipBackground,
+              border: `1px solid ${chartTheme.tooltipBorder}`,
+              borderRadius: chartTheme.tooltipBorderRadius,
+              color: chartTheme.tooltipText,
+              fontSize: chartTheme.fontSize,
             }}
           />
           {showLegend && (
@@ -141,7 +126,7 @@ export const DonutChart: React.FC<DonutChartProps> = ({
               verticalAlign="middle"
               align="right"
               layout="vertical"
-              wrapperStyle={{ fontSize: '12px' }}
+              wrapperStyle={{ fontSize: chartTheme.fontSize }}
             />
           )}
         </PieChart>

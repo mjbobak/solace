@@ -13,12 +13,10 @@ export const BulkAccountDropdown: React.FC<BulkAccountDropdownProps> = ({
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const triggerClassName =
-    'inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40';
+  const triggerClassName = 'bulk-toolbar-control inline-flex h-11 gap-2 px-4';
   const menuClassName =
-    'absolute bottom-full right-0 z-20 mb-2 max-h-[300px] min-w-[220px] overflow-y-auto rounded-2xl border border-white/10 bg-[#565761] py-2 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.7)]';
-  const menuItemClassName =
-    'w-full px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/10';
+    'bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 max-h-[300px] min-w-[220px] overflow-y-auto py-2';
+  const menuItemClassName = 'bulk-toolbar-menu-item font-medium';
 
   const handleSelect = (account: string) => {
     onSelectAccount(account);

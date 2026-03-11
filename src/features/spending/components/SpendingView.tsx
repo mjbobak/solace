@@ -560,7 +560,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
 
   if (isLoading) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-muted">
         Loading transactions...
       </div>
     );
@@ -568,15 +568,15 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/40 p-6">
+      <div className="surface-card">
         <div className="mb-4">
-        <SpendingFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          availableYears={availableYears}
-          availableAccounts={availableAccounts}
-          availableBudgetItems={availableBudgetItems}
-        />
+          <SpendingFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            availableYears={availableYears}
+            availableAccounts={availableAccounts}
+            availableBudgetItems={availableBudgetItems}
+          />
         </div>
 
         <BulkActionBar

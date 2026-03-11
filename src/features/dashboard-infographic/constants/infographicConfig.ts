@@ -1,3 +1,5 @@
+import { statusPalette } from '@/shared/theme';
+
 /**
  * Configuration and constants for the dashboard infographic
  */
@@ -15,13 +17,13 @@ export const SECTIONS = [
 export type SectionId = (typeof SECTIONS)[number]['id'];
 
 export const COLORS = {
-  income: '#10b981', // emerald
-  spending: '#f43f5e', // rose
-  budget: '#6366f1', // indigo
-  variancePositive: '#10b981', // green
-  varianceNegative: '#ef4444', // red
-  essential: '#6b7280', // gray
-  funsies: '#a78bfa', // light purple
+  income: statusPalette.income,
+  spending: statusPalette.spending,
+  budget: statusPalette.budget,
+  variancePositive: statusPalette.variancePositive,
+  varianceNegative: statusPalette.varianceNegative,
+  essential: statusPalette.essential,
+  funsies: statusPalette.funsies,
 } as const;
 
 export const ANIMATION_CONFIG = {

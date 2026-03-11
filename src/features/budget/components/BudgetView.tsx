@@ -282,7 +282,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
   if (isLoadingBudgets) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-500">Loading budgets...</div>
+        <div className="text-muted">Loading budgets...</div>
       </div>
     );
   }
@@ -297,7 +297,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
         savingsRate={savingsRate}
       />
 
-      <div className="bg-white backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/40 p-6">
+      <div className="surface-card">
         <div className="mb-3 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <ExpenseTypeFilters

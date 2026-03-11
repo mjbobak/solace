@@ -10,6 +10,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { chartPalette, chartTheme } from '@/shared/theme';
+
 interface BaseChartProps {
   data: Array<Record<string, unknown>>;
   width?: number | string;
@@ -31,14 +33,7 @@ interface BarChartProps extends BaseChartProps {
   margin?: { top: number; right: number; left: number; bottom: number };
 }
 
-const DEFAULT_COLORS = [
-  '#6366f1',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#06b6d4',
-];
+const DEFAULT_COLORS = chartPalette;
 
 export const BarChart: React.FC<BarChartProps> = ({
   data,
@@ -54,11 +49,8 @@ export const BarChart: React.FC<BarChartProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-gray-400">
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="chart-loading-text">
           <div className="animate-pulse">Loading chart...</div>
         </div>
       </div>
@@ -67,68 +59,68 @@ export const BarChart: React.FC<BarChartProps> = ({
 
   if (error) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-red-500 text-sm">{error}</div>
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="text-danger text-sm">{error}</div>
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div
-        className="flex items-center justify-center bg-white rounded-lg border border-gray-200"
-        style={{ height }}
-      >
-        <div className="text-gray-400 text-sm">No data available</div>
+      <div className="chart-empty-state" style={{ height }}>
+        <div className="text-sm text-muted">No data available</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-white rounded-lg p-4 border border-gray-200">
+    <div className="chart-shell">
       <ResponsiveContainer width="100%" height={height}>
         <RechartsBarChart
           data={data}
           layout={orientation === 'horizontal' ? 'horizontal' : 'vertical'}
           margin={margin}
         >
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />}
+          {showGrid && (
+            <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+          )}
           {orientation === 'vertical' ? (
             <>
               <XAxis
                 dataKey={xAxisKey}
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
+                stroke={chartTheme.axis}
+                style={{ fontSize: chartTheme.fontSize }}
               />
-              <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+              <YAxis
+                stroke={chartTheme.axis}
+                style={{ fontSize: chartTheme.fontSize }}
+              />
             </>
           ) : (
             <>
               <XAxis
                 type="number"
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
+                stroke={chartTheme.axis}
+                style={{ fontSize: chartTheme.fontSize }}
               />
               <YAxis
                 type="category"
                 dataKey={xAxisKey}
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
+                stroke={chartTheme.axis}
+                style={{ fontSize: chartTheme.fontSize }}
               />
             </>
           )}
           <Tooltip
             contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              fontSize: '12px',
+              backgroundColor: chartTheme.tooltipBackground,
+              border: `1px solid ${chartTheme.tooltipBorder}`,
+              borderRadius: chartTheme.tooltipBorderRadius,
+              color: chartTheme.tooltipText,
+              fontSize: chartTheme.fontSize,
             }}
           />
-          {showLegend && <Legend wrapperStyle={{ fontSize: '12px' }} />}
+          {showLegend && <Legend wrapperStyle={{ fontSize: chartTheme.fontSize }} />}
           {bars.map((bar, index) => (
             <Bar
               key={bar.dataKey}

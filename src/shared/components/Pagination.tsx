@@ -28,15 +28,15 @@ export const Pagination: React.FC<PaginationProps> = ({
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div className="flex items-center justify-between pt-4 border-t border-gray-200/40">
-      <div className="text-sm text-gray-600">
+    <div className="flex items-center justify-between border-t section-divider pt-4">
+      <div className="text-sm text-muted">
         Showing {startItem} to {endItem} of {totalItems} results
       </div>
 
       <div className="flex items-center gap-4">
         {showPageSize && onPageSizeChange && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Per page:</span>
+            <span className="text-sm text-muted">Per page:</span>
             <CustomDropdown
               value={pageSize.toString()}
               options={pageSizeOptions.map((size) => ({
@@ -59,7 +59,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             ← Prev
           </Button>
 
-          <span className="text-sm text-gray-600 min-w-12 text-center">
+          <span className="min-w-12 text-center text-sm text-muted">
             {currentPage} / {totalPages}
           </span>
 

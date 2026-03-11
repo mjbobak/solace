@@ -1,16 +1,16 @@
 import { mockBudgetData } from '@/features/budget/services/mockBudgetData';
 import { calculateAnnualNet, type IncomeEntry } from '@/features/income';
+import { statusPalette } from '@/shared/theme';
 
 import type { SankeyData, SankeyPeriod } from '../types/sankeyTypes';
 
-// Color scheme for Sankey nodes
 const COLORS = {
-  income: '#10b981', // Emerald
-  spending: '#f43f5e', // Rose
-  investments: '#3b82f6', // Blue
-  essential: '#6b7280', // Gray
-  funsies: '#a78bfa', // Light purple
-};
+  income: statusPalette.income,
+  spending: statusPalette.spending,
+  investments: statusPalette.investments,
+  essential: statusPalette.essential,
+  funsies: statusPalette.funsies,
+} as const;
 
 /**
  * Build Sankey data showing Income → Top-level categories (Essential/Funsies) → Spending

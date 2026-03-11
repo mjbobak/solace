@@ -22,9 +22,9 @@ export const MoneyFlowSection: React.FC<MoneyFlowSectionProps> = ({
   const narrative = `Visualize how your income flows from various sources into essential and discretionary spending categories.`;
 
   return (
-    <ScrollAnimatedSection className="py-12 px-6 space-y-8 border-t border-gray-200">
+    <ScrollAnimatedSection className="space-y-8 border-t section-divider px-6 py-12">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Money Flow</h2>
+        <h2 className="mb-4 text-2xl font-bold text-app">Money Flow</h2>
         <SectionNarrative text={narrative} highlight={true} />
       </div>
 

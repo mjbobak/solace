@@ -22,15 +22,13 @@ export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
   const sankeyData = useSankeyData(viewMode, activePeriod);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-      {/* Header with title and toggles */}
+    <div className="surface-card">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="page-section-title mb-0">
           Income & Spending Flow
         </h3>
 
         <div className="flex items-center gap-4">
-          {/* Period Toggle - only show if not controlled by parent */}
           {!externalPeriod && (
             <ToggleButtonGroup
               value={period}
@@ -42,7 +40,6 @@ export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
             />
           )}
 
-          {/* View Mode Toggle */}
           <ToggleButtonGroup
             value={viewMode}
             options={[
@@ -54,7 +51,6 @@ export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
         </div>
       </div>
 
-      {/* Sankey Chart */}
       <SankeyChart data={sankeyData} height={SANKEY_HEIGHT} />
     </div>
   );

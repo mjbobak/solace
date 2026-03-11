@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { statusPalette } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 
 interface DashboardMetricCardProps {
@@ -34,41 +35,41 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
   const getIconColor = () => {
     switch (category) {
       case 'income':
-        return { bg: 'bg-pink-100', text: 'text-pink-600' };
+        return 'icon-tile icon-tile-success';
       case 'expenses':
-        return { bg: 'bg-purple-100', text: 'text-purple-600' };
+        return 'icon-tile icon-tile-danger';
       case 'budget':
-        return { bg: 'bg-indigo-100', text: 'text-indigo-600' };
+        return 'icon-tile icon-tile-brand';
       case 'savings':
       default:
-        return { bg: 'bg-blue-100', text: 'text-blue-600' };
+        return 'icon-tile icon-tile-brand';
     }
   };
 
-  const getTrendColor = () => {
+  const getTrendColor = (): string => {
     switch (trend) {
       case 'up':
-        return 'text-green-600';
+        return statusPalette.income;
       case 'down':
-        return 'text-red-600';
+        return statusPalette.spending;
       default:
-        return 'text-indigo-600';
+        return statusPalette.budget;
     }
   };
 
   const colors = getIconColor();
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow">
+    <div className="surface-card surface-card-hover">
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 ${colors.bg} rounded-xl`}>
-          <Icon className={`w-6 h-6 ${colors.text}`} />
+        <div className={colors}>
+          <Icon className="h-6 w-6" />
         </div>
       </div>
 
       <div>
-        <p className="text-sm font-medium text-gray-600 mb-1">{label}</p>
-        <p className={`text-3xl font-bold ${getTrendColor()}`}>
+        <p className="mb-1 text-sm font-medium text-muted">{label}</p>
+        <p className="text-3xl font-bold" style={{ color: getTrendColor() }}>
           {formatValue()}
         </p>
       </div>

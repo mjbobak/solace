@@ -13,13 +13,11 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   className = '',
 }) => {
   return (
-    <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50/60 rounded-full text-xs font-medium text-blue-700 border border-blue-200/50 whitespace-nowrap ${className}`}
-    >
+    <div className={`status-chip status-chip-brand rounded-full whitespace-nowrap ${className}`}>
       <span>{label}</span>
       <button
         onClick={onRemove}
-        className="p-0.5 hover:bg-blue-200/50 rounded transition-colors flex-shrink-0"
+        className="filter-chip-dismiss flex-shrink-0 rounded p-0.5 transition-colors"
         title="Remove filter"
         aria-label={`Remove ${label} filter`}
       >

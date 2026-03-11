@@ -40,16 +40,16 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
   if (selectedCount === 0) return null;
 
   const toolbarControlClassName =
-    'h-11 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40';
+    'bulk-toolbar-control h-11 px-4';
   const pendingChipClassName =
-    'inline-flex h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-semibold text-white';
+    'bulk-toolbar-chip h-9 px-3';
   const iconButtonClassName =
     'inline-flex h-5 w-5 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white';
   const secondaryActionClassName = `${toolbarControlClassName} inline-flex items-center justify-center gap-2`;
 
   return createPortal(
     <div className="fixed bottom-6 left-6 right-6 z-50 max-w-7xl mx-auto">
-      <div className="rounded-2xl border border-white/10 bg-[#565761]/95 px-4 py-4 shadow-[0_16px_30px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+      <div className="bulk-toolbar">
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={onClearSelection}
@@ -117,7 +117,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
                 variant="primary"
                 onClick={onSave}
                 disabled={saveDisabled || pendingOperations.length === 0}
-                className="h-11 shrink-0 rounded-xl bg-white px-5 py-0 text-sm text-[#4d5cff] shadow-none hover:bg-white/90 disabled:bg-white/20 disabled:text-white/50"
+                className="bulk-toolbar-primary h-11 shrink-0 px-5 py-0"
               >
                 Save changes
               </Button>

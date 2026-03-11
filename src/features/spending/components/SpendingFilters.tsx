@@ -185,7 +185,7 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
             value={filters.searchQuery}
             onChange={(e) => onFiltersChange({ searchQuery: e.target.value })}
             placeholder="Search..."
-            className="!rounded-full !border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 hover:border-slate-300 focus:!ring-0 focus:border-slate-300"
+            className="rounded-full px-4 py-2.5 text-sm font-medium"
           />
         </div>
       </div>
@@ -196,12 +196,12 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
           {getActiveFilterChips().map((chip) => (
             <div
               key={chip.key}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 group"
+              className="filter-chip group"
             >
               <span className="truncate max-w-xs">{chip.label}</span>
               <button
                 onClick={() => handleRemoveFilter(chip.key)}
-                className="p-0.5 hover:bg-slate-200 rounded transition-colors flex-shrink-0 opacity-60 group-hover:opacity-100"
+                className="filter-chip-dismiss flex-shrink-0 opacity-60 group-hover:opacity-100"
                 aria-label={`Remove ${chip.label} filter`}
               >
                 <LuX size={14} />

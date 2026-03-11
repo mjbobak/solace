@@ -299,14 +299,13 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
   if (isInitialLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-gray-500">Loading income data...</p>
+        <p className="text-muted">Loading income data...</p>
       </div>
     );
   }
 
   return (
     <section className="space-y-4" aria-label="Income management">
-      {/* Summary and Cards Section */}
       <IncomeSummary
         period={incomePeriod}
         onPeriodChange={(period) => updateQueryParams({ period })}
@@ -315,9 +314,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
         totals={totals}
       />
 
-      {/* Table Section */}
-      <div className="bg-white backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/40 p-6">
-        {/* Table */}
+      <div className="surface-card">
         <IncomeTable
           data={groupedEntries}
           columns={columns}
@@ -328,7 +325,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
         />
       </div>
 
-      {/* Add Income Modal - Mode 1: Add Stream */}
       {modalMode === 'add-stream' && (
         <AddIncomeModal
           mode="add-stream"
@@ -338,7 +334,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
         />
       )}
 
-      {/* Add Income Modal - Mode 2: Add Range */}
       {modalMode === 'add-range' && modalData && (
         <AddIncomeModal
           mode="add-range"
@@ -351,7 +346,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
         />
       )}
 
-      {/* Add Income Modal - Mode 3: Edit Range */}
       {modalMode === 'edit-range' && modalData && (
         <AddIncomeModal
           mode="edit-range"

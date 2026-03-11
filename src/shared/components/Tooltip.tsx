@@ -123,24 +123,29 @@ export const Tooltip: React.FC<TooltipProps> = ({
         createPortal(
           <div
             ref={tooltipRef}
-            className={`fixed px-3 py-2 bg-gray-800 text-white text-xs rounded z-50 pointer-events-none shadow-lg transition-opacity duration-150 ${
+            className={`fixed z-50 rounded px-3 py-2 text-xs shadow-lg transition-opacity duration-150 ${
               stacked ? 'whitespace-pre-line' : 'whitespace-nowrap'
             } ${
               position ? 'opacity-100' : 'opacity-0'
             }`}
             style={
               position
-                ? { top: `${position.top}px`, left: `${position.left}px` }
-                : { top: '-9999px', left: '-9999px' } // Off-screen for initial measurement
+                ? {
+                    top: `${position.top}px`,
+                    left: `${position.left}px`,
+                    backgroundColor: 'var(--color-overlay-strong)',
+                    color: 'var(--color-inverse)',
+                  }
+                : { top: '-9999px', left: '-9999px' }
             }
           >
             {content}
-            {/* Arrow pointing to trigger */}
             <div
-              className="absolute top-full border-4 border-transparent border-t-gray-800"
+              className="absolute top-full border-4 border-transparent"
               style={{
                 left: `${position?.arrowLeft ?? 0}px`,
                 transform: 'translateX(-50%)',
+                borderTopColor: 'var(--color-overlay-strong)',
               }}
             />
           </div>,

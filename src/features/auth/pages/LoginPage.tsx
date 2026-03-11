@@ -22,8 +22,8 @@ const LoginPage: React.FC = () => {
   }, [isAuthenticated, navigate, location]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div className="app-page-center">
+      <div className="login-card">
         <LoginForm />
       </div>
     </div>

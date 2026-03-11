@@ -17,12 +17,10 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const triggerClassName =
-    'inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40';
+  const triggerClassName = 'bulk-toolbar-control inline-flex h-11 gap-2 px-4';
   const menuClassName =
-    'absolute bottom-full right-0 z-20 mb-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#565761] shadow-[0_18px_40px_-24px_rgba(0,0,0,0.7)]';
-  const menuItemClassName =
-    'w-full px-4 py-3 text-left text-sm text-white transition-colors hover:bg-white/10';
+    'bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden';
+  const menuItemClassName = 'bulk-toolbar-menu-item';
 
   // Auto-focus search input when dropdown opens
   useEffect(() => {
@@ -92,8 +90,7 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
             aria-hidden="true"
           />
           <div className={menuClassName}>
-            {/* Search Input - Sticky at top */}
-            <div className="sticky top-0 z-30 border-b border-white/10 bg-[#565761] p-3">
+            <div className="sticky top-0 z-30 border-b border-white/10 bg-transparent p-3">
               <div className="relative">
                 <input
                   ref={searchInputRef}
@@ -101,7 +98,7 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search budgets..."
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 pr-8 text-sm text-white placeholder:text-white/45 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/10"
+                  className="bulk-toolbar-input pr-8"
                 />
                 {searchQuery && (
                   <button

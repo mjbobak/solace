@@ -101,28 +101,27 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
-      {/* Dropdown trigger */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDownWrapper}
-        className="w-full px-3 py-3 text-sm text-slate-900 font-medium text-left bg-white border border-slate-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-1 cursor-pointer transition-all hover:bg-slate-50 hover:border-slate-300"
+        className="dropdown-trigger px-3 py-3"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
       >
         <div className="flex items-center justify-between">
           <span className="truncate">{displayValue}</span>
           <LuChevronDown
-            className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${
+            className={`dropdown-icon h-4 w-4 flex-shrink-0 transition-transform ${
               isOpen ? 'rotate-180' : ''
             }`}
           />
         </div>
       </button>
 
-      {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="dropdown-panel absolute z-50 mt-1 w-full animate-in overflow-hidden fade-in slide-in-from-top-2 duration-200">
           {isAddingNew ? (
-            // Add new input
             <div className="p-2">
               <input
                 ref={inputRef}
@@ -139,13 +138,13 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 }}
                 placeholder="Enter new option..."
                 autoFocus
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-0 focus:border-transparent"
+                className="form-input rounded-full text-sm"
               />
               <div className="flex gap-2 mt-2">
                 <button
                   type="button"
                   onClick={handleAddNewSubmit}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 transition-colors"
+                  className="dropdown-action-primary flex-1"
                 >
                   Add
                 </button>
@@ -155,14 +154,13 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                     setIsAddingNew(false);
                     setNewValue('');
                   }}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"
+                  className="dropdown-action-secondary flex-1"
                 >
                   Cancel
                 </button>
               </div>
             </div>
           ) : (
-            // Options list
             <div className="p-2">
               <div className="max-h-64 overflow-y-auto">
                 {options.map((option, index) => (
@@ -172,12 +170,12 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                     onClick={() =>
                       handleSelect(option.value, option.isAddNew || false)
                     }
-                    className={`w-full px-3 py-2.5 text-sm text-left rounded-lg transition-colors ${
+                    className={`dropdown-option w-full ${
                       option.isAddNew
-                        ? 'text-slate-900 font-medium bg-slate-100 hover:bg-slate-200'
+                        ? 'dropdown-option-active font-medium'
                         : option.value === value
-                          ? 'bg-slate-100 text-slate-900 font-medium'
-                          : 'text-slate-900 hover:bg-slate-50'
+                          ? 'dropdown-option-active font-medium'
+                          : ''
                     }`}
                   >
                     {option.label}

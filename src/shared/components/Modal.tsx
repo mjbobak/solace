@@ -60,30 +60,27 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm transition-opacity"
+        className="modal-backdrop fixed inset-0 transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
         <div
-          className={`relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ${MAX_WIDTH_CLASSES[maxWidth]} ${panelClassName}`}
+          className={`modal-panel max-h-[calc(100vh-2rem)] ${MAX_WIDTH_CLASSES[maxWidth]} ${panelClassName}`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5">
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <div className="modal-header">
+            <h2 className="text-app text-xl font-semibold">{title}</h2>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              className="icon-button"
+              aria-label="Close modal"
             >
-              <LuX className="w-5 h-5 text-gray-500" />
+              <LuX className="h-5 w-5" />
             </button>
           </div>
 
-          {/* Content */}
           <div className={`min-h-0 overflow-y-auto p-6 ${contentClassName}`}>
             {children}
           </div>

@@ -10,6 +10,7 @@ import { BarChart } from '@/shared/components/charts/BarChart';
 import { DonutChart } from '@/shared/components/charts/DonutChart';
 import { LineChart } from '@/shared/components/charts/LineChart';
 import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
+import { statusPalette } from '@/shared/theme';
 
 import {
   spendingData,
@@ -35,7 +36,6 @@ export const DashboardView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Visualization Toggle - Centered */}
       <div className="flex justify-center">
         <ToggleButtonGroup
           value={visualizationType}
@@ -43,7 +43,6 @@ export const DashboardView: React.FC = () => {
           onChange={setVisualizationType}
         />
       </div>
-      {/* Metric Cards - Always show */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <DashboardMetricCard
           label="Total Balance"
@@ -76,20 +75,22 @@ export const DashboardView: React.FC = () => {
         />
       </div>
 
-      {/* Comprehensive View - All visualizations */}
       {visualizationType === 'comprehensive' && (
         <>
-          {/* Spending Chart - Full width */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="surface-card">
+            <h3 className="page-section-title">
               Monthly Spending vs Budget
             </h3>
             <BarChart
               data={spendingData}
               xAxisKey="month"
               bars={[
-                { dataKey: 'Budget', fill: '#6366f1', name: 'Budget' },
-                { dataKey: 'Actual', fill: '#10b981', name: 'Actual Spending' },
+                { dataKey: 'Budget', fill: statusPalette.budget, name: 'Budget' },
+                {
+                  dataKey: 'Actual',
+                  fill: statusPalette.income,
+                  name: 'Actual Spending',
+                },
               ]}
               height={300}
               showGrid
@@ -97,18 +98,20 @@ export const DashboardView: React.FC = () => {
             />
           </div>
 
-          {/* Savings Trend and Category Breakdown - 2 column grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Savings Trend */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <div className="surface-card">
+              <h3 className="page-section-title">
                 Savings Trend
               </h3>
               <LineChart
                 data={savingsData}
                 xAxisKey="month"
                 lines={[
-                  { dataKey: 'savings', stroke: '#10b981', name: 'Savings' },
+                  {
+                    dataKey: 'savings',
+                    stroke: statusPalette.income,
+                    name: 'Savings',
+                  },
                 ]}
                 height={300}
                 showGrid
@@ -116,9 +119,8 @@ export const DashboardView: React.FC = () => {
               />
             </div>
 
-            {/* Category Breakdown */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <div className="surface-card">
+              <h3 className="page-section-title">
                 Spending by Category
               </h3>
               <DonutChart
@@ -132,25 +134,26 @@ export const DashboardView: React.FC = () => {
             </div>
           </div>
 
-          {/* Income & Spending Flow - Full width */}
           <SankeyFlowChart />
         </>
       )}
 
-      {/* Spending View */}
       {visualizationType === 'spending' && (
         <>
-          {/* Spending Chart - Full width */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="surface-card">
+            <h3 className="page-section-title">
               Monthly Spending vs Budget
             </h3>
             <BarChart
               data={spendingData}
               xAxisKey="month"
               bars={[
-                { dataKey: 'Budget', fill: '#6366f1', name: 'Budget' },
-                { dataKey: 'Actual', fill: '#10b981', name: 'Actual Spending' },
+                { dataKey: 'Budget', fill: statusPalette.budget, name: 'Budget' },
+                {
+                  dataKey: 'Actual',
+                  fill: statusPalette.income,
+                  name: 'Actual Spending',
+                },
               ]}
               height={300}
               showGrid
@@ -158,9 +161,8 @@ export const DashboardView: React.FC = () => {
             />
           </div>
 
-          {/* Category Breakdown */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="surface-card">
+            <h3 className="page-section-title">
               Spending by Category
             </h3>
             <DonutChart
@@ -175,20 +177,22 @@ export const DashboardView: React.FC = () => {
         </>
       )}
 
-      {/* Budget View */}
       {visualizationType === 'budget' && (
         <>
-          {/* Spending Chart - Full width */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="surface-card">
+            <h3 className="page-section-title">
               Monthly Spending vs Budget
             </h3>
             <BarChart
               data={spendingData}
               xAxisKey="month"
               bars={[
-                { dataKey: 'Budget', fill: '#6366f1', name: 'Budget' },
-                { dataKey: 'Actual', fill: '#10b981', name: 'Actual Spending' },
+                { dataKey: 'Budget', fill: statusPalette.budget, name: 'Budget' },
+                {
+                  dataKey: 'Actual',
+                  fill: statusPalette.income,
+                  name: 'Actual Spending',
+                },
               ]}
               height={300}
               showGrid
@@ -196,7 +200,6 @@ export const DashboardView: React.FC = () => {
             />
           </div>
 
-          {/* Income & Spending Flow - Full width */}
           <SankeyFlowChart />
         </>
       )}

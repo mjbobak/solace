@@ -95,8 +95,7 @@ export function Table<T>({
   sortState: controlledSortState,
   onSortChange,
 }: TableProps<T>) {
-  const checkboxClassName =
-    'h-4 w-4 cursor-pointer rounded-md border border-gray-300 bg-gray-100 accent-gray-500 transition-colors';
+  const checkboxClassName = 'checkbox-input';
 
   const [internalSortState, setInternalSortState] = useState<SortState>({
     column: null,
@@ -166,15 +165,15 @@ export function Table<T>({
 
   if (isLoading) {
     return (
-      <div className="w-full overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead className="bg-gray-50 border-b border-gray-200">
+      <div className="table-shell">
+        <table className="table-base">
+          <thead className="table-head">
             <tr className="h-10">
               {selectable && <th className="px-3 py-1 w-10" />}
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-3 py-1 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider"
+                  className="table-header-cell text-left"
                   style={{ width: column.width }}
                 >
                   {column.header}
@@ -185,15 +184,15 @@ export function Table<T>({
           </thead>
           <tbody>
             {[...Array(5)].map((_, idx) => (
-              <tr key={idx} className="border-b border-gray-100 h-10">
+              <tr key={idx} className="table-row">
                 {selectable && (
                   <td className="px-3 py-1 w-10">
-                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="table-skeleton h-4 w-4 animate-pulse rounded" />
                   </td>
                 )}
                 {columns.map((column) => (
                   <td key={column.key} className="px-3 py-1">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="table-skeleton h-4 animate-pulse rounded" />
                   </td>
                 ))}
                 <td className="px-3 py-1 w-12 flex items-center justify-end" />
@@ -210,9 +209,9 @@ export function Table<T>({
   }
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+    <div className="table-shell">
+      <table className="table-base">
+        <thead className="table-head sticky top-0">
           <tr className="h-10">
             {selectable && (
               <th className="px-3 py-1 w-10">
@@ -233,12 +232,10 @@ export function Table<T>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-3 py-1 text-[11px] font-medium text-gray-500 uppercase tracking-wider ${getAlignClass(
+                className={`table-header-cell ${getAlignClass(
                   column.align,
                 )} ${
-                  column.sortable
-                    ? 'cursor-pointer select-none hover:bg-gray-100'
-                    : ''
+                  column.sortable ? 'table-sortable cursor-pointer select-none' : ''
                 }`}
                 style={{ width: column.width }}
                 onClick={() => handleSort(column)}
@@ -268,9 +265,7 @@ export function Table<T>({
                 </div>
               </th>
             ))}
-            <th className="w-12 px-3 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {/* Empty header for indicator column */}
-            </th>
+            <th className="table-header-cell w-12 px-3 py-3.5 text-right" />
           </tr>
         </thead>
         <tbody>
@@ -279,14 +274,14 @@ export function Table<T>({
             return (
               <tr
                 key={rowKey(row)}
-                className={`border-b border-gray-100 transition-colors h-10 align-middle ${
-                  isSelected ? 'bg-blue-50' : ''
+                className={`table-row ${
+                  isSelected ? 'table-row-selected' : ''
                 } ${
                   onRowClick
-                    ? 'cursor-pointer hover:bg-gray-50'
+                    ? 'table-row-hover cursor-pointer'
                     : rowIndex % 2 === 0
-                      ? 'bg-white'
-                      : 'bg-gray-50'
+                      ? ''
+                      : 'table-row-striped'
                 }`}
                 onClick={() => onRowClick?.(row)}
               >
@@ -309,7 +304,7 @@ export function Table<T>({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={`px-3 py-1 text-[11px] text-gray-900 ${getAlignClass(
+                    className={`table-cell ${getAlignClass(
                       column.align,
                     )}`}
                   >
@@ -319,7 +314,7 @@ export function Table<T>({
                 <td className="px-3 text-right">
                   {highlightedIds.has(rowKey(row)) && (
                     <div
-                      className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"
+                      className="table-highlight-dot inline-block h-2 w-2 animate-pulse rounded-full"
                       title="Recently modified"
                     />
                   )}
