@@ -1,189 +1,668 @@
-"""Income service for business logic."""
+"""Income domain service and year projection logic."""
 
-from datetime import date
-from typing import Optional
+from __future__ import annotations
 
-from sqlalchemy import or_
+from calendar import isleap
+from datetime import date, timedelta
+from typing import Iterable, Optional
+
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
-from backend.app.db.models.income import Income, IncomeDeduction, IncomeEffectiveRange
+from backend.app.db.models.income import (
+    IncomeComponent,
+    IncomeComponentVersion,
+    IncomeComponentVersionDeduction,
+    IncomeOccurrence,
+    IncomeOccurrenceDeduction,
+    IncomeSource,
+)
 from backend.app.models.income import (
     DeductionCreate,
-    EffectiveRangeCreate,
-    EffectiveRangeUpdate,
-    IncomeCreate,
-    IncomeUpdate,
+    DeductionResponse,
+    DeductionTotalsResponse,
+    DeductionUpdate,
+    IncomeComponentCreate,
+    IncomeComponentResponse,
+    IncomeComponentUpdate,
+    IncomeComponentVersionCreate,
+    IncomeComponentVersionResponse,
+    IncomeComponentVersionUpdate,
+    IncomeOccurrenceCreate,
+    IncomeOccurrenceResponse,
+    IncomeOccurrenceUpdate,
+    IncomeProjectionTotalsResponse,
+    IncomeSourceCreate,
+    IncomeSourceResponse,
+    IncomeSourceUpdate,
+    IncomeYearProjectionResponse,
+    ProjectedIncomeComponentResponse,
+    ProjectedIncomeSourceResponse,
 )
-from backend.app.services.base_service import BaseService
+
+DEDUCTION_FIELDS = (
+    "federal_tax",
+    "state_tax",
+    "fica",
+    "retirement",
+    "health_insurance",
+    "other",
+)
 
 
-class IncomeService(BaseService[Income, IncomeCreate, IncomeUpdate]):
-    """Service for managing income entries."""
+def _blank_deduction_totals() -> dict[str, float]:
+    return {field: 0.0 for field in DEDUCTION_FIELDS}
+
+
+def _blank_projection_totals() -> dict[str, object]:
+    return {
+        "committed_gross": 0.0,
+        "committed_net": 0.0,
+        "planned_gross": 0.0,
+        "planned_net": 0.0,
+        "committed_deductions": _blank_deduction_totals(),
+        "planned_deductions": _blank_deduction_totals(),
+    }
+
+
+def _deduction_payload(deductions: object | None, scale: float = 1.0) -> dict[str, float]:
+    values = _blank_deduction_totals()
+    if deductions is None:
+        return values
+
+    for field in DEDUCTION_FIELDS:
+        raw_value = getattr(deductions, field, None)
+        values[field] = (raw_value or 0.0) * scale
+    return values
+
+
+def _deduction_response(values: dict[str, float]) -> DeductionTotalsResponse:
+    return DeductionTotalsResponse(**values, total=sum(values.values()))
+
+
+def _projection_response(values: dict[str, object]) -> IncomeProjectionTotalsResponse:
+    return IncomeProjectionTotalsResponse(
+        committed_gross=round(float(values["committed_gross"]), 2),
+        committed_net=round(float(values["committed_net"]), 2),
+        planned_gross=round(float(values["planned_gross"]), 2),
+        planned_net=round(float(values["planned_net"]), 2),
+        committed_deductions=_deduction_response(values["committed_deductions"]),
+        planned_deductions=_deduction_response(values["planned_deductions"]),
+    )
+
+
+def _add_deductions(accumulator: dict[str, float], additions: dict[str, float]) -> None:
+    for field in DEDUCTION_FIELDS:
+        accumulator[field] += additions[field]
+
+
+def _add_projection_values(
+    totals: dict[str, object],
+    *,
+    gross: float,
+    net: float,
+    deductions: dict[str, float],
+    include_in_committed: bool,
+) -> None:
+    if include_in_committed:
+        totals["committed_gross"] = float(totals["committed_gross"]) + gross
+        totals["committed_net"] = float(totals["committed_net"]) + net
+        _add_deductions(totals["committed_deductions"], deductions)
+
+    totals["planned_gross"] = float(totals["planned_gross"]) + gross
+    totals["planned_net"] = float(totals["planned_net"]) + net
+    _add_deductions(totals["planned_deductions"], deductions)
+
+
+def _roll_up_projection_totals(
+    parent: dict[str, object],
+    child: IncomeProjectionTotalsResponse,
+) -> None:
+    parent["committed_gross"] = float(parent["committed_gross"]) + child.committed_gross
+    parent["committed_net"] = float(parent["committed_net"]) + child.committed_net
+    parent["planned_gross"] = float(parent["planned_gross"]) + child.planned_gross
+    parent["planned_net"] = float(parent["planned_net"]) + child.planned_net
+    _add_deductions(
+        parent["committed_deductions"],
+        child.committed_deductions.model_dump(exclude={"total"}),
+    )
+    _add_deductions(
+        parent["planned_deductions"],
+        child.planned_deductions.model_dump(exclude={"total"}),
+    )
+
+
+def _ranges_overlap(
+    left_start: date,
+    left_end: date | None,
+    right_start: date,
+    right_end: date | None,
+) -> bool:
+    left_effective_end = left_end or date.max
+    right_effective_end = right_end or date.max
+    return left_start <= right_effective_end and right_start <= left_effective_end
+
+
+def _version_intersection_days(version: IncomeComponentVersion, year: int) -> int:
+    year_start = date(year, 1, 1)
+    year_end = date(year, 12, 31)
+    effective_start = max(version.start_date, year_start)
+    effective_end = min(version.end_date or year_end, year_end)
+    if effective_start > effective_end:
+        return 0
+    return (effective_end - effective_start).days + 1
+
+
+def _days_in_year(year: int) -> int:
+    return 366 if isleap(year) else 365
+
+
+class IncomeService:
+    """CRUD and projection operations for the source-first income domain."""
 
     def __init__(self, db: Session):
-        """Initialize with database session."""
-        super().__init__(db=db, model=Income)
+        self.db = db
 
-    def get_by_id(self, id: int) -> Optional[Income]:
-        """Get income by ID with all relationships loaded."""
-        return (
-            self.db.query(Income)
-            .options(joinedload(Income.effective_ranges).joinedload(IncomeEffectiveRange.deductions))
-            .filter(Income.id == id)
-            .first()
+    def list_sources(self) -> list[IncomeSource]:
+        return self.db.query(IncomeSource).order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc()).all()
+
+    def create_source(self, source_in: IncomeSourceCreate) -> IncomeSource:
+        sort_order = source_in.sort_order
+        if sort_order == 0 and self.db.query(IncomeSource.id).count() > 0:
+            sort_order = self._next_source_sort_order()
+
+        source = IncomeSource(
+            name=source_in.name.strip(),
+            is_active=source_in.is_active,
+            sort_order=sort_order,
         )
+        self.db.add(source)
+        self.db.commit()
+        self.db.refresh(source)
+        return source
 
-    def get_all(
-        self, skip: int = 0, limit: int = 100, order_by: str = "created_at", order_dir: str = "desc"
-    ) -> list[Income]:
-        """Get all incomes with relationships loaded."""
-        query = self.db.query(Income).options(
-            joinedload(Income.effective_ranges).joinedload(IncomeEffectiveRange.deductions)
-        )
+    def update_source(self, source_id: int, source_in: IncomeSourceUpdate) -> IncomeSource:
+        source = self._get_source_or_raise(source_id)
+        updates = source_in.model_dump(exclude_unset=True)
 
-        # Apply ordering
-        if hasattr(Income, order_by):
-            column = getattr(Income, order_by)
-            query = query.order_by(column.desc() if order_dir == "desc" else column.asc())
-
-        return query.offset(skip).limit(limit).all()
-
-    def create(self, obj_in: IncomeCreate, **extra_fields) -> Income:
-        """Create income with effective ranges and deductions."""
-        # Create income entry
-        income_data = obj_in.model_dump(exclude={"effective_ranges"})
-        income = Income(**income_data, **extra_fields)
-        self.db.add(income)
-        self.db.flush()  # Get income.id without committing
-
-        # Create effective ranges with deductions
-        for range_data in obj_in.effective_ranges:
-            self._create_effective_range(income.id, range_data)
+        if "name" in updates and updates["name"] is not None:
+            source.name = updates["name"].strip()
+        if "is_active" in updates and updates["is_active"] is not None:
+            source.is_active = updates["is_active"]
+        if "sort_order" in updates and updates["sort_order"] is not None:
+            source.sort_order = updates["sort_order"]
 
         self.db.commit()
-        self.db.refresh(income)
-        return income
+        self.db.refresh(source)
+        return source
 
-    def _create_effective_range(self, income_id: int, range_in: EffectiveRangeCreate) -> IncomeEffectiveRange:
-        """Create effective range with optional deductions."""
-        range_data = range_in.model_dump(exclude={"deductions"})
-        effective_range = IncomeEffectiveRange(income_id=income_id, **range_data)
-        self.db.add(effective_range)
+    def delete_source(self, source_id: int) -> None:
+        source = self._get_source_or_raise(source_id)
+        self.db.delete(source)
+        self.db.commit()
+
+    def create_component(self, source_id: int, component_in: IncomeComponentCreate) -> IncomeComponent:
+        self._get_source_or_raise(source_id)
+        component = IncomeComponent(
+            source_id=source_id,
+            component_type=component_in.component_type,
+            component_mode=component_in.component_mode,
+            label=component_in.label.strip() if component_in.label else None,
+        )
+        self.db.add(component)
+        self.db.commit()
+        self.db.refresh(component)
+        return component
+
+    def update_component(self, component_id: int, component_in: IncomeComponentUpdate) -> IncomeComponent:
+        component = self._get_component_or_raise(component_id)
+        updates = component_in.model_dump(exclude_unset=True)
+
+        if "component_type" in updates and updates["component_type"] is not None:
+            component.component_type = updates["component_type"]
+        if "component_mode" in updates and updates["component_mode"] is not None:
+            component.component_mode = updates["component_mode"]
+        if "label" in updates:
+            component.label = updates["label"].strip() if updates["label"] else None
+
+        self.db.commit()
+        self.db.refresh(component)
+        return component
+
+    def delete_component(self, component_id: int) -> None:
+        component = self._get_component_or_raise(component_id)
+        self.db.delete(component)
+        self.db.commit()
+
+    def create_version(self, component_id: int, version_in: IncomeComponentVersionCreate) -> IncomeComponentVersion:
+        component = self._get_component_or_raise(component_id)
+        self._ensure_component_mode(component, expected_mode="recurring")
+        self._validate_amounts(version_in.gross_amount, version_in.net_amount)
+        self._validate_date_range(version_in.start_date, version_in.end_date)
+        self._auto_close_previous_version(component_id, version_in.start_date)
+        self._ensure_no_version_overlap(component_id, version_in.start_date, version_in.end_date)
+
+        version = IncomeComponentVersion(
+            component_id=component_id,
+            start_date=version_in.start_date,
+            end_date=version_in.end_date,
+            gross_amount=version_in.gross_amount,
+            net_amount=version_in.net_amount,
+            periods_per_year=version_in.periods_per_year,
+        )
+        self.db.add(version)
         self.db.flush()
-
-        # Create deductions if provided
-        if range_in.deductions:
-            self._create_deductions(effective_range.id, range_in.deductions)
-
-        return effective_range
-
-    def _create_deductions(self, range_id: int, deductions_in: DeductionCreate) -> IncomeDeduction:
-        """Create deduction record."""
-        deduction = IncomeDeduction(income_effective_range_id=range_id, **deductions_in.model_dump())
-        self.db.add(deduction)
-        return deduction
-
-    def add_effective_range(self, income_id: int, range_in: EffectiveRangeCreate) -> IncomeEffectiveRange:
-        """Add new effective range to existing income."""
-        # Verify income exists
-        income = self.get_by_id(income_id)
-        if not income:
-            raise ValueError(f"Income with id {income_id} not found")
-
-        effective_range = self._create_effective_range(income_id, range_in)
-        self.db.commit()
-        self.db.refresh(effective_range)
-        return effective_range
-
-    def update_effective_range(self, range_id: int, range_in: EffectiveRangeUpdate) -> IncomeEffectiveRange:
-        """Update existing effective range."""
-        effective_range = self.db.query(IncomeEffectiveRange).filter(IncomeEffectiveRange.id == range_id).first()
-
-        if not effective_range:
-            raise ValueError(f"Effective range with id {range_id} not found")
-
-        # Update range fields
-        update_data = range_in.model_dump(exclude={"deductions"}, exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(effective_range, field, value)
-
-        # Update deductions if provided
-        if range_in.deductions is not None:
-            if effective_range.deductions:
-                # Update existing deductions
-                for field, value in range_in.deductions.model_dump(exclude_unset=True).items():
-                    setattr(effective_range.deductions, field, value)
-            else:
-                # Create new deductions
-                self._create_deductions(range_id, range_in.deductions)
+        if version_in.deductions:
+            self._create_version_deductions(version.id, version_in.deductions)
 
         self.db.commit()
-        self.db.refresh(effective_range)
-        return effective_range
+        self.db.refresh(version)
+        return self._get_version_or_raise(version.id)
 
-    def delete_effective_range(self, range_id: int) -> bool:
-        """Delete effective range (cascade deletes deductions)."""
-        effective_range = self.db.query(IncomeEffectiveRange).filter(IncomeEffectiveRange.id == range_id).first()
+    def update_version(self, version_id: int, version_in: IncomeComponentVersionUpdate) -> IncomeComponentVersion:
+        version = self._get_version_or_raise(version_id)
+        updates = version_in.model_dump(exclude_unset=True, exclude={"deductions"})
 
-        if not effective_range:
-            return False
+        next_start = updates.get("start_date", version.start_date)
+        next_end = updates.get("end_date", version.end_date)
+        next_gross = updates.get("gross_amount", version.gross_amount)
+        next_net = updates.get("net_amount", version.net_amount)
 
-        # Verify this isn't the last range
-        income = self.get_by_id(effective_range.income_id)
-        if income and len(income.effective_ranges) <= 1:
-            raise ValueError("Cannot delete the last effective range. Income must have at least one range.")
+        self._validate_date_range(next_start, next_end)
+        self._validate_amounts(next_gross, next_net)
+        self._ensure_no_version_overlap(version.component_id, next_start, next_end, exclude_version_id=version.id)
 
-        self.db.delete(effective_range)
+        for field, value in updates.items():
+            setattr(version, field, value)
+
+        if version_in.deductions is not None:
+            self._sync_version_deductions(version, version_in.deductions)
+
         self.db.commit()
-        return True
+        return self._get_version_or_raise(version_id)
 
-    def get_by_type(self, income_type: str, skip: int = 0, limit: int = 100) -> list[Income]:
-        """Get incomes by type (regular or bonus)."""
+    def delete_version(self, version_id: int) -> None:
+        version = self._get_version_or_raise(version_id)
+        self.db.delete(version)
+        self.db.commit()
+
+    def create_occurrence(self, component_id: int, occurrence_in: IncomeOccurrenceCreate) -> IncomeOccurrence:
+        component = self._get_component_or_raise(component_id)
+        self._ensure_component_mode(component, expected_mode="occurrence")
+        self._validate_amounts(occurrence_in.gross_amount, occurrence_in.net_amount)
+
+        paid_date = occurrence_in.paid_date
+        if occurrence_in.status == "expected":
+            paid_date = None
+        elif paid_date is None:
+            paid_date = occurrence_in.planned_date
+
+        occurrence = IncomeOccurrence(
+            component_id=component_id,
+            status=occurrence_in.status,
+            planned_date=occurrence_in.planned_date,
+            paid_date=paid_date,
+            gross_amount=occurrence_in.gross_amount,
+            net_amount=occurrence_in.net_amount,
+        )
+        self.db.add(occurrence)
+        self.db.flush()
+        if occurrence_in.deductions:
+            self._create_occurrence_deductions(occurrence.id, occurrence_in.deductions)
+
+        self.db.commit()
+        self.db.refresh(occurrence)
+        return self._get_occurrence_or_raise(occurrence.id)
+
+    def update_occurrence(self, occurrence_id: int, occurrence_in: IncomeOccurrenceUpdate) -> IncomeOccurrence:
+        occurrence = self._get_occurrence_or_raise(occurrence_id)
+        updates = occurrence_in.model_dump(exclude_unset=True, exclude={"deductions"})
+
+        next_gross = updates.get("gross_amount", occurrence.gross_amount)
+        next_net = updates.get("net_amount", occurrence.net_amount)
+        self._validate_amounts(next_gross, next_net)
+
+        for field, value in updates.items():
+            setattr(occurrence, field, value)
+
+        if occurrence.status == "expected":
+            occurrence.paid_date = None
+        elif occurrence.paid_date is None:
+            occurrence.paid_date = occurrence.planned_date
+
+        if occurrence_in.deductions is not None:
+            self._sync_occurrence_deductions(occurrence, occurrence_in.deductions)
+
+        self.db.commit()
+        return self._get_occurrence_or_raise(occurrence_id)
+
+    def delete_occurrence(self, occurrence_id: int) -> None:
+        occurrence = self._get_occurrence_or_raise(occurrence_id)
+        self.db.delete(occurrence)
+        self.db.commit()
+
+    def get_year_projection(self, year: int) -> IncomeYearProjectionResponse:
+        sources = self._load_sources_with_income()
+        projected_sources: list[ProjectedIncomeSourceResponse] = []
+        household_totals = _blank_projection_totals()
+
+        for source in sources:
+            component_responses: list[ProjectedIncomeComponentResponse] = []
+            source_totals = _blank_projection_totals()
+            components = sorted(
+                source.components,
+                key=lambda component: (
+                    component.component_mode,
+                    component.component_type,
+                    (component.label or "").lower(),
+                    component.id,
+                ),
+            )
+
+            for component in components:
+                component_response = self._project_component(component, year)
+                component_responses.append(component_response)
+                _roll_up_projection_totals(source_totals, component_response.totals)
+
+            source_response = ProjectedIncomeSourceResponse(
+                **self._source_payload(source),
+                totals=_projection_response(source_totals),
+                components=component_responses,
+            )
+            projected_sources.append(source_response)
+            _roll_up_projection_totals(household_totals, source_response.totals)
+
+        return IncomeYearProjectionResponse(
+            year=year,
+            totals=_projection_response(household_totals),
+            sources=projected_sources,
+        )
+
+    def serialize_source(self, source: IncomeSource) -> IncomeSourceResponse:
+        return IncomeSourceResponse(**self._source_payload(source))
+
+    def serialize_component(self, component: IncomeComponent) -> IncomeComponentResponse:
+        return IncomeComponentResponse(**self._component_payload(component))
+
+    def serialize_version(self, version: IncomeComponentVersion) -> IncomeComponentVersionResponse:
+        return self._version_response(version)
+
+    def serialize_occurrence(self, occurrence: IncomeOccurrence) -> IncomeOccurrenceResponse:
+        return self._occurrence_response(occurrence)
+
+    def _project_component(self, component: IncomeComponent, year: int) -> ProjectedIncomeComponentResponse:
+        component_totals = _blank_projection_totals()
+        versions = sorted(component.versions, key=lambda version: (version.start_date, version.id), reverse=True)
+        occurrences = sorted(
+            component.occurrences,
+            key=lambda occurrence: (occurrence.paid_date or occurrence.planned_date, occurrence.id),
+            reverse=True,
+        )
+
+        for version in versions:
+            overlap_days = _version_intersection_days(version, year)
+            if overlap_days == 0:
+                continue
+
+            factor = overlap_days / _days_in_year(year)
+            gross = version.gross_amount * version.periods_per_year * factor
+            net = version.net_amount * version.periods_per_year * factor
+            deductions = _deduction_payload(version.deductions, factor)
+            _add_projection_values(
+                component_totals,
+                gross=gross,
+                net=net,
+                deductions=deductions,
+                include_in_committed=True,
+            )
+
+        for occurrence in occurrences:
+            effective_date = occurrence.paid_date or occurrence.planned_date
+            if effective_date.year != year:
+                continue
+
+            deductions = _deduction_payload(occurrence.deductions)
+            _add_projection_values(
+                component_totals,
+                gross=occurrence.gross_amount,
+                net=occurrence.net_amount,
+                deductions=deductions,
+                include_in_committed=occurrence.status == "actual",
+            )
+
+        return ProjectedIncomeComponentResponse(
+            **self._component_payload(component),
+            totals=_projection_response(component_totals),
+            current_version=self._current_version_response(versions, year),
+            versions=[self._version_response(version) for version in versions],
+            occurrences=[self._occurrence_response(occurrence) for occurrence in occurrences],
+        )
+
+    def _current_version_response(
+        self,
+        versions: Iterable[IncomeComponentVersion],
+        year: int,
+    ) -> Optional[IncomeComponentVersionResponse]:
+        year_start = date(year, 1, 1)
+        year_end = date(year, 12, 31)
+        matching_version = next(
+            (
+                version
+                for version in versions
+                if _ranges_overlap(version.start_date, version.end_date, year_start, year_end)
+            ),
+            None,
+        )
+        if matching_version is not None:
+            return self._version_response(matching_version)
+
+        latest_version = next(iter(versions), None)
+        return self._version_response(latest_version) if latest_version is not None else None
+
+    def _load_sources_with_income(self) -> list[IncomeSource]:
         return (
-            self.db.query(Income)
-            .options(joinedload(Income.effective_ranges).joinedload(IncomeEffectiveRange.deductions))
-            .filter(Income.type == income_type)
-            .offset(skip)
-            .limit(limit)
+            self.db.query(IncomeSource)
+            .options(
+                joinedload(IncomeSource.components)
+                .joinedload(IncomeComponent.versions)
+                .joinedload(IncomeComponentVersion.deductions),
+                joinedload(IncomeSource.components)
+                .joinedload(IncomeComponent.occurrences)
+                .joinedload(IncomeOccurrence.deductions),
+            )
+            .order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc())
             .all()
         )
 
-    def get_current_effective_range(self, income_id: int) -> Optional[IncomeEffectiveRange]:
-        """Get the currently active effective range for an income."""
-        today = date.today()
-        return (
-            self.db.query(IncomeEffectiveRange)
-            .filter(
-                IncomeEffectiveRange.income_id == income_id,
-                IncomeEffectiveRange.start_date <= today,
-                or_(IncomeEffectiveRange.end_date is None, IncomeEffectiveRange.end_date >= today),
+    def _next_source_sort_order(self) -> int:
+        current = self.db.query(func.max(IncomeSource.sort_order)).scalar()
+        return 0 if current is None else int(current) + 1
+
+    def _get_source_or_raise(self, source_id: int) -> IncomeSource:
+        source = self.db.query(IncomeSource).filter(IncomeSource.id == source_id).first()
+        if source is None:
+            raise ValueError(f"Income source {source_id} not found")
+        return source
+
+    def _get_component_or_raise(self, component_id: int) -> IncomeComponent:
+        component = (
+            self.db.query(IncomeComponent)
+            .options(
+                joinedload(IncomeComponent.versions).joinedload(IncomeComponentVersion.deductions),
+                joinedload(IncomeComponent.occurrences).joinedload(IncomeOccurrence.deductions),
             )
+            .filter(IncomeComponent.id == component_id)
             .first()
         )
+        if component is None:
+            raise ValueError(f"Income component {component_id} not found")
+        return component
 
-    def delete_by_stream(self, stream_name: str) -> int:
-        """
-        Delete all income entries with the given stream name.
+    def _get_version_or_raise(self, version_id: int) -> IncomeComponentVersion:
+        version = (
+            self.db.query(IncomeComponentVersion)
+            .options(joinedload(IncomeComponentVersion.deductions))
+            .filter(IncomeComponentVersion.id == version_id)
+            .first()
+        )
+        if version is None:
+            raise ValueError(f"Income component version {version_id} not found")
+        return version
 
-        Args:
-            stream_name: The name of the income stream to delete
+    def _get_occurrence_or_raise(self, occurrence_id: int) -> IncomeOccurrence:
+        occurrence = (
+            self.db.query(IncomeOccurrence)
+            .options(joinedload(IncomeOccurrence.deductions))
+            .filter(IncomeOccurrence.id == occurrence_id)
+            .first()
+        )
+        if occurrence is None:
+            raise ValueError(f"Income occurrence {occurrence_id} not found")
+        return occurrence
 
-        Returns:
-            Number of entries deleted
+    def _ensure_component_mode(self, component: IncomeComponent, *, expected_mode: str) -> None:
+        if component.component_mode != expected_mode:
+            raise ValueError(
+                f"Income component {component.id} uses mode '{component.component_mode}', expected '{expected_mode}'"
+            )
 
-        Raises:
-            ValueError: If no entries found with the given stream name
-        """
-        # Find all entries with this stream name
-        entries = self.db.query(Income).filter(Income.stream == stream_name).all()
+    def _validate_amounts(self, gross_amount: float, net_amount: float) -> None:
+        if net_amount > gross_amount:
+            raise ValueError("Net amount cannot exceed gross amount")
 
-        if not entries:
-            raise ValueError(f"No income entries found for stream '{stream_name}'")
+    def _validate_date_range(self, start_date: date, end_date: date | None) -> None:
+        if end_date is not None and start_date > end_date:
+            raise ValueError("Start date must be on or before end date")
 
-        # Delete each entry (cascade will handle ranges and deductions)
-        deleted_count = len(entries)
-        for entry in entries:
-            self.db.delete(entry)
+    def _auto_close_previous_version(self, component_id: int, new_start_date: date) -> None:
+        previous_version = (
+            self.db.query(IncomeComponentVersion)
+            .filter(
+                IncomeComponentVersion.component_id == component_id,
+                IncomeComponentVersion.start_date < new_start_date,
+                IncomeComponentVersion.end_date.is_(None),
+            )
+            .order_by(IncomeComponentVersion.start_date.desc())
+            .first()
+        )
+        if previous_version is not None:
+            previous_version.end_date = new_start_date - timedelta(days=1)
 
-        self.db.commit()
-        return deleted_count
+    def _ensure_no_version_overlap(
+        self,
+        component_id: int,
+        start_date: date,
+        end_date: date | None,
+        *,
+        exclude_version_id: int | None = None,
+    ) -> None:
+        versions = (
+            self.db.query(IncomeComponentVersion)
+            .filter(IncomeComponentVersion.component_id == component_id)
+            .all()
+        )
+
+        for version in versions:
+            if exclude_version_id is not None and version.id == exclude_version_id:
+                continue
+            if _ranges_overlap(version.start_date, version.end_date, start_date, end_date):
+                raise ValueError("Recurring component versions cannot overlap")
+
+    def _create_version_deductions(
+        self,
+        version_id: int,
+        deductions_in: DeductionCreate,
+    ) -> IncomeComponentVersionDeduction:
+        deduction = IncomeComponentVersionDeduction(version_id=version_id, **deductions_in.model_dump())
+        self.db.add(deduction)
+        return deduction
+
+    def _create_occurrence_deductions(
+        self,
+        occurrence_id: int,
+        deductions_in: DeductionCreate,
+    ) -> IncomeOccurrenceDeduction:
+        deduction = IncomeOccurrenceDeduction(occurrence_id=occurrence_id, **deductions_in.model_dump())
+        self.db.add(deduction)
+        return deduction
+
+    def _sync_version_deductions(self, version: IncomeComponentVersion, deductions_in: DeductionUpdate) -> None:
+        if version.deductions is None:
+            self._create_version_deductions(version.id, DeductionCreate(**deductions_in.model_dump(exclude_unset=True)))
+            return
+
+        for field, value in deductions_in.model_dump(exclude_unset=True).items():
+            setattr(version.deductions, field, value)
+
+    def _sync_occurrence_deductions(self, occurrence: IncomeOccurrence, deductions_in: DeductionUpdate) -> None:
+        if occurrence.deductions is None:
+            self._create_occurrence_deductions(
+                occurrence.id,
+                DeductionCreate(**deductions_in.model_dump(exclude_unset=True)),
+            )
+            return
+
+        for field, value in deductions_in.model_dump(exclude_unset=True).items():
+            setattr(occurrence.deductions, field, value)
+
+    def _source_payload(self, source: IncomeSource) -> dict[str, object]:
+        return {
+            "id": source.id,
+            "name": source.name,
+            "is_active": source.is_active,
+            "sort_order": source.sort_order,
+            "created_at": source.created_at,
+            "updated_at": source.updated_at,
+        }
+
+    def _component_payload(self, component: IncomeComponent) -> dict[str, object]:
+        return {
+            "id": component.id,
+            "source_id": component.source_id,
+            "component_type": component.component_type,
+            "component_mode": component.component_mode,
+            "label": component.label,
+            "created_at": component.created_at,
+            "updated_at": component.updated_at,
+        }
+
+    def _deduction_resource(self, deduction: IncomeComponentVersionDeduction | IncomeOccurrenceDeduction | None) -> Optional[DeductionResponse]:
+        if deduction is None:
+            return None
+        return DeductionResponse(
+            id=deduction.id,
+            federal_tax=deduction.federal_tax,
+            state_tax=deduction.state_tax,
+            fica=deduction.fica,
+            retirement=deduction.retirement,
+            health_insurance=deduction.health_insurance,
+            other=deduction.other,
+        )
+
+    def _version_response(self, version: IncomeComponentVersion) -> IncomeComponentVersionResponse:
+        return IncomeComponentVersionResponse(
+            id=version.id,
+            component_id=version.component_id,
+            start_date=version.start_date,
+            end_date=version.end_date,
+            gross_amount=version.gross_amount,
+            net_amount=version.net_amount,
+            periods_per_year=version.periods_per_year,
+            deductions=self._deduction_resource(version.deductions),
+            created_at=version.created_at,
+            updated_at=version.updated_at,
+        )
+
+    def _occurrence_response(self, occurrence: IncomeOccurrence) -> IncomeOccurrenceResponse:
+        return IncomeOccurrenceResponse(
+            id=occurrence.id,
+            component_id=occurrence.component_id,
+            status=occurrence.status,
+            planned_date=occurrence.planned_date,
+            paid_date=occurrence.paid_date,
+            gross_amount=occurrence.gross_amount,
+            net_amount=occurrence.net_amount,
+            deductions=self._deduction_resource(occurrence.deductions),
+            created_at=occurrence.created_at,
+            updated_at=occurrence.updated_at,
+        )

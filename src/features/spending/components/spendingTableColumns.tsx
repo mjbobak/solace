@@ -5,6 +5,7 @@ import { hasSpreadPayment } from '@/features/spending/utils/spreadPayments';
 import type { Column } from '@/shared/components/data/Table';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateOnly } from '@/shared/utils/dateOnly';
 
 import { SpreadPaymentCell } from './SpreadPaymentCell';
 
@@ -40,9 +41,7 @@ export function getSpendingTableColumns(
     {
       key: 'transactionDate',
       header: 'Transaction Date',
-      accessor: (row) => (
-        <span>{new Date(row.transactionDate).toLocaleDateString()}</span>
-      ),
+      accessor: (row) => <span>{formatDateOnly(row.transactionDate)}</span>,
       sortValue: (row) => row.transactionDate,
       sortable: true,
       width: '140px',
@@ -50,9 +49,7 @@ export function getSpendingTableColumns(
     {
       key: 'postDate',
       header: 'Post Date',
-      accessor: (row) => (
-        <span>{new Date(row.postDate).toLocaleDateString()}</span>
-      ),
+      accessor: (row) => <span>{formatDateOnly(row.postDate)}</span>,
       sortValue: (row) => row.postDate,
       sortable: true,
       width: '120px',

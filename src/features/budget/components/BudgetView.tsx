@@ -30,6 +30,7 @@ import {
   setNumberParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
+import { getYearFromDateOnly } from '@/shared/utils/dateOnly';
 
 const ANNUAL_NET_INCOME = 200000;
 const SPEND_BASIS_OPTIONS: ReadonlyArray<{
@@ -135,7 +136,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
 
         const years = new Set<number>();
         transactions.forEach((transaction) => {
-          years.add(new Date(transaction.transactionDate).getFullYear());
+          years.add(getYearFromDateOnly(transaction.transactionDate));
         });
         years.add(currentYear);
 

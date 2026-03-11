@@ -1,5 +1,5 @@
 import { mockBudgetData } from '@/features/budget/services/mockBudgetData';
-import { calculateAnnualNet, type IncomeEntry } from '@/features/income';
+import type { IncomeYearProjection } from '@/features/income';
 import { statusPalette } from '@/shared/theme';
 
 import type { SankeyData, SankeyPeriod } from '../types/sankeyTypes';
@@ -12,36 +12,43 @@ const COLORS = {
   funsies: statusPalette.funsies,
 } as const;
 
+function getIncomeSources(
+  projection: IncomeYearProjection | null,
+  period: SankeyPeriod,
+) {
+  if (!projection) {
+    return [];
+  }
+
+  return projection.sources
+    .map((source) => ({
+      name: source.name,
+      amount:
+        period === 'annual'
+          ? source.totals.plannedNet
+          : source.totals.plannedNet / 12,
+    }))
+    .filter((source) => source.amount > 0);
+}
+
 /**
  * Build Sankey data showing Income → Top-level categories (Essential/Funsies) → Spending
  */
 export function buildTopLevelSankeyData(
   period: SankeyPeriod,
-  incomeData: IncomeEntry[],
+  projection: IncomeYearProjection | null,
 ): SankeyData {
-  // 1. Aggregate income by stream
-  const incomeStreams = incomeData.map((income) => ({
-    name: income.stream,
-    amount:
-      period === 'annual'
-        ? calculateAnnualNet(income)
-        : calculateAnnualNet(income) / 12,
-  }));
-
-  // 2. Aggregate budget by expense type
+  const incomeSources = getIncomeSources(projection, period);
   const essentialTotal = mockBudgetData
-    .filter((b) => b.expenseType === 'ESSENTIAL')
-    .reduce((sum, b) => sum + b.budgeted, 0);
-
+    .filter((entry) => entry.expenseType === 'ESSENTIAL')
+    .reduce((sum, entry) => sum + entry.budgeted, 0);
   const funsiesTotal = mockBudgetData
-    .filter((b) => b.expenseType === 'FUNSIES')
-    .reduce((sum, b) => sum + b.budgeted, 0);
-
+    .filter((entry) => entry.expenseType === 'FUNSIES')
+    .reduce((sum, entry) => sum + entry.budgeted, 0);
   const totalBudget = essentialTotal + funsiesTotal;
 
-  // 3. Build nodes with colors
-  const incomeNodes = incomeStreams.map((s) => ({
-    name: s.name,
+  const incomeNodes = incomeSources.map((source) => ({
+    name: source.name,
     fill: COLORS.income,
   }));
   const expenseNodes = [
@@ -49,23 +56,23 @@ export function buildTopLevelSankeyData(
     { name: 'FUNSIES', fill: COLORS.funsies },
   ];
   const spendingNode = { name: 'Spending', fill: COLORS.spending };
-
   const nodes = [...incomeNodes, ...expenseNodes, spendingNode];
+
   const incomeCount = incomeNodes.length;
   const essentialIndex = incomeCount;
   const funsiesIndex = incomeCount + 1;
-
-  // 4. Build links - distribute income to expense types proportionally
+  const spendingIndex = incomeCount + 2;
   const links: Array<{ source: number; target: number; value: number }> = [];
 
-  // Income to expense types
-  incomeStreams.forEach((income, incomeIdx) => {
-    const essentialAllocation = (income.amount * essentialTotal) / totalBudget;
-    const funsiesAllocation = (income.amount * funsiesTotal) / totalBudget;
+  incomeSources.forEach((income, incomeIndex) => {
+    const essentialAllocation =
+      totalBudget > 0 ? (income.amount * essentialTotal) / totalBudget : 0;
+    const funsiesAllocation =
+      totalBudget > 0 ? (income.amount * funsiesTotal) / totalBudget : 0;
 
     if (essentialAllocation > 0) {
       links.push({
-        source: incomeIdx,
+        source: incomeIndex,
         target: essentialIndex,
         value: Math.round(essentialAllocation * 100) / 100,
       });
@@ -73,23 +80,21 @@ export function buildTopLevelSankeyData(
 
     if (funsiesAllocation > 0) {
       links.push({
-        source: incomeIdx,
+        source: incomeIndex,
         target: funsiesIndex,
         value: Math.round(funsiesAllocation * 100) / 100,
       });
     }
   });
 
-  // Expense types to spending
   links.push({
     source: essentialIndex,
-    target: incomeCount + 2,
+    target: spendingIndex,
     value: Math.round(essentialTotal * 100) / 100,
   });
-
   links.push({
     source: funsiesIndex,
-    target: incomeCount + 2,
+    target: spendingIndex,
     value: Math.round(funsiesTotal * 100) / 100,
   });
 
@@ -101,78 +106,67 @@ export function buildTopLevelSankeyData(
  */
 export function buildDetailedSankeyData(
   period: SankeyPeriod,
-  incomeData: IncomeEntry[],
+  projection: IncomeYearProjection | null,
 ): SankeyData {
-  // 1. Aggregate income by stream
-  const incomeStreams = incomeData.map((income) => ({
-    name: income.stream,
-    amount:
-      period === 'annual'
-        ? calculateAnnualNet(income)
-        : calculateAnnualNet(income) / 12,
-  }));
+  const incomeSources = getIncomeSources(projection, period);
 
-  // 2. Aggregate budget by category
   const categoryTotals: Record<string, number> = {};
   mockBudgetData.forEach((budget) => {
-    const cat = budget.expenseCategory;
-    categoryTotals[cat] = (categoryTotals[cat] || 0) + budget.budgeted;
+    categoryTotals[budget.expenseCategory] =
+      (categoryTotals[budget.expenseCategory] || 0) + budget.budgeted;
   });
 
-  // Get unique categories sorted by total budget (descending)
   const sortedCategories = Object.entries(categoryTotals)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8) // Limit to top 8 categories
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 8)
     .map(([name, total]) => ({ name, total }));
 
-  // If there are more categories, group as "Other"
   const otherTotal =
-    Object.values(categoryTotals).reduce((a, b) => a + b, 0) -
-    sortedCategories.reduce((sum, c) => sum + c.total, 0);
+    Object.values(categoryTotals).reduce((sum, value) => sum + value, 0) -
+    sortedCategories.reduce((sum, category) => sum + category.total, 0);
 
   if (otherTotal > 0) {
     sortedCategories.push({ name: 'Other', total: otherTotal });
   }
 
-  const totalBudget = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
+  const totalBudget = Object.values(categoryTotals).reduce(
+    (sum, value) => sum + value,
+    0,
+  );
 
-  // 3. Build nodes with colors
-  const incomeNodes = incomeStreams.map((s) => ({
-    name: s.name,
+  const incomeNodes = incomeSources.map((source) => ({
+    name: source.name,
     fill: COLORS.income,
   }));
-  const categoryNodes = sortedCategories.map((c) => ({
-    name: c.name,
-    fill: c.name.includes('INVESTMENT') ? COLORS.investments : COLORS.essential,
+  const categoryNodes = sortedCategories.map((category) => ({
+    name: category.name,
+    fill: category.name.includes('INVESTMENT')
+      ? COLORS.investments
+      : COLORS.essential,
   }));
   const spendingNode = { name: 'Spending', fill: COLORS.spending };
-
   const nodes = [...incomeNodes, ...categoryNodes, spendingNode];
   const incomeCount = incomeNodes.length;
   const spendingIndex = incomeCount + categoryNodes.length;
-
-  // 4. Build links
   const links: Array<{ source: number; target: number; value: number }> = [];
 
-  // Income to categories - distribute proportionally
-  incomeStreams.forEach((income, incomeIdx) => {
-    sortedCategories.forEach((category, catIdx) => {
-      const categoryAllocation = (income.amount * category.total) / totalBudget;
-
-      if (categoryAllocation > 0) {
+  incomeSources.forEach((income, incomeIndex) => {
+    sortedCategories.forEach((category, categoryIndex) => {
+      const allocation =
+        totalBudget > 0 ? (income.amount * category.total) / totalBudget : 0;
+      if (allocation > 0) {
         links.push({
-          source: incomeIdx,
-          target: incomeCount + catIdx,
-          value: Math.round(categoryAllocation * 100) / 100,
+          source: incomeIndex,
+          target: incomeCount + categoryIndex,
+          value: Math.round(allocation * 100) / 100,
         });
       }
     });
   });
 
-  // Categories to spending
-  sortedCategories.forEach((category, catIdx) => {
+  sortedCategories.forEach((category, categoryIndex) => {
     links.push({
-      source: incomeCount + catIdx,
+      source: incomeCount + categoryIndex,
       target: spendingIndex,
       value: Math.round(category.total * 100) / 100,
     });

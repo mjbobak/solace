@@ -5,6 +5,7 @@
 
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
 import { getMonthlyTransactionImpacts } from '@/features/spending/utils/spreadPayments';
+import { parseDateOnly } from '@/shared/utils/dateOnly';
 
 /**
  * Get the first and last day of a month.
@@ -47,7 +48,7 @@ export function isTransactionInRange(
   startDate: Date,
   endDate: Date,
 ): boolean {
-  const txDate = new Date(transactionDateStr);
+  const txDate = parseDateOnly(transactionDateStr);
   // Normalize to date-only comparison (ignore time)
   const txDateOnly = new Date(
     txDate.getFullYear(),

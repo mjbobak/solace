@@ -1,3 +1,4 @@
+import { getTodayDateOnly } from '@/shared/utils/dateOnly';
 import type { SpendingEntry } from '../types/spendingView';
 
 // API response type from backend
@@ -202,6 +203,8 @@ function parseCSV(content: string): Record<string, string>[] {
 function csvRowToTransaction(
   row: Record<string, string>,
 ): Omit<SpendingEntry, 'id'> {
+  const fallbackDate = getTodayDateOnly();
+
   // Map common CSV headers to SpendingEntry fields
   const getField = (fieldNames: string[]): string => {
     return row[fieldNames.find((name) => row[name]) || ''] || '';
@@ -211,10 +214,8 @@ function csvRowToTransaction(
     account: getField(['account', 'bank', 'from account']),
     transactionDate:
       getField(['date', 'transaction date', 'transactiondate']) ||
-      new Date().toISOString().split('T')[0],
-    postDate:
-      getField(['post date', 'postdate', 'date']) ||
-      new Date().toISOString().split('T')[0],
+      fallbackDate,
+    postDate: getField(['post date', 'postdate', 'date']) || fallbackDate,
     description: getField(['description', 'merchant', 'name', 'payee']),
     budgetLabel: 'Uncategorized',
     amount: parseFloat(getField(['amount', 'value', 'debit', 'credit'])) || 0,

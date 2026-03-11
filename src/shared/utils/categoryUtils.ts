@@ -3,7 +3,7 @@
  * Handles bidirectional conversion between category IDs and names.
  */
 
-import type { ExpenseCategory } from '@/features/budget/types/budgetView';
+import type { ExpenseCategory } from '@/shared/types/category';
 
 /**
  * Get category name from ID using a list of categories.

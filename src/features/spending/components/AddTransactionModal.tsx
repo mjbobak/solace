@@ -5,6 +5,7 @@ import type { BudgetApiResponse } from '@/features/budget/types/budgetApi';
 import { Button } from '@/shared/components/Button';
 import { Modal } from '@/shared/components/Modal';
 import { formatCurrency } from '@/shared/utils/currency';
+import { getTodayDateOnly } from '@/shared/utils/dateOnly';
 
 import type { SpendingEntry } from '../types/spendingView';
 import {
@@ -32,6 +33,34 @@ interface AddTransactionModalProps {
   item?: SpendingEntry;
 }
 
+interface TransactionFormData {
+  account: string;
+  transactionDate: string;
+  postDate: string;
+  description: string;
+  budgetId: number | null;
+  budgetLabel: string;
+  budgetCategory: string | undefined;
+  budgetType: string | undefined;
+  amount: string;
+}
+
+function createDefaultFormData(): TransactionFormData {
+  const today = getTodayDateOnly();
+
+  return {
+    account: ACCOUNTS[0],
+    transactionDate: today,
+    postDate: today,
+    description: '',
+    budgetId: null,
+    budgetLabel: 'Uncategorized',
+    budgetCategory: undefined,
+    budgetType: undefined,
+    amount: '',
+  };
+}
+
 export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isOpen,
   onClose,
@@ -43,17 +72,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('manual');
   const [budgets, setBudgets] = useState<BudgetApiResponse[]>([]);
   const [isLoadingBudgets, setIsLoadingBudgets] = useState(true);
-  const [formData, setFormData] = useState({
-    account: ACCOUNTS[0],
-    transactionDate: new Date().toISOString().split('T')[0],
-    postDate: new Date().toISOString().split('T')[0],
-    description: '',
-    budgetId: null as number | null,
-    budgetLabel: 'Uncategorized' as string,
-    budgetCategory: undefined as string | undefined,
-    budgetType: undefined as string | undefined,
-    amount: '',
-  });
+  const [formData, setFormData] = useState(createDefaultFormData);
 
   // Fetch budgets on mount
   useEffect(() => {
@@ -86,32 +105,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       });
     } else if (isOpen) {
       // Reset form for add mode
-      setFormData({
-        account: ACCOUNTS[0],
-        transactionDate: new Date().toISOString().split('T')[0],
-        postDate: new Date().toISOString().split('T')[0],
-        description: '',
-        budgetId: null,
-        budgetLabel: 'Uncategorized',
-        budgetCategory: undefined,
-        budgetType: undefined,
-        amount: '',
-      });
+      setFormData(createDefaultFormData());
     }
   }, [isOpen, isEditMode, item]);
 
   const handleClose = () => {
-    setFormData({
-      account: ACCOUNTS[0],
-      transactionDate: new Date().toISOString().split('T')[0],
-      postDate: new Date().toISOString().split('T')[0],
-      description: '',
-      budgetId: null,
-      budgetLabel: 'Uncategorized',
-      budgetCategory: undefined,
-      budgetType: undefined,
-      amount: '',
-    });
+    setFormData(createDefaultFormData());
     setActiveTab('manual');
     onClose();
   };

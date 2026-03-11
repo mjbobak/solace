@@ -1,141 +1,95 @@
-/**
- * Component for income summary section
- * Displays summary cards and period/type toggles with animations
- */
-
 import React from 'react';
-import { motion } from 'framer-motion';
-import type { Variants } from 'framer-motion';
 
-import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
-import { formatCurrency } from '@/shared/utils/currency';
-
-import type {
-  IncomePeriod,
-  IncomeCategory,
-  IncomeTotals,
-} from '../types/incomeView';
+import type { IncomeProjectionTotals } from '../types/income';
 
 interface IncomeSummaryProps {
-  period: IncomePeriod;
-  onPeriodChange: (period: IncomePeriod) => void;
-  totals: IncomeTotals;
+  year: number;
+  onYearChange: (year: number) => void;
+  totals: IncomeProjectionTotals;
 }
 
-const getCardVariants = (index: number): Variants => ({
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: index * 0.1,
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-});
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
 
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
-  period,
-  onPeriodChange,
+  year,
+  onYearChange,
   totals,
 }) => {
-  const getPeriodValues = (income: IncomeCategory) => {
-    if (period === 'annual') {
-      return {
-        gross: income.annualGross,
-        net: income.annualNet,
-      };
-    }
+  const yearOptions = Array.from({ length: 5 }, (_, index) => year - 2 + index);
+  const expectedDelta = totals.plannedNet - totals.committedNet;
 
-    return {
-      gross: income.monthlyGross,
-      net: income.monthlyNet,
-    };
-  };
-
-  const IncomeBreakdown = ({
-    label,
-    income,
-  }: {
-    label: string;
-    income: IncomeCategory;
-  }) => {
-    const { gross, net } = getPeriodValues(income);
-
-    return (
-      <div>
-        <p className="mb-6 text-sm font-semibold uppercase tracking-wider text-gray-700">
-          {label}
-        </p>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
-              Gross
-            </p>
-            <p className="text-lg font-bold text-gray-900">
-              {formatCurrency(gross, '$')}
-            </p>
-          </div>
-
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
-              Net
-            </p>
-            <p className="text-lg font-bold text-emerald-700">
-              {formatCurrency(net, '$')}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const cards = [
+    {
+      label: 'Committed Net',
+      value: formatCurrency(totals.committedNet),
+      hint: 'Recurring income plus actual bonuses',
+    },
+    {
+      label: 'Planned Net',
+      value: formatCurrency(totals.plannedNet),
+      hint: 'Includes expected bonuses',
+    },
+    {
+      label: 'Expected Upside',
+      value: formatCurrency(expectedDelta),
+      hint: 'Planned minus committed',
+    },
+    {
+      label: 'Planned Deductions',
+      value: formatCurrency(totals.plannedDeductions.total),
+      hint: 'Taxes and withholdings in plan view',
+    },
+  ];
 
   return (
-    <div className="space-y-4">
-      {/* Filter Controls */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <div className="flex items-center gap-3">
-          {/* Period Toggle */}
-          <ToggleButtonGroup
-            value={period}
-            options={[
-              { value: 'monthly', label: 'Monthly' },
-              { value: 'annual', label: 'Annual' },
-            ]}
-            onChange={onPeriodChange}
-          />
+    <section className="space-y-4" aria-label="Income summary">
+      <div className="surface-card flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">
+            Income Plan
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-app">
+            Selected year projection
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            Household totals are prorated across compensation changes and dated
+            bonus payments.
+          </p>
         </div>
-      </motion.div>
 
-      {/* Summary Cards Grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <motion.div
-          variants={getCardVariants(0)}
-          initial="hidden"
-          animate="visible"
-          className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200"
-        >
-          <IncomeBreakdown
-            label="Regular Income"
-            income={totals.regularIncome}
-          />
-        </motion.div>
-
-        <motion.div
-          variants={getCardVariants(1)}
-          initial="hidden"
-          animate="visible"
-          className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200"
-        >
-          <IncomeBreakdown label="Bonus Income" income={totals.bonusIncome} />
-        </motion.div>
+        <label className="w-full max-w-[180px]">
+          <span className="form-label">Planning year</span>
+          <select
+            className="form-input"
+            value={year}
+            onChange={(event) => onYearChange(Number(event.target.value))}
+          >
+            {yearOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
-    </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <article key={card.label} className="surface-card-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+              {card.label}
+            </p>
+            <p className="mt-3 text-2xl font-semibold text-app">{card.value}</p>
+            <p className="mt-2 text-sm text-muted">{card.hint}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 };

@@ -1,4 +1,4 @@
-"""Income API router."""
+"""Income API router for the source-first income domain."""
 
 from typing import List
 
@@ -7,12 +7,19 @@ from sqlalchemy.orm import Session
 
 from backend.app.db.database import get_db
 from backend.app.models.income import (
-    EffectiveRangeCreate,
-    EffectiveRangeResponse,
-    EffectiveRangeUpdate,
-    IncomeCreate,
-    IncomeResponse,
-    IncomeUpdate,
+    IncomeComponentCreate,
+    IncomeComponentResponse,
+    IncomeComponentUpdate,
+    IncomeComponentVersionCreate,
+    IncomeComponentVersionResponse,
+    IncomeComponentVersionUpdate,
+    IncomeOccurrenceCreate,
+    IncomeOccurrenceResponse,
+    IncomeOccurrenceUpdate,
+    IncomeSourceCreate,
+    IncomeSourceResponse,
+    IncomeSourceUpdate,
+    IncomeYearProjectionResponse,
 )
 from backend.app.services.income_service import IncomeService
 
@@ -20,138 +27,186 @@ router = APIRouter(prefix="/incomes", tags=["incomes"])
 
 
 def get_income_service(db: Session = Depends(get_db)) -> IncomeService:
-    """Dependency to get income service."""
+    """Dependency to resolve the income service."""
     return IncomeService(db)
 
 
-@router.get("", response_model=List[IncomeResponse])
-async def list_incomes(
-    skip: int = 0,
-    limit: int = 100,
-    income_type: str | None = None,
+def _handle_value_error(error: ValueError) -> HTTPException:
+    detail = str(error)
+    if "not found" in detail.lower():
+        return HTTPException(status_code=404, detail=detail)
+    return HTTPException(status_code=400, detail=detail)
+
+
+@router.get("/projection", response_model=IncomeYearProjectionResponse)
+async def get_income_projection(
+    year: int,
     service: IncomeService = Depends(get_income_service),
 ):
-    """List all income entries with optional type filter."""
-    if income_type:
-        return service.get_by_type(income_type, skip=skip, limit=limit)
-    return service.get_all(skip=skip, limit=limit)
+    """Return the year-scoped nested income read model."""
+    return service.get_year_projection(year)
 
 
-@router.get("/{income_id}", response_model=IncomeResponse)
-async def get_income(income_id: int, service: IncomeService = Depends(get_income_service)):
-    """Get income by ID."""
-    income = service.get_by_id(income_id)
-    if not income:
-        raise HTTPException(status_code=404, detail=f"Income with id {income_id} not found")
-    return income
+@router.get("/sources", response_model=List[IncomeSourceResponse])
+async def list_income_sources(service: IncomeService = Depends(get_income_service)):
+    """List top-level income sources."""
+    return [service.serialize_source(source) for source in service.list_sources()]
 
 
-@router.post("", response_model=IncomeResponse, status_code=status.HTTP_201_CREATED)
-async def create_income(income_in: IncomeCreate, service: IncomeService = Depends(get_income_service)):
-    """Create new income entry with effective ranges."""
-    try:
-        return service.create(income_in)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.put("/{income_id}", response_model=IncomeResponse)
-async def update_income(
-    income_id: int,
-    income_in: IncomeUpdate,
+@router.post("/sources", response_model=IncomeSourceResponse, status_code=status.HTTP_201_CREATED)
+async def create_income_source(
+    source_in: IncomeSourceCreate,
     service: IncomeService = Depends(get_income_service),
 ):
-    """Update income entry (does not affect effective ranges)."""
-    income = service.get_by_id(income_id)
-    if not income:
-        raise HTTPException(status_code=404, detail=f"Income with id {income_id} not found")
-
+    """Create a top-level income source."""
     try:
-        return service.update(income_id, income_in)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return service.serialize_source(service.create_source(source_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
 
 
-@router.delete("/{income_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_income(income_id: int, service: IncomeService = Depends(get_income_service)):
-    """Delete income entry (cascade deletes ranges and deductions)."""
-    if not service.exists(income_id):
-        raise HTTPException(status_code=404, detail=f"Income with id {income_id} not found")
-
-    service.delete(income_id)
-
-
-# ========== Effective Range Endpoints ==========
-
-
-@router.post("/{income_id}/ranges", response_model=EffectiveRangeResponse, status_code=status.HTTP_201_CREATED)
-async def add_effective_range(
-    income_id: int,
-    range_in: EffectiveRangeCreate,
+@router.put("/sources/{source_id}", response_model=IncomeSourceResponse)
+async def update_income_source(
+    source_id: int,
+    source_in: IncomeSourceUpdate,
     service: IncomeService = Depends(get_income_service),
 ):
-    """Add new effective range to existing income."""
+    """Update an income source."""
     try:
-        return service.add_effective_range(income_id, range_in)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return service.serialize_source(service.update_source(source_id, source_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
 
 
-@router.put("/ranges/{range_id}", response_model=EffectiveRangeResponse)
-async def update_effective_range(
-    range_id: int,
-    range_in: EffectiveRangeUpdate,
+@router.delete("/sources/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_income_source(
+    source_id: int,
     service: IncomeService = Depends(get_income_service),
 ):
-    """Update existing effective range."""
+    """Delete an income source and its nested components."""
     try:
-        return service.update_effective_range(range_id, range_in)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        service.delete_source(source_id)
+    except ValueError as error:
+        raise _handle_value_error(error)
 
 
-@router.delete("/ranges/{range_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_effective_range(range_id: int, service: IncomeService = Depends(get_income_service)):
-    """Delete effective range (prevents deleting last range)."""
+@router.post("/sources/{source_id}/components", response_model=IncomeComponentResponse, status_code=status.HTTP_201_CREATED)
+async def create_income_component(
+    source_id: int,
+    component_in: IncomeComponentCreate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Create an income component under a source."""
     try:
-        deleted = service.delete_effective_range(range_id)
-        if not deleted:
-            raise HTTPException(status_code=404, detail=f"Effective range with id {range_id} not found")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return service.serialize_component(service.create_component(source_id, component_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
 
 
-@router.get("/{income_id}/ranges/current", response_model=EffectiveRangeResponse)
-async def get_current_range(income_id: int, service: IncomeService = Depends(get_income_service)):
-    """Get currently active effective range for income."""
-    current_range = service.get_current_effective_range(income_id)
-    if not current_range:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No active effective range found for income {income_id}",
-        )
-    return current_range
-
-
-# ========== Stream-level Operations ==========
-
-
-@router.delete("/stream/{stream_name}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_income_stream(stream_name: str, service: IncomeService = Depends(get_income_service)):
-    """
-    Delete all income entries for a given stream name.
-
-    Args:
-        stream_name: The name of the income stream to delete
-
-    Returns:
-        204 No Content on success
-
-    Raises:
-        404 Not Found if no entries exist for the stream
-    """
+@router.put("/components/{component_id}", response_model=IncomeComponentResponse)
+async def update_income_component(
+    component_id: int,
+    component_in: IncomeComponentUpdate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Update an income component."""
     try:
-        service.delete_by_stream(stream_name)
-        return None
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        return service.serialize_component(service.update_component(component_id, component_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.delete("/components/{component_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_income_component(
+    component_id: int,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Delete an income component."""
+    try:
+        service.delete_component(component_id)
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.post(
+    "/components/{component_id}/versions",
+    response_model=IncomeComponentVersionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_component_version(
+    component_id: int,
+    version_in: IncomeComponentVersionCreate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Create a recurring version under a recurring component."""
+    try:
+        return service.serialize_version(service.create_version(component_id, version_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.put("/versions/{version_id}", response_model=IncomeComponentVersionResponse)
+async def update_component_version(
+    version_id: int,
+    version_in: IncomeComponentVersionUpdate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Update a recurring version."""
+    try:
+        return service.serialize_version(service.update_version(version_id, version_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.delete("/versions/{version_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_component_version(
+    version_id: int,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Delete a recurring version."""
+    try:
+        service.delete_version(version_id)
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.post(
+    "/components/{component_id}/occurrences",
+    response_model=IncomeOccurrenceResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_income_occurrence(
+    component_id: int,
+    occurrence_in: IncomeOccurrenceCreate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Create a one-time occurrence under an occurrence component."""
+    try:
+        return service.serialize_occurrence(service.create_occurrence(component_id, occurrence_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.put("/occurrences/{occurrence_id}", response_model=IncomeOccurrenceResponse)
+async def update_income_occurrence(
+    occurrence_id: int,
+    occurrence_in: IncomeOccurrenceUpdate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Update a one-time occurrence."""
+    try:
+        return service.serialize_occurrence(service.update_occurrence(occurrence_id, occurrence_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.delete("/occurrences/{occurrence_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_income_occurrence(
+    occurrence_id: int,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Delete a one-time occurrence."""
+    try:
+        service.delete_occurrence(occurrence_id)
+    except ValueError as error:
+        raise _handle_value_error(error)
