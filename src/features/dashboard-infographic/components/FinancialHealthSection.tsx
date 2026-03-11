@@ -156,7 +156,10 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
                 Planned Savings
               </p>
-              <p className="mb-1 text-sm font-bold text-app">
+              <p
+                className="mb-1 text-sm font-bold"
+                style={{ color: statusPalette.budget }}
+              >
                 {formatCurrency(Math.abs(savings), '$')}
               </p>
               <p className="text-xs text-muted">

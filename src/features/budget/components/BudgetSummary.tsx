@@ -3,6 +3,7 @@ import { motion, type Variants } from 'framer-motion';
 import { LuWallet, LuPiggyBank } from 'react-icons/lu';
 
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
+import { statusPalette } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 
 interface BudgetSummaryProps {
@@ -68,6 +69,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   };
 
   const theme = getSavingsTheme();
+  const plannedValueClasses = {
+    annualClassName: 'text-indigo-700',
+    monthlyClassName: 'text-indigo-700/75',
+  };
 
   const getCardVariants = (index: number): Variants => ({
     hidden: { opacity: 0, y: 20 },
@@ -156,7 +161,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 Planned Savings
               </p>
               <div className="mb-1">
-                <CurrencyStack monthlyAmount={Math.abs(savings)} />
+                <CurrencyStack
+                  monthlyAmount={Math.abs(savings)}
+                  {...plannedValueClasses}
+                />
               </div>
               <p className="text-xs text-gray-500">
                 {savingsRate > 0
@@ -171,7 +179,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 Planned Investments
               </p>
               <div className="mb-1">
-                <CurrencyStack monthlyAmount={investments} />
+                <CurrencyStack
+                  monthlyAmount={investments}
+                  {...plannedValueClasses}
+                />
               </div>
               <p className="text-xs text-gray-500">
                 {income > 0 ? ((investments / income) * 100).toFixed(1) : '0'}%
@@ -185,11 +196,13 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
               <div className="mb-1">
                 <CurrencyStack
                   monthlyAmount={Math.abs(savings) + investments}
-                  annualClassName="text-emerald-700"
-                  monthlyClassName="text-emerald-700/75"
+                  {...plannedValueClasses}
                 />
               </div>
-              <p className="text-xs text-emerald-700 opacity-75">
+              <p
+                className="text-xs opacity-75"
+                style={{ color: statusPalette.budget }}
+              >
                 {income > 0
                   ? (
                       ((Math.abs(savings) + investments) / income) *
