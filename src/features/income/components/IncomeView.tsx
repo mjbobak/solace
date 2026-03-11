@@ -1043,32 +1043,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       <IncomeSummary
         year={selectedYear}
         onYearChange={handleYearChange}
-        totals={
-          projection?.totals ?? {
-            committedGross: 0,
-            committedNet: 0,
-            plannedGross: 0,
-            plannedNet: 0,
-            committedDeductions: {
-              federalTax: 0,
-              stateTax: 0,
-              fica: 0,
-              retirement: 0,
-              healthInsurance: 0,
-              other: 0,
-              total: 0,
-            },
-            plannedDeductions: {
-              federalTax: 0,
-              stateTax: 0,
-              fica: 0,
-              retirement: 0,
-              healthInsurance: 0,
-              other: 0,
-              total: 0,
-            },
-          }
-        }
+        totals={projection?.totals ?? EMPTY_PROJECTION_TOTALS}
       />
 
       {isLoading && !projection ? (
@@ -1370,8 +1345,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
                                               </td>
                                               <td className="px-4 py-3 text-muted">
                                                 {formatDate(
-                                                  occurrence.paidDate ??
-                                                    occurrence.plannedDate,
+                                                  getOccurrenceEventDate(occurrence),
                                                 )}
                                               </td>
                                               <td className="px-4 py-3 text-right font-semibold text-app">
@@ -1462,41 +1436,21 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       />
 
       <AddVersionModal
-        isOpen={
-          modalState?.type === 'add-version' || modalState?.type === 'edit-version'
-        }
-        component={
-          modalState?.type === 'add-version' || modalState?.type === 'edit-version'
-            ? modalState.component
-            : null
-        }
-        version={modalState?.type === 'edit-version' ? modalState.version : null}
+        isOpen={versionModalState !== null}
+        component={versionModalState?.component ?? null}
+        version={versionModalState?.type === 'edit-version' ? versionModalState.version : null}
         selectedYear={selectedYear}
         onClose={() => setModalState(null)}
-        onSubmit={(targetId, input) =>
-          modalState?.type === 'edit-version'
-            ? handleUpdateVersion(targetId, input)
-            : handleAddVersion(targetId, input)
-        }
+        onSubmit={handleVersionModalSubmit}
       />
 
       <AddBonusModal
-        isOpen={
-          modalState?.type === 'add-bonus' || modalState?.type === 'edit-bonus'
-        }
-        source={modalState?.type === 'add-bonus' ? modalState.source : null}
-        component={
-          modalState?.type === 'edit-bonus' ? modalState.component : null
-        }
-        occurrence={
-          modalState?.type === 'edit-bonus' ? modalState.occurrence : null
-        }
+        isOpen={bonusModalState !== null}
+        source={bonusModalState?.type === 'add-bonus' ? bonusModalState.source : null}
+        component={bonusModalState?.type === 'edit-bonus' ? bonusModalState.component : null}
+        occurrence={bonusModalState?.type === 'edit-bonus' ? bonusModalState.occurrence : null}
         onClose={() => setModalState(null)}
-        onSubmit={(targetId, payload) =>
-          modalState?.type === 'edit-bonus'
-            ? handleUpdateBonus(targetId, payload as CreateIncomeOccurrenceInput)
-            : handleAddBonus(targetId, payload as AddBonusModalSubmit)
-        }
+        onSubmit={handleBonusModalSubmit}
       />
 
       {openActionMenuSourceId !== null &&
