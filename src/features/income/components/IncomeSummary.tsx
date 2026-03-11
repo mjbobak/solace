@@ -8,6 +8,20 @@ interface IncomeSummaryProps {
   totals: IncomeProjectionTotals;
 }
 
+interface AmountStackProps {
+  primaryValue: string;
+  secondaryValue: string;
+  secondaryLabel?: string;
+}
+
+interface SummaryCard {
+  label: string;
+  primaryValue: string;
+  secondaryValue: string;
+  secondaryLabel?: string;
+  hint: string;
+}
+
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -16,36 +30,61 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+function AmountStack({
+  primaryValue,
+  secondaryValue,
+  secondaryLabel = 'Net',
+}: AmountStackProps) {
+  return (
+    <div className="flex flex-col leading-tight">
+      <span className="text-2xl font-semibold text-black">{primaryValue}</span>
+      <span className="mt-1 text-sm text-gray-500">
+        {secondaryValue} {secondaryLabel}
+      </span>
+    </div>
+  );
+}
+
+function buildSummaryCards(totals: IncomeProjectionTotals): SummaryCard[] {
+  const expectedGrossDelta = totals.plannedGross - totals.committedGross;
+  const expectedNetDelta = totals.plannedNet - totals.committedNet;
+
+  return [
+    {
+      label: 'Committed Income',
+      primaryValue: formatCurrency(totals.committedGross),
+      secondaryValue: formatCurrency(totals.committedNet),
+      hint: 'Recurring income plus actual bonuses',
+    },
+    {
+      label: 'Planned Income',
+      primaryValue: formatCurrency(totals.plannedGross),
+      secondaryValue: formatCurrency(totals.plannedNet),
+      hint: 'Includes expected bonuses',
+    },
+    {
+      label: 'Expected Upside',
+      primaryValue: formatCurrency(expectedGrossDelta),
+      secondaryValue: formatCurrency(expectedNetDelta),
+      hint: 'Planned minus committed',
+    },
+    {
+      label: 'Planned Deductions',
+      primaryValue: formatCurrency(totals.plannedDeductions.total),
+      secondaryValue: formatCurrency(totals.plannedNet),
+      secondaryLabel: 'Net after deductions',
+      hint: 'Taxes and withholdings in plan view',
+    },
+  ];
+}
+
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   year,
   onYearChange,
   totals,
 }) => {
   const yearOptions = Array.from({ length: 5 }, (_, index) => year - 2 + index);
-  const expectedDelta = totals.plannedNet - totals.committedNet;
-
-  const cards = [
-    {
-      label: 'Committed Net',
-      value: formatCurrency(totals.committedNet),
-      hint: 'Recurring income plus actual bonuses',
-    },
-    {
-      label: 'Planned Net',
-      value: formatCurrency(totals.plannedNet),
-      hint: 'Includes expected bonuses',
-    },
-    {
-      label: 'Expected Upside',
-      value: formatCurrency(expectedDelta),
-      hint: 'Planned minus committed',
-    },
-    {
-      label: 'Planned Deductions',
-      value: formatCurrency(totals.plannedDeductions.total),
-      hint: 'Taxes and withholdings in plan view',
-    },
-  ];
+  const cards = buildSummaryCards(totals);
 
   return (
     <section className="space-y-4" aria-label="Income summary">
@@ -85,7 +124,13 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
               {card.label}
             </p>
-            <p className="mt-3 text-2xl font-semibold text-app">{card.value}</p>
+            <div className="mt-3">
+              <AmountStack
+                primaryValue={card.primaryValue}
+                secondaryValue={card.secondaryValue}
+                secondaryLabel={card.secondaryLabel}
+              />
+            </div>
             <p className="mt-2 text-sm text-muted">{card.hint}</p>
           </article>
         ))}
