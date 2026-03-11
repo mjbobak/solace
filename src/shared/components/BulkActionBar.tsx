@@ -45,7 +45,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
     'inline-flex h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-semibold text-white';
   const iconButtonClassName =
     'inline-flex h-5 w-5 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white';
-  const secondaryActionClassName = `${toolbarControlClassName} justify-center gap-2`;
+  const secondaryActionClassName = `${toolbarControlClassName} inline-flex items-center justify-center gap-2`;
 
   return createPortal(
     <div className="fixed bottom-6 left-6 right-6 z-50 max-w-7xl mx-auto">
@@ -85,10 +85,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
           {pendingOperations.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
               {pendingOperations.map((op) => (
-                <div
-                  key={op.type}
-                  className={pendingChipClassName}
-                >
+                <div key={op.type} className={pendingChipClassName}>
                   <span className="whitespace-nowrap">{op.label}</span>
                   <button
                     onClick={op.onClear}
@@ -106,12 +103,12 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
             {onDelete && (
               <button
                 onClick={onDelete}
-                className={secondaryActionClassName}
+                className={`${secondaryActionClassName} shrink-0 whitespace-nowrap px-5 text-rose-400 hover:text-rose-400`}
                 title="Delete selected items"
                 aria-label="Delete selected items"
               >
-                <LuTrash2 size={16} />
-                <span>Delete</span>
+                <LuTrash2 size={16} className="shrink-0" />
+                <span className="whitespace-nowrap">Delete</span>
               </button>
             )}
 

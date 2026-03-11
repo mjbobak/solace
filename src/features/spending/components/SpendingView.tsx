@@ -32,13 +32,13 @@ import {
 import { AddTransactionModal } from './AddTransactionModal';
 import { BulkAccountDropdown } from './BulkAccountDropdown';
 import { BulkBudgetDropdown } from './BulkBudgetDropdown';
-import { BulkSaveConfirm } from './BulkConfirmDialogs';
+import { BulkDeleteConfirm } from './BulkConfirmDialogs';
 import { SpendingFilters } from './SpendingFilters';
 import { getSpendingTableColumns } from './spendingTableColumns';
 import { SpreadPaymentModal } from './SpreadPaymentModal';
 
 interface PendingBulkOperation {
-  type: 'delete' | 'category' | 'account';
+  type: 'category' | 'account';
   value?: string | { id: number; label: string; category: string };
 }
 
@@ -138,7 +138,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   const [pendingOperations, setPendingOperations] = useState<
     PendingBulkOperation[]
   >([]);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   // Highlighting state for recently modified rows
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set());
@@ -431,12 +431,9 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     [handleAddTransactionClick],
   );
 
-  // Bulk operation handlers - Stage operations instead of executing immediately
+  // Bulk operation handlers - stage edit operations, but execute delete separately
   const handleBulkDelete = () => {
-    setPendingOperations((prev) => [
-      ...prev.filter((op) => op.type !== 'delete'),
-      { type: 'delete' },
-    ]);
+    setShowBulkDeleteConfirm(true);
   };
 
   const handleBulkBudgetSelect = (
@@ -457,23 +454,13 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     ]);
   };
 
-  // Save button handler
-  const handleSave = () => {
+  const handleSave = async () => {
     if (pendingOperations.length === 0) return;
-    setShowSaveConfirm(true);
-  };
-
-  // Execute all pending operations
-  const handleSaveConfirm = async () => {
     const selectedIds = Array.from(selection.selectedIds);
 
     try {
-      // Execute all pending operations sequentially
       for (const op of pendingOperations) {
         switch (op.type) {
-          case 'delete':
-            await bulkOps.handleBulkDelete(selectedIds);
-            break;
           case 'category': {
             const budgetValue = op.value as {
               id: number;
@@ -502,13 +489,29 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       );
       setHighlightedIds(updatedIds);
 
-      // Clear state after successful execution
       selection.clearSelection();
       setPendingOperations([]);
-      setShowSaveConfirm(false);
     } catch {
-      // Errors already toasted by bulk operations hook
-      // Keep pending operations so user can retry
+      // Errors already toasted by bulk operations hook. Keep staged edits so the
+      // user can retry or adjust them.
+    }
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    const selectedIds = Array.from(selection.selectedIds);
+    if (selectedIds.length === 0) return;
+
+    try {
+      await bulkOps.handleBulkDelete(selectedIds);
+
+      const updatedData = await spendingService.getAllTransactions();
+      setTransactions(updatedData);
+      setHighlightedIds(new Set());
+      selection.clearSelection();
+      setPendingOperations([]);
+    } catch {
+      // Errors already toasted by bulk operations hook. Keep selection and
+      // staged edits intact so the user can retry.
     }
   };
 
@@ -522,9 +525,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     return pendingOperations.map((op) => {
       let label = '';
       switch (op.type) {
-        case 'delete':
-          label = 'Delete';
-          break;
         case 'category': {
           const budgetValue =
             typeof op.value === 'object'
@@ -664,12 +664,11 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
         variant="danger"
       />
 
-      <BulkSaveConfirm
-        isOpen={showSaveConfirm}
-        onClose={() => setShowSaveConfirm(false)}
-        onConfirm={handleSaveConfirm}
+      <BulkDeleteConfirm
+        isOpen={showBulkDeleteConfirm}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDeleteConfirm}
         count={selection.selectedCount}
-        operations={pendingOperations}
         isLoading={bulkOps.isLoading}
       />
     </div>
