@@ -7,21 +7,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
-import { SummaryCard } from '@/shared/components/data/SummaryCard';
 import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
 import { formatCurrency } from '@/shared/utils/currency';
 
 import type {
   IncomePeriod,
-  IncomeDisplayType,
+  IncomeCategory,
   IncomeTotals,
 } from '../types/incomeView';
 
 interface IncomeSummaryProps {
   period: IncomePeriod;
   onPeriodChange: (period: IncomePeriod) => void;
-  type: IncomeDisplayType;
-  onTypeChange: (type: IncomeDisplayType) => void;
   totals: IncomeTotals;
 }
 
@@ -41,10 +38,60 @@ const getCardVariants = (index: number): Variants => ({
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   period,
   onPeriodChange,
-  type,
-  onTypeChange,
   totals,
 }) => {
+  const getPeriodValues = (income: IncomeCategory) => {
+    if (period === 'annual') {
+      return {
+        gross: income.annualGross,
+        net: income.annualNet,
+      };
+    }
+
+    return {
+      gross: income.monthlyGross,
+      net: income.monthlyNet,
+    };
+  };
+
+  const IncomeBreakdown = ({
+    label,
+    income,
+  }: {
+    label: string;
+    income: IncomeCategory;
+  }) => {
+    const { gross, net } = getPeriodValues(income);
+
+    return (
+      <div>
+        <p className="mb-6 text-sm font-semibold uppercase tracking-wider text-gray-700">
+          {label}
+        </p>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Gross
+            </p>
+            <p className="text-lg font-bold text-gray-900">
+              {formatCurrency(gross, '$')}
+            </p>
+          </div>
+
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Net
+            </p>
+            <p className="text-lg font-bold text-emerald-700">
+              {formatCurrency(net, '$')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Filter Controls */}
@@ -63,16 +110,6 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
             ]}
             onChange={onPeriodChange}
           />
-
-          {/* Gross/Net Toggle */}
-          <ToggleButtonGroup
-            value={type}
-            options={[
-              { value: 'gross', label: 'Gross' },
-              { value: 'net', label: 'Net' },
-            ]}
-            onChange={onTypeChange}
-          />
         </div>
       </motion.div>
 
@@ -84,18 +121,9 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
           animate="visible"
           className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200"
         >
-          <SummaryCard
+          <IncomeBreakdown
             label="Regular Income"
-            value={formatCurrency(
-              period === 'annual'
-                ? type === 'gross'
-                  ? totals.regularIncome.annualGross
-                  : totals.regularIncome.annualNet
-                : type === 'gross'
-                  ? totals.regularIncome.monthlyGross
-                  : totals.regularIncome.monthlyNet,
-              '$',
-            )}
+            income={totals.regularIncome}
           />
         </motion.div>
 
@@ -105,19 +133,7 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
           animate="visible"
           className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200"
         >
-          <SummaryCard
-            label="Bonus Income"
-            value={formatCurrency(
-              period === 'annual'
-                ? type === 'gross'
-                  ? totals.bonusIncome.annualGross
-                  : totals.bonusIncome.annualNet
-                : type === 'gross'
-                  ? totals.bonusIncome.monthlyGross
-                  : totals.bonusIncome.monthlyNet,
-              '$',
-            )}
-          />
+          <IncomeBreakdown label="Bonus Income" income={totals.bonusIncome} />
         </motion.div>
       </div>
     </div>

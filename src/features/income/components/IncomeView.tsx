@@ -21,7 +21,6 @@ import { incomeApiService } from '../services/incomeApiService';
 import type { EffectiveDateRange, IncomeEntry } from '../types/income';
 import type {
   IncomePeriod,
-  IncomeDisplayType,
   EffectiveDateRangeWithEntry,
   GroupedIncomeEntry,
 } from '../types/incomeView';
@@ -101,12 +100,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     ['monthly', 'annual'],
     'monthly',
   );
-  const incomeType = getEnumParam<IncomeDisplayType>(
-    searchParams,
-    'type',
-    ['net', 'gross'],
-    'net',
-  );
   const [incomeEntries, setIncomeEntries] = useState<IncomeEntry[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [deletingStream, setDeletingStream] = useState<{
@@ -120,16 +113,14 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
   const [modalData, setModalData] = useState<ModalData | null>(null);
 
   const updateQueryParams = React.useCallback(
-    (updates: Partial<{ period: IncomePeriod; type: IncomeDisplayType }>) => {
+    (updates: Partial<{ period: IncomePeriod }>) => {
       const nextSearchParams = new URLSearchParams(searchParams);
 
       if (updates.period) {
         setStringParam(nextSearchParams, 'period', updates.period);
       }
 
-      if (updates.type) {
-        setStringParam(nextSearchParams, 'type', updates.type);
-      }
+      nextSearchParams.delete('type');
 
       setSearchParams(nextSearchParams, { replace: true });
     },
@@ -157,13 +148,13 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
   const { filteredData } = useIncomeFiltering(
     incomeEntries,
     incomePeriod,
-    incomeType,
+    'net',
   );
   const { totals } = useIncomeCalculations(filteredData);
   const { groupedEntries, toggleExpansion } = useIncomeGrouping(
     incomeEntries,
     incomePeriod,
-    incomeType,
+    'net',
   );
   const operations = useIncomeOperations(incomeEntries, setIncomeEntries, () =>
     setIsModalOpen(true),
@@ -309,8 +300,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       <IncomeSummary
         period={incomePeriod}
         onPeriodChange={(period) => updateQueryParams({ period })}
-        type={incomeType}
-        onTypeChange={(type) => updateQueryParams({ type })}
         totals={totals}
       />
 
@@ -320,7 +309,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
           columns={columns}
           childColumns={childColumns}
           period={incomePeriod}
-          displayType={incomeType}
+          displayType="net"
           onAddRange={handleAddRangeClick}
         />
       </div>
