@@ -14,6 +14,13 @@ from backend.app.db.database import Base, SessionLocal, engine
 
 logger = logging.getLogger(__name__)
 
+LEGACY_INCOME_TABLES = (
+    "income_deductions",
+    "income_effective_ranges",
+    "incomes",
+    "household_members",
+)
+
 
 def init_db() -> None:
     """
@@ -34,6 +41,7 @@ def init_db() -> None:
 
     # Create all tables defined in models
     Base.metadata.create_all(bind=engine)
+    _drop_legacy_income_tables()
     _ensure_transaction_spread_columns()
     _migrate_legacy_transaction_spreads()
 
@@ -77,6 +85,29 @@ def _create_default_admin() -> None:
         db.rollback()
     finally:
         db.close()
+
+
+def _drop_legacy_income_tables() -> None:
+    """Remove obsolete income tables from pre-rebuild databases."""
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+    tables_to_drop = [
+        table_name
+        for table_name in LEGACY_INCOME_TABLES
+        if table_name in existing_tables
+    ]
+
+    if not tables_to_drop:
+        return
+
+    with engine.begin() as connection:
+        for table_name in tables_to_drop:
+            connection.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+
+    logger.info(
+        "Removed legacy income tables: %s",
+        ", ".join(tables_to_drop),
+    )
 
 
 def _ensure_transaction_spread_columns() -> None:
