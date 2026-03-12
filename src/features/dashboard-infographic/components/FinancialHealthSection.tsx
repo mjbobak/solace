@@ -3,13 +3,13 @@
  * Displays 5 key metrics: Total Income (with breakdown), Total Spending, Total Savings, Total Invested, Total Net Wealth
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { LuTrendingDown, LuPiggyBank, LuDollarSign } from 'react-icons/lu';
 
 import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { useBudgetCalculations } from '@/features/budget/hooks/useBudgetCalculations';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
-import { dashboardMetrics } from '@/features/home/services/mockDashboardData';
+import { spendingService } from '@/features/spending/services/spendingService';
 import { formatCurrency } from '@/shared/utils/currency';
 
 import { useIncomeAnalysis } from '../hooks/useIncomeAnalysis';
@@ -41,16 +41,22 @@ const CurrencyStack = ({
   </div>
 );
 
-export const FinancialHealthSection: React.FC = () => {
-  const currentYear = new Date().getFullYear();
+interface FinancialHealthSectionProps {
+  year: number;
+}
 
-  const incomeAnalysis = useIncomeAnalysis();
+export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
+  year,
+}) => {
+  const [annualSpending, setAnnualSpending] = useState(0);
+
+  const incomeAnalysis = useIncomeAnalysis(year);
   const annualNetIncome = incomeAnalysis.totalIncome;
   const monthlyIncome = annualNetIncome / 12;
 
   // Match budget page calculations so savings/investing stays in sync.
   const { budgetEntries } = useBudgetData(
-    currentYear,
+    year,
     'monthly_current_month',
     false,
   );
@@ -63,9 +69,43 @@ export const FinancialHealthSection: React.FC = () => {
     .reduce((sum, entry) => sum + entry.budgeted, 0);
 
   const monthlySavings = monthlyIncome - monthlyTotalBudgeted;
-  const monthlySpending = dashboardMetrics.monthlySpending;
+  const plannedSavings = Math.abs(monthlySavings);
+  const monthlySpending = annualSpending / 12;
   const monthlyWealthContribution =
-    Math.abs(monthlySavings) + monthlyInvestments;
+    plannedSavings + monthlyInvestments;
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadAnnualSpending = async () => {
+      try {
+        const transactions = await spendingService.getTransactionsByDateRange(
+          `${year}-01-01`,
+          `${year}-12-31`,
+        );
+        if (isCancelled) {
+          return;
+        }
+
+        const nextAnnualSpending = transactions.reduce(
+          (sum, transaction) => sum + transaction.amount,
+          0,
+        );
+        setAnnualSpending(nextAnnualSpending);
+      } catch (error) {
+        console.error('Failed to load annual spending for dashboard:', error);
+        if (!isCancelled) {
+          setAnnualSpending(0);
+        }
+      }
+    };
+
+    void loadAnnualSpending();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [year]);
 
   const getPercentage = (value: number) =>
     monthlyIncome > 0 ? ((value / monthlyIncome) * 100).toFixed(1) : '0.0';
@@ -162,12 +202,12 @@ export const FinancialHealthSection: React.FC = () => {
               </p>
               <div className="mb-1">
                 <CurrencyStack
-                  monthlyAmount={Math.abs(monthlySavings)}
+                  monthlyAmount={plannedSavings}
                   {...PLANNED_VALUE_STACK_CLASSES}
                 />
               </div>
               <p className="text-xs text-muted">
-                {getPercentage(Math.abs(monthlySavings))}%
+                {getPercentage(plannedSavings)}%
               </p>
             </div>
 

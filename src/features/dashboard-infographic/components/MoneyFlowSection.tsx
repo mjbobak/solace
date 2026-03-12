@@ -14,10 +14,12 @@ import { SectionNarrative } from './SectionNarrative';
 
 interface MoneyFlowSectionProps {
   period: Period;
+  year: number;
 }
 
 export const MoneyFlowSection: React.FC<MoneyFlowSectionProps> = ({
   period,
+  year,
 }) => {
   const narrative = `Visualize how your income flows from various sources into essential and discretionary spending categories.`;
 
@@ -28,7 +30,7 @@ export const MoneyFlowSection: React.FC<MoneyFlowSectionProps> = ({
         <SectionNarrative text={narrative} highlight={true} />
       </div>
 
-      <SankeyFlowChart period={period} />
+      <SankeyFlowChart period={period} year={year} />
     </ScrollAnimatedSection>
   );
 };

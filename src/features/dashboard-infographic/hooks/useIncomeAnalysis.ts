@@ -80,9 +80,8 @@ function getMonthlyPlannedNet(
   return values;
 }
 
-export function useIncomeAnalysis(): IncomeAnalysisData {
+export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalysisData {
   const [projection, setProjection] = useState<IncomeYearProjection | null>(null);
-  const year = new Date().getFullYear();
 
   useEffect(() => {
     const fetchProjection = async () => {

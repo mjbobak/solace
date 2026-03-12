@@ -16,14 +16,14 @@ import type {
 export function useSankeyData(
   viewMode: SankeyViewMode,
   period: SankeyPeriod,
+  year = new Date().getFullYear(),
 ): SankeyData {
   const [incomeProjection, setIncomeProjection] = useState<IncomeYearProjection | null>(null);
-  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const fetchIncomeData = async () => {
       try {
-        const data = await incomeApiService.getYearProjection(currentYear);
+        const data = await incomeApiService.getYearProjection(year);
         setIncomeProjection(data);
       } catch (error) {
         console.error('Failed to fetch income data for Sankey:', error);
@@ -31,7 +31,7 @@ export function useSankeyData(
     };
 
     void fetchIncomeData();
-  }, [currentYear]);
+  }, [year]);
 
   return useMemo(() => {
     return viewMode === 'top-level'

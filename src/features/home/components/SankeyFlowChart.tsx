@@ -9,17 +9,19 @@ import type { SankeyPeriod, SankeyViewMode } from '../types/sankeyTypes';
 
 interface SankeyFlowChartProps {
   period?: SankeyPeriod;
+  year?: number;
 }
 
 export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
   period: externalPeriod,
+  year,
 }) => {
   const [viewMode, setViewMode] = useState<SankeyViewMode>('top-level');
   const [period, setPeriod] = useState<SankeyPeriod>('monthly');
 
   // Use external period if provided (from parent component), otherwise use internal state
   const activePeriod = externalPeriod || period;
-  const sankeyData = useSankeyData(viewMode, activePeriod);
+  const sankeyData = useSankeyData(viewMode, activePeriod, year);
 
   return (
     <div className="surface-card">
