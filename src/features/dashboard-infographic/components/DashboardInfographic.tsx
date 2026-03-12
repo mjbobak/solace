@@ -7,6 +7,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { PlanningYearDropdown } from '@/shared/components/PlanningYearDropdown';
+import { usePlanningYearSelection } from '@/shared/hooks/usePlanningYearSelection';
 
 import { EmergencyRunwaySection } from './EmergencyRunwaySection';
 import { FinancialHealthSection } from './FinancialHealthSection';
@@ -14,29 +15,22 @@ import { MoneyFlowSection } from './MoneyFlowSection';
 import { SpendingAnalysisSection } from './SpendingAnalysisSection';
 import { SpendingPulseSection } from './SpendingPulseSection';
 
-const YEAR_WINDOW = 2;
-
-function getSelectedYear(searchParams: URLSearchParams, fallbackYear: number) {
-  const parsedYear = Number(searchParams.get('year'));
-  return Number.isFinite(parsedYear) && parsedYear > 2000
-    ? parsedYear
-    : fallbackYear;
-}
-
 export const DashboardInfographic: React.FC = () => {
   const period = 'monthly' as const;
   const currentYear = new Date().getFullYear();
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedYear = getSelectedYear(searchParams, currentYear);
-  const yearOptions = Array.from(
-    { length: YEAR_WINDOW * 2 + 1 },
-    (_, index) => selectedYear - YEAR_WINDOW + index,
-  );
+  const {
+    availableYears: planningYears,
+    selectedYear,
+    setSelectedYear,
+  } = usePlanningYearSelection({
+    searchParams,
+    setSearchParams,
+    fallbackYear: currentYear,
+  });
 
   const handleYearChange = (year: number) => {
-    const nextSearchParams = new URLSearchParams(searchParams);
-    nextSearchParams.set('year', String(year));
-    setSearchParams(nextSearchParams, { replace: true });
+    setSelectedYear(year);
   };
 
   return (
@@ -45,7 +39,7 @@ export const DashboardInfographic: React.FC = () => {
         <div className="flex justify-end py-8">
           <PlanningYearDropdown
             year={selectedYear}
-            years={yearOptions}
+            years={planningYears}
             onYearChange={handleYearChange}
             className="w-full sm:w-fit sm:min-w-[216px]"
           />

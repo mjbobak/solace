@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { Button } from '@/shared/components/Button';
 import { Input } from '@/shared/components/Input';
 import { Modal } from '@/shared/components/Modal';
+import { usePlanningYearSelection } from '@/shared/hooks/usePlanningYearSelection';
 import { formatCurrency } from '@/shared/utils/currency';
 import {
   formatDateOnly,
@@ -28,7 +29,6 @@ import {
   toDateOnlyString,
 } from '@/shared/utils/dateOnly';
 
-import { IncomeSummary } from './IncomeSummary';
 import { incomeApiService } from '../services/incomeApiService';
 import type {
   CreateIncomeOccurrenceInput,
@@ -40,6 +40,8 @@ import type {
   RecurringIncomeVersion,
 } from '../types/income';
 import { getComponentDisplayName } from '../types/income';
+
+import { IncomeSummary } from './IncomeSummary';
 
 interface AddSourceModalSubmit {
   sourceName: string;
@@ -769,13 +771,16 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     useState<ActionMenuPosition | null>(null);
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
   const actionMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
-
-  const selectedYear = useMemo(() => {
-    const parsedYear = Number(searchParams.get('year'));
-    return Number.isFinite(parsedYear) && parsedYear > 2000
-      ? parsedYear
-      : new Date().getFullYear();
-  }, [searchParams]);
+  const currentYear = new Date().getFullYear();
+  const {
+    availableYears: planningYears,
+    selectedYear,
+    setSelectedYear,
+  } = usePlanningYearSelection({
+    searchParams,
+    setSearchParams,
+    fallbackYear: currentYear,
+  });
 
   const loadProjection = React.useCallback(async () => {
     setIsLoading(true);
@@ -855,9 +860,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       : null;
 
   const handleYearChange = (year: number) => {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set('year', String(year));
-    setSearchParams(nextParams, { replace: true });
+    setSelectedYear(year);
   };
 
   const handleAddSource = async (payload: AddSourceModalSubmit) => {
@@ -1102,6 +1105,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     <section className="space-y-6" aria-label="Income management">
       <IncomeSummary
         year={selectedYear}
+        availableYears={planningYears}
         onYearChange={handleYearChange}
         totals={projection?.totals ?? EMPTY_PROJECTION_TOTALS}
       />

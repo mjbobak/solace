@@ -11,27 +11,25 @@ import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { useBudgetFiltering } from '@/features/budget/hooks/useBudgetFiltering';
 import { useBudgetOperations } from '@/features/budget/hooks/useBudgetOperations';
 import { useCustomOptions } from '@/features/budget/hooks/useCustomOptions';
-import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type {
   ExpenseTypeFilter,
   BudgetEntry,
   SpendBasis,
 } from '@/features/budget/types/budgetView';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
-import { spendingService } from '@/features/spending/services/spendingService';
+import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Table } from '@/shared/components/data/Table';
 import { MultiSelectDropdown } from '@/shared/components/MultiSelectDropdown';
 import { Tooltip } from '@/shared/components/Tooltip';
+import { usePlanningYearSelection } from '@/shared/hooks/usePlanningYearSelection';
 import {
   getEnumParam,
   getMultiValueParam,
-  getNumberParam,
   setMultiValueParam,
   setNumberParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
-import { getYearFromDateOnly } from '@/shared/utils/dateOnly';
 
 const SPEND_BASIS_OPTIONS: ReadonlyArray<{
   value: SpendBasis;
@@ -67,7 +65,14 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
   );
   const expenseCategoryFilter = getMultiValueParam(searchParams, 'category');
   const currentYear = new Date().getFullYear();
-  const selectedYear = getNumberParam(searchParams, 'year') ?? currentYear;
+  const {
+    availableYears: planningYears,
+    selectedYear,
+  } = usePlanningYearSelection({
+    searchParams,
+    setSearchParams,
+    fallbackYear: currentYear,
+  });
   const spendBasis = getEnumParam<SpendBasis>(
     searchParams,
     'basis',
@@ -113,9 +118,10 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
   const [plannedAnnualNetIncome, setPlannedAnnualNetIncome] = useState(0);
 
   const [normalizeAccrual] = useState<boolean>(true);
-  const [yearOptions, setYearOptions] = useState<string[]>([
-    String(currentYear),
-  ]);
+  const yearOptions = React.useMemo(
+    () => planningYears.map((year) => String(year)),
+    [planningYears],
+  );
 
   const {
     budgetEntries,
@@ -127,33 +133,6 @@ export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
     spendBasisLabel,
     spendBasisHelpText,
   } = useBudgetData(selectedYear, spendBasis, normalizeAccrual);
-
-  React.useEffect(() => {
-    const loadYearOptions = async () => {
-      try {
-        const transactions = await spendingService.getAllTransactions({
-          fetchAll: true,
-        });
-
-        const years = new Set<number>();
-        transactions.forEach((transaction) => {
-          years.add(getYearFromDateOnly(transaction.transactionDate));
-        });
-        years.add(currentYear);
-
-        const options = Array.from(years)
-          .sort((a, b) => b - a)
-          .map((year) => String(year));
-
-        setYearOptions(options);
-      } catch (err) {
-        console.error('Failed to load year options:', err);
-        setYearOptions([String(currentYear)]);
-      }
-    };
-
-    loadYearOptions();
-  }, [currentYear]);
 
   React.useEffect(() => {
     const loadPlannedIncome = async () => {

@@ -6,6 +6,7 @@ import type { IncomeProjectionTotals } from '../types/income';
 
 interface IncomeSummaryProps {
   year: number;
+  availableYears: number[];
   onYearChange: (year: number) => void;
   totals: IncomeProjectionTotals;
 }
@@ -82,10 +83,10 @@ function buildSummaryCards(totals: IncomeProjectionTotals): SummaryCard[] {
 
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   year,
+  availableYears,
   onYearChange,
   totals,
 }) => {
-  const yearOptions = Array.from({ length: 5 }, (_, index) => year - 2 + index);
   const cards = buildSummaryCards(totals);
 
   return (
@@ -106,7 +107,7 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
 
         <PlanningYearDropdown
           year={year}
-          years={yearOptions}
+          years={availableYears}
           onYearChange={onYearChange}
           className="w-full sm:w-fit sm:min-w-[216px]"
         />
