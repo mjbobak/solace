@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { PlanningYearDropdown } from '@/shared/components/PlanningYearDropdown';
+
 import type { IncomeProjectionTotals } from '../types/income';
 
 interface IncomeSummaryProps {
@@ -102,20 +104,12 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
           </p>
         </div>
 
-        <label className="w-full max-w-[180px]">
-          <span className="form-label">Planning year</span>
-          <select
-            className="form-input"
-            value={year}
-            onChange={(event) => onYearChange(Number(event.target.value))}
-          >
-            {yearOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
+        <PlanningYearDropdown
+          year={year}
+          years={yearOptions}
+          onYearChange={onYearChange}
+          className="w-full sm:w-fit sm:min-w-[216px]"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

@@ -6,6 +6,8 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { PlanningYearDropdown } from '@/shared/components/PlanningYearDropdown';
+
 import { EmergencyRunwaySection } from './EmergencyRunwaySection';
 import { FinancialHealthSection } from './FinancialHealthSection';
 import { MoneyFlowSection } from './MoneyFlowSection';
@@ -41,20 +43,12 @@ export const DashboardInfographic: React.FC = () => {
     <div>
       <main className="surface-card mx-auto max-w-6xl px-6">
         <div className="flex justify-end py-8">
-          <label className="w-full max-w-[180px]">
-            <span className="form-label">Planning year</span>
-            <select
-              className="form-input"
-              value={selectedYear}
-              onChange={(event) => handleYearChange(Number(event.target.value))}
-            >
-              {yearOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
+          <PlanningYearDropdown
+            year={selectedYear}
+            years={yearOptions}
+            onYearChange={handleYearChange}
+            className="w-full sm:w-fit sm:min-w-[216px]"
+          />
         </div>
 
         <div id="financial-health">

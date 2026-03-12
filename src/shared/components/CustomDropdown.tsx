@@ -13,7 +13,9 @@ interface CustomDropdownProps {
   onChange: (value: string) => void;
   onAddNew?: (value: string) => void;
   placeholder?: string;
+  labelPrefix?: string;
   className?: string;
+  triggerClassName?: string;
   autoFocus?: boolean;
   onBlur?: () => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
@@ -25,7 +27,9 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   onChange,
   onAddNew,
   placeholder = 'Select...',
+  labelPrefix,
   className = '',
+  triggerClassName = '',
   autoFocus = false,
   onBlur,
   onKeyDown,
@@ -105,12 +109,21 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDownWrapper}
-        className="dropdown-trigger px-3 py-3"
+        className={`dropdown-trigger px-3 py-3 ${triggerClassName}`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
         <div className="flex items-center justify-between">
-          <span className="truncate">{displayValue}</span>
+          {labelPrefix ? (
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span className="truncate">{labelPrefix}:</span>
+              <span className="px-1.5 font-semibold tabular-nums">
+                {displayValue}
+              </span>
+            </span>
+          ) : (
+            <span className="truncate">{displayValue}</span>
+          )}
           <LuChevronDown
             className={`dropdown-icon h-4 w-4 flex-shrink-0 transition-transform ${
               isOpen ? 'rotate-180' : ''
