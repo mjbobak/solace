@@ -19,8 +19,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'income', label: 'Income' },
-  { id: 'spending', label: 'Spending' },
   { id: 'budget', label: 'Budget' },
+  { id: 'spending', label: 'Spending' },
 ];
 
 export const TopNav: React.FC<TopNavProps> = ({ activeTab, onTabChange }) => {
