@@ -41,6 +41,7 @@ def init_db() -> None:
 
     # Create all tables defined in models
     Base.metadata.create_all(bind=engine)
+    _ensure_income_sources_schema()
     _drop_legacy_income_tables()
     _ensure_transaction_spread_columns()
     _migrate_legacy_transaction_spreads()
@@ -108,6 +109,66 @@ def _drop_legacy_income_tables() -> None:
         "Removed legacy income tables: %s",
         ", ".join(tables_to_drop),
     )
+
+
+def _ensure_income_sources_schema() -> None:
+    """Rebuild legacy income_sources tables that still require member_id."""
+    inspector = inspect(engine)
+    if "income_sources" not in inspector.get_table_names():
+        return
+
+    columns = {
+        column["name"] for column in inspector.get_columns("income_sources")
+    }
+    if "member_id" not in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("PRAGMA foreign_keys=OFF"))
+        connection.execute(
+            text(
+                """
+                CREATE TABLE income_sources__new (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    name VARCHAR(200) NOT NULL,
+                    is_active BOOLEAN DEFAULT '1' NOT NULL,
+                    sort_order INTEGER NOT NULL,
+                    created_at DATETIME DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+                    updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO income_sources__new (id, name, is_active, sort_order, created_at, updated_at)
+                SELECT id, name, is_active, sort_order, created_at, updated_at
+                FROM income_sources
+                """
+            )
+        )
+        connection.execute(text("DROP TABLE income_sources"))
+        connection.execute(text("ALTER TABLE income_sources__new RENAME TO income_sources"))
+        connection.execute(
+            text(
+                """
+                CREATE INDEX IF NOT EXISTS ix_income_sources_id
+                ON income_sources (id)
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                CREATE INDEX IF NOT EXISTS ix_income_sources_name
+                ON income_sources (name)
+                """
+            )
+        )
+        connection.execute(text("PRAGMA foreign_keys=ON"))
+
+    logger.info("Rebuilt legacy income_sources schema without member_id")
 
 
 def _ensure_transaction_spread_columns() -> None:

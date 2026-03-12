@@ -114,6 +114,9 @@ export interface CreateIncomeComponentInput {
   label?: string | null;
 }
 
+export interface UpdateIncomeComponentInput
+  extends Partial<CreateIncomeComponentInput> {}
+
 export interface CreateRecurringIncomeVersionInput {
   startDate: string;
   endDate?: string | null;

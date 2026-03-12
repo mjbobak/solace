@@ -12,6 +12,7 @@ import type {
   ProjectedIncomeComponent,
   ProjectedIncomeSource,
   RecurringIncomeVersion,
+  UpdateIncomeComponentInput,
   UpdateIncomeOccurrenceInput,
   UpdateRecurringIncomeVersionInput,
   UpdateIncomeSourceInput,
@@ -157,8 +158,37 @@ async function request<T>(
 ): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, init);
   if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || response.statusText);
+    const raw = await response.text();
+    let message = raw || response.statusText;
+
+    try {
+      const parsed = JSON.parse(raw) as { detail?: unknown };
+      if (typeof parsed.detail === 'string' && parsed.detail.trim()) {
+        message = parsed.detail;
+      } else if (Array.isArray(parsed.detail) && parsed.detail.length > 0) {
+        message = parsed.detail
+          .map((item) => {
+            if (!item || typeof item !== 'object') {
+              return null;
+            }
+
+            const detailItem = item as { loc?: unknown; msg?: unknown };
+            const field = Array.isArray(detailItem.loc)
+              ? detailItem.loc
+                  .filter((part) => typeof part === 'string' || typeof part === 'number')
+                  .join('.')
+              : null;
+            const msg = typeof detailItem.msg === 'string' ? detailItem.msg : null;
+            return field && msg ? `${field}: ${msg}` : msg;
+          })
+          .filter((entry): entry is string => Boolean(entry))
+          .join('; ');
+      }
+    } catch {
+      // Plain-text error response; keep existing message.
+    }
+
+    throw new Error(message || response.statusText);
   }
 
   if (response.status === 204) {
@@ -303,6 +333,25 @@ export const incomeApiService = {
       `/sources/${sourceId}/components`,
       {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          component_type: input.componentType,
+          component_mode: input.componentMode,
+          label: input.label ?? null,
+        }),
+      },
+      transformComponent,
+    );
+  },
+
+  async updateComponent(
+    componentId: number,
+    input: UpdateIncomeComponentInput,
+  ): Promise<IncomeComponent> {
+    return request(
+      `/components/${componentId}`,
+      {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           component_type: input.componentType,

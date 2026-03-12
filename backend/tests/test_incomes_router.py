@@ -299,6 +299,32 @@ def test_overlapping_versions_are_rejected_but_adjacent_versions_are_allowed(cli
     assert adjacent_response.status_code == 201
 
 
+def test_recurring_version_allows_net_greater_than_gross_for_reimbursements(client):
+    """Recurring versions should allow effectively all-net reimbursements like FSA payouts."""
+    source = create_source(client, "FSA Day Care")
+    component = create_component(
+        client,
+        source["id"],
+        component_type="other",
+        component_mode="recurring",
+        label="Dependent care reimbursement",
+    )
+
+    response = client.post(
+        f"/api/incomes/components/{component['id']}/versions",
+        json={
+            "start_date": "2026-01-01",
+            "gross_amount": 1,
+            "net_amount": 250,
+            "periods_per_year": 12,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["gross_amount"] == 1
+    assert response.json()["net_amount"] == 250
+
+
 def test_expected_bonus_moves_from_planned_only_to_committed_when_marked_actual(client):
     """Updating an expected bonus to actual moves its value into committed totals."""
     source = create_source(client, "Acme Corp")

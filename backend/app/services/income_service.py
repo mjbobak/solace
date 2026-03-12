@@ -527,8 +527,10 @@ class IncomeService:
             )
 
     def _validate_amounts(self, gross_amount: float, net_amount: float) -> None:
-        if net_amount > gross_amount:
-            raise ValueError("Net amount cannot exceed gross amount")
+        # Reimbursements and other tax-advantaged income can legitimately
+        # arrive as effectively all-net cash, so we only rely on schema-level
+        # positivity checks here.
+        return None
 
     def _validate_date_range(self, start_date: date, end_date: date | None) -> None:
         if end_date is not None and start_date > end_date:

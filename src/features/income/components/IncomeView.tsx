@@ -55,6 +55,12 @@ interface AddBonusModalSubmit {
   occurrence: CreateIncomeOccurrenceInput;
 }
 
+interface EditBonusModalSubmit {
+  componentId: number;
+  label: string;
+  occurrence: CreateIncomeOccurrenceInput;
+}
+
 type ModalState =
   | { type: 'add-source' }
   | { type: 'rename-source'; source: ProjectedIncomeSource }
@@ -105,6 +111,11 @@ const EMPTY_PROJECTION_TOTALS = {
   },
 };
 
+function isPositiveNumber(value: string): boolean {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0;
+}
+
 function formatDate(value: string | null): string {
   if (!value) {
     return 'Present';
@@ -138,9 +149,15 @@ function getOccurrenceEventDate(occurrence: IncomeOccurrence): string {
 }
 
 function isAddBonusModalSubmit(
-  payload: AddBonusModalSubmit | CreateIncomeOccurrenceInput,
+  payload: AddBonusModalSubmit | EditBonusModalSubmit,
 ): payload is AddBonusModalSubmit {
-  return 'occurrence' in payload;
+  return 'existingBonusComponentId' in payload;
+}
+
+function isEditBonusModalSubmit(
+  payload: AddBonusModalSubmit | EditBonusModalSubmit,
+): payload is EditBonusModalSubmit {
+  return 'componentId' in payload;
 }
 
 function getDefaultChangeStartDate(
@@ -201,6 +218,16 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({
       return;
     }
 
+    if (
+      !isPositiveNumber(grossAmount) ||
+      !isPositiveNumber(netAmount) ||
+      !isPositiveNumber(periodsPerYear) ||
+      !startDate
+    ) {
+      toast.error('Enter a start date and positive amounts before saving.');
+      return;
+    }
+
     setIsSaving(true);
     try {
       await onSubmit({
@@ -230,7 +257,7 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <Input
             label="Gross per pay period"
             type="number"
-            min="0"
+            min="0.01"
             step="0.01"
             value={grossAmount}
             onChange={(event) => setGrossAmount(event.target.value)}
@@ -239,7 +266,7 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <Input
             label="Net per pay period"
             type="number"
-            min="0"
+            min="0.01"
             step="0.01"
             value={netAmount}
             onChange={(event) => setNetAmount(event.target.value)}
@@ -270,7 +297,13 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <Button
             onClick={handleSubmit}
             isLoading={isSaving}
-            disabled={!sourceName || !grossAmount || !netAmount || !periodsPerYear}
+            disabled={
+              !sourceName.trim() ||
+              !startDate ||
+              !isPositiveNumber(grossAmount) ||
+              !isPositiveNumber(netAmount) ||
+              !isPositiveNumber(periodsPerYear)
+            }
           >
             Save Source
           </Button>
@@ -395,6 +428,16 @@ const AddVersionModal: React.FC<AddVersionModalProps> = ({
       return;
     }
 
+    if (
+      !startDate ||
+      !isPositiveNumber(grossAmount) ||
+      !isPositiveNumber(netAmount) ||
+      !isPositiveNumber(periodsPerYear)
+    ) {
+      toast.error('Enter a start date and positive amounts before saving.');
+      return;
+    }
+
     setIsSaving(true);
     try {
       await onSubmit(version?.id ?? component.id, {
@@ -453,7 +496,7 @@ const AddVersionModal: React.FC<AddVersionModalProps> = ({
           <Input
             label="Gross per pay period"
             type="number"
-            min="0"
+            min="0.01"
             step="0.01"
             value={grossAmount}
             onChange={(event) => setGrossAmount(event.target.value)}
@@ -462,7 +505,7 @@ const AddVersionModal: React.FC<AddVersionModalProps> = ({
           <Input
             label="Net per pay period"
             type="number"
-            min="0"
+            min="0.01"
             step="0.01"
             value={netAmount}
             onChange={(event) => setNetAmount(event.target.value)}
@@ -477,7 +520,12 @@ const AddVersionModal: React.FC<AddVersionModalProps> = ({
           <Button
             onClick={handleSubmit}
             isLoading={isSaving}
-            disabled={!startDate || !grossAmount || !netAmount || !periodsPerYear}
+            disabled={
+              !startDate ||
+              !isPositiveNumber(grossAmount) ||
+              !isPositiveNumber(netAmount) ||
+              !isPositiveNumber(periodsPerYear)
+            }
           >
             {isEditing ? 'Save Changes' : 'Save Change'}
           </Button>
@@ -495,7 +543,7 @@ interface AddBonusModalProps {
   onClose: () => void;
   onSubmit: (
     targetId: number,
-    payload: AddBonusModalSubmit | CreateIncomeOccurrenceInput,
+    payload: AddBonusModalSubmit | EditBonusModalSubmit,
   ) => Promise<void>;
 }
 
@@ -545,16 +593,22 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
     setIsSaving(false);
   }, [bonusComponents, component, isOpen, occurrence]);
 
+  const buildOccurrencePayload = (): CreateIncomeOccurrenceInput => ({
+    status,
+    plannedDate,
+    paidDate: status === 'actual' ? paidDate || plannedDate : null,
+    grossAmount: Number(grossAmount),
+    netAmount: Number(netAmount),
+  });
+
   const handleSubmit = async () => {
     if (isEditing && component && occurrence) {
       setIsSaving(true);
       try {
         await onSubmit(occurrence.id, {
-          status,
-          plannedDate,
-          paidDate: status === 'actual' ? paidDate || plannedDate : null,
-          grossAmount: Number(grossAmount),
-          netAmount: Number(netAmount),
+          componentId: component.id,
+          label: label.trim(),
+          occurrence: buildOccurrencePayload(),
         });
       } finally {
         setIsSaving(false);
@@ -572,13 +626,7 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
         existingBonusComponentId:
           componentChoice === 'new' ? null : Number(componentChoice),
         label: label.trim(),
-        occurrence: {
-          status,
-          plannedDate,
-          paidDate: status === 'actual' ? paidDate || plannedDate : null,
-          grossAmount: Number(grossAmount),
-          netAmount: Number(netAmount),
-        },
+        occurrence: buildOccurrencePayload(),
       });
     } finally {
       setIsSaving(false);
@@ -621,14 +669,23 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
         )}
 
         {isEditing && component && (
-          <div className="surface-subtle p-4">
-            <p className="text-sm font-semibold text-app">
-              {getComponentDisplayName(component)}
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              Update the bonus event details for this income stream.
-            </p>
-          </div>
+          <>
+            <Input
+              label="Bonus label"
+              value={label}
+              onChange={(event) => setLabel(event.target.value)}
+              placeholder="Annual bonus"
+              required
+            />
+            <div className="surface-subtle p-4">
+              <p className="text-sm font-semibold text-app">
+                {getComponentDisplayName(component)}
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                Update the bonus label and event details for this income stream.
+              </p>
+            </div>
+          </>
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -687,7 +744,7 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
           <Button
             onClick={handleSubmit}
             isLoading={isSaving}
-            disabled={!grossAmount || !netAmount || !plannedDate}
+            disabled={!label.trim() || !grossAmount || !netAmount || !plannedDate}
           >
             {isEditing ? 'Save Changes' : 'Save Bonus'}
           </Button>
@@ -903,10 +960,13 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
 
   const handleUpdateBonus = async (
     occurrenceId: number,
-    input: CreateIncomeOccurrenceInput,
+    input: EditBonusModalSubmit,
   ) => {
     try {
-      await incomeApiService.updateOccurrence(occurrenceId, input);
+      await incomeApiService.updateComponent(input.componentId, {
+        label: input.label || 'Bonus',
+      });
+      await incomeApiService.updateOccurrence(occurrenceId, input.occurrence);
       toast.success('Bonus updated');
       setModalState(null);
       await loadProjection();
@@ -1006,10 +1066,10 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
 
   const handleBonusModalSubmit = async (
     targetId: number,
-    payload: AddBonusModalSubmit | CreateIncomeOccurrenceInput,
+    payload: AddBonusModalSubmit | EditBonusModalSubmit,
   ) => {
     if (bonusModalState?.type === 'edit-bonus') {
-      if (!isAddBonusModalSubmit(payload)) {
+      if (isEditBonusModalSubmit(payload)) {
         await handleUpdateBonus(targetId, payload);
       }
       return;
