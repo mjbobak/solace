@@ -8,22 +8,8 @@ export type IncomeComponentType =
 export type IncomeComponentMode = 'recurring' | 'occurrence';
 export type IncomeOccurrenceStatus = 'expected' | 'actual';
 
-export interface DeductionBreakdown {
-  federalTax?: number;
-  stateTax?: number;
-  fica?: number;
-  retirement?: number;
-  healthInsurance?: number;
-  other?: number;
-}
-
-export interface DeductionTotals {
-  federalTax: number;
-  stateTax: number;
-  fica: number;
-  retirement: number;
-  healthInsurance: number;
-  other: number;
+export interface TaxAdvantagedInvestments {
+  contributions401k: number;
   total: number;
 }
 
@@ -32,8 +18,6 @@ export interface IncomeProjectionTotals {
   committedNet: number;
   plannedGross: number;
   plannedNet: number;
-  committedDeductions: DeductionTotals;
-  plannedDeductions: DeductionTotals;
 }
 
 export interface IncomeSource {
@@ -63,7 +47,6 @@ export interface RecurringIncomeVersion {
   grossAmount: number;
   netAmount: number;
   periodsPerYear: number;
-  deductions: DeductionBreakdown | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -76,7 +59,6 @@ export interface IncomeOccurrence {
   paidDate: string | null;
   grossAmount: number;
   netAmount: number;
-  deductions: DeductionBreakdown | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -96,7 +78,15 @@ export interface ProjectedIncomeSource extends IncomeSource {
 export interface IncomeYearProjection {
   year: number;
   totals: IncomeProjectionTotals;
+  taxAdvantagedInvestments: TaxAdvantagedInvestments;
   sources: ProjectedIncomeSource[];
+}
+
+export interface IncomeYearSettings {
+  year: number;
+  contributions401k: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateIncomeSourceInput {
@@ -121,7 +111,6 @@ export interface CreateRecurringIncomeVersionInput {
   grossAmount: number;
   netAmount: number;
   periodsPerYear: number;
-  deductions?: DeductionBreakdown | null;
 }
 
 export type UpdateRecurringIncomeVersionInput =
@@ -133,10 +122,13 @@ export interface CreateIncomeOccurrenceInput {
   paidDate?: string | null;
   grossAmount: number;
   netAmount: number;
-  deductions?: DeductionBreakdown | null;
 }
 
 export type UpdateIncomeOccurrenceInput = Partial<CreateIncomeOccurrenceInput>;
+
+export interface UpdateIncomeYearSettingsInput {
+  contributions401k: number;
+}
 
 export function getComponentDisplayName(component: ProjectedIncomeComponent): string {
   if (component.label?.trim()) {

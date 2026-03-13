@@ -12,16 +12,11 @@ from sqlalchemy.orm import Session, joinedload
 from backend.app.db.models.income import (
     IncomeComponent,
     IncomeComponentVersion,
-    IncomeComponentVersionDeduction,
     IncomeOccurrence,
-    IncomeOccurrenceDeduction,
     IncomeSource,
+    IncomeYearSettings,
 )
 from backend.app.models.income import (
-    DeductionCreate,
-    DeductionResponse,
-    DeductionTotalsResponse,
-    DeductionUpdate,
     IncomeComponentCreate,
     IncomeComponentResponse,
     IncomeComponentUpdate,
@@ -34,24 +29,22 @@ from backend.app.models.income import (
     IncomeProjectionTotalsResponse,
     IncomeSourceCreate,
     IncomeSourceResponse,
+    IncomeYearSettingsResponse,
+    IncomeYearSettingsUpdate,
     IncomeSourceUpdate,
     IncomeYearProjectionResponse,
     ProjectedIncomeComponentResponse,
     ProjectedIncomeSourceResponse,
-)
-
-DEDUCTION_FIELDS = (
-    "federal_tax",
-    "state_tax",
-    "fica",
-    "retirement",
-    "health_insurance",
-    "other",
+    TaxAdvantagedInvestmentsResponse,
 )
 
 
-def _blank_deduction_totals() -> dict[str, float]:
-    return {field: 0.0 for field in DEDUCTION_FIELDS}
+def _normalize_optional_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    normalized_value = value.strip()
+    return normalized_value or None
 
 
 def _blank_projection_totals() -> dict[str, object]:
@@ -60,24 +53,7 @@ def _blank_projection_totals() -> dict[str, object]:
         "committed_net": 0.0,
         "planned_gross": 0.0,
         "planned_net": 0.0,
-        "committed_deductions": _blank_deduction_totals(),
-        "planned_deductions": _blank_deduction_totals(),
     }
-
-
-def _deduction_payload(deductions: object | None, scale: float = 1.0) -> dict[str, float]:
-    values = _blank_deduction_totals()
-    if deductions is None:
-        return values
-
-    for field in DEDUCTION_FIELDS:
-        raw_value = getattr(deductions, field, None)
-        values[field] = (raw_value or 0.0) * scale
-    return values
-
-
-def _deduction_response(values: dict[str, float]) -> DeductionTotalsResponse:
-    return DeductionTotalsResponse(**values, total=sum(values.values()))
 
 
 def _projection_response(values: dict[str, object]) -> IncomeProjectionTotalsResponse:
@@ -86,14 +62,7 @@ def _projection_response(values: dict[str, object]) -> IncomeProjectionTotalsRes
         committed_net=round(float(values["committed_net"]), 2),
         planned_gross=round(float(values["planned_gross"]), 2),
         planned_net=round(float(values["planned_net"]), 2),
-        committed_deductions=_deduction_response(values["committed_deductions"]),
-        planned_deductions=_deduction_response(values["planned_deductions"]),
     )
-
-
-def _add_deductions(accumulator: dict[str, float], additions: dict[str, float]) -> None:
-    for field in DEDUCTION_FIELDS:
-        accumulator[field] += additions[field]
 
 
 def _add_projection_values(
@@ -101,17 +70,14 @@ def _add_projection_values(
     *,
     gross: float,
     net: float,
-    deductions: dict[str, float],
     include_in_committed: bool,
 ) -> None:
     if include_in_committed:
         totals["committed_gross"] = float(totals["committed_gross"]) + gross
         totals["committed_net"] = float(totals["committed_net"]) + net
-        _add_deductions(totals["committed_deductions"], deductions)
 
     totals["planned_gross"] = float(totals["planned_gross"]) + gross
     totals["planned_net"] = float(totals["planned_net"]) + net
-    _add_deductions(totals["planned_deductions"], deductions)
 
 
 def _roll_up_projection_totals(
@@ -122,14 +88,6 @@ def _roll_up_projection_totals(
     parent["committed_net"] = float(parent["committed_net"]) + child.committed_net
     parent["planned_gross"] = float(parent["planned_gross"]) + child.planned_gross
     parent["planned_net"] = float(parent["planned_net"]) + child.planned_net
-    _add_deductions(
-        parent["committed_deductions"],
-        child.committed_deductions.model_dump(exclude={"total"}),
-    )
-    _add_deductions(
-        parent["planned_deductions"],
-        child.planned_deductions.model_dump(exclude={"total"}),
-    )
 
 
 def _ranges_overlap(
@@ -164,7 +122,11 @@ class IncomeService:
         self.db = db
 
     def list_sources(self) -> list[IncomeSource]:
-        return self.db.query(IncomeSource).order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc()).all()
+        return (
+            self.db.query(IncomeSource)
+            .order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc())
+            .all()
+        )
 
     def create_source(self, source_in: IncomeSourceCreate) -> IncomeSource:
         sort_order = source_in.sort_order
@@ -177,9 +139,7 @@ class IncomeService:
             sort_order=sort_order,
         )
         self.db.add(source)
-        self.db.commit()
-        self.db.refresh(source)
-        return source
+        return self._commit_and_refresh(source)
 
     def update_source(self, source_id: int, source_in: IncomeSourceUpdate) -> IncomeSource:
         source = self._get_source_or_raise(source_id)
@@ -192,9 +152,7 @@ class IncomeService:
         if "sort_order" in updates and updates["sort_order"] is not None:
             source.sort_order = updates["sort_order"]
 
-        self.db.commit()
-        self.db.refresh(source)
-        return source
+        return self._commit_and_refresh(source)
 
     def delete_source(self, source_id: int) -> None:
         source = self._get_source_or_raise(source_id)
@@ -207,12 +165,10 @@ class IncomeService:
             source_id=source_id,
             component_type=component_in.component_type,
             component_mode=component_in.component_mode,
-            label=component_in.label.strip() if component_in.label else None,
+            label=_normalize_optional_text(component_in.label),
         )
         self.db.add(component)
-        self.db.commit()
-        self.db.refresh(component)
-        return component
+        return self._commit_and_refresh(component)
 
     def update_component(self, component_id: int, component_in: IncomeComponentUpdate) -> IncomeComponent:
         component = self._get_component_or_raise(component_id)
@@ -223,11 +179,9 @@ class IncomeService:
         if "component_mode" in updates and updates["component_mode"] is not None:
             component.component_mode = updates["component_mode"]
         if "label" in updates:
-            component.label = updates["label"].strip() if updates["label"] else None
+            component.label = _normalize_optional_text(updates["label"])
 
-        self.db.commit()
-        self.db.refresh(component)
-        return component
+        return self._commit_and_refresh(component)
 
     def delete_component(self, component_id: int) -> None:
         component = self._get_component_or_raise(component_id)
@@ -251,17 +205,12 @@ class IncomeService:
             periods_per_year=version_in.periods_per_year,
         )
         self.db.add(version)
-        self.db.flush()
-        if version_in.deductions:
-            self._create_version_deductions(version.id, version_in.deductions)
-
-        self.db.commit()
-        self.db.refresh(version)
-        return self._get_version_or_raise(version.id)
+        saved_version = self._commit_and_refresh(version)
+        return self._get_version_or_raise(saved_version.id)
 
     def update_version(self, version_id: int, version_in: IncomeComponentVersionUpdate) -> IncomeComponentVersion:
         version = self._get_version_or_raise(version_id)
-        updates = version_in.model_dump(exclude_unset=True, exclude={"deductions"})
+        updates = version_in.model_dump(exclude_unset=True)
 
         next_start = updates.get("start_date", version.start_date)
         next_end = updates.get("end_date", version.end_date)
@@ -274,9 +223,6 @@ class IncomeService:
 
         for field, value in updates.items():
             setattr(version, field, value)
-
-        if version_in.deductions is not None:
-            self._sync_version_deductions(version, version_in.deductions)
 
         self.db.commit()
         return self._get_version_or_raise(version_id)
@@ -306,17 +252,12 @@ class IncomeService:
             net_amount=occurrence_in.net_amount,
         )
         self.db.add(occurrence)
-        self.db.flush()
-        if occurrence_in.deductions:
-            self._create_occurrence_deductions(occurrence.id, occurrence_in.deductions)
-
-        self.db.commit()
-        self.db.refresh(occurrence)
-        return self._get_occurrence_or_raise(occurrence.id)
+        saved_occurrence = self._commit_and_refresh(occurrence)
+        return self._get_occurrence_or_raise(saved_occurrence.id)
 
     def update_occurrence(self, occurrence_id: int, occurrence_in: IncomeOccurrenceUpdate) -> IncomeOccurrence:
         occurrence = self._get_occurrence_or_raise(occurrence_id)
-        updates = occurrence_in.model_dump(exclude_unset=True, exclude={"deductions"})
+        updates = occurrence_in.model_dump(exclude_unset=True)
 
         next_gross = updates.get("gross_amount", occurrence.gross_amount)
         next_net = updates.get("net_amount", occurrence.net_amount)
@@ -330,9 +271,6 @@ class IncomeService:
         elif occurrence.paid_date is None:
             occurrence.paid_date = occurrence.planned_date
 
-        if occurrence_in.deductions is not None:
-            self._sync_occurrence_deductions(occurrence, occurrence_in.deductions)
-
         self.db.commit()
         return self._get_occurrence_or_raise(occurrence_id)
 
@@ -341,8 +279,30 @@ class IncomeService:
         self.db.delete(occurrence)
         self.db.commit()
 
+    def upsert_year_settings(
+        self,
+        year: int,
+        settings_in: IncomeYearSettingsUpdate,
+    ) -> IncomeYearSettings:
+        settings = (
+            self.db.query(IncomeYearSettings)
+            .filter(IncomeYearSettings.year == year)
+            .first()
+        )
+        if settings is None:
+            settings = IncomeYearSettings(
+                year=year,
+                contributions_401k=settings_in.contributions_401k,
+            )
+            self.db.add(settings)
+        else:
+            settings.contributions_401k = settings_in.contributions_401k
+
+        return self._commit_and_refresh(settings)
+
     def get_year_projection(self, year: int) -> IncomeYearProjectionResponse:
         sources = self._load_sources_with_income()
+        year_settings = self._get_year_settings(year)
         projected_sources: list[ProjectedIncomeSourceResponse] = []
         household_totals = _blank_projection_totals()
 
@@ -375,6 +335,9 @@ class IncomeService:
         return IncomeYearProjectionResponse(
             year=year,
             totals=_projection_response(household_totals),
+            tax_advantaged_investments=self._tax_advantaged_investments_response(
+                year_settings
+            ),
             sources=projected_sources,
         )
 
@@ -389,6 +352,17 @@ class IncomeService:
 
     def serialize_occurrence(self, occurrence: IncomeOccurrence) -> IncomeOccurrenceResponse:
         return self._occurrence_response(occurrence)
+
+    def serialize_year_settings(
+        self,
+        settings: IncomeYearSettings,
+    ) -> IncomeYearSettingsResponse:
+        return IncomeYearSettingsResponse(
+            year=settings.year,
+            contributions_401k=settings.contributions_401k,
+            created_at=settings.created_at,
+            updated_at=settings.updated_at,
+        )
 
     def _project_component(self, component: IncomeComponent, year: int) -> ProjectedIncomeComponentResponse:
         component_totals = _blank_projection_totals()
@@ -407,12 +381,10 @@ class IncomeService:
             factor = overlap_days / _days_in_year(year)
             gross = version.gross_amount * version.periods_per_year * factor
             net = version.net_amount * version.periods_per_year * factor
-            deductions = _deduction_payload(version.deductions, factor)
             _add_projection_values(
                 component_totals,
                 gross=gross,
                 net=net,
-                deductions=deductions,
                 include_in_committed=True,
             )
 
@@ -421,12 +393,10 @@ class IncomeService:
             if effective_date.year != year:
                 continue
 
-            deductions = _deduction_payload(occurrence.deductions)
             _add_projection_values(
                 component_totals,
                 gross=occurrence.gross_amount,
                 net=occurrence.net_amount,
-                deductions=deductions,
                 include_in_committed=occurrence.status == "actual",
             )
 
@@ -463,12 +433,8 @@ class IncomeService:
         return (
             self.db.query(IncomeSource)
             .options(
-                joinedload(IncomeSource.components)
-                .joinedload(IncomeComponent.versions)
-                .joinedload(IncomeComponentVersion.deductions),
-                joinedload(IncomeSource.components)
-                .joinedload(IncomeComponent.occurrences)
-                .joinedload(IncomeOccurrence.deductions),
+                joinedload(IncomeSource.components).joinedload(IncomeComponent.versions),
+                joinedload(IncomeSource.components).joinedload(IncomeComponent.occurrences),
             )
             .order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc())
             .all()
@@ -488,8 +454,8 @@ class IncomeService:
         component = (
             self.db.query(IncomeComponent)
             .options(
-                joinedload(IncomeComponent.versions).joinedload(IncomeComponentVersion.deductions),
-                joinedload(IncomeComponent.occurrences).joinedload(IncomeOccurrence.deductions),
+                joinedload(IncomeComponent.versions),
+                joinedload(IncomeComponent.occurrences),
             )
             .filter(IncomeComponent.id == component_id)
             .first()
@@ -501,7 +467,6 @@ class IncomeService:
     def _get_version_or_raise(self, version_id: int) -> IncomeComponentVersion:
         version = (
             self.db.query(IncomeComponentVersion)
-            .options(joinedload(IncomeComponentVersion.deductions))
             .filter(IncomeComponentVersion.id == version_id)
             .first()
         )
@@ -512,7 +477,6 @@ class IncomeService:
     def _get_occurrence_or_raise(self, occurrence_id: int) -> IncomeOccurrence:
         occurrence = (
             self.db.query(IncomeOccurrence)
-            .options(joinedload(IncomeOccurrence.deductions))
             .filter(IncomeOccurrence.id == occurrence_id)
             .first()
         )
@@ -535,6 +499,11 @@ class IncomeService:
     def _validate_date_range(self, start_date: date, end_date: date | None) -> None:
         if end_date is not None and start_date > end_date:
             raise ValueError("Start date must be on or before end date")
+
+    def _commit_and_refresh(self, instance):
+        self.db.commit()
+        self.db.refresh(instance)
+        return instance
 
     def _auto_close_previous_version(self, component_id: int, new_start_date: date) -> None:
         previous_version = (
@@ -570,43 +539,6 @@ class IncomeService:
             if _ranges_overlap(version.start_date, version.end_date, start_date, end_date):
                 raise ValueError("Recurring component versions cannot overlap")
 
-    def _create_version_deductions(
-        self,
-        version_id: int,
-        deductions_in: DeductionCreate,
-    ) -> IncomeComponentVersionDeduction:
-        deduction = IncomeComponentVersionDeduction(version_id=version_id, **deductions_in.model_dump())
-        self.db.add(deduction)
-        return deduction
-
-    def _create_occurrence_deductions(
-        self,
-        occurrence_id: int,
-        deductions_in: DeductionCreate,
-    ) -> IncomeOccurrenceDeduction:
-        deduction = IncomeOccurrenceDeduction(occurrence_id=occurrence_id, **deductions_in.model_dump())
-        self.db.add(deduction)
-        return deduction
-
-    def _sync_version_deductions(self, version: IncomeComponentVersion, deductions_in: DeductionUpdate) -> None:
-        if version.deductions is None:
-            self._create_version_deductions(version.id, DeductionCreate(**deductions_in.model_dump(exclude_unset=True)))
-            return
-
-        for field, value in deductions_in.model_dump(exclude_unset=True).items():
-            setattr(version.deductions, field, value)
-
-    def _sync_occurrence_deductions(self, occurrence: IncomeOccurrence, deductions_in: DeductionUpdate) -> None:
-        if occurrence.deductions is None:
-            self._create_occurrence_deductions(
-                occurrence.id,
-                DeductionCreate(**deductions_in.model_dump(exclude_unset=True)),
-            )
-            return
-
-        for field, value in deductions_in.model_dump(exclude_unset=True).items():
-            setattr(occurrence.deductions, field, value)
-
     def _source_payload(self, source: IncomeSource) -> dict[str, object]:
         return {
             "id": source.id,
@@ -628,19 +560,6 @@ class IncomeService:
             "updated_at": component.updated_at,
         }
 
-    def _deduction_resource(self, deduction: IncomeComponentVersionDeduction | IncomeOccurrenceDeduction | None) -> Optional[DeductionResponse]:
-        if deduction is None:
-            return None
-        return DeductionResponse(
-            id=deduction.id,
-            federal_tax=deduction.federal_tax,
-            state_tax=deduction.state_tax,
-            fica=deduction.fica,
-            retirement=deduction.retirement,
-            health_insurance=deduction.health_insurance,
-            other=deduction.other,
-        )
-
     def _version_response(self, version: IncomeComponentVersion) -> IncomeComponentVersionResponse:
         return IncomeComponentVersionResponse(
             id=version.id,
@@ -650,7 +569,6 @@ class IncomeService:
             gross_amount=version.gross_amount,
             net_amount=version.net_amount,
             periods_per_year=version.periods_per_year,
-            deductions=self._deduction_resource(version.deductions),
             created_at=version.created_at,
             updated_at=version.updated_at,
         )
@@ -664,7 +582,23 @@ class IncomeService:
             paid_date=occurrence.paid_date,
             gross_amount=occurrence.gross_amount,
             net_amount=occurrence.net_amount,
-            deductions=self._deduction_resource(occurrence.deductions),
             created_at=occurrence.created_at,
             updated_at=occurrence.updated_at,
+        )
+
+    def _get_year_settings(self, year: int) -> Optional[IncomeYearSettings]:
+        return (
+            self.db.query(IncomeYearSettings)
+            .filter(IncomeYearSettings.year == year)
+            .first()
+        )
+
+    def _tax_advantaged_investments_response(
+        self,
+        settings: Optional[IncomeYearSettings],
+    ) -> TaxAdvantagedInvestmentsResponse:
+        contributions_401k = round(float(settings.contributions_401k if settings else 0), 2)
+        return TaxAdvantagedInvestmentsResponse(
+            contributions_401k=contributions_401k,
+            total=contributions_401k,
         )

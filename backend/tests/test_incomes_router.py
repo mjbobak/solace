@@ -7,6 +7,7 @@ from backend.app.db.models.income import (
     IncomeComponentVersion,
     IncomeOccurrence,
     IncomeSource,
+    IncomeYearSettings,
 )
 
 
@@ -86,6 +87,20 @@ def create_occurrence(
 
 def get_projection(client, year: int) -> dict:
     response = client.get(f"/api/incomes/projection?year={year}")
+    assert response.status_code == 200
+    return response.json()
+
+
+def update_year_settings(
+    client,
+    year: int,
+    *,
+    contributions_401k: float,
+) -> dict:
+    response = client.put(
+        f"/api/incomes/year-settings/{year}",
+        json={"contributions_401k": contributions_401k},
+    )
     assert response.status_code == 200
     return response.json()
 
@@ -170,6 +185,10 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     projection = get_projection(client, 2026)
 
     assert projection["year"] == 2026
+    assert projection["tax_advantaged_investments"] == {
+        "contributions_401k": 0,
+        "total": 0,
+    }
     assert len(projection["sources"]) == 2
     assert projection["sources"][0]["name"] == "Acme Corp"
     assert len(projection["sources"][0]["components"]) == 2
@@ -181,6 +200,29 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     assert projection["totals"]["planned_net"] == expected_planned_net
     assert projection["sources"][0]["totals"]["planned_net"] == (6000 * 12) + 7000 + 5600
     assert projection["sources"][1]["totals"]["planned_net"] == 4000 * 12
+
+
+def test_year_settings_can_be_created_updated_and_returned_in_projection(client, db_session):
+    """Year-scoped 401k settings should persist and flow through the projection read model."""
+    created = update_year_settings(client, 2026, contributions_401k=19500)
+    assert created["year"] == 2026
+    assert created["contributions_401k"] == 19500
+
+    projection = get_projection(client, 2026)
+    assert projection["tax_advantaged_investments"] == {
+        "contributions_401k": 19500,
+        "total": 19500,
+    }
+
+    updated = update_year_settings(client, 2026, contributions_401k=22000)
+    assert updated["contributions_401k"] == 22000
+
+    db_row = (
+        db_session.query(IncomeYearSettings)
+        .filter(IncomeYearSettings.year == 2026)
+        .one()
+    )
+    assert db_row.contributions_401k == 22000
 
 
 def test_promotion_mid_year_auto_closes_open_version_and_prorates_year_total(client, db_session):
@@ -359,6 +401,34 @@ def test_expected_bonus_moves_from_planned_only_to_committed_when_marked_actual(
     after_update = get_projection(client, 2026)
     assert after_update["totals"]["committed_net"] == 3500
     assert after_update["totals"]["planned_net"] == 3500
+
+
+def test_zero_amount_bonus_occurrence_is_returned_in_projection_without_error(client):
+    """Existing zero-amount bonus rows should still serialize in the income projection."""
+    source = create_source(client, "Acme Corp")
+    component = create_component(
+        client,
+        source["id"],
+        component_type="bonus",
+        component_mode="occurrence",
+        label="Placeholder bonus",
+    )
+
+    response = client.post(
+        f"/api/incomes/components/{component['id']}/occurrences",
+        json={
+            "status": "expected",
+            "planned_date": "2026-12-15",
+            "gross_amount": 0,
+            "net_amount": 0,
+        },
+    )
+    assert response.status_code == 201
+
+    projection = get_projection(client, 2026)
+    occurrence = projection["sources"][0]["components"][0]["occurrences"][0]
+    assert occurrence["gross_amount"] == 0
+    assert occurrence["net_amount"] == 0
 
 
 def test_recurring_version_can_be_updated_and_projection_reflects_new_values(client):

@@ -1,6 +1,9 @@
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
-import type { IncomeProjectionTotals } from '@/features/income/types/income';
+import type {
+  IncomeProjectionTotals,
+  TaxAdvantagedInvestments,
+} from '@/features/income/types/income';
 
 export type DashboardKpiValue =
   | { kind: 'currency'; amount: number }
@@ -21,6 +24,7 @@ export interface DashboardKpiGroup {
 interface BuildDashboardKpiGroupsParams {
   currentIncomeTotals: IncomeProjectionTotals | null;
   previousIncomeTotals: IncomeProjectionTotals | null;
+  currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null;
   budgetEntries: BudgetEntry[] | null;
 }
 
@@ -174,6 +178,7 @@ export function formatDashboardKpiValue(value: DashboardKpiValue): string {
 export function buildDashboardKpiGroups({
   currentIncomeTotals,
   previousIncomeTotals,
+  currentTaxAdvantagedInvestments,
   budgetEntries,
 }: BuildDashboardKpiGroupsParams): DashboardKpiGroup[] {
   const currentGrossIncome = currentIncomeTotals?.plannedGross ?? null;
@@ -219,7 +224,7 @@ export function buildDashboardKpiGroups({
     previousGrossIncome,
   );
   const contributions401k =
-    currentIncomeTotals?.plannedDeductions.retirement ?? null;
+    currentTaxAdvantagedInvestments?.contributions401k ?? null;
   const annual529Contributions = getMatchedAnnualContribution(
     budgetEntries,
     TAX_ADVANTAGED_LABEL_MATCHERS.contributions529,

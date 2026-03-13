@@ -84,6 +84,8 @@ export function useDashboardKpiReport(
       buildDashboardKpiGroups({
         currentIncomeTotals: currentProjection?.totals ?? null,
         previousIncomeTotals: previousProjection?.totals ?? null,
+        currentTaxAdvantagedInvestments:
+          currentProjection?.taxAdvantagedInvestments ?? null,
         budgetEntries: budgetError ? null : budgetEntries,
       }),
     [budgetEntries, budgetError, currentProjection, previousProjection],

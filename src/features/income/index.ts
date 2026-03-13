@@ -7,7 +7,6 @@ export type {
   CreateIncomeOccurrenceInput,
   CreateIncomeSourceInput,
   CreateRecurringIncomeVersionInput,
-  DeductionBreakdown,
   IncomeComponent,
   IncomeComponentMode,
   IncomeComponentType,
@@ -15,10 +14,13 @@ export type {
   IncomeOccurrenceStatus,
   IncomeProjectionTotals,
   IncomeSource,
+  IncomeYearSettings,
   IncomeYearProjection,
   ProjectedIncomeComponent,
   ProjectedIncomeSource,
   RecurringIncomeVersion,
+  TaxAdvantagedInvestments,
+  UpdateIncomeYearSettingsInput,
   UpdateIncomeSourceInput,
 } from './types/income';
 

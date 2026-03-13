@@ -3,49 +3,31 @@ import type {
   CreateIncomeOccurrenceInput,
   CreateIncomeSourceInput,
   CreateRecurringIncomeVersionInput,
-  DeductionBreakdown,
   IncomeComponent,
   IncomeOccurrence,
   IncomeProjectionTotals,
+  IncomeYearSettings,
   IncomeSource,
   IncomeYearProjection,
   ProjectedIncomeComponent,
   ProjectedIncomeSource,
   RecurringIncomeVersion,
+  TaxAdvantagedInvestments,
   UpdateIncomeComponentInput,
   UpdateIncomeOccurrenceInput,
   UpdateRecurringIncomeVersionInput,
+  UpdateIncomeYearSettingsInput,
   UpdateIncomeSourceInput,
 } from '../types/income';
 
 const API_BASE = '/api/incomes';
 
-function transformDeductions(
+function transformTaxAdvantagedInvestments(
   data: Record<string, unknown> | null | undefined,
-): DeductionBreakdown | null {
-  if (!data) {
-    return null;
-  }
-
+): TaxAdvantagedInvestments {
   return {
-    federalTax: Number(data.federal_tax ?? 0) || undefined,
-    stateTax: Number(data.state_tax ?? 0) || undefined,
-    fica: Number(data.fica ?? 0) || undefined,
-    retirement: Number(data.retirement ?? 0) || undefined,
-    healthInsurance: Number(data.health_insurance ?? 0) || undefined,
-    other: Number(data.other ?? 0) || undefined,
-  };
-}
-
-function transformDeductionTotals(data: Record<string, unknown>) {
-  return {
-    federalTax: Number(data.federal_tax ?? 0),
-    stateTax: Number(data.state_tax ?? 0),
-    fica: Number(data.fica ?? 0),
-    retirement: Number(data.retirement ?? 0),
-    healthInsurance: Number(data.health_insurance ?? 0),
-    other: Number(data.other ?? 0),
-    total: Number(data.total ?? 0),
+    contributions401k: Number(data?.contributions_401k ?? 0),
+    total: Number(data?.total ?? 0),
   };
 }
 
@@ -55,12 +37,6 @@ function transformTotals(data: Record<string, unknown>): IncomeProjectionTotals 
     committedNet: Number(data.committed_net ?? 0),
     plannedGross: Number(data.planned_gross ?? 0),
     plannedNet: Number(data.planned_net ?? 0),
-    committedDeductions: transformDeductionTotals(
-      data.committed_deductions as Record<string, unknown>,
-    ),
-    plannedDeductions: transformDeductionTotals(
-      data.planned_deductions as Record<string, unknown>,
-    ),
   };
 }
 
@@ -96,9 +72,6 @@ function transformVersion(data: Record<string, unknown>): RecurringIncomeVersion
     grossAmount: Number(data.gross_amount),
     netAmount: Number(data.net_amount),
     periodsPerYear: Number(data.periods_per_year),
-    deductions: transformDeductions(
-      (data.deductions as Record<string, unknown> | null) ?? null,
-    ),
     createdAt: String(data.created_at),
     updatedAt: String(data.updated_at),
   };
@@ -113,9 +86,17 @@ function transformOccurrence(data: Record<string, unknown>): IncomeOccurrence {
     paidDate: data.paid_date ? String(data.paid_date) : null,
     grossAmount: Number(data.gross_amount),
     netAmount: Number(data.net_amount),
-    deductions: transformDeductions(
-      (data.deductions as Record<string, unknown> | null) ?? null,
-    ),
+    createdAt: String(data.created_at),
+    updatedAt: String(data.updated_at),
+  };
+}
+
+function transformYearSettings(
+  data: Record<string, unknown>,
+): IncomeYearSettings {
+  return {
+    year: Number(data.year),
+    contributions401k: Number(data.contributions_401k ?? 0),
     createdAt: String(data.created_at),
     updatedAt: String(data.updated_at),
   };
@@ -199,21 +180,6 @@ async function request<T>(
   return transform ? transform(data) : (data as T);
 }
 
-function serializeDeductions(deductions: DeductionBreakdown | null | undefined) {
-  if (!deductions) {
-    return null;
-  }
-
-  return {
-    federal_tax: deductions.federalTax ?? null,
-    state_tax: deductions.stateTax ?? null,
-    fica: deductions.fica ?? null,
-    retirement: deductions.retirement ?? null,
-    health_insurance: deductions.healthInsurance ?? null,
-    other: deductions.other ?? null,
-  };
-}
-
 function serializeRecurringVersionInput(
   input: UpdateRecurringIncomeVersionInput,
 ) {
@@ -233,9 +199,6 @@ function serializeRecurringVersionInput(
   }
   if (input.periodsPerYear !== undefined) {
     body.periods_per_year = input.periodsPerYear;
-  }
-  if (input.deductions !== undefined) {
-    body.deductions = serializeDeductions(input.deductions);
   }
 
   return body;
@@ -259,9 +222,6 @@ function serializeOccurrenceInput(input: UpdateIncomeOccurrenceInput) {
   if (input.netAmount !== undefined) {
     body.net_amount = input.netAmount;
   }
-  if (input.deductions !== undefined) {
-    body.deductions = serializeDeductions(input.deductions);
-  }
 
   return body;
 }
@@ -271,6 +231,10 @@ export const incomeApiService = {
     return request(`/projection?year=${year}`, undefined, (data) => ({
       year: Number(data.year),
       totals: transformTotals(data.totals as Record<string, unknown>),
+      taxAdvantagedInvestments: transformTaxAdvantagedInvestments(
+        (data.tax_advantaged_investments as Record<string, unknown> | null) ??
+          null,
+      ),
       sources: ((data.sources as Array<Record<string, unknown>>) ?? []).map(
         transformProjectedSource,
       ),
@@ -428,6 +392,23 @@ export const incomeApiService = {
         body: JSON.stringify(serializeOccurrenceInput(input)),
       },
       transformOccurrence,
+    );
+  },
+
+  async updateYearSettings(
+    year: number,
+    input: UpdateIncomeYearSettingsInput,
+  ): Promise<IncomeYearSettings> {
+    return request(
+      `/year-settings/${year}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contributions_401k: input.contributions401k,
+        }),
+      },
+      transformYearSettings,
     );
   },
 };

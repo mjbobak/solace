@@ -10,44 +10,25 @@ IncomeComponentMode = Literal["recurring", "occurrence"]
 IncomeOccurrenceStatus = Literal["expected", "actual"]
 
 
-class DeductionBase(BaseModel):
-    """Optional deduction detail stored on versions and occurrences."""
+class TaxAdvantagedInvestmentsResponse(BaseModel):
+    """Year-scoped tax-advantaged investment totals for dashboard use."""
 
-    federal_tax: Optional[float] = Field(None, ge=0)
-    state_tax: Optional[float] = Field(None, ge=0)
-    fica: Optional[float] = Field(None, ge=0)
-    retirement: Optional[float] = Field(None, ge=0)
-    health_insurance: Optional[float] = Field(None, ge=0)
-    other: Optional[float] = Field(None, ge=0)
-
-
-class DeductionCreate(DeductionBase):
-    """Create payload for deductions."""
-
-
-class DeductionUpdate(DeductionBase):
-    """Patch payload for deductions."""
-
-
-class DeductionResponse(DeductionBase):
-    """Resource response for deductions."""
-
-    id: int
-
-    class Config:
-        from_attributes = True
-
-
-class DeductionTotalsResponse(BaseModel):
-    """Aggregated deductions for projected totals."""
-
-    federal_tax: float = 0
-    state_tax: float = 0
-    fica: float = 0
-    retirement: float = 0
-    health_insurance: float = 0
-    other: float = 0
+    contributions_401k: float = 0
     total: float = 0
+
+
+class IncomeYearSettingsUpdate(BaseModel):
+    """Update payload for year-scoped income settings."""
+
+    contributions_401k: float = Field(..., ge=0)
+
+
+class IncomeYearSettingsResponse(IncomeYearSettingsUpdate):
+    """Resource response for year-scoped income settings."""
+
+    year: int
+    created_at: datetime
+    updated_at: datetime
 
 
 class IncomeProjectionTotalsResponse(BaseModel):
@@ -57,8 +38,6 @@ class IncomeProjectionTotalsResponse(BaseModel):
     committed_net: float = 0
     planned_gross: float = 0
     planned_net: float = 0
-    committed_deductions: DeductionTotalsResponse = Field(default_factory=DeductionTotalsResponse)
-    planned_deductions: DeductionTotalsResponse = Field(default_factory=DeductionTotalsResponse)
 
 
 class IncomeSourceBase(BaseModel):
@@ -137,8 +116,6 @@ class IncomeComponentVersionBase(BaseModel):
 class IncomeComponentVersionCreate(IncomeComponentVersionBase):
     """Create payload for recurring versions."""
 
-    deductions: Optional[DeductionCreate] = None
-
 
 class IncomeComponentVersionUpdate(BaseModel):
     """Update payload for recurring versions."""
@@ -148,7 +125,6 @@ class IncomeComponentVersionUpdate(BaseModel):
     gross_amount: Optional[float] = Field(None, gt=0)
     net_amount: Optional[float] = Field(None, gt=0)
     periods_per_year: Optional[int] = Field(None, gt=0, le=366)
-    deductions: Optional[DeductionUpdate] = None
 
 
 class IncomeComponentVersionResponse(IncomeComponentVersionBase):
@@ -156,7 +132,6 @@ class IncomeComponentVersionResponse(IncomeComponentVersionBase):
 
     id: int
     component_id: int
-    deductions: Optional[DeductionResponse] = None
     created_at: datetime
     updated_at: datetime
 
@@ -170,14 +145,12 @@ class IncomeOccurrenceBase(BaseModel):
     status: IncomeOccurrenceStatus
     planned_date: date
     paid_date: Optional[date] = None
-    gross_amount: float = Field(..., gt=0)
-    net_amount: float = Field(..., gt=0)
+    gross_amount: float = Field(..., ge=0)
+    net_amount: float = Field(..., ge=0)
 
 
 class IncomeOccurrenceCreate(IncomeOccurrenceBase):
     """Create payload for one-time occurrences."""
-
-    deductions: Optional[DeductionCreate] = None
 
 
 class IncomeOccurrenceUpdate(BaseModel):
@@ -186,9 +159,8 @@ class IncomeOccurrenceUpdate(BaseModel):
     status: Optional[IncomeOccurrenceStatus] = None
     planned_date: Optional[date] = None
     paid_date: Optional[date] = None
-    gross_amount: Optional[float] = Field(None, gt=0)
-    net_amount: Optional[float] = Field(None, gt=0)
-    deductions: Optional[DeductionUpdate] = None
+    gross_amount: Optional[float] = Field(None, ge=0)
+    net_amount: Optional[float] = Field(None, ge=0)
 
 
 class IncomeOccurrenceResponse(IncomeOccurrenceBase):
@@ -196,7 +168,6 @@ class IncomeOccurrenceResponse(IncomeOccurrenceBase):
 
     id: int
     component_id: int
-    deductions: Optional[DeductionResponse] = None
     created_at: datetime
     updated_at: datetime
 
@@ -225,4 +196,7 @@ class IncomeYearProjectionResponse(BaseModel):
 
     year: int
     totals: IncomeProjectionTotalsResponse
+    tax_advantaged_investments: TaxAdvantagedInvestmentsResponse = Field(
+        default_factory=TaxAdvantagedInvestmentsResponse
+    )
     sources: list[ProjectedIncomeSourceResponse] = Field(default_factory=list)

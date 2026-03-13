@@ -10,6 +10,7 @@ import { AddSourceModal } from './modals/AddSourceModal';
 import { BonusOccurrenceModal } from './modals/BonusOccurrenceModal';
 import { RecurringVersionModal } from './modals/RecurringVersionModal';
 import { RenameSourceModal } from './modals/RenameSourceModal';
+import { TaxAdvantagedInvestmentsModal } from './modals/TaxAdvantagedInvestmentsModal';
 import { IncomeSourcesTable } from './table/IncomeSourcesTable';
 
 export interface IncomeViewHandle {
@@ -27,8 +28,10 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     expandedSources,
     versionModalState,
     bonusModalState,
+    isTaxAdvantagedInvestmentsModalOpen,
     setSelectedYear,
     openAddIncomeModal,
+    openTaxAdvantagedInvestmentsModal,
     closeModal,
     toggleSourceExpansion,
     openRenameSourceModal,
@@ -44,6 +47,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     handleDeleteVersion,
     handleDeleteBonus,
     handleDeleteSource,
+    handleTaxAdvantagedInvestmentsSubmit,
   } = useIncomeViewController();
   const {
     actionMenuPosition,
@@ -67,6 +71,13 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
         availableYears={planningYears}
         onYearChange={setSelectedYear}
         totals={projection?.totals ?? EMPTY_PROJECTION_TOTALS}
+        taxAdvantagedInvestments={
+          projection?.taxAdvantagedInvestments ?? {
+            contributions401k: 0,
+            total: 0,
+          }
+        }
+        onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
       />
 
       <IncomeSourcesTable
@@ -135,6 +146,16 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
         }
         onClose={closeModal}
         onSubmit={handleBonusModalSubmit}
+      />
+
+      <TaxAdvantagedInvestmentsModal
+        isOpen={isTaxAdvantagedInvestmentsModalOpen}
+        year={selectedYear}
+        initialContributions401k={
+          projection?.taxAdvantagedInvestments.contributions401k ?? 0
+        }
+        onClose={closeModal}
+        onSubmit={handleTaxAdvantagedInvestmentsSubmit}
       />
 
       <IncomeSourceActionMenu

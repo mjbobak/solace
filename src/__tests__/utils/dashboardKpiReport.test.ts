@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
-import type { IncomeProjectionTotals } from '@/features/income/types/income';
+import type {
+  IncomeProjectionTotals,
+  TaxAdvantagedInvestments,
+} from '@/features/income/types/income';
 import {
   buildDashboardKpiGroups,
   matchesBudgetLabel,
@@ -15,24 +18,16 @@ function createIncomeTotals(
     committedNet: 150000,
     plannedGross: 210000,
     plannedNet: 160000,
-    committedDeductions: {
-      federalTax: 0,
-      stateTax: 0,
-      fica: 0,
-      retirement: 18000,
-      healthInsurance: 0,
-      other: 0,
-      total: 18000,
-    },
-    plannedDeductions: {
-      federalTax: 0,
-      stateTax: 0,
-      fica: 0,
-      retirement: 22000,
-      healthInsurance: 0,
-      other: 0,
-      total: 22000,
-    },
+    ...overrides,
+  };
+}
+
+function createTaxAdvantagedInvestments(
+  overrides?: Partial<TaxAdvantagedInvestments>,
+): TaxAdvantagedInvestments {
+  return {
+    contributions401k: 22000,
+    total: 22000,
     ...overrides,
   };
 }
@@ -66,6 +61,7 @@ describe('buildDashboardKpiGroups', () => {
     const groups = buildDashboardKpiGroups({
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: createIncomeTotals({ plannedGross: 200000 }),
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
       budgetEntries: [
         createBudgetEntry(),
         createBudgetEntry({
@@ -139,6 +135,7 @@ describe('buildDashboardKpiGroups', () => {
     const groups = buildDashboardKpiGroups({
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: null,
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
       budgetEntries: [createBudgetEntry()],
     });
 
@@ -152,6 +149,7 @@ describe('buildDashboardKpiGroups', () => {
     const groups = buildDashboardKpiGroups({
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: null,
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
       budgetEntries: [createBudgetEntry()],
     });
 

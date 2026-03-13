@@ -83,12 +83,6 @@ class IncomeComponentVersion(Base):
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     component = relationship("IncomeComponent", back_populates="versions")
-    deductions = relationship(
-        "IncomeComponentVersionDeduction",
-        back_populates="version",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
 
     __table_args__ = (
         Index("ix_income_component_versions_component_dates", "component_id", "start_date", "end_date"),
@@ -99,32 +93,6 @@ class IncomeComponentVersion(Base):
             f"<IncomeComponentVersion(id={self.id}, component_id={self.component_id}, "
             f"start_date={self.start_date}, end_date={self.end_date})>"
         )
-
-
-class IncomeComponentVersionDeduction(Base):
-    """Optional deduction breakdown for a recurring version."""
-
-    __tablename__ = "income_component_version_deductions"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    version_id = Column(
-        Integer,
-        ForeignKey("income_component_versions.id", ondelete="CASCADE"),
-        nullable=False,
-        unique=True,
-        index=True,
-    )
-    federal_tax = Column(Float, nullable=True)
-    state_tax = Column(Float, nullable=True)
-    fica = Column(Float, nullable=True)
-    retirement = Column(Float, nullable=True)
-    health_insurance = Column(Float, nullable=True)
-    other = Column(Float, nullable=True)
-
-    version = relationship("IncomeComponentVersion", back_populates="deductions")
-
-    def __repr__(self) -> str:
-        return f"<IncomeComponentVersionDeduction(id={self.id}, version_id={self.version_id})>"
 
 
 class IncomeOccurrence(Base):
@@ -143,12 +111,6 @@ class IncomeOccurrence(Base):
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     component = relationship("IncomeComponent", back_populates="occurrences")
-    deductions = relationship(
-        "IncomeOccurrenceDeduction",
-        back_populates="occurrence",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
 
     __table_args__ = (Index("ix_income_occurrences_component_dates", "component_id", "planned_date", "paid_date"),)
 
@@ -159,27 +121,16 @@ class IncomeOccurrence(Base):
         )
 
 
-class IncomeOccurrenceDeduction(Base):
-    """Optional deduction breakdown for an occurrence."""
+class IncomeYearSettings(Base):
+    """Year-scoped household investment settings used by the income dashboard."""
 
-    __tablename__ = "income_occurrence_deductions"
+    __tablename__ = "income_year_settings"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    occurrence_id = Column(
-        Integer,
-        ForeignKey("income_occurrences.id", ondelete="CASCADE"),
-        nullable=False,
-        unique=True,
-        index=True,
-    )
-    federal_tax = Column(Float, nullable=True)
-    state_tax = Column(Float, nullable=True)
-    fica = Column(Float, nullable=True)
-    retirement = Column(Float, nullable=True)
-    health_insurance = Column(Float, nullable=True)
-    other = Column(Float, nullable=True)
-
-    occurrence = relationship("IncomeOccurrence", back_populates="deductions")
+    year = Column(Integer, nullable=False, unique=True, index=True)
+    contributions_401k = Column(Float, nullable=False, default=0, server_default="0")
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     def __repr__(self) -> str:
-        return f"<IncomeOccurrenceDeduction(id={self.id}, occurrence_id={self.occurrence_id})>"
+        return f"<IncomeYearSettings(year={self.year}, contributions_401k={self.contributions_401k})>"

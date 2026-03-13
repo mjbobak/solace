@@ -20,6 +20,14 @@ def test_drop_legacy_income_tables_removes_only_obsolete_tables(monkeypatch, tmp
             text("CREATE TABLE household_members (id INTEGER PRIMARY KEY)")
         )
         connection.execute(
+            text(
+                "CREATE TABLE income_component_version_deductions (id INTEGER PRIMARY KEY)"
+            )
+        )
+        connection.execute(
+            text("CREATE TABLE income_occurrence_deductions (id INTEGER PRIMARY KEY)")
+        )
+        connection.execute(
             text("CREATE TABLE income_sources (id INTEGER PRIMARY KEY)")
         )
 
@@ -34,6 +42,8 @@ def test_drop_legacy_income_tables_removes_only_obsolete_tables(monkeypatch, tmp
     assert "income_effective_ranges" not in remaining_tables
     assert "incomes" not in remaining_tables
     assert "household_members" not in remaining_tables
+    assert "income_component_version_deductions" not in remaining_tables
+    assert "income_occurrence_deductions" not in remaining_tables
 
 
 def test_ensure_income_sources_schema_removes_legacy_member_id_and_preserves_rows(monkeypatch, tmp_path):

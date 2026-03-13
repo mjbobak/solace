@@ -1,6 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -10,8 +16,9 @@ import {
 } from '@/features/income/components/IncomeView';
 import type { IncomeYearProjection } from '@/features/income/types/income';
 
-const { getYearProjection } = vi.hoisted(() => ({
+const { getYearProjection, updateYearSettings } = vi.hoisted(() => ({
   getYearProjection: vi.fn(),
+  updateYearSettings: vi.fn(),
 }));
 
 vi.mock('@/shared/hooks/usePlanningYearSelection', () => ({
@@ -36,6 +43,7 @@ vi.mock('sonner', () => ({
 vi.mock('@/features/income/services/incomeApiService', () => ({
   incomeApiService: {
     getYearProjection,
+    updateYearSettings,
     createSource: vi.fn(),
     createComponent: vi.fn(),
     createRecurringVersion: vi.fn(),
@@ -57,24 +65,10 @@ const projection: IncomeYearProjection = {
     committedNet: 90000,
     plannedGross: 135000,
     plannedNet: 101000,
-    committedDeductions: {
-      federalTax: 0,
-      stateTax: 0,
-      fica: 0,
-      retirement: 0,
-      healthInsurance: 0,
-      other: 0,
-      total: 0,
-    },
-    plannedDeductions: {
-      federalTax: 0,
-      stateTax: 0,
-      fica: 0,
-      retirement: 0,
-      healthInsurance: 0,
-      other: 0,
-      total: 0,
-    },
+  },
+  taxAdvantagedInvestments: {
+    contributions401k: 22000,
+    total: 22000,
   },
   sources: [
     {
@@ -89,24 +83,6 @@ const projection: IncomeYearProjection = {
         committedNet: 90000,
         plannedGross: 135000,
         plannedNet: 101000,
-        committedDeductions: {
-          federalTax: 0,
-          stateTax: 0,
-          fica: 0,
-          retirement: 0,
-          healthInsurance: 0,
-          other: 0,
-          total: 0,
-        },
-        plannedDeductions: {
-          federalTax: 0,
-          stateTax: 0,
-          fica: 0,
-          retirement: 0,
-          healthInsurance: 0,
-          other: 0,
-          total: 0,
-        },
       },
       components: [
         {
@@ -122,24 +98,6 @@ const projection: IncomeYearProjection = {
             committedNet: 90000,
             plannedGross: 120000,
             plannedNet: 90000,
-            committedDeductions: {
-              federalTax: 0,
-              stateTax: 0,
-              fica: 0,
-              retirement: 0,
-              healthInsurance: 0,
-              other: 0,
-              total: 0,
-            },
-            plannedDeductions: {
-              federalTax: 0,
-              stateTax: 0,
-              fica: 0,
-              retirement: 0,
-              healthInsurance: 0,
-              other: 0,
-              total: 0,
-            },
           },
           currentVersion: {
             id: 21,
@@ -149,7 +107,6 @@ const projection: IncomeYearProjection = {
             grossAmount: 4615.38,
             netAmount: 3461.54,
             periodsPerYear: 26,
-            deductions: null,
             createdAt: '2025-01-01T00:00:00Z',
             updatedAt: '2025-01-01T00:00:00Z',
           },
@@ -162,7 +119,6 @@ const projection: IncomeYearProjection = {
               grossAmount: 4615.38,
               netAmount: 3461.54,
               periodsPerYear: 26,
-              deductions: null,
               createdAt: '2025-01-01T00:00:00Z',
               updatedAt: '2025-01-01T00:00:00Z',
             },
@@ -182,24 +138,6 @@ const projection: IncomeYearProjection = {
             committedNet: 0,
             plannedGross: 15000,
             plannedNet: 11000,
-            committedDeductions: {
-              federalTax: 0,
-              stateTax: 0,
-              fica: 0,
-              retirement: 0,
-              healthInsurance: 0,
-              other: 0,
-              total: 0,
-            },
-            plannedDeductions: {
-              federalTax: 0,
-              stateTax: 0,
-              fica: 0,
-              retirement: 0,
-              healthInsurance: 0,
-              other: 0,
-              total: 0,
-            },
           },
           currentVersion: null,
           versions: [],
@@ -212,7 +150,6 @@ const projection: IncomeYearProjection = {
               paidDate: null,
               grossAmount: 15000,
               netAmount: 11000,
-              deductions: null,
               createdAt: '2025-01-01T00:00:00Z',
               updatedAt: '2025-01-01T00:00:00Z',
             },
@@ -260,6 +197,8 @@ describe('IncomeView', () => {
     expect(screen.getByText('$90,000.00 Net')).toBeInTheDocument();
     expect(screen.getByText('$135,000.00')).toBeInTheDocument();
     expect(screen.getByText('$101,000.00 Net')).toBeInTheDocument();
+    expect(screen.getByText('Tax Advantaged Investments')).toBeInTheDocument();
+    expect(screen.getByText('$22,000 401k Contributions')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Acme Corp').closest('button')!);
 
@@ -270,7 +209,9 @@ describe('IncomeView', () => {
     expect(expandedCell).toHaveAttribute('colspan', '4');
 
     const sourceTableHeaders = Array.from(
-      container.querySelectorAll('.surface-card > .overflow-x-auto > table > thead > tr > th'),
+      container.querySelectorAll(
+        '.surface-card > .overflow-x-auto > table > thead > tr > th',
+      ),
     ).map((header) => header.textContent?.trim());
 
     expect(sourceTableHeaders).toEqual([
@@ -302,5 +243,37 @@ describe('IncomeView', () => {
     expect(
       await screen.findByRole('heading', { name: 'Add Income Source' }),
     ).toBeInTheDocument();
+  });
+
+  it('saves the selected year tax advantaged investments from the summary card', async () => {
+    getYearProjection.mockResolvedValue(projection);
+    updateYearSettings.mockResolvedValue({
+      year: 2025,
+      contributions401k: 25000,
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-02T00:00:00Z',
+    });
+
+    render(
+      <MemoryRouter>
+        <IncomeView />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+
+    const input = await screen.findByLabelText(/401k contributions/i);
+    fireEvent.change(input, { target: { value: '25000' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Investments' }));
+
+    await waitFor(() =>
+      expect(updateYearSettings).toHaveBeenCalledWith(2025, {
+        contributions401k: 25000,
+      }),
+    );
   });
 });

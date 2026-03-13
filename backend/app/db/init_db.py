@@ -19,6 +19,8 @@ LEGACY_INCOME_TABLES = (
     "income_effective_ranges",
     "incomes",
     "household_members",
+    "income_component_version_deductions",
+    "income_occurrence_deductions",
 )
 
 

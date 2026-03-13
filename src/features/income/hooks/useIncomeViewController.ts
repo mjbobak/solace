@@ -42,8 +42,10 @@ interface UseIncomeViewControllerResult {
     IncomeViewModalState,
     { type: 'add-bonus' } | { type: 'edit-bonus' }
   > | null;
+  isTaxAdvantagedInvestmentsModalOpen: boolean;
   setSelectedYear: (year: number) => void;
   openAddIncomeModal: () => void;
+  openTaxAdvantagedInvestmentsModal: () => void;
   closeModal: () => void;
   toggleSourceExpansion: (sourceId: number) => void;
   openRenameSourceModal: (source: ProjectedIncomeSource) => void;
@@ -77,6 +79,9 @@ interface UseIncomeViewControllerResult {
     occurrence: IncomeOccurrence,
   ) => Promise<void>;
   handleDeleteSource: (source: ProjectedIncomeSource) => Promise<void>;
+  handleTaxAdvantagedInvestmentsSubmit: (input: {
+    contributions401k: number;
+  }) => Promise<void>;
 }
 
 export function useIncomeViewController(): UseIncomeViewControllerResult {
@@ -91,6 +96,10 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
   const [expandedSources, setExpandedSources] = useState<Set<number>>(
     () => new Set(),
   );
+  const [
+    isTaxAdvantagedInvestmentsModalOpen,
+    setIsTaxAdvantagedInvestmentsModalOpen,
+  ] = useState(false);
   const currentYear = new Date().getFullYear();
   const {
     availableYears: planningYears,
@@ -121,10 +130,15 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
 
   const closeModal = () => {
     setModalState(null);
+    setIsTaxAdvantagedInvestmentsModalOpen(false);
   };
 
   const openAddIncomeModal = () => {
     setModalState({ type: 'add-source' });
+  };
+
+  const openTaxAdvantagedInvestmentsModal = () => {
+    setIsTaxAdvantagedInvestmentsModalOpen(true);
   };
 
   const openRenameSourceModal = (source: ProjectedIncomeSource) => {
@@ -361,6 +375,21 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
     }
   };
 
+  const handleTaxAdvantagedInvestmentsSubmit = async (input: {
+    contributions401k: number;
+  }) => {
+    try {
+      await incomeApiService.updateYearSettings(selectedYear, input);
+      toast.success('Tax advantaged investments saved');
+      closeModal();
+      await loadProjection();
+    } catch (error) {
+      console.error('Failed to save tax advantaged investments:', error);
+      toast.error('Failed to save tax advantaged investments');
+      throw error;
+    }
+  };
+
   const handleVersionModalSubmit = async (
     targetId: number,
     input: CreateRecurringIncomeVersionInput,
@@ -411,8 +440,10 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
     expandedSources,
     versionModalState,
     bonusModalState,
+    isTaxAdvantagedInvestmentsModalOpen,
     setSelectedYear,
     openAddIncomeModal,
+    openTaxAdvantagedInvestmentsModal,
     closeModal,
     toggleSourceExpansion,
     openRenameSourceModal,
@@ -428,5 +459,6 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
     handleDeleteVersion,
     handleDeleteBonus,
     handleDeleteSource,
+    handleTaxAdvantagedInvestmentsSubmit,
   };
 }

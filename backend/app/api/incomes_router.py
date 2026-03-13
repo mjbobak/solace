@@ -18,6 +18,8 @@ from backend.app.models.income import (
     IncomeOccurrenceUpdate,
     IncomeSourceCreate,
     IncomeSourceResponse,
+    IncomeYearSettingsResponse,
+    IncomeYearSettingsUpdate,
     IncomeSourceUpdate,
     IncomeYearProjectionResponse,
 )
@@ -45,6 +47,24 @@ async def get_income_projection(
 ):
     """Return the year-scoped nested income read model."""
     return service.get_year_projection(year)
+
+
+@router.put(
+    "/year-settings/{year}",
+    response_model=IncomeYearSettingsResponse,
+)
+async def update_income_year_settings(
+    year: int,
+    settings_in: IncomeYearSettingsUpdate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Create or update year-scoped investment settings for income views."""
+    try:
+        return service.serialize_year_settings(
+            service.upsert_year_settings(year, settings_in)
+        )
+    except ValueError as error:
+        raise _handle_value_error(error)
 
 
 @router.get("/sources", response_model=List[IncomeSourceResponse])

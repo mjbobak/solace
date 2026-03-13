@@ -6,10 +6,9 @@ from backend.app.db.models.expense_category import ExpenseCategory
 from backend.app.db.models.income import (
     IncomeComponent,
     IncomeComponentVersion,
-    IncomeComponentVersionDeduction,
     IncomeOccurrence,
-    IncomeOccurrenceDeduction,
     IncomeSource,
+    IncomeYearSettings,
 )
 from backend.app.db.models.transaction import ReviewStatus, Transaction, TransactionStatus
 from backend.app.db.models.user import User
@@ -20,10 +19,9 @@ __all__ = [
     "ExpenseCategory",
     "IncomeComponent",
     "IncomeComponentVersion",
-    "IncomeComponentVersionDeduction",
     "IncomeOccurrence",
-    "IncomeOccurrenceDeduction",
     "IncomeSource",
+    "IncomeYearSettings",
     "Transaction",
     "ReviewStatus",
     "TransactionStatus",

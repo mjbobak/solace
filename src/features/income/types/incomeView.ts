@@ -54,24 +54,6 @@ export const EMPTY_PROJECTION_TOTALS: IncomeProjectionTotals = {
   committedNet: 0,
   plannedGross: 0,
   plannedNet: 0,
-  committedDeductions: {
-    federalTax: 0,
-    stateTax: 0,
-    fica: 0,
-    retirement: 0,
-    healthInsurance: 0,
-    other: 0,
-    total: 0,
-  },
-  plannedDeductions: {
-    federalTax: 0,
-    stateTax: 0,
-    fica: 0,
-    retirement: 0,
-    healthInsurance: 0,
-    other: 0,
-    total: 0,
-  },
 };
 
 export function isAddBonusModalSubmit(
