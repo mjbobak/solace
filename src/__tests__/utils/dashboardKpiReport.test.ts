@@ -135,6 +135,9 @@ describe('buildDashboardKpiGroups', () => {
       kind: 'percentage',
       amount: 0.7375,
     });
+    expect(findRow(groups, 'savings-rate')?.benchmark).toBe(
+      'Strong: 20%+ of after-tax income.',
+    );
     expect(findRow(groups, 'income-growth-rate')?.value).toEqual({
       kind: 'percentage',
       amount: 0.05,

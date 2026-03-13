@@ -170,6 +170,9 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                 <th className="px-6 py-3 text-right font-semibold text-app">
                   Value
                 </th>
+                <th className="px-6 py-3 text-left font-semibold text-app">
+                  Strong Looks Like
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -177,7 +180,7 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                 <React.Fragment key={group.title}>
                   <tr className="border-t border-black/10 bg-black/[0.02]">
                     <th
-                      colSpan={2}
+                      colSpan={3}
                       className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted"
                     >
                       {group.title}
@@ -208,6 +211,9 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                           emergencyFundInput,
                           setEmergencyFundInput,
                         )}
+                      </td>
+                      <td className="px-6 py-3 text-left text-sm text-muted">
+                        {row.benchmark}
                       </td>
                     </tr>
                   ))}

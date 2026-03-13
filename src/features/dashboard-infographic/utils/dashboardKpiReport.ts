@@ -14,6 +14,7 @@ export interface DashboardKpiRow {
   key: string;
   label: string;
   value: DashboardKpiValue;
+  benchmark: string;
 }
 
 export interface DashboardKpiGroup {
@@ -41,6 +42,47 @@ const TAX_ADVANTAGED_LABEL_MATCHERS = {
 } as const;
 
 export const DEFAULT_EMERGENCY_FUND_BALANCE = 18000;
+
+const KPI_BENCHMARKS: Record<string, string> = {
+  'net-worth': 'Strong: trending upward year over year.',
+  'net-worth-growth-rate': 'Strong: outpaces inflation and stays positive.',
+  'net-worth-growth-vs-income-growth':
+    'Strong: net worth grows at least as fast as income.',
+  'savings-rate': 'Strong: 20%+ of after-tax income.',
+  'annual-savings-amount': 'Strong: consistently positive and rising over time.',
+  'annual-investment-contributions':
+    'Strong: steady annual contributions with room to increase.',
+  'gross-income': 'Strong: stable or growing year over year.',
+  'after-tax-income': 'Strong: enough to cover spending and still save 20%+.',
+  'income-growth-rate': 'Strong: positive growth each year.',
+  'savings-efficiency': 'Strong: 15%+ of after-tax income remains as cash savings.',
+  'total-monthly-expenses': 'Strong: low enough to leave healthy room for saving.',
+  'annual-living-expenses':
+    'Strong: controlled relative to take-home income.',
+  'expense-growth-rate':
+    'Strong: grows slower than income over time.',
+  'essential-spending':
+    'Strong: essentials stay well below after-tax income.',
+  'funsies-spending': 'Strong: intentional and comfortably within your plan.',
+  'expense-ratio': 'Strong: under 60% of after-tax income.',
+  'emergency-fund-balance': 'Strong: enough cash to cover 3-6 months of essentials.',
+  'emergency-fund-months': 'Strong: 3-6 months minimum, 6+ very solid.',
+  'cash-reserves': 'Strong: covers near-term needs plus a buffer.',
+  'tax-advantaged-contributions':
+    'Strong: consistent annual contributions, ideally near account limits.',
+  'tax-advantaged-savings-ratio':
+    'Strong: 10%+ of after-tax income.',
+  '401k-contributions':
+    'Strong: enough to get the full match, ideally trending toward maxing.',
+  'roth-ira-contributions':
+    'Strong: consistent annual funding, ideally near the yearly limit.',
+  'hsa-contributions':
+    'Strong: consistent funding, ideally near the yearly limit when eligible.',
+  '529-contributions':
+    'Strong: consistent contributions aligned with education goals.',
+  'retirement-funding-ratio':
+    'Strong: on track with your long-term retirement target.',
+};
 
 function isLivingExpense(entry: BudgetEntry): boolean {
   return !isInvestmentCategory(entry.expenseCategory);
@@ -137,6 +179,7 @@ function createCurrencyRow(
   return {
     key,
     label,
+    benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
     value:
       amount === null ? createNotAvailableValue() : createCurrencyValue(amount),
   };
@@ -150,6 +193,7 @@ function createPercentageRow(
   return {
     key,
     label,
+    benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
     value:
       amount === null
         ? createNotAvailableValue()
@@ -161,6 +205,7 @@ function createUnsupportedRow(key: string, label: string): DashboardKpiRow {
   return {
     key,
     label,
+    benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
     value: createNotAvailableValue(),
   };
 }
@@ -385,6 +430,9 @@ export function buildDashboardKpiGroups({
         {
           key: 'emergency-fund-months',
           label: 'Emergency Fund Months (Emergency Fund / Monthly Expenses)',
+          benchmark:
+            KPI_BENCHMARKS['emergency-fund-months'] ??
+            'Strong: trending in a healthy direction.',
           value:
             emergencyFundMonths === null
               ? createNotAvailableValue()

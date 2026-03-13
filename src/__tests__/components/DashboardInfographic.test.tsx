@@ -78,6 +78,7 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
             key: `gross-income-${year}`,
             label: 'Gross Income',
             value: { kind: 'currency', amount: year * 1000 },
+            benchmark: 'Strong: stable or growing year over year.',
           },
           {
             key: 'emergency-fund-balance',
@@ -86,6 +87,8 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
               kind: 'currency',
               amount: emergencyFundBalance ?? 18000,
             },
+            benchmark:
+              'Strong: enough cash to cover 3-6 months of essentials.',
           },
           {
             key: 'emergency-fund-months',
@@ -94,6 +97,7 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
               kind: 'text',
               text: `${(((emergencyFundBalance ?? 18000) / 3000) || 0).toFixed(1)} months`,
             },
+            benchmark: 'Strong: 3-6 months minimum, 6+ very solid.',
           },
         ],
       },
@@ -128,6 +132,10 @@ describe('DashboardInfographic', () => {
       screen.getByRole('button', { name: 'Explain Gross Income' }),
     ).toBeInTheDocument();
     expect(screen.getByText('$2,025,000')).toBeInTheDocument();
+    expect(screen.getByText('Strong Looks Like')).toBeInTheDocument();
+    expect(
+      screen.getByText('Strong: stable or growing year over year.'),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue('18000')).toBeInTheDocument();
     expect(screen.getByText('6.0 months')).toBeInTheDocument();
 
