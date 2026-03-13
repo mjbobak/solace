@@ -138,12 +138,25 @@ function formatNetRangeSummary(component: ProjectedIncomeComponent): string {
   return `${formatCurrency(component.currentVersion.netAmount)} net x ${component.currentVersion.periodsPerYear}`;
 }
 
-function getSourceComposition(source: ProjectedIncomeSource): string {
-  const labels = source.components.map((component) =>
-    getComponentDisplayName(component),
-  );
+interface IncomeAmountStackProps {
+  primaryValue: number;
+  secondaryValue: number;
+}
 
-  return labels.length > 0 ? labels.join(' • ') : 'No components yet';
+function IncomeAmountStack({
+  primaryValue,
+  secondaryValue,
+}: IncomeAmountStackProps) {
+  return (
+    <div className="flex flex-col leading-tight">
+      <span className="text-sm font-semibold text-app">
+        {formatCurrency(primaryValue)}
+      </span>
+      <span className="mt-1 text-xs text-muted">
+        {formatCurrency(secondaryValue)} Net
+      </span>
+    </div>
+  );
 }
 
 function getOccurrenceEventDate(occurrence: IncomeOccurrence): string {
@@ -558,7 +571,10 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
   onSubmit,
 }) => {
   const bonusComponents = useMemo(
-    () => source?.components.filter((component) => component.componentMode === 'occurrence') ?? [],
+    () =>
+      source?.components.filter(
+        (component) => component.componentMode === 'occurrence',
+      ) ?? [],
     [source],
   );
   const isEditing = Boolean(component && occurrence);
@@ -584,7 +600,8 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
       return;
     }
 
-    const defaultChoice = bonusComponents.length > 0 ? String(bonusComponents[0].id) : 'new';
+    const defaultChoice =
+      bonusComponents.length > 0 ? String(bonusComponents[0].id) : 'new';
     setComponentChoice(defaultChoice);
     setLabel(bonusComponents[0]?.label ?? 'Annual bonus');
     setStatus('expected');
@@ -746,7 +763,9 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
           <Button
             onClick={handleSubmit}
             isLoading={isSaving}
-            disabled={!label.trim() || !grossAmount || !netAmount || !plannedDate}
+            disabled={
+              !label.trim() || !grossAmount || !netAmount || !plannedDate
+            }
           >
             {isEditing ? 'Save Changes' : 'Save Bonus'}
           </Button>
@@ -758,7 +777,9 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
 
 export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [projection, setProjection] = useState<IncomeYearProjection | null>(null);
+  const [projection, setProjection] = useState<IncomeYearProjection | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<number>>(
@@ -1132,25 +1153,25 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       ) : (
         <div className="surface-card overflow-hidden p-0">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full table-fixed border-collapse">
+              <colgroup>
+                <col className="w-[34%]" />
+                <col className="w-[24%]" />
+                <col className="w-[24%]" />
+                <col className="w-[18%]" />
+              </colgroup>
               <thead className="border-b section-divider bg-gray-50/80 text-left">
                 <tr>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                     Income Stream
                   </th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Components
+                    Committed
                   </th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Current Mix
+                    Planned
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Planned Net
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Committed Net
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                  <th className="w-px whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                     Actions
                   </th>
                 </tr>
@@ -1191,27 +1212,21 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
                             </span>
                           </button>
                         </td>
-                        <td className="px-4 py-4 text-sm text-muted">
-                          {source.components.length} total
-                          <div className="mt-1 text-xs">
-                            {recurringComponents.length} recurring,{' '}
-                            {bonusComponents.length} bonus
-                          </div>
+                        <td className="px-4 py-4 align-middle">
+                          <IncomeAmountStack
+                            primaryValue={source.totals.committedGross}
+                            secondaryValue={source.totals.committedNet}
+                          />
                         </td>
-                        <td className="px-4 py-4 text-sm text-muted">
-                          {getSourceComposition(source)}
-                        </td>
-                        <td className="px-4 py-4 text-right text-sm font-semibold text-app">
-                          {formatCurrency(source.totals.plannedNet)}
-                        </td>
-                        <td className="px-4 py-4 text-right text-sm font-semibold text-app">
-                          {formatCurrency(source.totals.committedNet)}
+                        <td className="px-4 py-4 align-middle">
+                          <IncomeAmountStack
+                            primaryValue={source.totals.plannedGross}
+                            secondaryValue={source.totals.plannedNet}
+                          />
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex justify-end gap-2">
-                            <div
-                              className="relative"
-                            >
+                            <div className="relative">
                               <button
                                 type="button"
                                 className="icon-button rounded-full border border-app p-2"
@@ -1236,7 +1251,9 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
                                 title={`More actions for ${source.name}`}
                                 aria-label={`More actions for income source ${source.name}`}
                                 aria-haspopup="menu"
-                                aria-expanded={openActionMenuSourceId === source.id}
+                                aria-expanded={
+                                  openActionMenuSourceId === source.id
+                                }
                               >
                                 <LuEllipsis className="h-4 w-4" />
                               </button>
@@ -1247,7 +1264,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
 
                       {isExpanded && (
                         <tr className="border-b section-divider bg-gray-50/40">
-                          <td colSpan={6} className="px-4 py-4">
+                          <td colSpan={4} className="px-4 py-4">
                             <div className="space-y-5">
                               <div>
                                 <div className="mb-3 flex items-center justify-between">
@@ -1257,111 +1274,143 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
                                 </div>
                                 {recurringComponents.length === 0 ? (
                                   <div className="rounded-xl border border-dashed border-app p-4 text-sm text-muted">
-                                    No recurring components tracked for this source.
+                                    No recurring components tracked for this
+                                    source.
                                   </div>
                                 ) : (
                                   <div className="overflow-x-auto rounded-xl border border-app bg-white">
                                     <table className="w-full text-sm">
                                       <thead className="border-b section-divider bg-gray-50/80 text-left text-muted">
                                         <tr>
-                                          <th className="px-4 py-3">Component</th>
-                                          <th className="px-4 py-3">Active Range</th>
-                                          <th className="px-4 py-3">Current Pay</th>
-                                          <th className="px-4 py-3 text-right">Planned Net</th>
-                                          <th className="px-4 py-3 text-right">Actions</th>
+                                          <th className="px-4 py-3">
+                                            Component
+                                          </th>
+                                          <th className="px-4 py-3">
+                                            Active Range
+                                          </th>
+                                          <th className="px-4 py-3">
+                                            Current Pay
+                                          </th>
+                                          <th className="px-4 py-3 text-right">
+                                            Planned Net
+                                          </th>
+                                          <th className="px-4 py-3 text-right">
+                                            Actions
+                                          </th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {recurringComponents.map((component) => (
-                                          <React.Fragment key={component.id}>
-                                            <tr className="border-b section-divider align-top">
-                                              <td className="px-4 py-3 font-medium text-app">
-                                                {getComponentDisplayName(component)}
-                                              </td>
-                                              <td className="px-4 py-3 text-muted">
-                                                {component.currentVersion
-                                                  ? `${formatDate(component.currentVersion.startDate)} to ${formatDate(component.currentVersion.endDate)}`
-                                                  : 'No active version'}
-                                              </td>
-                                              <td className="px-4 py-3 text-muted">
-                                                {formatNetRangeSummary(component)}
-                                              </td>
-                                              <td className="px-4 py-3 text-right font-semibold text-app">
-                                                {formatCurrency(component.totals.plannedNet)}
-                                              </td>
-                                              <td className="px-4 py-3">
-                                                <div className="flex justify-end">
-                                                  <Button
-                                                    variant="secondary"
-                                                    className="px-3 py-2 text-xs"
-                                                    onClick={() =>
-                                                      setModalState({
-                                                        type: 'add-version',
-                                                        component,
-                                                      })
-                                                    }
-                                                  >
-                                                    Add Change
-                                                  </Button>
-                                                </div>
-                                              </td>
-                                            </tr>
-                                            {component.versions.map((version) => (
-                                              <tr
-                                                key={version.id}
-                                                className="border-b section-divider bg-gray-50/70 text-xs text-muted"
-                                              >
-                                                <td className="px-4 py-2 pl-10">
-                                                  History
+                                        {recurringComponents.map(
+                                          (component) => (
+                                            <React.Fragment key={component.id}>
+                                              <tr className="border-b section-divider align-top">
+                                                <td className="px-4 py-3 font-medium text-app">
+                                                  {getComponentDisplayName(
+                                                    component,
+                                                  )}
                                                 </td>
-                                                <td className="px-4 py-2">
-                                                  {formatDate(version.startDate)} to{' '}
-                                                  {formatDate(version.endDate)}
+                                                <td className="px-4 py-3 text-muted">
+                                                  {component.currentVersion
+                                                    ? `${formatDate(component.currentVersion.startDate)} to ${formatDate(component.currentVersion.endDate)}`
+                                                    : 'No active version'}
                                                 </td>
-                                                <td className="px-4 py-2">
-                                                  {formatCurrency(version.netAmount)} net x{' '}
-                                                  {version.periodsPerYear}
+                                                <td className="px-4 py-3 text-muted">
+                                                  {formatNetRangeSummary(
+                                                    component,
+                                                  )}
                                                 </td>
-                                                <td className="px-4 py-2 text-right">
-                                                  {formatCurrency(version.grossAmount)} gross
+                                                <td className="px-4 py-3 text-right font-semibold text-app">
+                                                  {formatCurrency(
+                                                    component.totals.plannedNet,
+                                                  )}
                                                 </td>
-                                                <td className="px-4 py-2">
-                                                  <div className="flex justify-end gap-2">
-                                                    <button
-                                                      type="button"
-                                                      className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-white"
+                                                <td className="px-4 py-3">
+                                                  <div className="flex justify-end">
+                                                    <Button
+                                                      variant="secondary"
+                                                      className="px-3 py-2 text-xs"
                                                       onClick={() =>
                                                         setModalState({
-                                                          type: 'edit-version',
+                                                          type: 'add-version',
                                                           component,
-                                                          version,
                                                         })
                                                       }
-                                                      title={`Edit ${getComponentDisplayName(component)} change`}
-                                                      aria-label={`Edit ${getComponentDisplayName(component)} change`}
                                                     >
-                                                      <LuPencil className="h-3.5 w-3.5" />
-                                                    </button>
-                                                    <button
-                                                      type="button"
-                                                      className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-white"
-                                                      onClick={() =>
-                                                        void handleDeleteVersion(
-                                                          component,
-                                                          version,
-                                                        )
-                                                      }
-                                                      title={`Delete ${getComponentDisplayName(component)} change`}
-                                                      aria-label={`Delete ${getComponentDisplayName(component)} change`}
-                                                    >
-                                                      <LuTrash2 className="h-3.5 w-3.5" />
-                                                    </button>
+                                                      Add Promotion
+                                                    </Button>
                                                   </div>
                                                 </td>
                                               </tr>
-                                            ))}
-                                          </React.Fragment>
-                                        ))}
+                                              {component.versions.map(
+                                                (version) => (
+                                                  <tr
+                                                    key={version.id}
+                                                    className="border-b section-divider bg-gray-50/70 text-xs text-muted"
+                                                  >
+                                                    <td className="px-4 py-2 pl-10">
+                                                      History
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                      {formatDate(
+                                                        version.startDate,
+                                                      )}{' '}
+                                                      to{' '}
+                                                      {formatDate(
+                                                        version.endDate,
+                                                      )}
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                      {formatCurrency(
+                                                        version.netAmount,
+                                                      )}{' '}
+                                                      net x{' '}
+                                                      {version.periodsPerYear}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-right">
+                                                      {formatCurrency(
+                                                        version.grossAmount,
+                                                      )}{' '}
+                                                      gross
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                      <div className="flex justify-end gap-2">
+                                                        <button
+                                                          type="button"
+                                                          className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-white"
+                                                          onClick={() =>
+                                                            setModalState({
+                                                              type: 'edit-version',
+                                                              component,
+                                                              version,
+                                                            })
+                                                          }
+                                                          title={`Edit ${getComponentDisplayName(component)} change`}
+                                                          aria-label={`Edit ${getComponentDisplayName(component)} change`}
+                                                        >
+                                                          <LuPencil className="h-3.5 w-3.5" />
+                                                        </button>
+                                                        <button
+                                                          type="button"
+                                                          className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-white"
+                                                          onClick={() =>
+                                                            void handleDeleteVersion(
+                                                              component,
+                                                              version,
+                                                            )
+                                                          }
+                                                          title={`Delete ${getComponentDisplayName(component)} change`}
+                                                          aria-label={`Delete ${getComponentDisplayName(component)} change`}
+                                                        >
+                                                          <LuTrash2 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ),
+                                              )}
+                                            </React.Fragment>
+                                          ),
+                                        )}
                                       </tbody>
                                     </table>
                                   </div>
@@ -1385,88 +1434,101 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
                                         <tr>
                                           <th className="px-4 py-3">Bonus</th>
                                           <th className="px-4 py-3">Status</th>
-                                          <th className="px-4 py-3">Event Date</th>
-                                          <th className="px-4 py-3 text-right">Net</th>
-                                          <th className="px-4 py-3 text-right">Actions</th>
+                                          <th className="px-4 py-3">
+                                            Event Date
+                                          </th>
+                                          <th className="px-4 py-3 text-right">
+                                            Net
+                                          </th>
+                                          <th className="px-4 py-3 text-right">
+                                            Actions
+                                          </th>
                                         </tr>
                                       </thead>
                                       <tbody>
                                         {bonusComponents.flatMap((component) =>
-                                          component.occurrences.map((occurrence) => (
-                                            <tr
-                                              key={`${component.id}-${occurrence.id}`}
-                                              className="border-b section-divider"
-                                            >
-                                              <td className="px-4 py-3 font-medium text-app">
-                                                {getComponentDisplayName(component)}
-                                              </td>
-                                              <td className="px-4 py-3">
-                                                <span
-                                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${statusClasses[occurrence.status]}`}
-                                                >
-                                                  {occurrence.status}
-                                                </span>
-                                              </td>
-                                              <td className="px-4 py-3 text-muted">
-                                                {formatDate(
-                                                  getOccurrenceEventDate(occurrence),
-                                                )}
-                                              </td>
-                                              <td className="px-4 py-3 text-right font-semibold text-app">
-                                                {formatCurrency(occurrence.netAmount)}
-                                              </td>
-                                              <td className="px-4 py-3">
-                                                <div className="flex justify-end gap-2">
-                                                  {occurrence.status === 'expected' ? (
-                                                    <Button
-                                                      variant="secondary"
-                                                      className="px-3 py-2 text-xs"
+                                          component.occurrences.map(
+                                            (occurrence) => (
+                                              <tr
+                                                key={`${component.id}-${occurrence.id}`}
+                                                className="border-b section-divider"
+                                              >
+                                                <td className="px-4 py-3 font-medium text-app">
+                                                  {getComponentDisplayName(
+                                                    component,
+                                                  )}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                  <span
+                                                    className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${statusClasses[occurrence.status]}`}
+                                                  >
+                                                    {occurrence.status}
+                                                  </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-muted">
+                                                  {formatDate(
+                                                    getOccurrenceEventDate(
+                                                      occurrence,
+                                                    ),
+                                                  )}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-semibold text-app">
+                                                  {formatCurrency(
+                                                    occurrence.netAmount,
+                                                  )}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                  <div className="flex justify-end gap-2">
+                                                    {occurrence.status ===
+                                                    'expected' ? (
+                                                      <Button
+                                                        variant="secondary"
+                                                        className="px-3 py-2 text-xs"
+                                                        onClick={() =>
+                                                          handleMarkBonusActual(
+                                                            occurrence,
+                                                          )
+                                                        }
+                                                      >
+                                                        Mark Actual
+                                                      </Button>
+                                                    ) : (
+                                                      <span className="text-xs text-muted"></span>
+                                                    )}
+                                                    <button
+                                                      type="button"
+                                                      className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-gray-50"
                                                       onClick={() =>
-                                                        handleMarkBonusActual(
+                                                        setModalState({
+                                                          type: 'edit-bonus',
+                                                          component,
+                                                          occurrence,
+                                                        })
+                                                      }
+                                                      title={`Edit ${getComponentDisplayName(component)} event`}
+                                                      aria-label={`Edit ${getComponentDisplayName(component)} event`}
+                                                    >
+                                                      <LuPencil className="h-3.5 w-3.5" />
+                                                    </button>
+                                                    <button
+                                                      type="button"
+                                                      className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-red-50"
+                                                      onClick={() =>
+                                                        void handleDeleteBonus(
+                                                          component,
                                                           occurrence,
                                                         )
                                                       }
+                                                      title={`Delete ${getComponentDisplayName(component)} event`}
+                                                      aria-label={`Delete ${getComponentDisplayName(component)} event`}
                                                     >
-                                                      Mark Actual
-                                                    </Button>
-                                                  ) : (
-                                                    <span className="text-xs text-muted">
-                                                      Recorded
-                                                    </span>
-                                                  )}
-                                                  <button
-                                                    type="button"
-                                                    className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-gray-50"
-                                                    onClick={() =>
-                                                      setModalState({
-                                                        type: 'edit-bonus',
-                                                        component,
-                                                        occurrence,
-                                                      })
-                                                    }
-                                                    title={`Edit ${getComponentDisplayName(component)} event`}
-                                                    aria-label={`Edit ${getComponentDisplayName(component)} event`}
-                                                  >
-                                                    <LuPencil className="h-3.5 w-3.5" />
-                                                  </button>
-                                                  <button
-                                                    type="button"
-                                                    className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-red-50"
-                                                    onClick={() =>
-                                                      void handleDeleteBonus(
-                                                        component,
-                                                        occurrence,
-                                                      )
-                                                    }
-                                                    title={`Delete ${getComponentDisplayName(component)} event`}
-                                                    aria-label={`Delete ${getComponentDisplayName(component)} event`}
-                                                  >
-                                                    <LuTrash2 className="h-3.5 w-3.5" />
-                                                  </button>
-                                                </div>
-                                              </td>
-                                            </tr>
-                                          )),
+                                                      <LuTrash2 className="h-3.5 w-3.5" />
+                                                    </button>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            ),
+                                          ),
                                         )}
                                       </tbody>
                                     </table>
@@ -1502,7 +1564,11 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       <AddVersionModal
         isOpen={versionModalState !== null}
         component={versionModalState?.component ?? null}
-        version={versionModalState?.type === 'edit-version' ? versionModalState.version : null}
+        version={
+          versionModalState?.type === 'edit-version'
+            ? versionModalState.version
+            : null
+        }
         selectedYear={selectedYear}
         onClose={() => setModalState(null)}
         onSubmit={handleVersionModalSubmit}
@@ -1510,9 +1576,19 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
 
       <AddBonusModal
         isOpen={bonusModalState !== null}
-        source={bonusModalState?.type === 'add-bonus' ? bonusModalState.source : null}
-        component={bonusModalState?.type === 'edit-bonus' ? bonusModalState.component : null}
-        occurrence={bonusModalState?.type === 'edit-bonus' ? bonusModalState.occurrence : null}
+        source={
+          bonusModalState?.type === 'add-bonus' ? bonusModalState.source : null
+        }
+        component={
+          bonusModalState?.type === 'edit-bonus'
+            ? bonusModalState.component
+            : null
+        }
+        occurrence={
+          bonusModalState?.type === 'edit-bonus'
+            ? bonusModalState.occurrence
+            : null
+        }
         onClose={() => setModalState(null)}
         onSubmit={handleBonusModalSubmit}
       />
