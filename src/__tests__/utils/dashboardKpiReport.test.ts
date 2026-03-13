@@ -62,25 +62,39 @@ describe('buildDashboardKpiGroups', () => {
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: createIncomeTotals({ plannedGross: 200000 }),
       currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      emergencyFundBalance: 10000,
       budgetEntries: [
-        createBudgetEntry(),
+        createBudgetEntry({ spent: 2800 }),
         createBudgetEntry({
           id: 'BUD-0002',
-          expenseCategory: 'INVESTMENTS',
-          expenseLabel: '529A',
-          budgeted: 500,
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Restaurants',
+          budgeted: 400,
+          spent: 350,
+          remaining: 50,
+          percentage: 0.875,
         }),
         createBudgetEntry({
           id: 'BUD-0003',
           expenseCategory: 'INVESTMENTS',
-          expenseLabel: 'Roth IRA',
-          budgeted: 250,
+          expenseLabel: '529A',
+          budgeted: 500,
+          spent: 500,
         }),
         createBudgetEntry({
           id: 'BUD-0004',
+          expenseCategory: 'INVESTMENTS',
+          expenseLabel: 'Roth IRA',
+          budgeted: 250,
+          spent: 250,
+        }),
+        createBudgetEntry({
+          id: 'BUD-0005',
           expenseCategory: 'BENEFITS',
           expenseLabel: 'HSA',
           budgeted: 100,
+          spent: 100,
         }),
       ],
     });
@@ -91,19 +105,35 @@ describe('buildDashboardKpiGroups', () => {
     });
     expect(findRow(groups, 'annual-living-expenses')?.value).toEqual({
       kind: 'currency',
-      amount: 37200,
+      amount: 42000,
     });
     expect(findRow(groups, 'annual-investment-contributions')?.value).toEqual({
       kind: 'currency',
       amount: 9000,
     });
+    expect(findRow(groups, 'essential-spending')?.value).toEqual({
+      kind: 'currency',
+      amount: 2900,
+    });
+    expect(findRow(groups, 'funsies-spending')?.value).toEqual({
+      kind: 'currency',
+      amount: 350,
+    });
+    expect(findRow(groups, 'emergency-fund-balance')?.value).toEqual({
+      kind: 'currency',
+      amount: 10000,
+    });
+    expect(findRow(groups, 'emergency-fund-months')?.value).toEqual({
+      kind: 'text',
+      text: '3.2 months',
+    });
     expect(findRow(groups, 'annual-savings-amount')?.value).toEqual({
       kind: 'currency',
-      amount: 113800,
+      amount: 109000,
     });
     expect(findRow(groups, 'savings-rate')?.value).toEqual({
       kind: 'percentage',
-      amount: 0.7675,
+      amount: 0.7375,
     });
     expect(findRow(groups, 'income-growth-rate')?.value).toEqual({
       kind: 'percentage',

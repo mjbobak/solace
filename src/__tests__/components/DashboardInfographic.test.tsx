@@ -65,7 +65,11 @@ vi.mock('@/features/dashboard-infographic/components/MoneyFlowSection', () => ({
 }));
 
 vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
-  useDashboardKpiReport: (year: number) => ({
+  useDashboardKpiReport: (
+    year: number,
+    _availableYears: number[],
+    emergencyFundBalance?: number | null,
+  ) => ({
     groups: [
       {
         title: `${year} Report Group`,
@@ -74,6 +78,22 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
             key: `gross-income-${year}`,
             label: 'Gross Income',
             value: { kind: 'currency', amount: year * 1000 },
+          },
+          {
+            key: 'emergency-fund-balance',
+            label: 'Emergency Fund Balance',
+            value: {
+              kind: 'currency',
+              amount: emergencyFundBalance ?? 18000,
+            },
+          },
+          {
+            key: 'emergency-fund-months',
+            label: 'Emergency Fund Months (Emergency Fund / Monthly Expenses)',
+            value: {
+              kind: 'text',
+              text: `${(((emergencyFundBalance ?? 18000) / 3000) || 0).toFixed(1)} months`,
+            },
           },
         ],
       },
@@ -104,7 +124,19 @@ describe('DashboardInfographic', () => {
       screen.getByRole('heading', { name: 'Wealth Management KPI Report' }),
     ).toBeInTheDocument();
     expect(screen.getByText('2025 Report Group')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Explain Gross Income' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('$2,025,000')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('18000')).toBeInTheDocument();
+    expect(screen.getByText('6.0 months')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Emergency fund balance'), {
+      target: { value: '9000' },
+    });
+
+    expect(screen.getByDisplayValue('9000')).toBeInTheDocument();
+    expect(screen.getByText('3.0 months')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '2024' }));
 

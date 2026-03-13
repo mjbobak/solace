@@ -73,6 +73,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
     setTimeoutId(id);
   };
 
+  const showTooltipImmediately = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+    setIsVisible(true);
+  };
+
   const handleMouseLeave = () => {
     if (timeoutId) {
       clearTimeout(timeoutId);
@@ -114,6 +122,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
         className="inline-block"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onFocus={showTooltipImmediately}
+        onBlur={handleMouseLeave}
       >
         {children}
       </div>

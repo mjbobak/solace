@@ -26,6 +26,7 @@ interface BuildDashboardKpiGroupsParams {
   previousIncomeTotals: IncomeProjectionTotals | null;
   currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null;
   budgetEntries: BudgetEntry[] | null;
+  emergencyFundBalance?: number | null;
 }
 
 const NOT_AVAILABLE_VALUE: DashboardKpiValue = {
@@ -38,6 +39,20 @@ const TAX_ADVANTAGED_LABEL_MATCHERS = {
   roth: 'ROTH',
   hsa: 'HSA',
 } as const;
+
+export const DEFAULT_EMERGENCY_FUND_BALANCE = 18000;
+
+function isLivingExpense(entry: BudgetEntry): boolean {
+  return !isInvestmentCategory(entry.expenseCategory);
+}
+
+function isEssentialLivingExpense(entry: BudgetEntry): boolean {
+  return entry.expenseType === 'ESSENTIAL' && isLivingExpense(entry);
+}
+
+function isFunsiesLivingExpense(entry: BudgetEntry): boolean {
+  return entry.expenseType === 'FUNSIES' && isLivingExpense(entry);
+}
 
 function createCurrencyValue(amount: number): DashboardKpiValue {
   return {
@@ -57,6 +72,13 @@ function createNotAvailableValue(): DashboardKpiValue {
   return NOT_AVAILABLE_VALUE;
 }
 
+function createTextValue(text: string): DashboardKpiValue {
+  return {
+    kind: 'text',
+    text,
+  };
+}
+
 function formatAnnualBudgetAmount(monthlyAmount: number): number {
   return monthlyAmount * 12;
 }
@@ -68,6 +90,15 @@ function getAnnualBudgetAmount(
   return budgetEntries
     .filter(predicate)
     .reduce((sum, entry) => sum + formatAnnualBudgetAmount(entry.budgeted), 0);
+}
+
+function getSpentAmount(
+  budgetEntries: BudgetEntry[],
+  predicate: (entry: BudgetEntry) => boolean,
+): number {
+  return budgetEntries
+    .filter(predicate)
+    .reduce((sum, entry) => sum + entry.spent, 0);
 }
 
 export function matchesBudgetLabel(
@@ -180,22 +211,37 @@ export function buildDashboardKpiGroups({
   previousIncomeTotals,
   currentTaxAdvantagedInvestments,
   budgetEntries,
+  emergencyFundBalance = DEFAULT_EMERGENCY_FUND_BALANCE,
 }: BuildDashboardKpiGroupsParams): DashboardKpiGroup[] {
   const currentGrossIncome = currentIncomeTotals?.plannedGross ?? null;
   const currentAfterTaxIncome = currentIncomeTotals?.plannedNet ?? null;
   const previousGrossIncome = previousIncomeTotals?.plannedGross ?? null;
   const annualLivingExpenses = budgetEntries
-    ? getAnnualBudgetAmount(
-        budgetEntries,
-        (entry) => !isInvestmentCategory(entry.expenseCategory),
-      )
+    ? getAnnualBudgetAmount(budgetEntries, isLivingExpense)
     : null;
   const totalMonthlyExpenses =
     annualLivingExpenses === null ? null : annualLivingExpenses / 12;
+  const monthlyEssentialExpenses = budgetEntries
+    ? budgetEntries
+        .filter(isEssentialLivingExpense)
+        .reduce((sum, entry) => sum + entry.budgeted, 0)
+    : null;
+  const emergencyFundMonths =
+    emergencyFundBalance === null ||
+    monthlyEssentialExpenses === null ||
+    monthlyEssentialExpenses === 0
+      ? null
+      : emergencyFundBalance / monthlyEssentialExpenses;
   const annualInvestmentContributions = budgetEntries
     ? getAnnualBudgetAmount(budgetEntries, (entry) =>
         isInvestmentCategory(entry.expenseCategory),
       )
+    : null;
+  const essentialSpending = budgetEntries
+    ? getSpentAmount(budgetEntries, isEssentialLivingExpense)
+    : null;
+  const funsiesSpending = budgetEntries
+    ? getSpentAmount(budgetEntries, isFunsiesLivingExpense)
     : null;
   const annualSavingsAmount =
     currentAfterTaxIncome === null ||
@@ -315,8 +361,12 @@ export function buildDashboardKpiGroups({
           annualLivingExpenses,
         ),
         createUnsupportedRow('expense-growth-rate', 'Expense Growth Rate'),
-        createUnsupportedRow('fixed-expenses', 'Fixed Expenses'),
-        createUnsupportedRow('variable-expenses', 'Variable Expenses'),
+        createCurrencyRow(
+          'essential-spending',
+          'Essential',
+          essentialSpending,
+        ),
+        createCurrencyRow('funsies-spending', 'Funsies', funsiesSpending),
         createPercentageRow(
           'expense-ratio',
           'Expense Ratio (Living Expenses / After-Tax Income)',
@@ -327,11 +377,19 @@ export function buildDashboardKpiGroups({
     {
       title: '7. Liquidity and Safety',
       rows: [
-        createUnsupportedRow('emergency-fund-balance', 'Emergency Fund Balance'),
-        createUnsupportedRow(
-          'emergency-fund-months',
-          'Emergency Fund Months (Emergency Fund / Monthly Expenses)',
+        createCurrencyRow(
+          'emergency-fund-balance',
+          'Emergency Fund Balance',
+          emergencyFundBalance,
         ),
+        {
+          key: 'emergency-fund-months',
+          label: 'Emergency Fund Months (Emergency Fund / Monthly Expenses)',
+          value:
+            emergencyFundMonths === null
+              ? createNotAvailableValue()
+              : createTextValue(`${emergencyFundMonths.toFixed(1)} months`),
+        },
         createUnsupportedRow('cash-reserves', 'Cash Reserves'),
       ],
     },

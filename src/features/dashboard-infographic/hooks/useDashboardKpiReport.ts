@@ -18,6 +18,7 @@ interface UseDashboardKpiReportResult {
 export function useDashboardKpiReport(
   year: number,
   availableYears: number[],
+  emergencyFundBalance?: number | null,
 ): UseDashboardKpiReportResult {
   const [currentProjection, setCurrentProjection] =
     useState<IncomeYearProjection | null>(null);
@@ -87,8 +88,15 @@ export function useDashboardKpiReport(
         currentTaxAdvantagedInvestments:
           currentProjection?.taxAdvantagedInvestments ?? null,
         budgetEntries: budgetError ? null : budgetEntries,
+        emergencyFundBalance,
       }),
-    [budgetEntries, budgetError, currentProjection, previousProjection],
+    [
+      budgetEntries,
+      budgetError,
+      currentProjection,
+      previousProjection,
+      emergencyFundBalance,
+    ],
   );
 
   return {
