@@ -105,8 +105,7 @@ export interface CreateIncomeSourceInput {
   sortOrder?: number;
 }
 
-export interface UpdateIncomeSourceInput
-  extends Partial<CreateIncomeSourceInput> {}
+export type UpdateIncomeSourceInput = Partial<CreateIncomeSourceInput>;
 
 export interface CreateIncomeComponentInput {
   componentType: IncomeComponentType;
@@ -114,8 +113,7 @@ export interface CreateIncomeComponentInput {
   label?: string | null;
 }
 
-export interface UpdateIncomeComponentInput
-  extends Partial<CreateIncomeComponentInput> {}
+export type UpdateIncomeComponentInput = Partial<CreateIncomeComponentInput>;
 
 export interface CreateRecurringIncomeVersionInput {
   startDate: string;
@@ -126,8 +124,8 @@ export interface CreateRecurringIncomeVersionInput {
   deductions?: DeductionBreakdown | null;
 }
 
-export interface UpdateRecurringIncomeVersionInput
-  extends Partial<CreateRecurringIncomeVersionInput> {}
+export type UpdateRecurringIncomeVersionInput =
+  Partial<CreateRecurringIncomeVersionInput>;
 
 export interface CreateIncomeOccurrenceInput {
   status: IncomeOccurrenceStatus;
@@ -138,8 +136,7 @@ export interface CreateIncomeOccurrenceInput {
   deductions?: DeductionBreakdown | null;
 }
 
-export interface UpdateIncomeOccurrenceInput
-  extends Partial<CreateIncomeOccurrenceInput> {}
+export type UpdateIncomeOccurrenceInput = Partial<CreateIncomeOccurrenceInput>;
 
 export function getComponentDisplayName(component: ProjectedIncomeComponent): string {
   if (component.label?.trim()) {

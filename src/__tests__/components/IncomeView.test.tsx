@@ -1,7 +1,14 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
+
+import {
+  IncomeView,
+  type IncomeViewHandle,
+} from '@/features/income/components/IncomeView';
+import type { IncomeYearProjection } from '@/features/income/types/income';
 
 const { getYearProjection } = vi.hoisted(() => ({
   getYearProjection: vi.fn(),
@@ -42,9 +49,6 @@ vi.mock('@/features/income/services/incomeApiService', () => ({
     deleteSource: vi.fn(),
   },
 }));
-
-import { IncomeView } from '@/features/income/components/IncomeView';
-import type { IncomeYearProjection } from '@/features/income/types/income';
 
 const projection: IncomeYearProjection = {
   year: 2025,
@@ -275,5 +279,28 @@ describe('IncomeView', () => {
       'Planned',
       'Actions',
     ]);
+  });
+
+  it('opens the add income modal through the imperative handle', async () => {
+    getYearProjection.mockResolvedValue(projection);
+    const incomeViewRef = React.createRef<IncomeViewHandle>();
+
+    render(
+      <MemoryRouter>
+        <IncomeView ref={incomeViewRef} />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
+    );
+
+    act(() => {
+      incomeViewRef.current?.openAddIncomeModal();
+    });
+
+    expect(
+      await screen.findByRole('heading', { name: 'Add Income Source' }),
+    ).toBeInTheDocument();
   });
 });
