@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  LuChevronDown,
-  LuChevronRight,
-  LuEllipsis,
-} from 'react-icons/lu';
+import { LuChevronDown, LuChevronRight, LuEllipsis } from 'react-icons/lu';
 
 import type {
   IncomeOccurrence,

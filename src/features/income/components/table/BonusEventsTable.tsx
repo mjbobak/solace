@@ -44,7 +44,7 @@ export function BonusEventsTable({
   return (
     <div className="overflow-x-auto rounded-xl border border-app bg-white">
       <table className="w-full text-sm">
-        <thead className="border-b section-divider bg-gray-50/80 text-left text-muted">
+        <thead className="border-b section-divider bg-gray-200 text-left text-gray-700 text-muted">
           <tr>
             <th className="px-4 py-3">Bonus</th>
             <th className="px-4 py-3">Status</th>

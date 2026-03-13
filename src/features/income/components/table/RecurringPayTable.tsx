@@ -44,7 +44,7 @@ export function RecurringPayTable({
   return (
     <div className="overflow-x-auto rounded-xl border border-app bg-white">
       <table className="w-full text-sm">
-        <thead className="border-b section-divider bg-gray-50/80 text-left text-muted">
+        <thead className="border-b section-divider bg-gray-200 text-gray-700 text-left text-muted">
           <tr>
             <th className="px-4 py-3">Component</th>
             <th className="px-4 py-3">Active Range</th>
@@ -86,7 +86,7 @@ export function RecurringPayTable({
               {component.versions.map((version) => (
                 <tr
                   key={version.id}
-                  className="border-b section-divider bg-gray-50/70 text-xs text-muted"
+                  className="border-b section-divider bg-gray-50/70 text-xs text-muted text-gray-400"
                 >
                   <td className="px-4 py-2 pl-10">History</td>
                   <td className="px-4 py-2">
