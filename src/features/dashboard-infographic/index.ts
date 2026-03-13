@@ -11,6 +11,7 @@ export { useScrollSpy } from './hooks/useScrollSpy';
 export { useSpendingPulse } from './hooks/useSpendingPulse';
 export { useEmergencyCalculations } from './hooks/useEmergencyCalculations';
 export { useIncomeAnalysis } from './hooks/useIncomeAnalysis';
+export { useDashboardKpiReport } from './hooks/useDashboardKpiReport';
 
 // Types
 export type { Period } from './types/infographic';
