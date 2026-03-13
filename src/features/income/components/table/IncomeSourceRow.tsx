@@ -120,31 +120,35 @@ export function IncomeSourceRow({
           <td colSpan={4} className="px-4 py-4">
             <div className="space-y-5">
               <div>
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between pl-10">
                   <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
                     Recurring Pay
                   </h4>
                 </div>
-                <RecurringPayTable
-                  components={recurringComponents}
-                  onAddVersion={onAddVersion}
-                  onEditVersion={onEditVersion}
-                  onDeleteVersion={onDeleteVersion}
-                />
+                <div className="pl-10">
+                  <RecurringPayTable
+                    components={recurringComponents}
+                    onAddVersion={onAddVersion}
+                    onEditVersion={onEditVersion}
+                    onDeleteVersion={onDeleteVersion}
+                  />
+                </div>
               </div>
 
               <div>
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between pl-10">
                   <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
                     Bonus Events
                   </h4>
                 </div>
-                <BonusEventsTable
-                  components={bonusComponents}
-                  onMarkActual={onMarkActual}
-                  onEditBonus={onEditBonus}
-                  onDeleteBonus={onDeleteBonus}
-                />
+                <div className="pl-10">
+                  <BonusEventsTable
+                    components={bonusComponents}
+                    onMarkActual={onMarkActual}
+                    onEditBonus={onEditBonus}
+                    onDeleteBonus={onDeleteBonus}
+                  />
+                </div>
               </div>
             </div>
           </td>
