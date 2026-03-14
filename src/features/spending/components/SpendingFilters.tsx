@@ -23,7 +23,6 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
   availableAccounts,
   availableBudgetItems,
 }) => {
-  // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
       filters.year.length > 0 ||
@@ -37,78 +36,70 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
     );
   }, [filters]);
 
-  // Generate filter chips data
-  const getActiveFilterChips = useMemo(
-    () => (): Array<{ key: string; label: string }> => {
-      const chips: Array<{ key: string; label: string }> = [];
+  const activeFilterChips = useMemo((): Array<{ key: string; label: string }> => {
+    const chips: Array<{ key: string; label: string }> = [];
 
-      if (filters.searchQuery !== '') {
-        chips.push({
-          key: 'searchQuery',
-          label: `Search: "${filters.searchQuery}"`,
-        });
+    if (filters.searchQuery !== '') {
+      chips.push({
+        key: 'searchQuery',
+        label: `Search: "${filters.searchQuery}"`,
+      });
+    }
+
+    if (filters.year.length > 0) {
+      chips.push({ key: 'year', label: `Year: ${filters.year.join(', ')}` });
+    }
+
+    if (filters.month.length > 0) {
+      const monthNames = filters.month
+        .map((m) => MONTHS.find((month) => month.value === m)?.label)
+        .filter(Boolean)
+        .join(', ');
+      chips.push({ key: 'month', label: `Month: ${monthNames}` });
+    }
+
+    if (filters.accounts.length > 0) {
+      chips.push({
+        key: 'accounts',
+        label: `Account: ${filters.accounts.join(', ')}`,
+      });
+    }
+
+    if (filters.budgetCategories.length > 0) {
+      chips.push({
+        key: 'budgetCategories',
+        label: `Budget Item: ${filters.budgetCategories.join(', ')}`,
+      });
+    }
+
+    if (filters.accrualStatus.length > 0) {
+      const statusLabels = filters.accrualStatus
+        .map((status) => (status === 'YES' ? 'Spread' : 'Not spread'))
+        .join(', ');
+      chips.push({
+        key: 'accrualStatus',
+        label: `Payment Spread: ${statusLabels}`,
+      });
+    }
+
+    if (filters.amountMin !== undefined || filters.amountMax !== undefined) {
+      let amountLabel = 'Amount: ';
+      if (filters.amountMin !== undefined && filters.amountMax !== undefined) {
+        amountLabel += `$${filters.amountMin}-$${filters.amountMax}`;
+      } else if (filters.amountMin !== undefined) {
+        amountLabel += `≥$${filters.amountMin}`;
+      } else if (filters.amountMax !== undefined) {
+        amountLabel += `≤$${filters.amountMax}`;
       }
+      chips.push({
+        key: 'amount',
+        label: amountLabel,
+      });
+    }
 
-      if (filters.year.length > 0) {
-        chips.push({ key: 'year', label: `Year: ${filters.year.join(', ')}` });
-      }
+    return chips;
+  }, [filters]);
 
-      if (filters.month.length > 0) {
-        const monthNames = filters.month
-          .map((m) => MONTHS.find((month) => month.value === m)?.label)
-          .filter(Boolean)
-          .join(', ');
-        chips.push({ key: 'month', label: `Month: ${monthNames}` });
-      }
-
-      if (filters.accounts.length > 0) {
-        chips.push({
-          key: 'accounts',
-          label: `Account: ${filters.accounts.join(', ')}`,
-        });
-      }
-
-      if (filters.budgetCategories.length > 0) {
-        chips.push({
-          key: 'budgetCategories',
-          label: `Budget Item: ${filters.budgetCategories.join(', ')}`,
-        });
-      }
-
-      if (filters.accrualStatus.length > 0) {
-        const statusLabels = filters.accrualStatus
-          .map((status) => (status === 'YES' ? 'Spread' : 'Not spread'))
-          .join(', ');
-        chips.push({
-          key: 'accrualStatus',
-          label: `Payment Spread: ${statusLabels}`,
-        });
-      }
-
-      if (filters.amountMin !== undefined || filters.amountMax !== undefined) {
-        let amountLabel = 'Amount: ';
-        if (
-          filters.amountMin !== undefined &&
-          filters.amountMax !== undefined
-        ) {
-          amountLabel += `$${filters.amountMin}-$${filters.amountMax}`;
-        } else if (filters.amountMin !== undefined) {
-          amountLabel += `≥$${filters.amountMin}`;
-        } else if (filters.amountMax !== undefined) {
-          amountLabel += `≤$${filters.amountMax}`;
-        }
-        chips.push({
-          key: 'amount',
-          label: amountLabel,
-        });
-      }
-
-      return chips;
-    },
-    [filters],
-  );
-
-  // Handler to remove a filter
   const handleRemoveFilter = (filterKey: string) => {
     const updates: Partial<SpendingFiltersType> = {};
 
@@ -167,6 +158,7 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
               }
               options={availableBudgetItems}
               placeholder="All Budget Items"
+              searchPlaceholder="Filter budget items..."
             />
           </div>
         </div>
@@ -193,7 +185,7 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
       {/* Active filter chips - refined chip design */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2.5 items-center">
-          {getActiveFilterChips().map((chip) => (
+          {activeFilterChips.map((chip) => (
             <div
               key={chip.key}
               className="filter-chip group"

@@ -5,33 +5,32 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({
-  label,
-  error,
-  className = '',
-  id,
-  ...props
-}) => {
-  const generatedId = React.useId();
-  const inputId = id ?? generatedId;
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, className = '', id, ...props }, ref) => {
+    const generatedId = React.useId();
+    const inputId = id ?? generatedId;
 
-  return (
-    <div className="w-full">
-      {label && (
-        <label className="form-label" htmlFor={inputId}>
-          {label}
-          {props.required && <span className="input-required ml-1">*</span>}
-        </label>
-      )}
-      <input
-        id={inputId}
-        className={`form-input ${error ? 'form-input-error' : ''} ${className}`}
-        {...props}
-      />
-      {error && <p className="form-error">{error}</p>}
-    </div>
-  );
-};
+    return (
+      <div className="w-full">
+        {label && (
+          <label className="form-label" htmlFor={inputId}>
+            {label}
+            {props.required && <span className="input-required ml-1">*</span>}
+          </label>
+        )}
+        <input
+          ref={ref}
+          id={inputId}
+          className={`form-input ${error ? 'form-input-error' : ''} ${className}`}
+          {...props}
+        />
+        {error && <p className="form-error">{error}</p>}
+      </div>
+    );
+  },
+);
+
+Input.displayName = 'Input';
 
 interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
