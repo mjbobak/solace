@@ -28,8 +28,16 @@ export function useDashboardKpiReport(
     useState<IncomeYearProjection | null>(null);
   const [incomeError, setIncomeError] = useState<string | null>(null);
   const [isIncomeLoading, setIsIncomeLoading] = useState(true);
-  const { budgetEntries, isLoading: isBudgetLoading, error: budgetError } =
-    useBudgetData(year, 'monthly_current_month', false);
+  const {
+    budgetEntries: monthlyBudgetEntries,
+    isLoading: isMonthlyBudgetLoading,
+    error: monthlyBudgetError,
+  } = useBudgetData(year, 'monthly_current_month', false);
+  const {
+    budgetEntries: annualBudgetEntries,
+    isLoading: isAnnualBudgetLoading,
+    error: annualBudgetError,
+  } = useBudgetData(year, 'annual_full_year', false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -89,12 +97,15 @@ export function useDashboardKpiReport(
         previousIncomeTotals: previousProjection?.totals ?? null,
         currentTaxAdvantagedInvestments:
           currentProjection?.taxAdvantagedInvestments ?? null,
-        budgetEntries: budgetError ? null : budgetEntries,
+        monthlyBudgetEntries: monthlyBudgetError ? null : monthlyBudgetEntries,
+        annualBudgetEntries: annualBudgetError ? null : annualBudgetEntries,
         emergencyFundBalance,
       }),
     [
-      budgetEntries,
-      budgetError,
+      monthlyBudgetEntries,
+      monthlyBudgetError,
+      annualBudgetEntries,
+      annualBudgetError,
       currentProjection,
       previousProjection,
       emergencyFundBalance,
@@ -106,7 +117,7 @@ export function useDashboardKpiReport(
     savedEmergencyFundBalance:
       currentProjection?.emergencyFundBalance ??
       DEFAULT_EMERGENCY_FUND_BALANCE,
-    isLoading: isIncomeLoading || isBudgetLoading,
-    error: incomeError ?? budgetError,
+    isLoading: isIncomeLoading || isMonthlyBudgetLoading || isAnnualBudgetLoading,
+    error: incomeError ?? monthlyBudgetError ?? annualBudgetError,
   };
 }

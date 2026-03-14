@@ -14,7 +14,8 @@ export type DashboardKpiValue =
 export interface DashboardKpiRow {
   key: string;
   label: string;
-  value: DashboardKpiValue;
+  actualValue: DashboardKpiValue;
+  plannedValue?: DashboardKpiValue;
   benchmark: string;
 }
 
@@ -27,7 +28,8 @@ interface BuildDashboardKpiGroupsParams {
   currentIncomeTotals: IncomeProjectionTotals | null;
   previousIncomeTotals: IncomeProjectionTotals | null;
   currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null;
-  budgetEntries: BudgetEntry[] | null;
+  monthlyBudgetEntries: BudgetEntry[] | null;
+  annualBudgetEntries: BudgetEntry[] | null;
   emergencyFundBalance?: number | null;
 }
 
@@ -124,22 +126,39 @@ function formatAnnualBudgetAmount(monthlyAmount: number): number {
   return monthlyAmount * 12;
 }
 
+function sumBudgetEntries(
+  budgetEntries: BudgetEntry[],
+  predicate: (entry: BudgetEntry) => boolean,
+  getAmount: (entry: BudgetEntry) => number,
+): number {
+  return budgetEntries
+    .filter(predicate)
+    .reduce((sum, entry) => sum + getAmount(entry), 0);
+}
+
 function getAnnualBudgetAmount(
   budgetEntries: BudgetEntry[],
   predicate: (entry: BudgetEntry) => boolean,
 ): number {
-  return budgetEntries
-    .filter(predicate)
-    .reduce((sum, entry) => sum + formatAnnualBudgetAmount(entry.budgeted), 0);
+  return sumBudgetEntries(
+    budgetEntries,
+    predicate,
+    (entry) => formatAnnualBudgetAmount(entry.budgeted),
+  );
 }
 
 function getSpentAmount(
   budgetEntries: BudgetEntry[],
   predicate: (entry: BudgetEntry) => boolean,
 ): number {
-  return budgetEntries
-    .filter(predicate)
-    .reduce((sum, entry) => sum + entry.spent, 0);
+  return sumBudgetEntries(budgetEntries, predicate, (entry) => entry.spent);
+}
+
+function getBudgetedAmount(
+  budgetEntries: BudgetEntry[],
+  predicate: (entry: BudgetEntry) => boolean,
+): number {
+  return sumBudgetEntries(budgetEntries, predicate, (entry) => entry.budgeted);
 }
 
 export function matchesBudgetLabel(
@@ -170,33 +189,55 @@ function getMatchedAnnualContribution(
   };
 }
 
+function createNumericDisplayValue(
+  amount: number | null,
+  createValue: (value: number) => DashboardKpiValue,
+): DashboardKpiValue {
+  if (amount === null) {
+    return createNotAvailableValue();
+  }
+
+  return createValue(amount);
+}
+
+function createPlannedValue(
+  amount: number | null | undefined,
+  createValue: (value: number) => DashboardKpiValue,
+): DashboardKpiValue | undefined {
+  if (amount === undefined) {
+    return undefined;
+  }
+
+  return createNumericDisplayValue(amount, createValue);
+}
+
 function createCurrencyRow(
   key: string,
   label: string,
-  amount: number | null,
+  actualAmount: number | null,
+  plannedAmount?: number | null,
 ): DashboardKpiRow {
   return {
     key,
     label,
     benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
-    value:
-      amount === null ? createNotAvailableValue() : createCurrencyValue(amount),
+    actualValue: createNumericDisplayValue(actualAmount, createCurrencyValue),
+    plannedValue: createPlannedValue(plannedAmount, createCurrencyValue),
   };
 }
 
 function createPercentageRow(
   key: string,
   label: string,
-  amount: number | null,
+  actualAmount: number | null,
+  plannedAmount?: number | null,
 ): DashboardKpiRow {
   return {
     key,
     label,
     benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
-    value:
-      amount === null
-        ? createNotAvailableValue()
-        : createPercentageValue(amount),
+    actualValue: createNumericDisplayValue(actualAmount, createPercentageValue),
+    plannedValue: createPlannedValue(plannedAmount, createPercentageValue),
   };
 }
 
@@ -205,7 +246,7 @@ function createUnsupportedRow(key: string, label: string): DashboardKpiRow {
     key,
     label,
     benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
-    value: createNotAvailableValue(),
+    actualValue: createNotAvailableValue(),
   };
 }
 
@@ -254,59 +295,100 @@ export function buildDashboardKpiGroups({
   currentIncomeTotals,
   previousIncomeTotals,
   currentTaxAdvantagedInvestments,
-  budgetEntries,
+  monthlyBudgetEntries,
+  annualBudgetEntries,
   emergencyFundBalance = DEFAULT_EMERGENCY_FUND_BALANCE,
 }: BuildDashboardKpiGroupsParams): DashboardKpiGroup[] {
   const currentGrossIncome = currentIncomeTotals?.plannedGross ?? null;
   const currentAfterTaxIncome = currentIncomeTotals?.plannedNet ?? null;
+  const currentCommittedAfterTaxIncome = currentIncomeTotals?.committedNet ?? null;
   const previousGrossIncome = previousIncomeTotals?.plannedGross ?? null;
-  const annualLivingExpenses = budgetEntries
-    ? getAnnualBudgetAmount(budgetEntries, isLivingExpense)
+  const plannedAnnualLivingExpenses = monthlyBudgetEntries
+    ? getAnnualBudgetAmount(monthlyBudgetEntries, isLivingExpense)
+    : null;
+  const actualAnnualLivingExpenses = annualBudgetEntries
+    ? getSpentAmount(annualBudgetEntries, isLivingExpense)
     : null;
   const totalMonthlyExpenses =
-    annualLivingExpenses === null ? null : annualLivingExpenses / 12;
-  const monthlyEssentialExpenses = budgetEntries
-    ? budgetEntries
-        .filter(isEssentialLivingExpense)
-        .reduce((sum, entry) => sum + entry.budgeted, 0)
+    plannedAnnualLivingExpenses === null ? null : plannedAnnualLivingExpenses / 12;
+  const actualTotalMonthlyExpenses = monthlyBudgetEntries
+    ? getSpentAmount(monthlyBudgetEntries, isLivingExpense)
+    : null;
+  const plannedMonthlyEssentialExpenses = monthlyBudgetEntries
+    ? getBudgetedAmount(monthlyBudgetEntries, isEssentialLivingExpense)
     : null;
   const emergencyFundMonths =
     emergencyFundBalance === null ||
-    monthlyEssentialExpenses === null ||
-    monthlyEssentialExpenses === 0
+    plannedMonthlyEssentialExpenses === null ||
+    plannedMonthlyEssentialExpenses === 0
       ? null
-      : emergencyFundBalance / monthlyEssentialExpenses;
-  const annualInvestmentContributions = budgetEntries
-    ? getAnnualBudgetAmount(budgetEntries, (entry) =>
+      : emergencyFundBalance / plannedMonthlyEssentialExpenses;
+  const plannedAnnualInvestmentContributions = monthlyBudgetEntries
+    ? getAnnualBudgetAmount(monthlyBudgetEntries, (entry) =>
         isInvestmentCategory(entry.expenseCategory),
       )
     : null;
-  const essentialSpending = budgetEntries
-    ? getSpentAmount(budgetEntries, isEssentialLivingExpense)
+  const actualAnnualInvestmentContributions = annualBudgetEntries
+    ? getSpentAmount(annualBudgetEntries, (entry) =>
+        isInvestmentCategory(entry.expenseCategory),
+      )
     : null;
-  const funsiesSpending = budgetEntries
-    ? getSpentAmount(budgetEntries, isFunsiesLivingExpense)
+  const actualEssentialSpending = monthlyBudgetEntries
+    ? getSpentAmount(monthlyBudgetEntries, isEssentialLivingExpense)
     : null;
-  const annualSavingsAmount =
+  const plannedEssentialSpending = monthlyBudgetEntries
+    ? getBudgetedAmount(monthlyBudgetEntries, isEssentialLivingExpense)
+    : null;
+  const actualFunsiesSpending = monthlyBudgetEntries
+    ? getSpentAmount(monthlyBudgetEntries, isFunsiesLivingExpense)
+    : null;
+  const plannedFunsiesSpending = monthlyBudgetEntries
+    ? getBudgetedAmount(monthlyBudgetEntries, isFunsiesLivingExpense)
+    : null;
+  const plannedAnnualSavingsAmount =
     currentAfterTaxIncome === null ||
-    annualLivingExpenses === null ||
-    annualInvestmentContributions === null
+    plannedAnnualLivingExpenses === null ||
+    plannedAnnualInvestmentContributions === null
       ? null
       : currentAfterTaxIncome -
-        annualLivingExpenses -
-        annualInvestmentContributions;
-  const savingsRate = calculateRatio(
-    annualSavingsAmount === null || annualInvestmentContributions === null
+        plannedAnnualLivingExpenses -
+        plannedAnnualInvestmentContributions;
+  const actualAnnualSavingsAmount =
+    currentCommittedAfterTaxIncome === null ||
+    actualAnnualLivingExpenses === null ||
+    actualAnnualInvestmentContributions === null
       ? null
-      : annualSavingsAmount + annualInvestmentContributions,
+      : currentCommittedAfterTaxIncome -
+        actualAnnualLivingExpenses -
+        actualAnnualInvestmentContributions;
+  const savingsRate = calculateRatio(
+    actualAnnualSavingsAmount === null ||
+      actualAnnualInvestmentContributions === null
+      ? null
+      : actualAnnualSavingsAmount + actualAnnualInvestmentContributions,
+    currentCommittedAfterTaxIncome,
+  );
+  const plannedSavingsRate = calculateRatio(
+    plannedAnnualSavingsAmount === null ||
+      plannedAnnualInvestmentContributions === null
+      ? null
+      : plannedAnnualSavingsAmount + plannedAnnualInvestmentContributions,
     currentAfterTaxIncome,
   );
   const savingsEfficiency = calculateRatio(
-    annualSavingsAmount,
+    actualAnnualSavingsAmount,
+    currentCommittedAfterTaxIncome,
+  );
+  const plannedSavingsEfficiency = calculateRatio(
+    plannedAnnualSavingsAmount,
     currentAfterTaxIncome,
   );
   const expenseRatio = calculateRatio(
-    annualLivingExpenses,
+    actualAnnualLivingExpenses,
+    currentCommittedAfterTaxIncome,
+  );
+  const plannedExpenseRatio = calculateRatio(
+    plannedAnnualLivingExpenses,
     currentAfterTaxIncome,
   );
   const incomeGrowthRate = calculateGrowthRate(
@@ -316,15 +398,15 @@ export function buildDashboardKpiGroups({
   const contributions401k =
     currentTaxAdvantagedInvestments?.contributions401k ?? null;
   const annual529Contributions = getMatchedAnnualContribution(
-    budgetEntries,
+    monthlyBudgetEntries,
     TAX_ADVANTAGED_LABEL_MATCHERS.contributions529,
   );
   const annualRothContributions = getMatchedAnnualContribution(
-    budgetEntries,
+    monthlyBudgetEntries,
     TAX_ADVANTAGED_LABEL_MATCHERS.roth,
   );
   const annualHsaContributions = getMatchedAnnualContribution(
-    budgetEntries,
+    monthlyBudgetEntries,
     TAX_ADVANTAGED_LABEL_MATCHERS.hsa,
   );
   const taxAdvantagedContributions =
@@ -357,16 +439,23 @@ export function buildDashboardKpiGroups({
     {
       title: '2. Savings Rate',
       rows: [
-        createPercentageRow('savings-rate', 'Savings Rate', savingsRate),
+        createPercentageRow(
+          'savings-rate',
+          'Savings Rate',
+          savingsRate,
+          plannedSavingsRate,
+        ),
         createCurrencyRow(
           'annual-savings-amount',
           'Annual Savings Amount',
-          annualSavingsAmount,
+          actualAnnualSavingsAmount,
+          plannedAnnualSavingsAmount,
         ),
         createCurrencyRow(
           'annual-investment-contributions',
           'Annual Investment Contributions',
-          annualInvestmentContributions,
+          actualAnnualInvestmentContributions,
+          plannedAnnualInvestmentContributions,
         ),
       ],
     },
@@ -388,6 +477,7 @@ export function buildDashboardKpiGroups({
           'savings-efficiency',
           'Savings Efficiency (Savings / After-Tax Income)',
           savingsEfficiency,
+          plannedSavingsEfficiency,
         ),
       ],
     },
@@ -397,24 +487,33 @@ export function buildDashboardKpiGroups({
         createCurrencyRow(
           'total-monthly-expenses',
           'Total Monthly Expenses',
+          actualTotalMonthlyExpenses,
           totalMonthlyExpenses,
         ),
         createCurrencyRow(
           'annual-living-expenses',
           'Annual Living Expenses',
-          annualLivingExpenses,
+          actualAnnualLivingExpenses,
+          plannedAnnualLivingExpenses,
         ),
         createUnsupportedRow('expense-growth-rate', 'Expense Growth Rate'),
         createCurrencyRow(
           'essential-spending',
           'Essential',
-          essentialSpending,
+          actualEssentialSpending,
+          plannedEssentialSpending,
         ),
-        createCurrencyRow('funsies-spending', 'Funsies', funsiesSpending),
+        createCurrencyRow(
+          'funsies-spending',
+          'Funsies',
+          actualFunsiesSpending,
+          plannedFunsiesSpending,
+        ),
         createPercentageRow(
           'expense-ratio',
           'Expense Ratio (Living Expenses / After-Tax Income)',
           expenseRatio,
+          plannedExpenseRatio,
         ),
       ],
     },
@@ -432,7 +531,7 @@ export function buildDashboardKpiGroups({
           benchmark:
             KPI_BENCHMARKS['emergency-fund-months'] ??
             'Strong: trending in a healthy direction.',
-          value:
+          actualValue:
             emergencyFundMonths === null
               ? createNotAvailableValue()
               : createTextValue(`${emergencyFundMonths.toFixed(1)} months`),

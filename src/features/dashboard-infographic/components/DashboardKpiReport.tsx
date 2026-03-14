@@ -3,10 +3,10 @@ import { BsInfoCircle, BsPencil } from 'react-icons/bs';
 import { toast } from 'sonner';
 
 import { incomeApiService } from '@/features/income/services/incomeApiService';
+import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { useDashboardKpiReport } from '../hooks/useDashboardKpiReport';
 import {
-  DEFAULT_EMERGENCY_FUND_BALANCE,
   formatDashboardKpiValue,
   type DashboardKpiRow,
 } from '../utils/dashboardKpiReport';
@@ -104,13 +104,13 @@ function renderMetricValue(
   emergencyFundInputRef: React.RefObject<HTMLInputElement | null>,
 ): React.ReactNode {
   if (row.key !== 'emergency-fund-balance') {
-    return formatDashboardKpiValue(row.value);
+    return formatDashboardKpiValue(row.actualValue);
   }
 
   if (!isEditingEmergencyFund) {
     return (
       <div className="flex items-center justify-end gap-2">
-        <span>{formatDashboardKpiValue(row.value)}</span>
+        <span>{formatDashboardKpiValue(row.actualValue)}</span>
         <button
           type="button"
           onClick={onEditEmergencyFund}
@@ -250,7 +250,10 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                   Metric
                 </th>
                 <th className="px-6 py-3 text-right font-semibold text-app">
-                  Value
+                  Planned
+                </th>
+                <th className="px-6 py-3 text-right font-semibold text-app">
+                  Actual
                 </th>
                 <th className="px-6 py-3 text-left font-semibold text-app">
                   Strong Looks Like
@@ -262,7 +265,7 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                 <React.Fragment key={group.title}>
                   <tr className="border-t border-black/10 bg-black/[0.02]">
                     <th
-                      colSpan={3}
+                      colSpan={4}
                       className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted"
                     >
                       {group.title}
@@ -287,6 +290,11 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                           </Tooltip>
                         </div>
                       </th>
+                      <td className="px-6 py-3 text-right text-app">
+                        {row.plannedValue
+                          ? formatDashboardKpiValue(row.plannedValue)
+                          : '—'}
+                      </td>
                       <td className="px-6 py-3 text-right text-app">
                         {renderMetricValue(
                           row,
