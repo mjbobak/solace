@@ -6,48 +6,6 @@ const { updateYearSettings } = vi.hoisted(() => ({
   updateYearSettings: vi.fn(),
 }));
 
-vi.mock('@/shared/hooks/usePlanningYearSelection', async () => {
-  const ReactModule = await import('react');
-
-  return {
-    usePlanningYearSelection: () => {
-      const [selectedYear, setSelectedYear] = ReactModule.useState(2025);
-
-      return {
-        availableYears: [2024, 2025],
-        isLoading: false,
-        selectedYear,
-        setSelectedYear,
-      };
-    },
-  };
-});
-
-vi.mock('@/shared/components/PlanningYearDropdown', () => ({
-  PlanningYearDropdown: ({
-    year,
-    years,
-    onYearChange,
-  }: {
-    year: number;
-    years: number[];
-    onYearChange: (year: number) => void;
-  }) => (
-    <div>
-      <span>Selected year {year}</span>
-      {years.map((optionYear) => (
-        <button
-          key={optionYear}
-          type="button"
-          onClick={() => onYearChange(optionYear)}
-        >
-          {optionYear}
-        </button>
-      ))}
-    </div>
-  ),
-}));
-
 vi.mock('@/features/dashboard-infographic/components/FinancialHealthSection', () => ({
   FinancialHealthSection: () => <div>Financial Health Section</div>,
 }));
@@ -72,6 +30,7 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
   useDashboardKpiReport: (
     year: number,
     _availableYears: number[],
+    _spendBasis: string,
     emergencyFundBalance?: number | null,
   ) => ({
     groups: [
@@ -81,13 +40,13 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
           {
             key: `gross-income-${year}`,
             label: 'Gross Income',
-            value: { kind: 'currency', amount: year * 1000 },
+            actualValue: { kind: 'currency', amount: year * 1000 },
             benchmark: 'Strong: stable or growing year over year.',
           },
           {
             key: 'emergency-fund-balance',
             label: 'Emergency Fund Balance',
-            value: {
+            actualValue: {
               kind: 'currency',
               amount: emergencyFundBalance ?? 18000,
             },
@@ -97,7 +56,7 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
           {
             key: 'emergency-fund-months',
             label: 'Emergency Fund Months (Emergency Fund / Monthly Expenses)',
-            value: {
+            actualValue: {
               kind: 'text',
               text: `${(((emergencyFundBalance ?? 18000) / 3000) || 0).toFixed(1)} months`,
             },
@@ -139,7 +98,13 @@ describe('DashboardInfographic', () => {
 
     render(
       <MemoryRouter>
-        <DashboardInfographic />
+        <DashboardInfographic
+          year={2025}
+          availableYears={[2024, 2025]}
+          spendBasis="monthly_avg_elapsed"
+          mode="report"
+          onModeChange={vi.fn()}
+        />
       </MemoryRouter>,
     );
 
@@ -184,13 +149,20 @@ describe('DashboardInfographic', () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '2024' }));
+  });
 
-    expect(screen.getByText('Planning year 2024')).toBeInTheDocument();
-    expect(screen.getByText('2024 Report Group')).toBeInTheDocument();
-    expect(screen.getByText('$2,024,000')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Visual' }));
+  it('renders visual mode content when requested', () => {
+    render(
+      <MemoryRouter>
+        <DashboardInfographic
+          year={2025}
+          availableYears={[2024, 2025]}
+          spendBasis="monthly_avg_elapsed"
+          mode="visual"
+          onModeChange={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByText('Financial Health Section')).toBeInTheDocument();
     expect(

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
+import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type { IncomeYearProjection } from '@/features/income/types/income';
+import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
 
 import {
   buildDashboardKpiGroups,
@@ -20,6 +22,7 @@ interface UseDashboardKpiReportResult {
 export function useDashboardKpiReport(
   year: number,
   availableYears: number[],
+  spendBasis: SpendBasis,
   emergencyFundBalance?: number | null,
 ): UseDashboardKpiReportResult {
   const [currentProjection, setCurrentProjection] =
@@ -28,16 +31,8 @@ export function useDashboardKpiReport(
     useState<IncomeYearProjection | null>(null);
   const [incomeError, setIncomeError] = useState<string | null>(null);
   const [isIncomeLoading, setIsIncomeLoading] = useState(true);
-  const {
-    budgetEntries: monthlyBudgetEntries,
-    isLoading: isMonthlyBudgetLoading,
-    error: monthlyBudgetError,
-  } = useBudgetData(year, 'monthly_current_month', false);
-  const {
-    budgetEntries: annualBudgetEntries,
-    isLoading: isAnnualBudgetLoading,
-    error: annualBudgetError,
-  } = useBudgetData(year, 'annual_full_year', false);
+  const { budgetEntries, isLoading: isBudgetLoading, error: budgetError } =
+    useBudgetData(year, spendBasis, false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -97,17 +92,18 @@ export function useDashboardKpiReport(
         previousIncomeTotals: previousProjection?.totals ?? null,
         currentTaxAdvantagedInvestments:
           currentProjection?.taxAdvantagedInvestments ?? null,
-        monthlyBudgetEntries: monthlyBudgetError ? null : monthlyBudgetEntries,
-        annualBudgetEntries: annualBudgetError ? null : annualBudgetEntries,
+        budgetEntries: budgetError ? null : budgetEntries,
+        spendBasis,
+        completedMonths: getCompletedMonthsForYear(year),
         emergencyFundBalance,
       }),
     [
-      monthlyBudgetEntries,
-      monthlyBudgetError,
-      annualBudgetEntries,
-      annualBudgetError,
+      budgetEntries,
+      budgetError,
       currentProjection,
       previousProjection,
+      spendBasis,
+      year,
       emergencyFundBalance,
     ],
   );
@@ -117,7 +113,7 @@ export function useDashboardKpiReport(
     savedEmergencyFundBalance:
       currentProjection?.emergencyFundBalance ??
       DEFAULT_EMERGENCY_FUND_BALANCE,
-    isLoading: isIncomeLoading || isMonthlyBudgetLoading || isAnnualBudgetLoading,
-    error: incomeError ?? monthlyBudgetError ?? annualBudgetError,
+    isLoading: isIncomeLoading || isBudgetLoading,
+    error: incomeError ?? budgetError,
   };
 }

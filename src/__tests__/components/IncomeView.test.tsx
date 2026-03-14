@@ -7,7 +7,6 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -19,18 +18,6 @@ import type { IncomeYearProjection } from '@/features/income/types/income';
 const { getYearProjection, updateYearSettings } = vi.hoisted(() => ({
   getYearProjection: vi.fn(),
   updateYearSettings: vi.fn(),
-}));
-
-vi.mock('@/shared/hooks/usePlanningYearSelection', () => ({
-  usePlanningYearSelection: () => ({
-    availableYears: [2025],
-    selectedYear: 2025,
-    setSelectedYear: vi.fn(),
-  }),
-}));
-
-vi.mock('@/shared/components/PlanningYearDropdown', () => ({
-  PlanningYearDropdown: () => <div>Planning year dropdown</div>,
 }));
 
 vi.mock('sonner', () => ({
@@ -166,9 +153,7 @@ describe('IncomeView', () => {
     getYearProjection.mockResolvedValue(projection);
 
     const { container } = render(
-      <MemoryRouter>
-        <IncomeView />
-      </MemoryRouter>,
+      <IncomeView planningYear={2025} />,
     );
 
     await waitFor(() =>
@@ -228,9 +213,7 @@ describe('IncomeView', () => {
     const incomeViewRef = React.createRef<IncomeViewHandle>();
 
     render(
-      <MemoryRouter>
-        <IncomeView ref={incomeViewRef} />
-      </MemoryRouter>,
+      <IncomeView ref={incomeViewRef} planningYear={2025} />,
     );
 
     await waitFor(() =>
@@ -257,9 +240,7 @@ describe('IncomeView', () => {
     });
 
     render(
-      <MemoryRouter>
-        <IncomeView />
-      </MemoryRouter>,
+      <IncomeView planningYear={2025} />,
     );
 
     await waitFor(() =>

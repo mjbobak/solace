@@ -20,359 +20,265 @@ import { isInvestmentCategory } from '@/features/budget/utils/investmentCategori
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Table } from '@/shared/components/data/Table';
-import { MultiSelectDropdown } from '@/shared/components/MultiSelectDropdown';
-import { Tooltip } from '@/shared/components/Tooltip';
-import { usePlanningYearSelection } from '@/shared/hooks/usePlanningYearSelection';
 import {
   getEnumParam,
   getMultiValueParam,
   setMultiValueParam,
-  setNumberParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
-
-const SPEND_BASIS_OPTIONS: ReadonlyArray<{
-  value: SpendBasis;
-  label: string;
-}> = [
-  { value: 'annual_full_year', label: 'Annual' },
-  {
-    value: 'monthly_avg_elapsed',
-    label: 'Monthly - Completed Months',
-  },
-  {
-    value: 'monthly_current_month',
-    label: 'Monthly - Current Month',
-  },
-];
-
-function getLastSelected(values: string[]): string | null {
-  if (values.length === 0) return null;
-  return values[values.length - 1];
-}
 
 export interface BudgetViewHandle {
   openAddBudgetModal: () => void;
 }
 
-export const BudgetView = React.forwardRef<BudgetViewHandle>((_, ref) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const expenseTypeFilter = getEnumParam<ExpenseTypeFilter>(
-    searchParams,
-    'type',
-    ['ESSENTIAL', 'FUNSIES', 'ALL'],
-    'ALL',
-  );
-  const expenseCategoryFilter = getMultiValueParam(searchParams, 'category');
-  const currentYear = new Date().getFullYear();
-  const {
-    availableYears: planningYears,
-    selectedYear,
-  } = usePlanningYearSelection({
-    searchParams,
-    setSearchParams,
-    fallbackYear: currentYear,
-  });
-  const spendBasis = getEnumParam<SpendBasis>(
-    searchParams,
-    'basis',
-    ['annual_full_year', 'monthly_avg_elapsed', 'monthly_avg_12', 'monthly_current_month'],
-    'monthly_avg_elapsed',
-  );
-  const updateQueryParams = React.useCallback(
-    (
-      updates: Partial<{
-        type: ExpenseTypeFilter;
-        category: string[];
-        year: number;
-        basis: SpendBasis;
-      }>,
+interface BudgetViewProps {
+  planningYear: number;
+  spendBasis: SpendBasis;
+}
+
+export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
+  ({ planningYear, spendBasis }, ref) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const expenseTypeFilter = getEnumParam<ExpenseTypeFilter>(
+      searchParams,
+      'type',
+      ['ESSENTIAL', 'FUNSIES', 'ALL'],
+      'ALL',
+    );
+    const expenseCategoryFilter = getMultiValueParam(searchParams, 'category');
+    const updateQueryParams = React.useCallback(
+      (
+        updates: Partial<{
+          type: ExpenseTypeFilter;
+          category: string[];
+        }>,
+      ) => {
+        const nextSearchParams = new URLSearchParams(searchParams);
+
+        if (updates.type) {
+          setStringParam(nextSearchParams, 'type', updates.type);
+        }
+
+        if (updates.category) {
+          setMultiValueParam(nextSearchParams, 'category', updates.category);
+        }
+
+        setSearchParams(nextSearchParams, { replace: true });
+      },
+      [searchParams, setSearchParams],
+    );
+    const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<BudgetEntry | undefined>(
+      undefined,
+    );
+    const [plannedAnnualNetIncome, setPlannedAnnualNetIncome] = useState(0);
+
+    const normalizeAccrual = true;
+
+    const {
+      budgetEntries,
+      isLoading: isLoadingBudgets,
+      error,
+      refetchSpending,
+      upsertBudgetEntry,
+      removeBudgetEntry,
+      spendBasisLabel,
+      spendBasisHelpText,
+    } = useBudgetData(planningYear, spendBasis, normalizeAccrual);
+
+    React.useEffect(() => {
+      const loadPlannedIncome = async () => {
+        try {
+          const projection = await incomeApiService.getYearProjection(
+            planningYear,
+          );
+          setPlannedAnnualNetIncome(projection.totals.plannedNet);
+        } catch (err) {
+          console.error('Failed to load planned income projection:', err);
+          setPlannedAnnualNetIncome(0);
+        }
+      };
+
+      void loadPlannedIncome();
+    }, [planningYear]);
+
+    React.useEffect(() => {
+      if (error) {
+        toast.error(`Failed to load data: ${error}`);
+        console.error('Data loading error:', error);
+      }
+    }, [error]);
+
+    React.useEffect(() => {
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          refetchSpending();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () =>
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [refetchSpending]);
+
+    const budgetData = useBudgetFiltering(
+      budgetEntries,
+      expenseTypeFilter,
+      expenseCategoryFilter,
+    );
+    const totals = useBudgetCalculations(budgetData);
+    const overallTotals = useBudgetCalculations(budgetEntries);
+
+    const operations = useBudgetOperations(budgetEntries, {
+      upsertBudgetEntry,
+      removeBudgetEntry,
+    });
+    const customOptions = useCustomOptions();
+
+    const income = plannedAnnualNetIncome / 12;
+
+    const investments = budgetEntries
+      .filter((entry) => isInvestmentCategory(entry.expenseCategory))
+      .reduce((sum, entry) => sum + entry.budgeted, 0);
+
+    const savings = income - overallTotals.budgeted;
+    const savingsRate = income > 0 ? (savings / income) * 100 : 0;
+
+    const handleAddClick = () => {
+      setEditingItem(undefined);
+      setIsModalOpen(true);
+    };
+
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        openAddBudgetModal: handleAddClick,
+      }),
+      [],
+    );
+
+    const handleEditClick = (item: BudgetEntry) => {
+      const originalItem = budgetEntries.find((entry) => entry.id === item.id);
+      setEditingItem(originalItem);
+      setIsModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+      setIsModalOpen(false);
+      setEditingItem(undefined);
+    };
+
+    const handleModalSave = (
+      itemData: Omit<BudgetEntry, 'id' | 'spent' | 'remaining' | 'percentage'>,
     ) => {
-      const nextSearchParams = new URLSearchParams(searchParams);
-
-      if (updates.type) {
-        setStringParam(nextSearchParams, 'type', updates.type);
+      if (editingItem) {
+        operations.handleUpdate(editingItem.id, itemData);
+      } else {
+        operations.handleSave(itemData);
       }
+      handleModalClose();
+    };
 
-      if (updates.category) {
-        setMultiValueParam(nextSearchParams, 'category', updates.category);
-      }
+    const handleDeleteClick = (id: string) => {
+      setDeletingItemId(id);
+    };
 
-      if (updates.year !== undefined) {
-        setNumberParam(nextSearchParams, 'year', updates.year);
-      }
-
-      if (updates.basis) {
-        setStringParam(nextSearchParams, 'basis', updates.basis);
-      }
-
-      setSearchParams(nextSearchParams, { replace: true });
-    },
-    [searchParams, setSearchParams],
-  );
-  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<BudgetEntry | undefined>(
-    undefined,
-  );
-  const [plannedAnnualNetIncome, setPlannedAnnualNetIncome] = useState(0);
-
-  const [normalizeAccrual] = useState<boolean>(true);
-  const yearOptions = React.useMemo(
-    () => planningYears.map((year) => String(year)),
-    [planningYears],
-  );
-
-  const {
-    budgetEntries,
-    isLoading: isLoadingBudgets,
-    error,
-    refetchSpending,
-    upsertBudgetEntry,
-    removeBudgetEntry,
-    spendBasisLabel,
-    spendBasisHelpText,
-  } = useBudgetData(selectedYear, spendBasis, normalizeAccrual);
-
-  React.useEffect(() => {
-    const loadPlannedIncome = async () => {
-      try {
-        const projection = await incomeApiService.getYearProjection(selectedYear);
-        setPlannedAnnualNetIncome(projection.totals.plannedNet);
-      } catch (err) {
-        console.error('Failed to load planned income projection:', err);
-        setPlannedAnnualNetIncome(0);
+    const handleDeleteConfirm = () => {
+      if (deletingItemId) {
+        operations.handleDelete(deletingItemId);
+        setDeletingItemId(null);
       }
     };
 
-    void loadPlannedIncome();
-  }, [selectedYear]);
-
-  React.useEffect(() => {
-    if (error) {
-      toast.error(`Failed to load data: ${error}`);
-      console.error('Data loading error:', error);
-    }
-  }, [error]);
-
-  React.useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        refetchSpending();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () =>
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [refetchSpending]);
-
-  const budgetData = useBudgetFiltering(
-    budgetEntries,
-    expenseTypeFilter,
-    expenseCategoryFilter,
-  );
-  const totals = useBudgetCalculations(budgetData);
-  const overallTotals = useBudgetCalculations(budgetEntries);
-
-  const operations = useBudgetOperations(budgetEntries, {
-    upsertBudgetEntry,
-    removeBudgetEntry,
-  });
-  const customOptions = useCustomOptions();
-
-  const income = plannedAnnualNetIncome / 12;
-
-  const investments = budgetEntries
-    .filter((entry) => isInvestmentCategory(entry.expenseCategory))
-    .reduce((sum, entry) => sum + entry.budgeted, 0);
-
-  const savings = income - overallTotals.budgeted;
-  const savingsRate = income > 0 ? (savings / income) * 100 : 0;
-
-  const handleAddClick = () => {
-    setEditingItem(undefined);
-    setIsModalOpen(true);
-  };
-
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      openAddBudgetModal: handleAddClick,
-    }),
-    [],
-  );
-
-  const handleEditClick = (item: BudgetEntry) => {
-    const originalItem = budgetEntries.find((entry) => entry.id === item.id);
-    setEditingItem(originalItem);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setEditingItem(undefined);
-  };
-
-  const handleModalSave = (
-    itemData: Omit<BudgetEntry, 'id' | 'spent' | 'remaining' | 'percentage'>,
-  ) => {
-    if (editingItem) {
-      operations.handleUpdate(editingItem.id, itemData);
-    } else {
-      operations.handleSave(itemData);
-    }
-    handleModalClose();
-  };
-
-  const handleDeleteClick = (id: string) => {
-    setDeletingItemId(id);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (deletingItemId) {
-      operations.handleDelete(deletingItemId);
+    const handleDeleteCancel = () => {
       setDeletingItemId(null);
+    };
+
+    const columns = getBudgetTableColumns({
+      handleEdit: handleEditClick,
+      handleToggleAccrual: operations.handleToggleAccrual,
+      handleDelete: handleDeleteClick,
+    });
+
+    if (isLoadingBudgets) {
+      return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-muted">Loading budgets...</div>
+        </div>
+      );
     }
-  };
 
-  const handleDeleteCancel = () => {
-    setDeletingItemId(null);
-  };
-
-  const columns = getBudgetTableColumns({
-    handleEdit: handleEditClick,
-    handleToggleAccrual: operations.handleToggleAccrual,
-    handleDelete: handleDeleteClick,
-  });
-
-  const spendBasisTooltipContent = `${spendBasisLabel}: ${spendBasisHelpText}`;
-  const spendBasisOptions = SPEND_BASIS_OPTIONS.map((option) => option.label);
-  const selectedSpendBasisLabel =
-    SPEND_BASIS_OPTIONS.find((option) => option.value === spendBasis)?.label ??
-    SPEND_BASIS_OPTIONS[0].label;
-
-  const handleYearChange = (values: string[]) => {
-    const next = getLastSelected(values);
-    if (!next) return;
-
-    const parsedYear = parseInt(next, 10);
-    if (!Number.isNaN(parsedYear)) {
-      updateQueryParams({ year: parsedYear });
-    }
-  };
-
-  const handleSpendBasisChange = (values: string[]) => {
-    const nextLabel = getLastSelected(values);
-    if (!nextLabel) return;
-
-    const nextOption = SPEND_BASIS_OPTIONS.find(
-      (option) => option.label === nextLabel,
-    );
-    if (nextOption) {
-      updateQueryParams({ basis: nextOption.value });
-    }
-  };
-
-  if (isLoadingBudgets) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-muted">Loading budgets...</div>
-      </div>
-    );
-  }
+      <div className="space-y-3">
+        <BudgetSummary
+          totals={totals}
+          investments={investments}
+          income={income}
+          savings={savings}
+          savingsRate={savingsRate}
+        />
 
-  return (
-    <div className="space-y-3">
-      <BudgetSummary
-        totals={totals}
-        investments={investments}
-        income={income}
-        savings={savings}
-        savingsRate={savingsRate}
-      />
-
-      <div className="surface-card">
-        <div className="mb-3 flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <ExpenseTypeFilters
-              expenseTypeFilter={expenseTypeFilter}
-              onFilterChange={(filter) => updateQueryParams({ type: filter })}
-              expenseCategoryFilter={expenseCategoryFilter}
-              onCategoryChange={(categories) =>
-                updateQueryParams({ category: categories })
-              }
-              availableCategories={customOptions.categories.map(
-                (cat) => cat.name,
-              )}
-            />
-            <div className="w-32">
-              <MultiSelectDropdown
-                label="Year"
-                options={yearOptions}
-                selectedValues={[String(selectedYear)]}
-                onChange={handleYearChange}
-                placeholder="Select year"
-                showCheckboxes={false}
+        <div className="surface-card">
+          <div className="mb-3 flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <ExpenseTypeFilters
+                expenseTypeFilter={expenseTypeFilter}
+                onFilterChange={(filter) => updateQueryParams({ type: filter })}
+                expenseCategoryFilter={expenseCategoryFilter}
+                onCategoryChange={(categories) =>
+                  updateQueryParams({ category: categories })
+                }
+                availableCategories={customOptions.categories.map(
+                  (cat) => cat.name,
+                )}
               />
             </div>
+            <p className="pt-3 text-sm text-muted">
+              {spendBasisLabel}: {spendBasisHelpText}
+            </p>
           </div>
 
-          <div className="ml-auto shrink-0">
-            <Tooltip content={spendBasisTooltipContent}>
-              <MultiSelectDropdown
-                label="Spend Basis"
-                options={spendBasisOptions}
-                selectedValues={[selectedSpendBasisLabel]}
-                onChange={handleSpendBasisChange}
-                placeholder="Select spend basis"
-                className="inline-block w-auto min-w-[22rem]"
-                menuAlign="right"
-                showCheckboxes={false}
-              />
-            </Tooltip>
-          </div>
+          <Table
+            columns={columns}
+            data={budgetData}
+            rowKey={(row) => row.id}
+            emptyMessage="No budget entries found"
+          />
         </div>
 
-        <Table
-          columns={columns}
-          data={budgetData}
-          rowKey={(row) => row.id}
-          emptyMessage="No budget entries found"
+        <BudgetItemModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSave={handleModalSave}
+          item={editingItem}
+          expenseTypes={customOptions.getAllExpenseTypeOptions()}
+          expenseCategories={customOptions.categories.map((cat) => cat.name)}
+          onAddCustomCategory={customOptions.addCategory}
+        />
+
+        <ConfirmDialog
+          isOpen={deletingItemId !== null}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Budget Item"
+          message={
+            <>
+              Are you sure you want to delete{' '}
+              <strong>
+                {budgetEntries.find((e) => e.id === deletingItemId)
+                  ?.expenseLabel || 'this item'}
+              </strong>
+              ? This action cannot be undone.
+            </>
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger"
         />
       </div>
-
-      <BudgetItemModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onSave={handleModalSave}
-        item={editingItem}
-        expenseTypes={customOptions.getAllExpenseTypeOptions()}
-        expenseCategories={customOptions.categories.map((cat) => cat.name)}
-        onAddCustomCategory={customOptions.addCategory}
-      />
-
-      <ConfirmDialog
-        isOpen={deletingItemId !== null}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Budget Item"
-        message={
-          <>
-            Are you sure you want to delete{' '}
-            <strong>
-              {budgetEntries.find((e) => e.id === deletingItemId)
-                ?.expenseLabel || 'this item'}
-            </strong>
-            ? This action cannot be undone.
-          </>
-        }
-        confirmText="Delete"
-        cancelText="Cancel"
-        variant="danger"
-      />
-    </div>
-  );
-});
+    );
+  },
+);
 
 BudgetView.displayName = 'BudgetView';

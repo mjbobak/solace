@@ -17,10 +17,13 @@ export interface IncomeViewHandle {
   openAddIncomeModal: () => void;
 }
 
-export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
+interface IncomeViewProps {
+  planningYear: number;
+}
+
+export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
+  ({ planningYear }, ref) => {
   const {
-    planningYears,
-    selectedYear,
     projection,
     isLoading,
     modalState,
@@ -29,7 +32,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     versionModalState,
     bonusModalState,
     isTaxAdvantagedInvestmentsModalOpen,
-    setSelectedYear,
     openAddIncomeModal,
     openTaxAdvantagedInvestmentsModal,
     closeModal,
@@ -48,7 +50,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
     handleDeleteBonus,
     handleDeleteSource,
     handleTaxAdvantagedInvestmentsSubmit,
-  } = useIncomeViewController();
+  } = useIncomeViewController(planningYear);
   const {
     actionMenuPosition,
     actionMenuRef,
@@ -67,9 +69,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
   return (
     <section className="space-y-6" aria-label="Income management">
       <IncomeSummary
-        year={selectedYear}
-        availableYears={planningYears}
-        onYearChange={setSelectedYear}
         totals={projection?.totals ?? EMPTY_PROJECTION_TOTALS}
         taxAdvantagedInvestments={
           projection?.taxAdvantagedInvestments ?? {
@@ -124,7 +123,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
             ? versionModalState.version
             : null
         }
-        selectedYear={selectedYear}
+        selectedYear={planningYear}
         onClose={closeModal}
         onSubmit={handleVersionModalSubmit}
       />
@@ -150,7 +149,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
 
       <TaxAdvantagedInvestmentsModal
         isOpen={isTaxAdvantagedInvestmentsModalOpen}
-        year={selectedYear}
+        year={planningYear}
         initialContributions401k={
           projection?.taxAdvantagedInvestments.contributions401k ?? 0
         }
@@ -171,6 +170,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle>((_, ref) => {
       />
     </section>
   );
-});
+  },
+);
 
 IncomeView.displayName = 'IncomeView';

@@ -10,13 +10,14 @@ import {
 } from '@/features/budget/services/budgetAdapters';
 import { budgetService } from '@/features/budget/services/budgetService';
 import type { BudgetApiResponse } from '@/features/budget/types/budgetApi';
+import { getComparisonBudgetForSpendBasis } from '@/shared/utils/spendBasis';
 
 import type { BudgetEntry, SpendBasis } from '../types/budgetView';
 
 import {
-  getCompletedMonthsForYear,
   useBudgetSpending,
 } from './useBudgetSpending';
+import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
 
 interface UseBudgetDataReturn {
   budgetEntries: BudgetEntry[];
@@ -29,26 +30,6 @@ interface UseBudgetDataReturn {
   monthlyRange: { low: number; high: number } | null;
   spendBasisLabel: string;
   spendBasisHelpText: string;
-}
-
-function getComparisonBudgetForSpendBasis(params: {
-  spendBasis: SpendBasis;
-  monthlyBudget: number;
-  completedMonths: number;
-}): number {
-  const { spendBasis, monthlyBudget, completedMonths } = params;
-
-  switch (spendBasis) {
-    case 'annual_full_year':
-      return monthlyBudget * 12;
-    case 'monthly_avg_elapsed':
-      return monthlyBudget * completedMonths;
-    case 'monthly_current_month':
-    case 'monthly_avg_12':
-      return monthlyBudget;
-    default:
-      return monthlyBudget;
-  }
 }
 
 export function useBudgetData(

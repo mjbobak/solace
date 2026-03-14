@@ -1,8 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-
-import { usePlanningYearSelection } from '@/shared/hooks/usePlanningYearSelection';
 
 import { incomeApiService } from '../services/incomeApiService';
 import type {
@@ -27,8 +24,6 @@ import {
 import { formatDate } from '../utils/incomeViewFormatters';
 
 interface UseIncomeViewControllerResult {
-  planningYears: number[];
-  selectedYear: number;
   projection: IncomeYearProjection | null;
   isLoading: boolean;
   modalState: IncomeViewModalState | null;
@@ -43,7 +38,6 @@ interface UseIncomeViewControllerResult {
     { type: 'add-bonus' } | { type: 'edit-bonus' }
   > | null;
   isTaxAdvantagedInvestmentsModalOpen: boolean;
-  setSelectedYear: (year: number) => void;
   openAddIncomeModal: () => void;
   openTaxAdvantagedInvestmentsModal: () => void;
   closeModal: () => void;
@@ -84,8 +78,9 @@ interface UseIncomeViewControllerResult {
   }) => Promise<void>;
 }
 
-export function useIncomeViewController(): UseIncomeViewControllerResult {
-  const [searchParams, setSearchParams] = useSearchParams();
+export function useIncomeViewController(
+  selectedYear: number,
+): UseIncomeViewControllerResult {
   const [projection, setProjection] = useState<IncomeYearProjection | null>(
     null,
   );
@@ -100,16 +95,6 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
     isTaxAdvantagedInvestmentsModalOpen,
     setIsTaxAdvantagedInvestmentsModalOpen,
   ] = useState(false);
-  const currentYear = new Date().getFullYear();
-  const {
-    availableYears: planningYears,
-    selectedYear,
-    setSelectedYear,
-  } = usePlanningYearSelection({
-    searchParams,
-    setSearchParams,
-    fallbackYear: currentYear,
-  });
 
   const loadProjection = React.useCallback(async () => {
     setIsLoading(true);
@@ -431,8 +416,6 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
   };
 
   return {
-    planningYears,
-    selectedYear,
     projection,
     isLoading,
     modalState,
@@ -441,7 +424,6 @@ export function useIncomeViewController(): UseIncomeViewControllerResult {
     versionModalState,
     bonusModalState,
     isTaxAdvantagedInvestmentsModalOpen,
-    setSelectedYear,
     openAddIncomeModal,
     openTaxAdvantagedInvestmentsModal,
     closeModal,

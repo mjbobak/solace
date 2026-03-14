@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Button } from '@/shared/components/Button';
-import { PlanningYearDropdown } from '@/shared/components/PlanningYearDropdown';
 
 import type {
   IncomeProjectionTotals,
@@ -9,9 +8,6 @@ import type {
 } from '../types/income';
 
 interface IncomeSummaryProps {
-  year: number;
-  availableYears: number[];
-  onYearChange: (year: number) => void;
   totals: IncomeProjectionTotals;
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
   onEditTaxAdvantagedInvestments: () => void;
@@ -98,9 +94,6 @@ function buildSummaryCards(
 }
 
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
-  year,
-  availableYears,
-  onYearChange,
   totals,
   taxAdvantagedInvestments,
   onEditTaxAdvantagedInvestments,
@@ -126,13 +119,6 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
             bonus payments.
           </p>
         </div>
-
-        <PlanningYearDropdown
-          year={year}
-          years={availableYears}
-          onYearChange={onYearChange}
-          className="w-full sm:w-fit sm:min-w-[216px]"
-        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

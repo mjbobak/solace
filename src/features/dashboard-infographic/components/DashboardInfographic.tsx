@@ -3,12 +3,10 @@
  * Renders either the visual dashboard or a simple KPI report.
  */
 
-import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React from 'react';
 
-import { PlanningYearDropdown } from '@/shared/components/PlanningYearDropdown';
+import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
-import { usePlanningYearSelection } from '@/shared/hooks/usePlanningYearSelection';
 
 import { DashboardKpiReport } from './DashboardKpiReport';
 import { EmergencyRunwaySection } from './EmergencyRunwaySection';
@@ -17,57 +15,50 @@ import { MoneyFlowSection } from './MoneyFlowSection';
 import { SpendingAnalysisSection } from './SpendingAnalysisSection';
 import { SpendingPulseSection } from './SpendingPulseSection';
 
-type DashboardMode = 'visual' | 'report';
+export type DashboardMode = 'visual' | 'report';
 
-export const DashboardInfographic: React.FC = () => {
+interface DashboardInfographicProps {
+  year: number;
+  availableYears: number[];
+  spendBasis: SpendBasis;
+  mode: DashboardMode;
+  onModeChange: (mode: DashboardMode) => void;
+}
+
+export const DashboardInfographic: React.FC<DashboardInfographicProps> = ({
+  year,
+  availableYears,
+  spendBasis,
+  mode,
+  onModeChange,
+}) => {
   const period = 'monthly' as const;
-  const currentYear = new Date().getFullYear();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [dashboardMode, setDashboardMode] = useState<DashboardMode>('report');
-  const {
-    availableYears: planningYears,
-    selectedYear,
-    setSelectedYear,
-  } = usePlanningYearSelection({
-    searchParams,
-    setSearchParams,
-    fallbackYear: currentYear,
-  });
-
-  const handleYearChange = (year: number) => {
-    setSelectedYear(year);
-  };
 
   return (
     <div>
       <main className="surface-card mx-auto max-w-6xl px-6">
-        <div className="flex flex-col gap-4 py-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="py-8">
           <ToggleButtonGroup
-            value={dashboardMode}
-            onChange={setDashboardMode}
+            value={mode}
+            onChange={onModeChange}
             options={[
               { value: 'visual', label: 'Visual' },
               { value: 'report', label: 'Report' },
             ]}
             className="w-full sm:w-auto"
           />
-          <PlanningYearDropdown
-            year={selectedYear}
-            years={planningYears}
-            onYearChange={handleYearChange}
-            className="w-full sm:w-fit sm:min-w-[216px]"
-          />
         </div>
 
-        {dashboardMode === 'report' ? (
+        {mode === 'report' ? (
           <DashboardKpiReport
-            year={selectedYear}
-            availableYears={planningYears}
+            year={year}
+            availableYears={availableYears}
+            spendBasis={spendBasis}
           />
         ) : (
           <>
             <div id="financial-health">
-              <FinancialHealthSection year={selectedYear} />
+              <FinancialHealthSection year={year} />
             </div>
 
             <div id="spending-analysis">
@@ -83,7 +74,7 @@ export const DashboardInfographic: React.FC = () => {
             </div>
 
             <div id="money-flow">
-              <MoneyFlowSection period={period} year={selectedYear} />
+              <MoneyFlowSection period={period} year={year} />
             </div>
           </>
         )}

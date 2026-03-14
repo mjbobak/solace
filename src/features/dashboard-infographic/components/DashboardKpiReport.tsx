@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { BsInfoCircle, BsPencil } from 'react-icons/bs';
 import { toast } from 'sonner';
 
+import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import { Tooltip } from '@/shared/components/Tooltip';
@@ -14,6 +15,7 @@ import {
 interface DashboardKpiReportProps {
   year: number;
   availableYears: number[];
+  spendBasis: SpendBasis;
 }
 
 const METRIC_EXPLANATIONS: Record<string, string> = {
@@ -158,6 +160,7 @@ function renderMetricValue(
 export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
   year,
   availableYears,
+  spendBasis,
 }) => {
   const emergencyFundSaveInFlightRef = useRef(false);
   const [emergencyFundInput, setEmergencyFundInput] = useState(
@@ -167,7 +170,12 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
   const emergencyFundInputRef = useRef<HTMLInputElement>(null);
   const emergencyFundBalance = parseEmergencyFundInput(emergencyFundInput);
   const { groups, savedEmergencyFundBalance, isLoading, error } =
-    useDashboardKpiReport(year, availableYears, emergencyFundBalance);
+    useDashboardKpiReport(
+      year,
+      availableYears,
+      spendBasis,
+      emergencyFundBalance,
+    );
 
   useEffect(() => {
     if (isEditingEmergencyFund) {

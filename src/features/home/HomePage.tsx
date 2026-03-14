@@ -1,26 +1,55 @@
 import React, { useMemo, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   BudgetView,
   type BudgetViewHandle,
 } from '@/features/budget/components/BudgetView';
-import { DashboardInfographic } from '@/features/dashboard-infographic';
+import {
+  DashboardInfographic,
+  type DashboardMode,
+} from '@/features/dashboard-infographic';
 import { IncomeView, type IncomeViewHandle } from '@/features/income';
 import { SpendingView, type SpendingViewHandle } from '@/features/spending';
 import { Button } from '@/shared/components/Button';
+import { PlanningFiltersBar } from '@/shared/components/PlanningFiltersBar';
+import { useSharedPlanningFilters } from '@/shared/hooks/useSharedPlanningFilters';
+import {
+  getCompletedMonthsForYear,
+  getSpendBasisHelpText,
+} from '@/shared/utils/spendBasis';
+import {
+  setNumberParam,
+  setStringParam,
+} from '@/shared/utils/searchParams';
 
 import { TopNav } from '../../shared/components/TopNav';
 import type { TabType } from '../../shared/components/TopNav';
 
 import { MainContent } from './components/MainContent';
 
+function buildSharedPlanningSearch(params: {
+  planningYear: number;
+  spendBasis: string;
+}): string {
+  const nextSearchParams = new URLSearchParams();
+  setNumberParam(nextSearchParams, 'planningYear', params.planningYear);
+  setStringParam(nextSearchParams, 'spendBasis', params.spendBasis);
+
+  const nextSearch = nextSearchParams.toString();
+  return nextSearch.length > 0 ? `?${nextSearch}` : '';
+}
+
 const HomePage: React.FC = () => {
   const budgetViewRef = useRef<BudgetViewHandle>(null);
   const spendingViewRef = useRef<SpendingViewHandle>(null);
   const incomeViewRef = useRef<IncomeViewHandle>(null);
+  const currentYear = new Date().getFullYear();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [dashboardMode, setDashboardMode] =
+    React.useState<DashboardMode>('report');
 
   const activeTab = useMemo<TabType>(() => {
     switch (location.pathname) {
@@ -35,6 +64,33 @@ const HomePage: React.FC = () => {
         return 'dashboard';
     }
   }, [location.pathname]);
+
+  const {
+    availableYears,
+    planningYear,
+    spendBasis,
+    setPlanningYear,
+    setSpendBasis,
+  } = useSharedPlanningFilters({
+    searchParams,
+    setSearchParams,
+    fallbackYear: currentYear,
+    enableLegacyPlanningYearFallback: activeTab !== 'spending',
+    enableLegacySpendBasisFallback:
+      activeTab === 'dashboard' || activeTab === 'budget',
+  });
+
+  const spendBasisTooltipContent = useMemo(() => {
+    const completedMonths = getCompletedMonthsForYear(planningYear);
+    const longMonth = new Date().toLocaleString('en-US', { month: 'long' });
+
+    return getSpendBasisHelpText({
+      spendBasis,
+      year: planningYear,
+      longMonth,
+      completedMonths,
+    });
+  }, [planningYear, spendBasis]);
 
   const getPageTitle = (): string => {
     switch (activeTab) {
@@ -51,20 +107,53 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const renderDashboard = () => (
+    <DashboardInfographic
+      year={planningYear}
+      availableYears={availableYears}
+      spendBasis={spendBasis}
+      mode={dashboardMode}
+      onModeChange={setDashboardMode}
+    />
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardInfographic />;
+        return renderDashboard();
       case 'income':
-        return <IncomeView ref={incomeViewRef} />;
+        return <IncomeView ref={incomeViewRef} planningYear={planningYear} />;
       case 'spending':
         return <SpendingView ref={spendingViewRef} />;
       case 'budget':
-        return <BudgetView ref={budgetViewRef} />;
+        return (
+          <BudgetView
+            ref={budgetViewRef}
+            planningYear={planningYear}
+            spendBasis={spendBasis}
+          />
+        );
       default:
-        return <DashboardInfographic />;
+        return renderDashboard();
     }
   };
+
+  const headerControls =
+    activeTab === 'spending' ? null : (
+      <PlanningFiltersBar
+        planningYear={planningYear}
+        availableYears={availableYears}
+        onPlanningYearChange={setPlanningYear}
+        spendBasis={spendBasis}
+        onSpendBasisChange={setSpendBasis}
+        showPlanningYear={true}
+        showSpendBasis={
+          activeTab === 'budget' ||
+          (activeTab === 'dashboard' && dashboardMode === 'report')
+        }
+        spendBasisTooltipContent={spendBasisTooltipContent}
+      />
+    );
 
   return (
     <div className="min-h-screen">
@@ -72,12 +161,19 @@ const HomePage: React.FC = () => {
         activeTab={activeTab}
         onTabChange={(tab) => {
           if (tab !== activeTab) {
-            navigate(`/${tab}`);
+            navigate({
+              pathname: `/${tab}`,
+              search: buildSharedPlanningSearch({
+                planningYear,
+                spendBasis,
+              }),
+            });
           }
         }}
       />
       <MainContent
         title={getPageTitle()}
+        headerControls={headerControls}
         headerAction={(() => {
           switch (activeTab) {
             case 'budget':

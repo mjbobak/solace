@@ -7,6 +7,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { spendingService } from '@/features/spending/services/spendingService';
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
 import { getMonthlyTransactionImpacts } from '@/features/spending/utils/spreadPayments';
+import {
+  getCompletedMonthsForYear,
+  getSpendBasisHelpText,
+  getSpendBasisLabel,
+} from '@/shared/utils/spendBasis';
 import { getMonthIndexFromDateOnly } from '@/shared/utils/dateOnly';
 
 import type { SpendBasis } from '../types/budgetView';
@@ -19,21 +24,6 @@ interface UseBudgetSpendingReturn {
   monthlyRange: { low: number; high: number } | null;
   spendBasisLabel: string;
   spendBasisHelpText: string;
-}
-
-function getSpendBasisLabel(spendBasis: SpendBasis): string {
-  switch (spendBasis) {
-    case 'annual_full_year':
-      return 'Annual - Full year';
-    case 'monthly_avg_elapsed':
-      return 'Total for completed months';
-    case 'monthly_avg_12':
-      return 'Avg per 12 months';
-    case 'monthly_current_month':
-      return 'Current month actual';
-    default:
-      return 'Spending';
-  }
 }
 
 function getMonthlySpendForBasis(params: {
@@ -60,46 +50,6 @@ function getMonthlySpendForBasis(params: {
     default:
       return 0;
   }
-}
-
-function getSpendBasisHelpText(params: {
-  spendBasis: SpendBasis;
-  year: number;
-  longMonth: string;
-  completedMonths: number;
-}): string {
-  const { spendBasis, year, longMonth, completedMonths } = params;
-
-  if (spendBasis === 'annual_full_year') {
-    return `Using full-year ${year} actuals (12 months).`;
-  }
-
-  if (spendBasis === 'monthly_avg_12') {
-    return `Using ${year} totals divided by 12 months.`;
-  }
-
-  if (spendBasis === 'monthly_current_month') {
-    return `Using ${longMonth} ${year} actuals.`;
-  }
-
-  if (completedMonths === 0) {
-    return `Using completed months only for ${year} (none completed yet).`;
-  }
-
-  const endMonth = new Date(year, completedMonths - 1, 1).toLocaleString(
-    'en-US',
-    { month: 'short' },
-  );
-  return `Using Jan-${endMonth} ${year} actuals (${completedMonths} completed month${completedMonths === 1 ? '' : 's'}).`;
-}
-
-export function getCompletedMonthsForYear(year: number): number {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-
-  if (year < currentYear) return 12;
-  if (year > currentYear) return 0;
-  return now.getMonth();
 }
 
 function isLinkedToBudget(transaction: SpendingEntry): boolean {

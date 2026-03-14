@@ -4,6 +4,7 @@
 
 // Main component
 export { DashboardInfographic } from './components/DashboardInfographic';
+export type { DashboardMode } from './components/DashboardInfographic';
 
 // Hooks
 export { useScrollAnimation } from './hooks/useScrollAnimation';
