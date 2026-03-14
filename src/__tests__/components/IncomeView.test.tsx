@@ -202,7 +202,15 @@ describe('IncomeView', () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText('Tax-Advantaged Buckets')).toHaveLength(2);
     expect(screen.getByText('$4,000 Spendable Restricted')).toBeInTheDocument();
-    expect(screen.getByText('Household payroll-style benefits')).toBeInTheDocument();
+    expect(screen.getByText('Tax-Advantaged Contributions')).toBeInTheDocument();
+    expect(screen.queryByText('FSA Daycare')).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Show tax-advantaged bucket details',
+      }),
+    );
+
     expect(screen.getByText('FSA Daycare')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Acme Corp').closest('button')!);
