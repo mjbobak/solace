@@ -3,16 +3,16 @@ import { useCallback, useEffect, useMemo } from 'react';
 import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { normalizePlanningYear } from '@/shared/utils/planningYears';
 import {
-  DEFAULT_SPEND_BASIS,
-  isSpendBasis,
-  normalizeSpendBasisForPlanningYear,
-} from '@/shared/utils/spendBasis';
-import {
   getNumberParam,
   getStringParam,
   setNumberParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
+import {
+  DEFAULT_SPEND_BASIS,
+  isSpendBasis,
+  normalizeSpendBasisForPlanningYear,
+} from '@/shared/utils/spendBasis';
 
 import { usePlanningYears } from './usePlanningYears';
 
@@ -35,6 +35,10 @@ interface UseSharedPlanningFiltersResult {
   spendBasis: SpendBasis;
   setPlanningYear: (year: number) => void;
   setSpendBasis: (spendBasis: SpendBasis) => void;
+  setPlanningFilters: (params: {
+    planningYear: number;
+    spendBasis: SpendBasis;
+  }) => void;
 }
 
 function syncSharedPlanningParams(params: {
@@ -208,6 +212,21 @@ export function useSharedPlanningFilters({
     [searchParams, setSearchParams],
   );
 
+  const setPlanningFilters = useCallback(
+    (params: { planningYear: number; spendBasis: SpendBasis }) => {
+      const nextSearchParams = syncSharedPlanningParams({
+        searchParams,
+        planningYear: params.planningYear,
+        spendBasis: normalizeSpendBasisForPlanningYear(
+          params.spendBasis,
+          params.planningYear,
+        ),
+      });
+      setSearchParams(nextSearchParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
   return {
     availableYears,
     isLoading,
@@ -215,5 +234,6 @@ export function useSharedPlanningFilters({
     spendBasis,
     setPlanningYear,
     setSpendBasis,
+    setPlanningFilters,
   };
 }

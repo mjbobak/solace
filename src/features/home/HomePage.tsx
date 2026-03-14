@@ -15,10 +15,6 @@ import { Button } from '@/shared/components/Button';
 import { PlanningFiltersBar } from '@/shared/components/PlanningFiltersBar';
 import { useSharedPlanningFilters } from '@/shared/hooks/useSharedPlanningFilters';
 import {
-  getCompletedMonthsForYear,
-  getSpendBasisHelpText,
-} from '@/shared/utils/spendBasis';
-import {
   setNumberParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
@@ -70,6 +66,7 @@ const HomePage: React.FC = () => {
     planningYear,
     spendBasis,
     setPlanningYear,
+    setPlanningFilters,
     setSpendBasis,
   } = useSharedPlanningFilters({
     searchParams,
@@ -79,18 +76,6 @@ const HomePage: React.FC = () => {
     enableLegacySpendBasisFallback:
       activeTab === 'dashboard' || activeTab === 'budget',
   });
-
-  const spendBasisTooltipContent = useMemo(() => {
-    const completedMonths = getCompletedMonthsForYear(planningYear);
-    const longMonth = new Date().toLocaleString('en-US', { month: 'long' });
-
-    return getSpendBasisHelpText({
-      spendBasis,
-      year: planningYear,
-      longMonth,
-      completedMonths,
-    });
-  }, [planningYear, spendBasis]);
 
   const getPageTitle = (): string => {
     switch (activeTab) {
@@ -146,12 +131,9 @@ const HomePage: React.FC = () => {
         onPlanningYearChange={setPlanningYear}
         spendBasis={spendBasis}
         onSpendBasisChange={setSpendBasis}
+        onPlanningFiltersChange={setPlanningFilters}
         showPlanningYear={true}
-        showSpendBasis={
-          activeTab === 'budget' ||
-          (activeTab === 'dashboard' && dashboardMode === 'report')
-        }
-        spendBasisTooltipContent={spendBasisTooltipContent}
+        showSpendBasis={true}
       />
     );
 
