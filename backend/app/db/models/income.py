@@ -1,6 +1,17 @@
 """Income domain database models."""
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Index, Integer, String
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -138,11 +149,54 @@ class IncomeYearSettings(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
+    tax_advantaged_buckets = relationship(
+        "IncomeYearTaxAdvantagedBucket",
+        back_populates="year_settings",
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self) -> str:
         return (
             "<IncomeYearSettings("
             f"year={self.year}, "
             f"contributions_401k={self.contributions_401k}, "
             f"emergency_fund_balance={self.emergency_fund_balance}"
+            ")>"
+        )
+
+
+class IncomeYearTaxAdvantagedBucket(Base):
+    """Annual household tax-advantaged bucket stored per planning year."""
+
+    __tablename__ = "income_year_tax_advantaged_buckets"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    year_settings_id = Column(
+        Integer,
+        ForeignKey("income_year_settings.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    bucket_type = Column(String(32), nullable=False, index=True)
+    annual_amount = Column(Float, nullable=False, default=0, server_default="0")
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    year_settings = relationship("IncomeYearSettings", back_populates="tax_advantaged_buckets")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "year_settings_id",
+            "bucket_type",
+            name="uq_income_year_tax_advantaged_bucket_type",
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            "<IncomeYearTaxAdvantagedBucket("
+            f"year_settings_id={self.year_settings_id}, "
+            f"bucket_type='{self.bucket_type}', "
+            f"annual_amount={self.annual_amount}"
             ")>"
         )

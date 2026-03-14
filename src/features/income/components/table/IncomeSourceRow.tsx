@@ -87,13 +87,15 @@ export function IncomeSourceRow({
         <td className="px-4 py-4 align-middle">
           <IncomeAmountStack
             primaryValue={source.totals.committedGross}
-            secondaryValue={source.totals.committedNet}
+            secondaryValue={source.totals.committedCashNet}
+            secondaryLabel="Cash Net"
           />
         </td>
         <td className="px-4 py-4 align-middle">
           <IncomeAmountStack
             primaryValue={source.totals.plannedGross}
-            secondaryValue={source.totals.plannedNet}
+            secondaryValue={source.totals.plannedCashNet}
+            secondaryLabel="Cash Net"
           />
         </td>
         <td className="px-4 py-4">

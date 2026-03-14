@@ -1,4 +1,5 @@
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '../constants/yearSettings';
+import { normalizeTaxAdvantagedBuckets } from '../constants/taxAdvantagedBuckets';
 import type {
   CreateIncomeComponentInput,
   CreateIncomeOccurrenceInput,
@@ -13,6 +14,7 @@ import type {
   ProjectedIncomeComponent,
   ProjectedIncomeSource,
   RecurringIncomeVersion,
+  TaxAdvantagedBucketEntry,
   TaxAdvantagedInvestments,
   UpdateIncomeComponentInput,
   UpdateIncomeOccurrenceInput,
@@ -23,11 +25,35 @@ import type {
 
 const API_BASE = '/api/incomes';
 
+function transformTaxAdvantagedBucketEntries(
+  entries: Array<Record<string, unknown>> | null | undefined,
+): TaxAdvantagedBucketEntry[] {
+  return normalizeTaxAdvantagedBuckets(
+    (entries ?? []).map((entry) => ({
+      bucketType: entry.bucket_type as TaxAdvantagedBucketEntry['bucketType'],
+      annualAmount: Number(entry.annual_amount ?? 0),
+    })),
+  );
+}
+
+function serializeTaxAdvantagedBucketEntries(
+  entries: TaxAdvantagedBucketEntry[],
+): Array<Record<string, unknown>> {
+  return normalizeTaxAdvantagedBuckets(entries).map((entry) => ({
+    bucket_type: entry.bucketType,
+    annual_amount: entry.annualAmount,
+  }));
+}
+
 function transformTaxAdvantagedInvestments(
   data: Record<string, unknown> | null | undefined,
 ): TaxAdvantagedInvestments {
   return {
-    contributions401k: Number(data?.contributions_401k ?? 0),
+    entries: transformTaxAdvantagedBucketEntries(
+      (data?.entries as Array<Record<string, unknown>> | undefined) ?? [],
+    ),
+    lockedTotal: Number(data?.locked_total ?? 0),
+    spendableTotal: Number(data?.spendable_total ?? 0),
     total: Number(data?.total ?? 0),
   };
 }
@@ -35,8 +61,10 @@ function transformTaxAdvantagedInvestments(
 function transformTotals(data: Record<string, unknown>): IncomeProjectionTotals {
   return {
     committedGross: Number(data.committed_gross ?? 0),
+    committedCashNet: Number(data.committed_cash_net ?? 0),
     committedNet: Number(data.committed_net ?? 0),
     plannedGross: Number(data.planned_gross ?? 0),
+    plannedCashNet: Number(data.planned_cash_net ?? 0),
     plannedNet: Number(data.planned_net ?? 0),
   };
 }
@@ -97,7 +125,10 @@ function transformYearSettings(
 ): IncomeYearSettings {
   return {
     year: Number(data.year),
-    contributions401k: Number(data.contributions_401k ?? 0),
+    taxAdvantagedBuckets: transformTaxAdvantagedBucketEntries(
+      (data.tax_advantaged_buckets as Array<Record<string, unknown>> | undefined) ??
+        [],
+    ),
     emergencyFundBalance: Number(
       data.emergency_fund_balance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
     ),
@@ -412,8 +443,12 @@ export const incomeApiService = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...(input.contributions401k !== undefined
-            ? { contributions_401k: input.contributions401k }
+          ...(input.taxAdvantagedBuckets !== undefined
+            ? {
+                tax_advantaged_buckets: serializeTaxAdvantagedBucketEntries(
+                  input.taxAdvantagedBuckets,
+                ),
+              }
             : {}),
           ...(input.emergencyFundBalance !== undefined
             ? { emergency_fund_balance: input.emergencyFundBalance }

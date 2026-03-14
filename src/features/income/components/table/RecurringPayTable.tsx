@@ -48,8 +48,8 @@ export function RecurringPayTable({
           <tr>
             <th className="px-4 py-3">Component</th>
             <th className="px-4 py-3">Active Range</th>
-            <th className="px-4 py-3">Current Pay</th>
-            <th className="px-4 py-3 text-right">Planned Net</th>
+            <th className="px-4 py-3">Current Cash Pay</th>
+            <th className="px-4 py-3 text-right">Planned Cash Net</th>
             <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
@@ -69,7 +69,7 @@ export function RecurringPayTable({
                   {formatNetRangeSummary(component)}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-app">
-                  {formatCurrency(component.totals.plannedNet)}
+                  {formatCurrency(component.totals.plannedCashNet)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end">
@@ -94,7 +94,7 @@ export function RecurringPayTable({
                     {formatDate(version.endDate)}
                   </td>
                   <td className="px-4 py-2">
-                    {formatCurrency(version.netAmount)} net x{' '}
+                    {formatCurrency(version.netAmount)} cash net x{' '}
                     {version.periodsPerYear}
                   </td>
                   <td className="px-4 py-2 text-right">

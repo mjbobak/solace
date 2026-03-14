@@ -94,3 +94,94 @@ def test_ensure_income_sources_schema_removes_legacy_member_id_and_preserves_row
         ).fetchall()
 
     assert rows == [(1, "Salary", 1, 3)]
+
+
+def test_ensure_income_year_tax_advantaged_buckets_schema_creates_table(monkeypatch, tmp_path):
+    """Bucket table should be created for older databases missing the new table."""
+    db_path = tmp_path / "init-db-income-buckets.sqlite"
+    engine = create_engine(f"sqlite:///{db_path}")
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                CREATE TABLE income_year_settings (
+                    id INTEGER PRIMARY KEY,
+                    year INTEGER NOT NULL,
+                    contributions_401k FLOAT NOT NULL DEFAULT 0,
+                    emergency_fund_balance FLOAT NOT NULL DEFAULT 18000,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+
+    monkeypatch.setattr(init_db_module, "engine", engine)
+
+    init_db_module._ensure_income_year_tax_advantaged_buckets_schema()
+
+    inspector = inspect(engine)
+    assert init_db_module.TAX_ADVANTAGED_BUCKET_TABLE in inspector.get_table_names()
+    column_names = {
+        column["name"]
+        for column in inspector.get_columns(init_db_module.TAX_ADVANTAGED_BUCKET_TABLE)
+    }
+    assert {
+        "id",
+        "year_settings_id",
+        "bucket_type",
+        "annual_amount",
+        "created_at",
+        "updated_at",
+    } <= column_names
+
+
+def test_backfill_legacy_401k_buckets_is_idempotent(monkeypatch, tmp_path):
+    """Legacy 401k values should backfill once without creating duplicates."""
+    db_path = tmp_path / "init-db-income-bucket-backfill.sqlite"
+    engine = create_engine(f"sqlite:///{db_path}")
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                CREATE TABLE income_year_settings (
+                    id INTEGER PRIMARY KEY,
+                    year INTEGER NOT NULL,
+                    contributions_401k FLOAT NOT NULL DEFAULT 0,
+                    emergency_fund_balance FLOAT NOT NULL DEFAULT 18000,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO income_year_settings (
+                    id, year, contributions_401k, emergency_fund_balance
+                ) VALUES (1, 2026, 19500, 18000)
+                """
+            )
+        )
+
+    monkeypatch.setattr(init_db_module, "engine", engine)
+
+    init_db_module._ensure_income_year_tax_advantaged_buckets_schema()
+    init_db_module._backfill_legacy_401k_buckets()
+    init_db_module._backfill_legacy_401k_buckets()
+
+    with engine.begin() as connection:
+        rows = connection.execute(
+            text(
+                """
+                SELECT year_settings_id, bucket_type, annual_amount
+                FROM income_year_tax_advantaged_buckets
+                ORDER BY id
+                """
+            )
+        ).fetchall()
+
+    assert rows == [(1, "401k", 19500.0)]

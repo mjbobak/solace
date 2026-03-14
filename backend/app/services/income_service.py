@@ -15,6 +15,7 @@ from backend.app.db.models.income import (
     IncomeOccurrence,
     IncomeSource,
     IncomeYearSettings,
+    IncomeYearTaxAdvantagedBucket,
 )
 from backend.app.models.income import (
     IncomeComponentCreate,
@@ -35,8 +36,30 @@ from backend.app.models.income import (
     IncomeYearProjectionResponse,
     ProjectedIncomeComponentResponse,
     ProjectedIncomeSourceResponse,
+    TaxAdvantagedBucketEntryResponse,
+    TaxAdvantagedBucketEntryUpdate,
     TaxAdvantagedInvestmentsResponse,
 )
+
+TAX_ADVANTAGED_BUCKET_METADATA = {
+    "401k": {
+        "is_spendable": False,
+    },
+    "hsa": {
+        "is_spendable": False,
+    },
+    "fsa_daycare": {
+        "is_spendable": True,
+    },
+    "fsa_medical": {
+        "is_spendable": True,
+    },
+}
+TAX_ADVANTAGED_BUCKET_TYPES = tuple(TAX_ADVANTAGED_BUCKET_METADATA)
+
+
+def _is_spendable_tax_advantaged_bucket(bucket_type: str) -> bool:
+    return bool(TAX_ADVANTAGED_BUCKET_METADATA[bucket_type]["is_spendable"])
 
 
 def _normalize_optional_text(value: str | None) -> str | None:
@@ -50,8 +73,10 @@ def _normalize_optional_text(value: str | None) -> str | None:
 def _blank_projection_totals() -> dict[str, object]:
     return {
         "committed_gross": 0.0,
+        "committed_cash_net": 0.0,
         "committed_net": 0.0,
         "planned_gross": 0.0,
+        "planned_cash_net": 0.0,
         "planned_net": 0.0,
     }
 
@@ -59,8 +84,10 @@ def _blank_projection_totals() -> dict[str, object]:
 def _projection_response(values: dict[str, object]) -> IncomeProjectionTotalsResponse:
     return IncomeProjectionTotalsResponse(
         committed_gross=round(float(values["committed_gross"]), 2),
+        committed_cash_net=round(float(values["committed_cash_net"]), 2),
         committed_net=round(float(values["committed_net"]), 2),
         planned_gross=round(float(values["planned_gross"]), 2),
+        planned_cash_net=round(float(values["planned_cash_net"]), 2),
         planned_net=round(float(values["planned_net"]), 2),
     )
 
@@ -74,9 +101,11 @@ def _add_projection_values(
 ) -> None:
     if include_in_committed:
         totals["committed_gross"] = float(totals["committed_gross"]) + gross
+        totals["committed_cash_net"] = float(totals["committed_cash_net"]) + net
         totals["committed_net"] = float(totals["committed_net"]) + net
 
     totals["planned_gross"] = float(totals["planned_gross"]) + gross
+    totals["planned_cash_net"] = float(totals["planned_cash_net"]) + net
     totals["planned_net"] = float(totals["planned_net"]) + net
 
 
@@ -85,8 +114,10 @@ def _roll_up_projection_totals(
     child: IncomeProjectionTotalsResponse,
 ) -> None:
     parent["committed_gross"] = float(parent["committed_gross"]) + child.committed_gross
+    parent["committed_cash_net"] = float(parent["committed_cash_net"]) + child.committed_cash_net
     parent["committed_net"] = float(parent["committed_net"]) + child.committed_net
     parent["planned_gross"] = float(parent["planned_gross"]) + child.planned_gross
+    parent["planned_cash_net"] = float(parent["planned_cash_net"]) + child.planned_cash_net
     parent["planned_net"] = float(parent["planned_net"]) + child.planned_net
 
 
@@ -292,21 +323,28 @@ class IncomeService:
         if settings is None:
             settings = IncomeYearSettings(
                 year=year,
-                contributions_401k=settings_in.contributions_401k or 0,
                 emergency_fund_balance=settings_in.emergency_fund_balance or 18000,
             )
             self.db.add(settings)
         else:
-            if settings_in.contributions_401k is not None:
-                settings.contributions_401k = settings_in.contributions_401k
             if settings_in.emergency_fund_balance is not None:
                 settings.emergency_fund_balance = settings_in.emergency_fund_balance
+        self.db.flush()
+
+        if settings_in.tax_advantaged_buckets is not None:
+            self._replace_tax_advantaged_buckets(
+                settings,
+                settings_in.tax_advantaged_buckets,
+            )
 
         return self._commit_and_refresh(settings)
 
     def get_year_projection(self, year: int) -> IncomeYearProjectionResponse:
         sources = self._load_sources_with_income()
         year_settings = self._get_year_settings(year)
+        tax_advantaged_investments = self._tax_advantaged_investments_response(
+            year_settings
+        )
         projected_sources: list[ProjectedIncomeSourceResponse] = []
         household_totals = _blank_projection_totals()
 
@@ -336,6 +374,13 @@ class IncomeService:
             projected_sources.append(source_response)
             _roll_up_projection_totals(household_totals, source_response.totals)
 
+        household_totals["committed_net"] = float(household_totals["committed_net"]) + float(
+            tax_advantaged_investments.spendable_total
+        )
+        household_totals["planned_net"] = float(household_totals["planned_net"]) + float(
+            tax_advantaged_investments.spendable_total
+        )
+
         return IncomeYearProjectionResponse(
             year=year,
             totals=_projection_response(household_totals),
@@ -345,9 +390,7 @@ class IncomeService:
                 ),
                 2,
             ),
-            tax_advantaged_investments=self._tax_advantaged_investments_response(
-                year_settings
-            ),
+            tax_advantaged_investments=tax_advantaged_investments,
             sources=projected_sources,
         )
 
@@ -369,7 +412,9 @@ class IncomeService:
     ) -> IncomeYearSettingsResponse:
         return IncomeYearSettingsResponse(
             year=settings.year,
-            contributions_401k=settings.contributions_401k,
+            tax_advantaged_buckets=self._tax_advantaged_bucket_entry_responses(
+                settings
+            ),
             emergency_fund_balance=settings.emergency_fund_balance,
             created_at=settings.created_at,
             updated_at=settings.updated_at,
@@ -600,6 +645,7 @@ class IncomeService:
     def _get_year_settings(self, year: int) -> Optional[IncomeYearSettings]:
         return (
             self.db.query(IncomeYearSettings)
+            .options(joinedload(IncomeYearSettings.tax_advantaged_buckets))
             .filter(IncomeYearSettings.year == year)
             .first()
         )
@@ -608,8 +654,78 @@ class IncomeService:
         self,
         settings: Optional[IncomeYearSettings],
     ) -> TaxAdvantagedInvestmentsResponse:
-        contributions_401k = round(float(settings.contributions_401k if settings else 0), 2)
-        return TaxAdvantagedInvestmentsResponse(
-            contributions_401k=contributions_401k,
-            total=contributions_401k,
+        entries = self._tax_advantaged_bucket_entry_responses(settings)
+        locked_total = round(
+            sum(
+                entry.annual_amount
+                for entry in entries
+                if not _is_spendable_tax_advantaged_bucket(entry.bucket_type)
+            ),
+            2,
         )
+        spendable_total = round(
+            sum(
+                entry.annual_amount
+                for entry in entries
+                if _is_spendable_tax_advantaged_bucket(entry.bucket_type)
+            ),
+            2,
+        )
+        return TaxAdvantagedInvestmentsResponse(
+            entries=entries,
+            locked_total=locked_total,
+            spendable_total=spendable_total,
+            total=round(locked_total + spendable_total, 2),
+        )
+
+    def _tax_advantaged_bucket_entry_responses(
+        self,
+        settings: Optional[IncomeYearSettings],
+    ) -> list[TaxAdvantagedBucketEntryResponse]:
+        bucket_amounts = {
+            bucket.bucket_type: round(float(bucket.annual_amount), 2)
+            for bucket in (settings.tax_advantaged_buckets if settings else [])
+            if bucket.bucket_type in TAX_ADVANTAGED_BUCKET_METADATA
+        }
+        return [
+            TaxAdvantagedBucketEntryResponse(
+                bucket_type=bucket_type,
+                annual_amount=bucket_amounts.get(bucket_type, 0),
+            )
+            for bucket_type in TAX_ADVANTAGED_BUCKET_TYPES
+        ]
+
+    def _replace_tax_advantaged_buckets(
+        self,
+        settings: IncomeYearSettings,
+        bucket_updates: list[TaxAdvantagedBucketEntryUpdate],
+    ) -> None:
+        seen_types: set[str] = set()
+        for entry in bucket_updates:
+            if entry.bucket_type in seen_types:
+                raise ValueError(
+                    f"Duplicate tax-advantaged bucket '{entry.bucket_type}'"
+                )
+            seen_types.add(entry.bucket_type)
+
+        existing_by_type = {
+            bucket.bucket_type: bucket for bucket in settings.tax_advantaged_buckets
+        }
+        desired_amounts = {
+            entry.bucket_type: float(entry.annual_amount)
+            for entry in bucket_updates
+        }
+
+        for bucket_type in TAX_ADVANTAGED_BUCKET_TYPES:
+            next_amount = desired_amounts.get(bucket_type, 0.0)
+            existing_bucket = existing_by_type.get(bucket_type)
+            if existing_bucket is None:
+                settings.tax_advantaged_buckets.append(
+                    IncomeYearTaxAdvantagedBucket(
+                        bucket_type=bucket_type,
+                        annual_amount=next_amount,
+                    )
+                )
+                continue
+
+            existing_bucket.annual_amount = next_amount

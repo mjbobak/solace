@@ -49,7 +49,7 @@ export function BonusEventsTable({
             <th className="px-4 py-3">Bonus</th>
             <th className="px-4 py-3">Status</th>
             <th className="px-4 py-3">Event Date</th>
-            <th className="px-4 py-3 text-right">Net</th>
+            <th className="px-4 py-3 text-right">Cash Net</th>
             <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>

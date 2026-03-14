@@ -46,7 +46,6 @@ const NOT_AVAILABLE_VALUE: DashboardKpiValue = {
 const TAX_ADVANTAGED_LABEL_MATCHERS = {
   contributions529: '529',
   roth: 'ROTH',
-  hsa: 'HSA',
 } as const;
 
 const KPI_BENCHMARKS: Record<string, string> = {
@@ -199,6 +198,21 @@ function getMatchedAnnualContribution(
     ),
     hasMatch: matchingEntries.length > 0,
   };
+}
+
+function getTaxAdvantagedBucketAmount(
+  currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null,
+  bucketType: '401k' | 'hsa' | 'fsa_daycare' | 'fsa_medical',
+): number | null {
+  if (!currentTaxAdvantagedInvestments) {
+    return null;
+  }
+
+  return (
+    currentTaxAdvantagedInvestments.entries.find(
+      (entry) => entry.bucketType === bucketType,
+    )?.annualAmount ?? 0
+  );
 }
 
 function createNumericDisplayValue(
@@ -467,8 +481,14 @@ export function buildDashboardKpiGroups({
     currentGrossIncome,
     previousGrossIncome,
   );
-  const contributions401k =
-    currentTaxAdvantagedInvestments?.contributions401k ?? null;
+  const contributions401k = getTaxAdvantagedBucketAmount(
+    currentTaxAdvantagedInvestments,
+    '401k',
+  );
+  const annualHsaContributions = getTaxAdvantagedBucketAmount(
+    currentTaxAdvantagedInvestments,
+    'hsa',
+  );
   const annual529Contributions = getMatchedAnnualContribution(
     budgetEntries,
     TAX_ADVANTAGED_LABEL_MATCHERS.contributions529,
@@ -477,17 +497,14 @@ export function buildDashboardKpiGroups({
     budgetEntries,
     TAX_ADVANTAGED_LABEL_MATCHERS.roth,
   );
-  const annualHsaContributions = getMatchedAnnualContribution(
-    budgetEntries,
-    TAX_ADVANTAGED_LABEL_MATCHERS.hsa,
-  );
   const taxAdvantagedContributions =
-    contributions401k === null || annual529Contributions === null
+    currentTaxAdvantagedInvestments === null ||
+    annual529Contributions === null ||
+    annualRothContributions === null
       ? null
-      : contributions401k +
+      : currentTaxAdvantagedInvestments.total +
         annual529Contributions.amount +
-        (annualRothContributions?.amount ?? 0) +
-        (annualHsaContributions?.amount ?? 0);
+        annualRothContributions.amount;
   const taxAdvantagedSavingsRatio = calculateRatio(
     taxAdvantagedContributions,
     currentAfterTaxIncome,
@@ -639,7 +656,7 @@ export function buildDashboardKpiGroups({
         createCurrencyRow(
           'hsa-contributions',
           'HSA Contributions',
-          annualHsaContributions?.hasMatch ? annualHsaContributions.amount : null,
+          annualHsaContributions,
         ),
         createCurrencyRow(
           '529-contributions',

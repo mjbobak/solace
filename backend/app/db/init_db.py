@@ -22,6 +22,7 @@ LEGACY_INCOME_TABLES = (
     "income_component_version_deductions",
     "income_occurrence_deductions",
 )
+TAX_ADVANTAGED_BUCKET_TABLE = "income_year_tax_advantaged_buckets"
 
 
 def init_db() -> None:
@@ -45,6 +46,8 @@ def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     _ensure_income_sources_schema()
     _ensure_income_year_settings_columns()
+    _ensure_income_year_tax_advantaged_buckets_schema()
+    _backfill_legacy_401k_buckets()
     _drop_legacy_income_tables()
     _ensure_transaction_spread_columns()
     _migrate_legacy_transaction_spreads()
@@ -199,6 +202,95 @@ def _ensure_income_year_settings_columns() -> None:
 
     if statements:
         logger.info("Ensured income year settings columns exist")
+
+
+def _ensure_income_year_tax_advantaged_buckets_schema() -> None:
+    """Create the year bucket table for existing SQLite databases if needed."""
+    inspector = inspect(engine)
+    if TAX_ADVANTAGED_BUCKET_TABLE in inspector.get_table_names():
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                f"""
+                CREATE TABLE {TAX_ADVANTAGED_BUCKET_TABLE} (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    year_settings_id INTEGER NOT NULL,
+                    bucket_type VARCHAR(32) NOT NULL,
+                    annual_amount FLOAT DEFAULT 0 NOT NULL,
+                    created_at DATETIME DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+                    updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+                    CONSTRAINT uq_income_year_tax_advantaged_bucket_type
+                        UNIQUE (year_settings_id, bucket_type),
+                    FOREIGN KEY(year_settings_id)
+                        REFERENCES income_year_settings (id)
+                        ON DELETE CASCADE
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                f"""
+                CREATE INDEX IF NOT EXISTS ix_{TAX_ADVANTAGED_BUCKET_TABLE}_year_settings_id
+                ON {TAX_ADVANTAGED_BUCKET_TABLE} (year_settings_id)
+                """
+            )
+        )
+        connection.execute(
+            text(
+                f"""
+                CREATE INDEX IF NOT EXISTS ix_{TAX_ADVANTAGED_BUCKET_TABLE}_bucket_type
+                ON {TAX_ADVANTAGED_BUCKET_TABLE} (bucket_type)
+                """
+            )
+        )
+
+    logger.info("Ensured income year tax-advantaged bucket table exists")
+
+
+def _backfill_legacy_401k_buckets() -> None:
+    """Migrate legacy year-level 401k values into the bucket table once."""
+    inspector = inspect(engine)
+    tables = set(inspector.get_table_names())
+    if "income_year_settings" not in tables or TAX_ADVANTAGED_BUCKET_TABLE not in tables:
+        return
+
+    columns = {
+        column["name"] for column in inspector.get_columns("income_year_settings")
+    }
+    if "contributions_401k" not in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                f"""
+                INSERT INTO {TAX_ADVANTAGED_BUCKET_TABLE} (
+                    year_settings_id,
+                    bucket_type,
+                    annual_amount,
+                    created_at,
+                    updated_at
+                )
+                SELECT
+                    settings.id,
+                    '401k',
+                    settings.contributions_401k,
+                    settings.created_at,
+                    settings.updated_at
+                FROM income_year_settings AS settings
+                WHERE COALESCE(settings.contributions_401k, 0) > 0
+                  AND NOT EXISTS (
+                    SELECT 1
+                    FROM {TAX_ADVANTAGED_BUCKET_TABLE} AS buckets
+                    WHERE buckets.year_settings_id = settings.id
+                      AND buckets.bucket_type = '401k'
+                  )
+                """
+            )
+        )
 
 
 def _ensure_transaction_spread_columns() -> None:

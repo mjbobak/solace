@@ -206,7 +206,7 @@ export function BonusOccurrenceModal({
             required
           />
           <Input
-            label="Net amount"
+            label="Cash net amount"
             type="number"
             min="0"
             step="0.01"

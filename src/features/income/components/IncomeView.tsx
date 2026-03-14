@@ -1,6 +1,7 @@
 import React, { useImperativeHandle } from 'react';
 
 import { useIncomeActionMenu } from '../hooks/useIncomeActionMenu';
+import { EMPTY_TAX_ADVANTAGED_INVESTMENTS } from '../constants/taxAdvantagedBuckets';
 import { useIncomeViewController } from '../hooks/useIncomeViewController';
 import { EMPTY_PROJECTION_TOTALS } from '../types/incomeView';
 
@@ -11,6 +12,7 @@ import { BonusOccurrenceModal } from './modals/BonusOccurrenceModal';
 import { RecurringVersionModal } from './modals/RecurringVersionModal';
 import { RenameSourceModal } from './modals/RenameSourceModal';
 import { TaxAdvantagedInvestmentsModal } from './modals/TaxAdvantagedInvestmentsModal';
+import { TaxAdvantagedBucketsSection } from './TaxAdvantagedBucketsSection';
 import { IncomeSourcesTable } from './table/IncomeSourcesTable';
 
 export interface IncomeViewHandle {
@@ -71,12 +73,16 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       <IncomeSummary
         totals={projection?.totals ?? EMPTY_PROJECTION_TOTALS}
         taxAdvantagedInvestments={
-          projection?.taxAdvantagedInvestments ?? {
-            contributions401k: 0,
-            total: 0,
-          }
+          projection?.taxAdvantagedInvestments ?? EMPTY_TAX_ADVANTAGED_INVESTMENTS
         }
         onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
+      />
+
+      <TaxAdvantagedBucketsSection
+        taxAdvantagedInvestments={
+          projection?.taxAdvantagedInvestments ?? EMPTY_TAX_ADVANTAGED_INVESTMENTS
+        }
+        onEdit={openTaxAdvantagedInvestmentsModal}
       />
 
       <IncomeSourcesTable
@@ -150,9 +156,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       <TaxAdvantagedInvestmentsModal
         isOpen={isTaxAdvantagedInvestmentsModalOpen}
         year={planningYear}
-        initialContributions401k={
-          projection?.taxAdvantagedInvestments.contributions401k ?? 0
-        }
+        initialEntries={projection?.taxAdvantagedInvestments.entries ?? []}
         onClose={closeModal}
         onSubmit={handleTaxAdvantagedInvestmentsSubmit}
       />

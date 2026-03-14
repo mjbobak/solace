@@ -141,7 +141,7 @@ export function RecurringVersionModal({
             required
           />
           <Input
-            label="Net per pay period"
+            label="Cash net per pay period"
             type="number"
             min="0.01"
             step="0.01"

@@ -5,6 +5,7 @@ import { incomeApiService } from '../services/incomeApiService';
 import type {
   CreateRecurringIncomeVersionInput,
   IncomeOccurrence,
+  TaxAdvantagedBucketEntry,
   IncomeYearProjection,
   ProjectedIncomeComponent,
   ProjectedIncomeSource,
@@ -74,7 +75,7 @@ interface UseIncomeViewControllerResult {
   ) => Promise<void>;
   handleDeleteSource: (source: ProjectedIncomeSource) => Promise<void>;
   handleTaxAdvantagedInvestmentsSubmit: (input: {
-    contributions401k: number;
+    taxAdvantagedBuckets: TaxAdvantagedBucketEntry[];
   }) => Promise<void>;
 }
 
@@ -361,16 +362,16 @@ export function useIncomeViewController(
   };
 
   const handleTaxAdvantagedInvestmentsSubmit = async (input: {
-    contributions401k: number;
+    taxAdvantagedBuckets: TaxAdvantagedBucketEntry[];
   }) => {
     try {
       await incomeApiService.updateYearSettings(selectedYear, input);
-      toast.success('Tax advantaged investments saved');
+      toast.success('Tax-advantaged buckets saved');
       closeModal();
       await loadProjection();
     } catch (error) {
-      console.error('Failed to save tax advantaged investments:', error);
-      toast.error('Failed to save tax advantaged investments');
+      console.error('Failed to save tax-advantaged buckets:', error);
+      toast.error('Failed to save tax-advantaged buckets');
       throw error;
     }
   };

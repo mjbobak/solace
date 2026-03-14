@@ -14,6 +14,8 @@ export type {
   IncomeOccurrenceStatus,
   IncomeProjectionTotals,
   IncomeSource,
+  TaxAdvantagedBucketEntry,
+  TaxAdvantagedBucketType,
   IncomeYearSettings,
   IncomeYearProjection,
   ProjectedIncomeComponent,

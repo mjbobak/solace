@@ -80,13 +80,11 @@ function buildSummaryCards(
       hint: 'Planned minus committed',
     },
     {
-      label: 'Tax Advantaged Investments',
+      label: 'Tax-Advantaged Buckets',
       primaryValue: formatCurrency(taxAdvantagedInvestments.total),
-      secondaryValue: formatCurrency(
-        taxAdvantagedInvestments.contributions401k,
-      ),
-      secondaryLabel: '401k Contributions',
-      hint: 'Manual annual contribution total saved for dashboard reporting',
+      secondaryValue: formatCurrency(taxAdvantagedInvestments.spendableTotal),
+      secondaryLabel: 'Spendable Restricted',
+      hint: 'Annual household payroll buckets tracked outside income streams',
       actionLabel: 'Edit',
       onAction: onEditTaxAdvantagedInvestments,
     },
@@ -106,21 +104,6 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
 
   return (
     <section className="space-y-4" aria-label="Income summary">
-      <div className="surface-card flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">
-            Income Plan
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-app">
-            Selected year projection
-          </h2>
-          <p className="mt-1 text-sm text-muted">
-            Household totals are prorated across compensation changes and dated
-            bonus payments.
-          </p>
-        </div>
-      </div>
-
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <article key={card.label} className="surface-card-soft">

@@ -15,8 +15,10 @@ function createIncomeTotals(
 ): IncomeProjectionTotals {
   return {
     committedGross: 200000,
+    committedCashNet: 150000,
     committedNet: 150000,
     plannedGross: 210000,
+    plannedCashNet: 160000,
     plannedNet: 160000,
     ...overrides,
   };
@@ -26,8 +28,15 @@ function createTaxAdvantagedInvestments(
   overrides?: Partial<TaxAdvantagedInvestments>,
 ): TaxAdvantagedInvestments {
   return {
-    contributions401k: 22000,
-    total: 22000,
+    entries: [
+      { bucketType: '401k', annualAmount: 22000 },
+      { bucketType: 'hsa', annualAmount: 1200 },
+      { bucketType: 'fsa_daycare', annualAmount: 3500 },
+      { bucketType: 'fsa_medical', annualAmount: 500 },
+    ],
+    lockedTotal: 23200,
+    spendableTotal: 4000,
+    total: 27200,
     ...overrides,
   };
 }
@@ -214,7 +223,7 @@ describe('buildDashboardKpiGroups', () => {
     });
     expect(findRow(groups, 'tax-advantaged-contributions')?.actualValue).toEqual({
       kind: 'currency',
-      amount: 32200,
+      amount: 36200,
     });
   });
 

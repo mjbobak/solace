@@ -7,16 +7,30 @@ export type IncomeComponentType =
 
 export type IncomeComponentMode = 'recurring' | 'occurrence';
 export type IncomeOccurrenceStatus = 'expected' | 'actual';
+export type TaxAdvantagedBucketType =
+  | '401k'
+  | 'hsa'
+  | 'fsa_daycare'
+  | 'fsa_medical';
+
+export interface TaxAdvantagedBucketEntry {
+  bucketType: TaxAdvantagedBucketType;
+  annualAmount: number;
+}
 
 export interface TaxAdvantagedInvestments {
-  contributions401k: number;
+  entries: TaxAdvantagedBucketEntry[];
+  lockedTotal: number;
+  spendableTotal: number;
   total: number;
 }
 
 export interface IncomeProjectionTotals {
   committedGross: number;
+  committedCashNet: number;
   committedNet: number;
   plannedGross: number;
+  plannedCashNet: number;
   plannedNet: number;
 }
 
@@ -85,7 +99,7 @@ export interface IncomeYearProjection {
 
 export interface IncomeYearSettings {
   year: number;
-  contributions401k: number;
+  taxAdvantagedBuckets: TaxAdvantagedBucketEntry[];
   emergencyFundBalance: number;
   createdAt: string;
   updatedAt: string;
@@ -129,7 +143,7 @@ export interface CreateIncomeOccurrenceInput {
 export type UpdateIncomeOccurrenceInput = Partial<CreateIncomeOccurrenceInput>;
 
 export interface UpdateIncomeYearSettingsInput {
-  contributions401k?: number;
+  taxAdvantagedBuckets?: TaxAdvantagedBucketEntry[];
   emergencyFundBalance?: number;
 }
 

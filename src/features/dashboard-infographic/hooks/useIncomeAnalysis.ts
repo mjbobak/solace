@@ -110,10 +110,10 @@ export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalys
       .map((source) => ({
         source: source.name,
         member: source.name,
-        amount: source.totals.plannedNet,
+        amount: source.totals.plannedCashNet,
         percentage:
-          projection.totals.plannedNet > 0
-            ? (source.totals.plannedNet / projection.totals.plannedNet) * 100
+          projection.totals.plannedCashNet > 0
+            ? (source.totals.plannedCashNet / projection.totals.plannedCashNet) * 100
             : 0,
       }))
       .sort((left, right) => right.amount - left.amount);
@@ -123,7 +123,7 @@ export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalys
       const current = typeTotals.get(component.componentType) ?? 0;
       typeTotals.set(
         component.componentType,
-        current + component.totals.plannedNet,
+        current + component.totals.plannedCashNet,
       );
     });
 
@@ -132,8 +132,8 @@ export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalys
         type,
         amount,
         percentage:
-          projection.totals.plannedNet > 0
-            ? (amount / projection.totals.plannedNet) * 100
+          projection.totals.plannedCashNet > 0
+            ? (amount / projection.totals.plannedCashNet) * 100
             : 0,
       }))
       .sort((left, right) => right.amount - left.amount);
@@ -152,7 +152,7 @@ export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalys
     }));
 
     return {
-      totalIncome: projection.totals.plannedNet,
+      totalIncome: projection.totals.plannedCashNet,
       sourceBreakdown,
       typeBreakdown,
       trend,

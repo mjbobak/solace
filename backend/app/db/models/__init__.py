@@ -9,6 +9,7 @@ from backend.app.db.models.income import (
     IncomeOccurrence,
     IncomeSource,
     IncomeYearSettings,
+    IncomeYearTaxAdvantagedBucket,
 )
 from backend.app.db.models.transaction import ReviewStatus, Transaction, TransactionStatus
 from backend.app.db.models.user import User
@@ -22,6 +23,7 @@ __all__ = [
     "IncomeOccurrence",
     "IncomeSource",
     "IncomeYearSettings",
+    "IncomeYearTaxAdvantagedBucket",
     "Transaction",
     "ReviewStatus",
     "TransactionStatus",

@@ -51,8 +51,10 @@ export interface ActionMenuPosition {
 
 export const EMPTY_PROJECTION_TOTALS: IncomeProjectionTotals = {
   committedGross: 0,
+  committedCashNet: 0,
   committedNet: 0,
   plannedGross: 0,
+  plannedCashNet: 0,
   plannedNet: 0,
 };
 

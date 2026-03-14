@@ -8,25 +8,47 @@ from pydantic import BaseModel, Field
 IncomeComponentType = Literal["base_pay", "bonus", "commission", "overtime", "other"]
 IncomeComponentMode = Literal["recurring", "occurrence"]
 IncomeOccurrenceStatus = Literal["expected", "actual"]
+TaxAdvantagedBucketType = Literal["401k", "hsa", "fsa_daycare", "fsa_medical"]
+
+
+class TaxAdvantagedBucketEntryBase(BaseModel):
+    """Typed annual tax-advantaged bucket amount."""
+
+    bucket_type: TaxAdvantagedBucketType
+    annual_amount: float = Field(..., ge=0)
+
+
+class TaxAdvantagedBucketEntryUpdate(TaxAdvantagedBucketEntryBase):
+    """Update payload for a single tax-advantaged bucket entry."""
+
+
+class TaxAdvantagedBucketEntryResponse(TaxAdvantagedBucketEntryBase):
+    """Read model for a single tax-advantaged bucket entry."""
 
 
 class TaxAdvantagedInvestmentsResponse(BaseModel):
-    """Year-scoped tax-advantaged investment totals for dashboard use."""
+    """Year-scoped tax-advantaged totals for dashboard use."""
 
-    contributions_401k: float = 0
+    entries: list[TaxAdvantagedBucketEntryResponse] = Field(default_factory=list)
+    locked_total: float = 0
+    spendable_total: float = 0
     total: float = 0
 
 
 class IncomeYearSettingsUpdate(BaseModel):
     """Update payload for year-scoped income settings."""
 
-    contributions_401k: Optional[float] = Field(None, ge=0)
+    tax_advantaged_buckets: Optional[list[TaxAdvantagedBucketEntryUpdate]] = None
     emergency_fund_balance: Optional[float] = Field(None, ge=0)
 
 
-class IncomeYearSettingsResponse(IncomeYearSettingsUpdate):
+class IncomeYearSettingsResponse(BaseModel):
     """Resource response for year-scoped income settings."""
 
+    tax_advantaged_buckets: list[TaxAdvantagedBucketEntryResponse] = Field(
+        default_factory=list
+    )
+    emergency_fund_balance: float = 0
     year: int
     created_at: datetime
     updated_at: datetime
@@ -36,8 +58,10 @@ class IncomeProjectionTotalsResponse(BaseModel):
     """Committed vs planned income totals for a projection scope."""
 
     committed_gross: float = 0
+    committed_cash_net: float = 0
     committed_net: float = 0
     planned_gross: float = 0
+    planned_cash_net: float = 0
     planned_net: float = 0
 
 

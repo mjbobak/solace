@@ -8,6 +8,7 @@ from backend.app.db.models.income import (
     IncomeOccurrence,
     IncomeSource,
     IncomeYearSettings,
+    IncomeYearTaxAdvantagedBucket,
 )
 
 
@@ -95,12 +96,12 @@ def update_year_settings(
     client,
     year: int,
     *,
-    contributions_401k: float | None = None,
+    tax_advantaged_buckets: list[dict] | None = None,
     emergency_fund_balance: float | None = None,
 ) -> dict:
-    payload: dict[str, float] = {}
-    if contributions_401k is not None:
-        payload["contributions_401k"] = contributions_401k
+    payload: dict[str, object] = {}
+    if tax_advantaged_buckets is not None:
+        payload["tax_advantaged_buckets"] = tax_advantaged_buckets
     if emergency_fund_balance is not None:
         payload["emergency_fund_balance"] = emergency_fund_balance
 
@@ -194,7 +195,14 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     assert projection["year"] == 2026
     assert projection["emergency_fund_balance"] == 18000
     assert projection["tax_advantaged_investments"] == {
-        "contributions_401k": 0,
+        "entries": [
+            {"bucket_type": "401k", "annual_amount": 0},
+            {"bucket_type": "hsa", "annual_amount": 0},
+            {"bucket_type": "fsa_daycare", "annual_amount": 0},
+            {"bucket_type": "fsa_medical", "annual_amount": 0},
+        ],
+        "locked_total": 0,
+        "spendable_total": 0,
         "total": 0,
     }
     assert len(projection["sources"]) == 2
@@ -204,33 +212,70 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     expected_committed_net = (6000 * 12) + (4000 * 12) + 7000
     expected_planned_net = expected_committed_net + 5600
 
+    assert projection["totals"]["committed_cash_net"] == expected_committed_net
     assert projection["totals"]["committed_net"] == expected_committed_net
+    assert projection["totals"]["planned_cash_net"] == expected_planned_net
     assert projection["totals"]["planned_net"] == expected_planned_net
+    assert projection["sources"][0]["totals"]["planned_cash_net"] == (6000 * 12) + 7000 + 5600
     assert projection["sources"][0]["totals"]["planned_net"] == (6000 * 12) + 7000 + 5600
+    assert projection["sources"][1]["totals"]["planned_cash_net"] == 4000 * 12
     assert projection["sources"][1]["totals"]["planned_net"] == 4000 * 12
 
 
 def test_year_settings_can_be_created_updated_and_returned_in_projection(client, db_session):
     """Year-scoped dashboard settings should persist and flow through the projection read model."""
-    created = update_year_settings(client, 2026, contributions_401k=19500)
+    created = update_year_settings(
+        client,
+        2026,
+        tax_advantaged_buckets=[
+            {"bucket_type": "401k", "annual_amount": 19500},
+            {"bucket_type": "hsa", "annual_amount": 1000},
+            {"bucket_type": "fsa_daycare", "annual_amount": 2500},
+            {"bucket_type": "fsa_medical", "annual_amount": 500},
+        ],
+    )
     assert created["year"] == 2026
-    assert created["contributions_401k"] == 19500
+    assert created["tax_advantaged_buckets"] == [
+        {"bucket_type": "401k", "annual_amount": 19500},
+        {"bucket_type": "hsa", "annual_amount": 1000},
+        {"bucket_type": "fsa_daycare", "annual_amount": 2500},
+        {"bucket_type": "fsa_medical", "annual_amount": 500},
+    ]
     assert created["emergency_fund_balance"] == 18000
 
     projection = get_projection(client, 2026)
     assert projection["emergency_fund_balance"] == 18000
     assert projection["tax_advantaged_investments"] == {
-        "contributions_401k": 19500,
-        "total": 19500,
+        "entries": [
+            {"bucket_type": "401k", "annual_amount": 19500},
+            {"bucket_type": "hsa", "annual_amount": 1000},
+            {"bucket_type": "fsa_daycare", "annual_amount": 2500},
+            {"bucket_type": "fsa_medical", "annual_amount": 500},
+        ],
+        "locked_total": 20500,
+        "spendable_total": 3000,
+        "total": 23500,
     }
+    assert projection["totals"]["committed_cash_net"] == 0
+    assert projection["totals"]["committed_net"] == 3000
+    assert projection["totals"]["planned_cash_net"] == 0
+    assert projection["totals"]["planned_net"] == 3000
 
     updated = update_year_settings(
         client,
         2026,
-        contributions_401k=22000,
+        tax_advantaged_buckets=[
+            {"bucket_type": "401k", "annual_amount": 22000},
+            {"bucket_type": "hsa", "annual_amount": 1500},
+            {"bucket_type": "fsa_daycare", "annual_amount": 3000},
+            {"bucket_type": "fsa_medical", "annual_amount": 250},
+        ],
         emergency_fund_balance=24000,
     )
-    assert updated["contributions_401k"] == 22000
+    assert updated["tax_advantaged_buckets"][0] == {
+        "bucket_type": "401k",
+        "annual_amount": 22000,
+    }
     assert updated["emergency_fund_balance"] == 24000
 
     db_row = (
@@ -238,8 +283,19 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
         .filter(IncomeYearSettings.year == 2026)
         .one()
     )
-    assert db_row.contributions_401k == 22000
     assert db_row.emergency_fund_balance == 24000
+    bucket_rows = (
+        db_session.query(IncomeYearTaxAdvantagedBucket)
+        .filter(IncomeYearTaxAdvantagedBucket.year_settings_id == db_row.id)
+        .order_by(IncomeYearTaxAdvantagedBucket.bucket_type.asc())
+        .all()
+    )
+    assert [(bucket.bucket_type, bucket.annual_amount) for bucket in bucket_rows] == [
+        ("401k", 22000),
+        ("fsa_daycare", 3000),
+        ("fsa_medical", 250),
+        ("hsa", 1500),
+    ]
 
     projection = get_projection(client, 2026)
     assert projection["emergency_fund_balance"] == 24000
@@ -250,13 +306,21 @@ def test_year_settings_partial_updates_preserve_existing_values(client, db_sessi
     update_year_settings(
         client,
         2026,
-        contributions_401k=19500,
+        tax_advantaged_buckets=[
+            {"bucket_type": "401k", "annual_amount": 19500},
+            {"bucket_type": "hsa", "annual_amount": 1200},
+            {"bucket_type": "fsa_daycare", "annual_amount": 1500},
+            {"bucket_type": "fsa_medical", "annual_amount": 300},
+        ],
         emergency_fund_balance=21000,
     )
 
     updated = update_year_settings(client, 2026, emergency_fund_balance=26000)
 
-    assert updated["contributions_401k"] == 19500
+    assert updated["tax_advantaged_buckets"][0] == {
+        "bucket_type": "401k",
+        "annual_amount": 19500,
+    }
     assert updated["emergency_fund_balance"] == 26000
 
     db_row = (
@@ -264,8 +328,13 @@ def test_year_settings_partial_updates_preserve_existing_values(client, db_sessi
         .filter(IncomeYearSettings.year == 2026)
         .one()
     )
-    assert db_row.contributions_401k == 19500
     assert db_row.emergency_fund_balance == 26000
+    bucket_rows = (
+        db_session.query(IncomeYearTaxAdvantagedBucket)
+        .filter(IncomeYearTaxAdvantagedBucket.year_settings_id == db_row.id)
+        .count()
+    )
+    assert bucket_rows == 4
 
 
 def test_promotion_mid_year_auto_closes_open_version_and_prorates_year_total(client, db_session):

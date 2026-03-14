@@ -49,14 +49,23 @@ const projection: IncomeYearProjection = {
   year: 2025,
   totals: {
     committedGross: 120000,
+    committedCashNet: 90000,
     committedNet: 90000,
     plannedGross: 135000,
-    plannedNet: 101000,
+    plannedCashNet: 101000,
+    plannedNet: 105000,
   },
   emergencyFundBalance: 18000,
   taxAdvantagedInvestments: {
-    contributions401k: 22000,
-    total: 22000,
+    entries: [
+      { bucketType: '401k', annualAmount: 22000 },
+      { bucketType: 'hsa', annualAmount: 1000 },
+      { bucketType: 'fsa_daycare', annualAmount: 3500 },
+      { bucketType: 'fsa_medical', annualAmount: 500 },
+    ],
+    lockedTotal: 23000,
+    spendableTotal: 4000,
+    total: 27000,
   },
   sources: [
     {
@@ -68,8 +77,10 @@ const projection: IncomeYearProjection = {
       updatedAt: '2025-01-01T00:00:00Z',
       totals: {
         committedGross: 120000,
+        committedCashNet: 90000,
         committedNet: 90000,
         plannedGross: 135000,
+        plannedCashNet: 101000,
         plannedNet: 101000,
       },
       components: [
@@ -83,8 +94,10 @@ const projection: IncomeYearProjection = {
           updatedAt: '2025-01-01T00:00:00Z',
           totals: {
             committedGross: 120000,
+            committedCashNet: 90000,
             committedNet: 90000,
             plannedGross: 120000,
+            plannedCashNet: 90000,
             plannedNet: 90000,
           },
           currentVersion: {
@@ -123,8 +136,10 @@ const projection: IncomeYearProjection = {
           updatedAt: '2025-01-01T00:00:00Z',
           totals: {
             committedGross: 0,
+            committedCashNet: 0,
             committedNet: 0,
             plannedGross: 15000,
+            plannedCashNet: 11000,
             plannedNet: 11000,
           },
           currentVersion: null,
@@ -149,12 +164,10 @@ const projection: IncomeYearProjection = {
 };
 
 describe('IncomeView', () => {
-  it('shows committed and planned stacked annual income columns in the source table', async () => {
+  it('shows tax-advantaged buckets above the source table', async () => {
     getYearProjection.mockResolvedValue(projection);
 
-    const { container } = render(
-      <IncomeView planningYear={2025} />,
-    );
+    const { container } = render(<IncomeView planningYear={2025} />);
 
     await waitFor(() =>
       expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
@@ -179,17 +192,25 @@ describe('IncomeView', () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
 
-    expect(screen.getByText('$120,000.00')).toBeInTheDocument();
-    expect(screen.getByText('$90,000.00 Net')).toBeInTheDocument();
-    expect(screen.getByText('$135,000.00')).toBeInTheDocument();
-    expect(screen.getByText('$101,000.00 Net')).toBeInTheDocument();
-    expect(screen.getByText('Tax Advantaged Investments')).toBeInTheDocument();
-    expect(screen.getByText('$22,000 401k Contributions')).toBeInTheDocument();
+    expect(screen.getByText('$120,000')).toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === '$90,000 Net'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('$135,000')).toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === '$105,000 Net'),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('Tax-Advantaged Buckets')).toHaveLength(2);
+    expect(screen.getByText('$4,000 Spendable Restricted')).toBeInTheDocument();
+    expect(screen.getByText('Household payroll-style benefits')).toBeInTheDocument();
+    expect(screen.getByText('FSA Daycare')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Acme Corp').closest('button')!);
 
     const recurringPayHeading = await screen.findByText('Recurring Pay');
     expect(recurringPayHeading).toBeInTheDocument();
+    expect(screen.getByText('Current Cash Pay')).toBeInTheDocument();
+    expect(screen.getByText('Planned Cash Net')).toBeInTheDocument();
 
     const expandedCell = recurringPayHeading.closest('td');
     expect(expandedCell).toHaveAttribute('colspan', '4');
@@ -212,9 +233,7 @@ describe('IncomeView', () => {
     getYearProjection.mockResolvedValue(projection);
     const incomeViewRef = React.createRef<IncomeViewHandle>();
 
-    render(
-      <IncomeView ref={incomeViewRef} planningYear={2025} />,
-    );
+    render(<IncomeView ref={incomeViewRef} planningYear={2025} />);
 
     await waitFor(() =>
       expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
@@ -229,19 +248,22 @@ describe('IncomeView', () => {
     ).toBeInTheDocument();
   });
 
-  it('saves the selected year tax advantaged investments from the summary card', async () => {
+  it('saves the selected year tax-advantaged buckets from the summary card', async () => {
     getYearProjection.mockResolvedValue(projection);
     updateYearSettings.mockResolvedValue({
       year: 2025,
-      contributions401k: 25000,
+      taxAdvantagedBuckets: [
+        { bucketType: '401k', annualAmount: 25000 },
+        { bucketType: 'hsa', annualAmount: 1000 },
+        { bucketType: 'fsa_daycare', annualAmount: 3500 },
+        { bucketType: 'fsa_medical', annualAmount: 500 },
+      ],
       emergencyFundBalance: 18000,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-02T00:00:00Z',
     });
 
-    render(
-      <IncomeView planningYear={2025} />,
-    );
+    render(<IncomeView planningYear={2025} />);
 
     await waitFor(() =>
       expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
@@ -249,13 +271,18 @@ describe('IncomeView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
 
-    const input = await screen.findByLabelText(/401k contributions/i);
+    const input = await screen.findByLabelText(/401k annual amount/i);
     fireEvent.change(input, { target: { value: '25000' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save Investments' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save Buckets' }));
 
     await waitFor(() =>
       expect(updateYearSettings).toHaveBeenCalledWith(2025, {
-        contributions401k: 25000,
+        taxAdvantagedBuckets: [
+          { bucketType: '401k', annualAmount: 25000 },
+          { bucketType: 'hsa', annualAmount: 1000 },
+          { bucketType: 'fsa_daycare', annualAmount: 3500 },
+          { bucketType: 'fsa_medical', annualAmount: 500 },
+        ],
       }),
     );
   });

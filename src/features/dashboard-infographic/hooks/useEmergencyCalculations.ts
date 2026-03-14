@@ -53,8 +53,8 @@ export function useEmergencyCalculations(): EmergencyRunwayData {
     const sources = incomeProjection?.sources ?? [];
     const personA = sources[0];
     const personB = sources[1];
-    const personAIncome = personA ? personA.totals.committedNet / 12 : 0;
-    const personBIncome = personB ? personB.totals.committedNet / 12 : 0;
+    const personAIncome = personA ? personA.totals.committedCashNet / 12 : 0;
+    const personBIncome = personB ? personB.totals.committedCashNet / 12 : 0;
 
     // Emergency fund balance
     const emergencyFund = 18000; // Will be added to dashboardMetrics

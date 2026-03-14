@@ -90,7 +90,7 @@ describe('DashboardInfographic', () => {
   it('toggles between visual and report modes and keeps the selected year in sync', async () => {
     updateYearSettings.mockResolvedValue({
       year: 2025,
-      contributions401k: 0,
+      taxAdvantagedBuckets: [],
       emergencyFundBalance: 9000,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-02T00:00:00Z',
