@@ -114,9 +114,11 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       month: getMultiValueParam(searchParams, 'month'),
       accounts: getMultiValueParam(searchParams, 'account'),
       budgetCategories: getMultiValueParam(searchParams, 'budget'),
+      budgetId: getNumberParam(searchParams, 'budgetId'),
       accrualStatus: getMultiValueParam(searchParams, 'accrual'),
       amountMin: getNumberParam(searchParams, 'min'),
       amountMax: getNumberParam(searchParams, 'max'),
+      forceEmpty: searchParams.get('forceEmpty') === '1',
       searchQuery: getStringParam(searchParams, 'q') ?? '',
     }),
     [searchParams],
@@ -169,6 +171,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
         'budget',
         mergedFilters.budgetCategories,
       );
+      setNumberParam(nextSearchParams, 'budgetId', mergedFilters.budgetId);
       setMultiValueParam(
         nextSearchParams,
         'accrual',
@@ -176,6 +179,11 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       );
       setNumberParam(nextSearchParams, 'min', mergedFilters.amountMin);
       setNumberParam(nextSearchParams, 'max', mergedFilters.amountMax);
+      setStringParam(
+        nextSearchParams,
+        'forceEmpty',
+        mergedFilters.forceEmpty ? '1' : undefined,
+      );
       setStringParam(nextSearchParams, 'q', mergedFilters.searchQuery);
 
       if ('page' in updates) {
@@ -265,6 +273,24 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     }
     return result;
   }, [transactions]);
+
+  const drillThroughBudgetLabel = useMemo(() => {
+    if (filters.budgetId === undefined) {
+      return undefined;
+    }
+
+    const matchingBudget = allBudgets.find(
+      (budget) => budget.id === filters.budgetId,
+    );
+    if (matchingBudget) {
+      return matchingBudget.expense_label;
+    }
+
+    const matchingTransaction = transactions.find(
+      (transaction) => transaction.budgetId === filters.budgetId,
+    );
+    return matchingTransaction?.budgetLabel;
+  }, [allBudgets, filters.budgetId, transactions]);
 
   // Filter handlers
   const handleFiltersChange = (updates: Partial<SpendingFiltersType>) => {
@@ -576,6 +602,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
             availableYears={availableYears}
             availableAccounts={availableAccounts}
             availableBudgetItems={availableBudgetItems}
+            drillThroughBudgetLabel={drillThroughBudgetLabel}
           />
         </div>
 

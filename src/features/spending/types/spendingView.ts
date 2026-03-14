@@ -22,9 +22,11 @@ export interface SpendingFilters {
   month: MonthFilter;
   accounts: string[];
   budgetCategories: string[];
+  budgetId?: number;
   accrualStatus: string[]; // ['YES', 'NO'] - empty array = show all
   amountMin?: number;
   amountMax?: number;
+  forceEmpty?: boolean;
   searchQuery: string;
 }
 

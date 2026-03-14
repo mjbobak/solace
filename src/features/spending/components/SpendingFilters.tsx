@@ -14,6 +14,7 @@ interface SpendingFiltersProps {
   availableYears: { value: string; label: string }[];
   availableAccounts: string[];
   availableBudgetItems: string[];
+  drillThroughBudgetLabel?: string;
 }
 
 export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
@@ -22,19 +23,27 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
   availableYears,
   availableAccounts,
   availableBudgetItems,
+  drillThroughBudgetLabel,
 }) => {
+  const hasDrillThroughBudgetFilter = filters.budgetId !== undefined;
+  const drillThroughChipLabel = hasDrillThroughBudgetFilter
+    ? `Budget Item: ${drillThroughBudgetLabel ?? `Budget #${filters.budgetId}`}`
+    : undefined;
+
   const hasActiveFilters = useMemo(() => {
     return (
       filters.year.length > 0 ||
       filters.month.length > 0 ||
       filters.accounts.length > 0 ||
       filters.budgetCategories.length > 0 ||
+      hasDrillThroughBudgetFilter ||
       filters.accrualStatus.length > 0 ||
       filters.amountMin !== undefined ||
       filters.amountMax !== undefined ||
+      filters.forceEmpty === true ||
       filters.searchQuery !== ''
     );
-  }, [filters]);
+  }, [filters, hasDrillThroughBudgetFilter]);
 
   const activeFilterChips = useMemo((): Array<{ key: string; label: string }> => {
     const chips: Array<{ key: string; label: string }> = [];
@@ -72,6 +81,13 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
       });
     }
 
+    if (drillThroughChipLabel) {
+      chips.push({
+        key: 'budgetId',
+        label: drillThroughChipLabel,
+      });
+    }
+
     if (filters.accrualStatus.length > 0) {
       const statusLabels = filters.accrualStatus
         .map((status) => (status === 'YES' ? 'Spread' : 'Not spread'))
@@ -98,7 +114,7 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
     }
 
     return chips;
-  }, [filters]);
+  }, [drillThroughChipLabel, filters]);
 
   const handleRemoveFilter = (filterKey: string) => {
     const updates: Partial<SpendingFiltersType> = {};
@@ -118,6 +134,10 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
         break;
       case 'budgetCategories':
         updates.budgetCategories = [];
+        break;
+      case 'budgetId':
+        updates.budgetId = undefined;
+        updates.forceEmpty = false;
         break;
       case 'accrualStatus':
         updates.accrualStatus = [];

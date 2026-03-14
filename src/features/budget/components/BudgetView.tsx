@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { ExpenseTypeFilters } from '@/features/budget/components/BudgetFilters';
@@ -20,12 +20,14 @@ import { isInvestmentCategory } from '@/features/budget/utils/investmentCategori
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Table } from '@/shared/components/data/Table';
+import { buildBudgetDrillThroughSearchParams } from '@/shared/utils/budgetDrillThrough';
 import {
   getEnumParam,
   getMultiValueParam,
   setMultiValueParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
+import { extractNumericId } from '../services/budgetAdapters';
 
 export interface BudgetViewHandle {
   openAddBudgetModal: () => void;
@@ -38,6 +40,7 @@ interface BudgetViewProps {
 
 export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
   ({ planningYear, spendBasis }, ref) => {
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const expenseTypeFilter = getEnumParam<ExpenseTypeFilter>(
       searchParams,
@@ -195,10 +198,25 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       setDeletingItemId(null);
     };
 
+    const handleViewSpendingClick = (item: BudgetEntry) => {
+      const nextSearchParams = buildBudgetDrillThroughSearchParams({
+        baseSearchParams: searchParams,
+        planningYear,
+        spendBasis,
+        budgetId: extractNumericId(item.id),
+      });
+
+      navigate({
+        pathname: '/spending',
+        search: `?${nextSearchParams.toString()}`,
+      });
+    };
+
     const columns = getBudgetTableColumns({
       handleEdit: handleEditClick,
       handleToggleAccrual: operations.handleToggleAccrual,
       handleDelete: handleDeleteClick,
+      handleViewSpending: handleViewSpendingClick,
     });
 
     if (isLoadingBudgets) {

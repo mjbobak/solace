@@ -11,12 +11,14 @@ interface GetColumnsParams {
   handleEdit: (item: BudgetEntry) => void;
   handleToggleAccrual: (id: string) => void;
   handleDelete: (id: string) => void;
+  handleViewSpending: (item: BudgetEntry) => void;
 }
 
 export function getBudgetTableColumns(
   params: GetColumnsParams,
 ): Column<BudgetEntry>[] {
-  const { handleEdit, handleToggleAccrual, handleDelete } = params;
+  const { handleEdit, handleToggleAccrual, handleDelete, handleViewSpending } =
+    params;
 
   return [
     {
@@ -119,8 +121,16 @@ export function getBudgetTableColumns(
       key: 'spent',
       header: 'Spent',
       accessor: (row) => (
-        <div className="border-l border-gray-300 pl-3 text-gray-900">
-          {formatCurrency(row.spent, '$')}
+        <div className="border-l border-gray-300 pl-3">
+          <button
+            type="button"
+            onClick={() => handleViewSpending(row)}
+            className="font-medium text-blue-700 transition-colors hover:text-blue-900 hover:underline"
+            aria-label={`View transactions for ${row.expenseLabel}`}
+            title={`View transactions for ${row.expenseLabel}`}
+          >
+            {formatCurrency(row.spent, '$')}
+          </button>
         </div>
       ),
       sortValue: (row) => row.spent,

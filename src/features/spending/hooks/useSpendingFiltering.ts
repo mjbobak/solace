@@ -8,7 +8,17 @@ export function useSpendingFiltering(
   filters: SpendingFilters,
 ): SpendingEntry[] {
   return useMemo(() => {
+    if (filters.forceEmpty) {
+      return [];
+    }
+
     let filtered = transactions;
+
+    if (filters.budgetId !== undefined) {
+      filtered = filtered.filter(
+        (transaction) => transaction.budgetId === filters.budgetId,
+      );
+    }
 
     if (filters.year.length > 0 || filters.month.length > 0) {
       filtered = filtered.filter((transaction) => {
