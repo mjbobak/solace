@@ -34,8 +34,9 @@ export const TAX_ADVANTAGED_BUCKET_DEFINITIONS: TaxAdvantagedBucketDefinition[] 
     {
       type: 'fsa_medical',
       label: 'FSA Medical',
-      description: 'Medical FSA dollars available for eligible current-year spending.',
-      behaviorLabel: 'Spendable restricted',
+      description:
+        'Medical FSA dollars reserved for eligible healthcare expenses and tracked outside net income.',
+      behaviorLabel: 'Medical-only use',
     },
   ];
 

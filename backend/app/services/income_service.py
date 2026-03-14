@@ -44,15 +44,19 @@ from backend.app.models.income import (
 TAX_ADVANTAGED_BUCKET_METADATA = {
     "401k": {
         "is_spendable": False,
+        "counts_toward_net": False,
     },
     "hsa": {
         "is_spendable": False,
+        "counts_toward_net": False,
     },
     "fsa_daycare": {
         "is_spendable": True,
+        "counts_toward_net": True,
     },
     "fsa_medical": {
         "is_spendable": True,
+        "counts_toward_net": False,
     },
 }
 TAX_ADVANTAGED_BUCKET_TYPES = tuple(TAX_ADVANTAGED_BUCKET_METADATA)
@@ -60,6 +64,10 @@ TAX_ADVANTAGED_BUCKET_TYPES = tuple(TAX_ADVANTAGED_BUCKET_METADATA)
 
 def _is_spendable_tax_advantaged_bucket(bucket_type: str) -> bool:
     return bool(TAX_ADVANTAGED_BUCKET_METADATA[bucket_type]["is_spendable"])
+
+
+def _counts_toward_net_tax_advantaged_bucket(bucket_type: str) -> bool:
+    return bool(TAX_ADVANTAGED_BUCKET_METADATA[bucket_type]["counts_toward_net"])
 
 
 def _normalize_optional_text(value: str | None) -> str | None:
@@ -375,10 +383,18 @@ class IncomeService:
             _roll_up_projection_totals(household_totals, source_response.totals)
 
         household_totals["committed_net"] = float(household_totals["committed_net"]) + float(
-            tax_advantaged_investments.spendable_total
+            sum(
+                entry.annual_amount
+                for entry in tax_advantaged_investments.entries
+                if _counts_toward_net_tax_advantaged_bucket(entry.bucket_type)
+            )
         )
         household_totals["planned_net"] = float(household_totals["planned_net"]) + float(
-            tax_advantaged_investments.spendable_total
+            sum(
+                entry.annual_amount
+                for entry in tax_advantaged_investments.entries
+                if _counts_toward_net_tax_advantaged_bucket(entry.bucket_type)
+            )
         )
 
         return IncomeYearProjectionResponse(

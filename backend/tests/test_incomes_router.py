@@ -257,9 +257,9 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
         "total": 23500,
     }
     assert projection["totals"]["committed_cash_net"] == 0
-    assert projection["totals"]["committed_net"] == 3000
+    assert projection["totals"]["committed_net"] == 2500
     assert projection["totals"]["planned_cash_net"] == 0
-    assert projection["totals"]["planned_net"] == 3000
+    assert projection["totals"]["planned_net"] == 2500
 
     updated = update_year_settings(
         client,
