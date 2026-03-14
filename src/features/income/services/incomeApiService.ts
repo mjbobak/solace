@@ -1,3 +1,4 @@
+import { DEFAULT_EMERGENCY_FUND_BALANCE } from '../constants/yearSettings';
 import type {
   CreateIncomeComponentInput,
   CreateIncomeOccurrenceInput,
@@ -97,6 +98,9 @@ function transformYearSettings(
   return {
     year: Number(data.year),
     contributions401k: Number(data.contributions_401k ?? 0),
+    emergencyFundBalance: Number(
+      data.emergency_fund_balance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
+    ),
     createdAt: String(data.created_at),
     updatedAt: String(data.updated_at),
   };
@@ -231,6 +235,9 @@ export const incomeApiService = {
     return request(`/projection?year=${year}`, undefined, (data) => ({
       year: Number(data.year),
       totals: transformTotals(data.totals as Record<string, unknown>),
+      emergencyFundBalance: Number(
+        data.emergency_fund_balance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
+      ),
       taxAdvantagedInvestments: transformTaxAdvantagedInvestments(
         (data.tax_advantaged_investments as Record<string, unknown> | null) ??
           null,
@@ -405,7 +412,12 @@ export const incomeApiService = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contributions_401k: input.contributions401k,
+          ...(input.contributions401k !== undefined
+            ? { contributions_401k: input.contributions401k }
+            : {}),
+          ...(input.emergencyFundBalance !== undefined
+            ? { emergency_fund_balance: input.emergencyFundBalance }
+            : {}),
         }),
       },
       transformYearSettings,

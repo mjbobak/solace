@@ -78,6 +78,7 @@ export interface ProjectedIncomeSource extends IncomeSource {
 export interface IncomeYearProjection {
   year: number;
   totals: IncomeProjectionTotals;
+  emergencyFundBalance: number;
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
   sources: ProjectedIncomeSource[];
 }
@@ -85,6 +86,7 @@ export interface IncomeYearProjection {
 export interface IncomeYearSettings {
   year: number;
   contributions401k: number;
+  emergencyFundBalance: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -127,7 +129,8 @@ export interface CreateIncomeOccurrenceInput {
 export type UpdateIncomeOccurrenceInput = Partial<CreateIncomeOccurrenceInput>;
 
 export interface UpdateIncomeYearSettingsInput {
-  contributions401k: number;
+  contributions401k?: number;
+  emergencyFundBalance?: number;
 }
 
 export function getComponentDisplayName(component: ProjectedIncomeComponent): string {

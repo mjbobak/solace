@@ -292,11 +292,15 @@ class IncomeService:
         if settings is None:
             settings = IncomeYearSettings(
                 year=year,
-                contributions_401k=settings_in.contributions_401k,
+                contributions_401k=settings_in.contributions_401k or 0,
+                emergency_fund_balance=settings_in.emergency_fund_balance or 18000,
             )
             self.db.add(settings)
         else:
-            settings.contributions_401k = settings_in.contributions_401k
+            if settings_in.contributions_401k is not None:
+                settings.contributions_401k = settings_in.contributions_401k
+            if settings_in.emergency_fund_balance is not None:
+                settings.emergency_fund_balance = settings_in.emergency_fund_balance
 
         return self._commit_and_refresh(settings)
 
@@ -335,6 +339,12 @@ class IncomeService:
         return IncomeYearProjectionResponse(
             year=year,
             totals=_projection_response(household_totals),
+            emergency_fund_balance=round(
+                float(
+                    year_settings.emergency_fund_balance if year_settings else 18000
+                ),
+                2,
+            ),
             tax_advantaged_investments=self._tax_advantaged_investments_response(
                 year_settings
             ),
@@ -360,6 +370,7 @@ class IncomeService:
         return IncomeYearSettingsResponse(
             year=settings.year,
             contributions_401k=settings.contributions_401k,
+            emergency_fund_balance=settings.emergency_fund_balance,
             created_at=settings.created_at,
             updated_at=settings.updated_at,
         )

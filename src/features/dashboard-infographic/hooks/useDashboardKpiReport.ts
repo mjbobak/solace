@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
+import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type { IncomeYearProjection } from '@/features/income/types/income';
 
@@ -11,6 +12,7 @@ import {
 
 interface UseDashboardKpiReportResult {
   groups: DashboardKpiGroup[];
+  savedEmergencyFundBalance: number;
   isLoading: boolean;
   error: string | null;
 }
@@ -101,6 +103,9 @@ export function useDashboardKpiReport(
 
   return {
     groups,
+    savedEmergencyFundBalance:
+      currentProjection?.emergencyFundBalance ??
+      DEFAULT_EMERGENCY_FUND_BALANCE,
     isLoading: isIncomeLoading || isBudgetLoading,
     error: incomeError ?? budgetError,
   };

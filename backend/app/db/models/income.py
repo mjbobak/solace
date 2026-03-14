@@ -129,8 +129,20 @@ class IncomeYearSettings(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     year = Column(Integer, nullable=False, unique=True, index=True)
     contributions_401k = Column(Float, nullable=False, default=0, server_default="0")
+    emergency_fund_balance = Column(
+        Float,
+        nullable=False,
+        default=18000,
+        server_default="18000",
+    )
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     def __repr__(self) -> str:
-        return f"<IncomeYearSettings(year={self.year}, contributions_401k={self.contributions_401k})>"
+        return (
+            "<IncomeYearSettings("
+            f"year={self.year}, "
+            f"contributions_401k={self.contributions_401k}, "
+            f"emergency_fund_balance={self.emergency_fund_balance}"
+            ")>"
+        )

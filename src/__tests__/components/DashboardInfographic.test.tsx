@@ -1,6 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
+
+const { updateYearSettings } = vi.hoisted(() => ({
+  updateYearSettings: vi.fn(),
+}));
 
 vi.mock('@/shared/hooks/usePlanningYearSelection', async () => {
   const ReactModule = await import('react');
@@ -102,27 +106,42 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
         ],
       },
     ],
+    savedEmergencyFundBalance: 18000,
     isLoading: false,
     error: null,
   }),
 }));
 
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
+vi.mock('@/features/income/services/incomeApiService', () => ({
+  incomeApiService: {
+    updateYearSettings,
+  },
+}));
+
 import { DashboardInfographic } from '@/features/dashboard-infographic/components/DashboardInfographic';
 
 describe('DashboardInfographic', () => {
-  it('toggles between visual and report modes and keeps the selected year in sync', () => {
+  it('toggles between visual and report modes and keeps the selected year in sync', async () => {
+    updateYearSettings.mockResolvedValue({
+      year: 2025,
+      contributions401k: 0,
+      emergencyFundBalance: 9000,
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-02T00:00:00Z',
+    });
+
     render(
       <MemoryRouter>
         <DashboardInfographic />
       </MemoryRouter>,
     );
-
-    expect(screen.getByText('Financial Health Section')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('heading', { name: 'Wealth Management KPI Report' }),
-    ).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Report' }));
 
     expect(
       screen.getByRole('heading', { name: 'Wealth Management KPI Report' }),
@@ -136,15 +155,34 @@ describe('DashboardInfographic', () => {
     expect(
       screen.getByText('Strong: stable or growing year over year.'),
     ).toBeInTheDocument();
-    expect(screen.getByDisplayValue('18000')).toBeInTheDocument();
+    expect(screen.getByText('$18,000')).toBeInTheDocument();
     expect(screen.getByText('6.0 months')).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Edit emergency fund balance' }),
+    );
+
+    expect(screen.getByDisplayValue('18000')).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Emergency fund balance'), {
       target: { value: '9000' },
     });
 
     expect(screen.getByDisplayValue('9000')).toBeInTheDocument();
-    expect(screen.getByText('3.0 months')).toBeInTheDocument();
+
+    fireEvent.blur(screen.getByLabelText('Emergency fund balance'));
+
+    await waitFor(() =>
+      expect(screen.getByText('$9,000')).toBeInTheDocument(),
+    );
+    await waitFor(() =>
+      expect(screen.getByText('3.0 months')).toBeInTheDocument(),
+    );
+    await waitFor(() =>
+      expect(updateYearSettings).toHaveBeenCalledWith(2025, {
+        emergencyFundBalance: 9000,
+      }),
+    );
 
     fireEvent.click(screen.getByRole('button', { name: '2024' }));
 

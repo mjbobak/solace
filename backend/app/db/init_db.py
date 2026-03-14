@@ -44,6 +44,7 @@ def init_db() -> None:
     # Create all tables defined in models
     Base.metadata.create_all(bind=engine)
     _ensure_income_sources_schema()
+    _ensure_income_year_settings_columns()
     _drop_legacy_income_tables()
     _ensure_transaction_spread_columns()
     _migrate_legacy_transaction_spreads()
@@ -171,6 +172,33 @@ def _ensure_income_sources_schema() -> None:
         connection.execute(text("PRAGMA foreign_keys=ON"))
 
     logger.info("Rebuilt legacy income_sources schema without member_id")
+
+
+def _ensure_income_year_settings_columns() -> None:
+    """Add missing year-settings columns to existing databases."""
+    inspector = inspect(engine)
+    if "income_year_settings" not in inspector.get_table_names():
+        return
+
+    existing_columns = {
+        column["name"] for column in inspector.get_columns("income_year_settings")
+    }
+    statements: list[str] = []
+
+    if "emergency_fund_balance" not in existing_columns:
+        statements.append(
+            """
+            ALTER TABLE income_year_settings
+            ADD COLUMN emergency_fund_balance FLOAT DEFAULT 18000 NOT NULL
+            """
+        )
+
+    with engine.begin() as connection:
+        for statement in statements:
+            connection.execute(text(statement))
+
+    if statements:
+        logger.info("Ensured income year settings columns exist")
 
 
 def _ensure_transaction_spread_columns() -> None:

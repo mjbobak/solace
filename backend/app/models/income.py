@@ -20,7 +20,8 @@ class TaxAdvantagedInvestmentsResponse(BaseModel):
 class IncomeYearSettingsUpdate(BaseModel):
     """Update payload for year-scoped income settings."""
 
-    contributions_401k: float = Field(..., ge=0)
+    contributions_401k: Optional[float] = Field(None, ge=0)
+    emergency_fund_balance: Optional[float] = Field(None, ge=0)
 
 
 class IncomeYearSettingsResponse(IncomeYearSettingsUpdate):
@@ -196,6 +197,7 @@ class IncomeYearProjectionResponse(BaseModel):
 
     year: int
     totals: IncomeProjectionTotalsResponse
+    emergency_fund_balance: float = 18000
     tax_advantaged_investments: TaxAdvantagedInvestmentsResponse = Field(
         default_factory=TaxAdvantagedInvestmentsResponse
     )

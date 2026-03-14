@@ -1,4 +1,5 @@
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
+import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
 import type {
   IncomeProjectionTotals,
@@ -40,8 +41,6 @@ const TAX_ADVANTAGED_LABEL_MATCHERS = {
   roth: 'ROTH',
   hsa: 'HSA',
 } as const;
-
-export const DEFAULT_EMERGENCY_FUND_BALANCE = 18000;
 
 const KPI_BENCHMARKS: Record<string, string> = {
   'net-worth': 'Strong: trending upward year over year.',

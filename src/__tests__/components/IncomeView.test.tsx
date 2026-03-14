@@ -66,6 +66,7 @@ const projection: IncomeYearProjection = {
     plannedGross: 135000,
     plannedNet: 101000,
   },
+  emergencyFundBalance: 18000,
   taxAdvantagedInvestments: {
     contributions401k: 22000,
     total: 22000,
@@ -250,6 +251,7 @@ describe('IncomeView', () => {
     updateYearSettings.mockResolvedValue({
       year: 2025,
       contributions401k: 25000,
+      emergencyFundBalance: 18000,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-02T00:00:00Z',
     });

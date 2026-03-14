@@ -95,11 +95,18 @@ def update_year_settings(
     client,
     year: int,
     *,
-    contributions_401k: float,
+    contributions_401k: float | None = None,
+    emergency_fund_balance: float | None = None,
 ) -> dict:
+    payload: dict[str, float] = {}
+    if contributions_401k is not None:
+        payload["contributions_401k"] = contributions_401k
+    if emergency_fund_balance is not None:
+        payload["emergency_fund_balance"] = emergency_fund_balance
+
     response = client.put(
         f"/api/incomes/year-settings/{year}",
-        json={"contributions_401k": contributions_401k},
+        json=payload,
     )
     assert response.status_code == 200
     return response.json()
@@ -185,6 +192,7 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     projection = get_projection(client, 2026)
 
     assert projection["year"] == 2026
+    assert projection["emergency_fund_balance"] == 18000
     assert projection["tax_advantaged_investments"] == {
         "contributions_401k": 0,
         "total": 0,
@@ -203,19 +211,27 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
 
 
 def test_year_settings_can_be_created_updated_and_returned_in_projection(client, db_session):
-    """Year-scoped 401k settings should persist and flow through the projection read model."""
+    """Year-scoped dashboard settings should persist and flow through the projection read model."""
     created = update_year_settings(client, 2026, contributions_401k=19500)
     assert created["year"] == 2026
     assert created["contributions_401k"] == 19500
+    assert created["emergency_fund_balance"] == 18000
 
     projection = get_projection(client, 2026)
+    assert projection["emergency_fund_balance"] == 18000
     assert projection["tax_advantaged_investments"] == {
         "contributions_401k": 19500,
         "total": 19500,
     }
 
-    updated = update_year_settings(client, 2026, contributions_401k=22000)
+    updated = update_year_settings(
+        client,
+        2026,
+        contributions_401k=22000,
+        emergency_fund_balance=24000,
+    )
     assert updated["contributions_401k"] == 22000
+    assert updated["emergency_fund_balance"] == 24000
 
     db_row = (
         db_session.query(IncomeYearSettings)
@@ -223,6 +239,33 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
         .one()
     )
     assert db_row.contributions_401k == 22000
+    assert db_row.emergency_fund_balance == 24000
+
+    projection = get_projection(client, 2026)
+    assert projection["emergency_fund_balance"] == 24000
+
+
+def test_year_settings_partial_updates_preserve_existing_values(client, db_session):
+    """Saving one year setting should not overwrite the others."""
+    update_year_settings(
+        client,
+        2026,
+        contributions_401k=19500,
+        emergency_fund_balance=21000,
+    )
+
+    updated = update_year_settings(client, 2026, emergency_fund_balance=26000)
+
+    assert updated["contributions_401k"] == 19500
+    assert updated["emergency_fund_balance"] == 26000
+
+    db_row = (
+        db_session.query(IncomeYearSettings)
+        .filter(IncomeYearSettings.year == 2026)
+        .one()
+    )
+    assert db_row.contributions_401k == 19500
+    assert db_row.emergency_fund_balance == 26000
 
 
 def test_promotion_mid_year_auto_closes_open_version_and_prorates_year_total(client, db_session):

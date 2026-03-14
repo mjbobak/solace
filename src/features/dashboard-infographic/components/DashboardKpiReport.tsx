@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { BsInfoCircle } from 'react-icons/bs';
+import React, { useEffect, useRef, useState } from 'react';
+import { BsInfoCircle, BsPencil } from 'react-icons/bs';
+import { toast } from 'sonner';
 
+import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { useDashboardKpiReport } from '../hooks/useDashboardKpiReport';
 import {
@@ -96,9 +98,29 @@ function renderMetricValue(
   row: DashboardKpiRow,
   emergencyFundInput: string,
   onEmergencyFundInputChange: (value: string) => void,
+  isEditingEmergencyFund: boolean,
+  onEditEmergencyFund: () => void,
+  onFinishEditingEmergencyFund: () => void,
+  emergencyFundInputRef: React.RefObject<HTMLInputElement | null>,
 ): React.ReactNode {
   if (row.key !== 'emergency-fund-balance') {
     return formatDashboardKpiValue(row.value);
+  }
+
+  if (!isEditingEmergencyFund) {
+    return (
+      <div className="flex items-center justify-end gap-2">
+        <span>{formatDashboardKpiValue(row.value)}</span>
+        <button
+          type="button"
+          onClick={onEditEmergencyFund}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-black/[0.04] hover:text-app focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/35"
+          aria-label="Edit emergency fund balance"
+        >
+          <BsPencil size={12} />
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -111,6 +133,7 @@ function renderMetricValue(
           $
         </span>
         <input
+          ref={emergencyFundInputRef}
           id="emergency-fund-balance-input"
           type="number"
           min="0"
@@ -118,6 +141,12 @@ function renderMetricValue(
           inputMode="decimal"
           value={emergencyFundInput}
           onChange={(event) => onEmergencyFundInputChange(event.target.value)}
+          onBlur={onFinishEditingEmergencyFund}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === 'Escape') {
+              onFinishEditingEmergencyFund();
+            }
+          }}
           className="form-input h-9 w-full pl-7 pr-3 text-right"
           aria-label="Emergency fund balance"
         />
@@ -130,15 +159,68 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
   year,
   availableYears,
 }) => {
+  const emergencyFundSaveInFlightRef = useRef(false);
   const [emergencyFundInput, setEmergencyFundInput] = useState(
     String(DEFAULT_EMERGENCY_FUND_BALANCE),
   );
+  const [isEditingEmergencyFund, setIsEditingEmergencyFund] = useState(false);
+  const emergencyFundInputRef = useRef<HTMLInputElement>(null);
   const emergencyFundBalance = parseEmergencyFundInput(emergencyFundInput);
-  const { groups, isLoading, error } = useDashboardKpiReport(
-    year,
-    availableYears,
-    emergencyFundBalance,
-  );
+  const { groups, savedEmergencyFundBalance, isLoading, error } =
+    useDashboardKpiReport(year, availableYears, emergencyFundBalance);
+
+  useEffect(() => {
+    if (isEditingEmergencyFund) {
+      return;
+    }
+
+    setEmergencyFundInput(String(savedEmergencyFundBalance));
+  }, [isEditingEmergencyFund, savedEmergencyFundBalance]);
+
+  useEffect(() => {
+    if (!isEditingEmergencyFund) {
+      return;
+    }
+
+    emergencyFundInputRef.current?.focus();
+    emergencyFundInputRef.current?.select();
+  }, [isEditingEmergencyFund]);
+
+  const handleFinishEditingEmergencyFund = async () => {
+    if (emergencyFundSaveInFlightRef.current) {
+      return;
+    }
+
+    const nextEmergencyFundBalance = parseEmergencyFundInput(emergencyFundInput);
+
+    if (nextEmergencyFundBalance === null) {
+      setEmergencyFundInput(String(savedEmergencyFundBalance));
+      setIsEditingEmergencyFund(false);
+      return;
+    }
+
+    setIsEditingEmergencyFund(false);
+
+    if (nextEmergencyFundBalance === savedEmergencyFundBalance) {
+      return;
+    }
+
+    emergencyFundSaveInFlightRef.current = true;
+
+    try {
+      const nextSettings = await incomeApiService.updateYearSettings(year, {
+        emergencyFundBalance: nextEmergencyFundBalance,
+      });
+      setEmergencyFundInput(String(nextSettings.emergencyFundBalance));
+      toast.success('Emergency fund balance saved');
+    } catch (saveError) {
+      console.error('Failed to save emergency fund balance:', saveError);
+      setEmergencyFundInput(String(savedEmergencyFundBalance));
+      toast.error('Failed to save emergency fund balance');
+    } finally {
+      emergencyFundSaveInFlightRef.current = false;
+    }
+  };
 
   return (
     <section
@@ -210,6 +292,12 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                           row,
                           emergencyFundInput,
                           setEmergencyFundInput,
+                          isEditingEmergencyFund,
+                          () => setIsEditingEmergencyFund(true),
+                          () => {
+                            void handleFinishEditingEmergencyFund();
+                          },
+                          emergencyFundInputRef,
                         )}
                       </td>
                       <td className="px-6 py-3 text-left text-sm text-muted">

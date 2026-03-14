@@ -23,7 +23,7 @@ export const DashboardInfographic: React.FC = () => {
   const period = 'monthly' as const;
   const currentYear = new Date().getFullYear();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [dashboardMode, setDashboardMode] = useState<DashboardMode>('visual');
+  const [dashboardMode, setDashboardMode] = useState<DashboardMode>('report');
   const {
     availableYears: planningYears,
     selectedYear,
