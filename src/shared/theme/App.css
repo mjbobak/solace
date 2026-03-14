@@ -527,8 +527,24 @@ body {
   }
 
   .app-nav {
-    @apply fixed left-0 right-0 top-0 z-50 flex h-16 items-center gap-8 px-6 transition-all duration-200;
+    @apply fixed left-0 right-0 top-0 z-50 flex min-h-16 flex-wrap items-center gap-4 px-6 py-2 transition-all duration-200;
     color: var(--color-text);
+  }
+
+  .app-nav-brand {
+    @apply flex items-center gap-2;
+  }
+
+  .app-nav-links {
+    @apply flex items-center gap-1;
+  }
+
+  .app-nav-actions {
+    @apply ml-auto flex items-center justify-end gap-3;
+  }
+
+  .app-nav-right-content {
+    @apply flex items-center justify-end;
   }
 
   .app-nav-scrolled {
@@ -557,6 +573,24 @@ body {
     @apply inline-flex items-center rounded-full border p-1;
     background: color-mix(in srgb, var(--color-surface-elevated) 88%, transparent);
     border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  @media (max-width: 1100px) {
+    .app-shell {
+      @apply pt-24;
+    }
+
+    .app-nav {
+      @apply gap-3;
+    }
+
+    .app-nav-actions {
+      @apply w-full;
+    }
+
+    .app-nav-right-content {
+      @apply w-full;
+    }
   }
 
   .theme-toggle-button {

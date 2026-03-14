@@ -159,6 +159,8 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen">
       <TopNav
         activeTab={activeTab}
+        rightContent={headerControls}
+        showThemeToggle={false}
         onTabChange={(tab) => {
           if (tab !== activeTab) {
             navigate({
@@ -173,7 +175,6 @@ const HomePage: React.FC = () => {
       />
       <MainContent
         title={getPageTitle()}
-        headerControls={headerControls}
         headerAction={(() => {
           switch (activeTab) {
             case 'budget':

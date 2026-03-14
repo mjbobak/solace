@@ -9,6 +9,8 @@ export type TabType = 'dashboard' | 'income' | 'spending' | 'budget';
 interface TopNavProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
+  rightContent?: React.ReactNode;
+  showThemeToggle?: boolean;
 }
 
 interface NavItem {
@@ -23,7 +25,12 @@ const navItems: NavItem[] = [
   { id: 'spending', label: 'Spending' },
 ];
 
-export const TopNav: React.FC<TopNavProps> = ({ activeTab, onTabChange }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  activeTab,
+  onTabChange,
+  rightContent,
+  showThemeToggle = true,
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -40,12 +47,12 @@ export const TopNav: React.FC<TopNavProps> = ({ activeTab, onTabChange }) => {
     <nav
       className={`app-nav ${isScrolled ? 'app-nav-scrolled' : ''}`}
     >
-      <div className="flex items-center gap-2">
+      <div className="app-nav-brand">
         <TbHomeStats className="w-6 h-6" />
         <h1 className="text-xl font-bold tracking-wide">Solace.</h1>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="app-nav-links">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
 
@@ -61,44 +68,47 @@ export const TopNav: React.FC<TopNavProps> = ({ activeTab, onTabChange }) => {
         })}
       </div>
 
-      <div className="ml-auto">
-        <div className="theme-toggle-group" aria-label="Theme mode selector">
-          {([
-            {
-              value: 'light' as const,
-              label: 'Light theme',
-              icon: LuSunMedium,
-            },
-            {
-              value: 'dark' as const,
-              label: 'Dark theme',
-              icon: LuMoon,
-            },
-            {
-              value: 'system' as const,
-              label: 'System theme',
-              icon: LuMonitor,
-            },
-          ] satisfies Array<{
-            value: Theme;
-            label: string;
-            icon: React.ComponentType<{ className?: string }>;
-          }>).map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              className={`theme-toggle-button ${
-                theme === value ? 'theme-toggle-button-active' : ''
-              }`}
-              onClick={() => setTheme(value)}
-              aria-label={label}
-              aria-pressed={theme === value}
-              title={label}
-            >
-              <Icon className="h-4 w-4" />
-            </button>
-          ))}
-        </div>
+      <div className="app-nav-actions">
+        {rightContent ? <div className="app-nav-right-content">{rightContent}</div> : null}
+        {showThemeToggle ? (
+          <div className="theme-toggle-group" aria-label="Theme mode selector">
+            {([
+              {
+                value: 'light' as const,
+                label: 'Light theme',
+                icon: LuSunMedium,
+              },
+              {
+                value: 'dark' as const,
+                label: 'Dark theme',
+                icon: LuMoon,
+              },
+              {
+                value: 'system' as const,
+                label: 'System theme',
+                icon: LuMonitor,
+              },
+            ] satisfies Array<{
+              value: Theme;
+              label: string;
+              icon: React.ComponentType<{ className?: string }>;
+            }>).map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                type="button"
+                className={`theme-toggle-button ${
+                  theme === value ? 'theme-toggle-button-active' : ''
+                }`}
+                onClick={() => setTheme(value)}
+                aria-label={label}
+                aria-pressed={theme === value}
+                title={label}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </nav>
   );

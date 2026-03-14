@@ -144,4 +144,24 @@ describe('ThemeProvider', () => {
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
   });
+
+  it('can render custom nav content without the theme toggle', () => {
+    installMatchMedia(false);
+
+    render(
+      <ThemeProvider>
+        <TopNav
+          activeTab="dashboard"
+          onTabChange={vi.fn()}
+          rightContent={<div>Planning filters</div>}
+          showThemeToggle={false}
+        />
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByText('Planning filters')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Dark theme' }),
+    ).not.toBeInTheDocument();
+  });
 });
