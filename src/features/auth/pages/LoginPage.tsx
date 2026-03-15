@@ -11,9 +11,11 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const fromLocation = (location.state as {
-        from?: { pathname: string; search?: string };
-      })?.from;
+      const fromLocation = (
+        location.state as {
+          from?: { pathname: string; search?: string };
+        }
+      )?.from;
       const from = fromLocation
         ? `${fromLocation.pathname}${fromLocation.search || ''}`
         : '/dashboard';

@@ -2,11 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { TopNav } from '@/shared/components/TopNav';
-import {
-  THEME_STORAGE_KEY,
-  ThemeProvider,
-  useTheme,
-} from '@/shared/theme';
+import { THEME_STORAGE_KEY, ThemeProvider, useTheme } from '@/shared/theme';
 
 function installMatchMedia(initialMatches = false) {
   let matches = initialMatches;
@@ -20,7 +16,10 @@ function installMatchMedia(initialMatches = false) {
       },
       media: '(prefers-color-scheme: dark)',
       onchange: null,
-      addEventListener: (_event: string, listener: (event: MediaQueryListEvent) => void) => {
+      addEventListener: (
+        _event: string,
+        listener: (event: MediaQueryListEvent) => void,
+      ) => {
         listeners.add(listener);
       },
       removeEventListener: (

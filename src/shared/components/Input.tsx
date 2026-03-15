@@ -21,7 +21,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={`form-input ${error ? 'form-input-error' : ''} ${className}`}
+          className={`form-input ${
+            error ? 'form-input-error' : ''
+          } ${className}`}
           {...props}
         />
         {error && <p className="form-error">{error}</p>}
@@ -58,7 +60,9 @@ export const Textarea: React.FC<TextareaProps> = ({
       )}
       <textarea
         id={textareaId}
-        className={`form-input resize-none ${error ? 'form-input-error' : ''} ${className}`}
+        className={`form-input resize-none ${
+          error ? 'form-input-error' : ''
+        } ${className}`}
         {...props}
       />
       {error && <p className="form-error">{error}</p>}

@@ -25,7 +25,9 @@ describe('PlanningFiltersBar', () => {
     );
 
     expect(screen.getByText('Current Month')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /show 2 more/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /show 2 more/i }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/^2024$/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /show 2 more/i }));

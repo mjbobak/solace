@@ -52,7 +52,9 @@ export function TaxAdvantagedInvestmentsModal({
   onClose,
   onSubmit,
 }: TaxAdvantagedInvestmentsModalProps) {
-  const [amountsByType, setAmountsByType] = useState<Record<string, string>>({});
+  const [amountsByType, setAmountsByType] = useState<Record<string, string>>(
+    {},
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -65,14 +67,16 @@ export function TaxAdvantagedInvestmentsModal({
       normalizeTaxAdvantagedBuckets(
         TAX_ADVANTAGED_BUCKET_DEFINITIONS.map((bucket) => ({
           bucketType: bucket.type,
-          annualAmount: parseNonNegativeNumber(amountsByType[bucket.type] ?? '') ?? 0,
+          annualAmount:
+            parseNonNegativeNumber(amountsByType[bucket.type] ?? '') ?? 0,
         })),
       ),
     [amountsByType],
   );
 
   const hasInvalidValue = TAX_ADVANTAGED_BUCKET_DEFINITIONS.some(
-    (bucket) => parseNonNegativeNumber(amountsByType[bucket.type] ?? '') === null,
+    (bucket) =>
+      parseNonNegativeNumber(amountsByType[bucket.type] ?? '') === null,
   );
 
   const handleSubmit = async () => {

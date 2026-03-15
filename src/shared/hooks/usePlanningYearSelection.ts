@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { normalizePlanningYear } from '@/shared/utils/planningYears';
-import {
-  getNumberParam,
-  setNumberParam,
-} from '@/shared/utils/searchParams';
+import { getNumberParam, setNumberParam } from '@/shared/utils/searchParams';
 
 import { usePlanningYears } from './usePlanningYears';
 
@@ -37,10 +34,7 @@ export function usePlanningYearSelection({
   setSearchParams,
   fallbackYear,
 }: UsePlanningYearSelectionParams): UsePlanningYearSelectionResult {
-  const {
-    years: availableYears,
-    isLoading,
-  } = usePlanningYears();
+  const { years: availableYears, isLoading } = usePlanningYears();
 
   const requestedYear = useMemo(
     () => getRequestedPlanningYear(searchParams, fallbackYear),

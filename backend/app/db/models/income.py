@@ -67,9 +67,7 @@ class IncomeComponent(Base):
         cascade="all, delete-orphan",
     )
 
-    __table_args__ = (
-        Index("ix_income_components_source_type_mode", "source_id", "component_type", "component_mode"),
-    )
+    __table_args__ = (Index("ix_income_components_source_type_mode", "source_id", "component_type", "component_mode"),)
 
     def __repr__(self) -> str:
         return (
@@ -95,9 +93,7 @@ class IncomeComponentVersion(Base):
 
     component = relationship("IncomeComponent", back_populates="versions")
 
-    __table_args__ = (
-        Index("ix_income_component_versions_component_dates", "component_id", "start_date", "end_date"),
-    )
+    __table_args__ = (Index("ix_income_component_versions_component_dates", "component_id", "start_date", "end_date"),)
 
     def __repr__(self) -> str:
         return (

@@ -7,7 +7,11 @@ export interface SpreadPaymentConfig {
 
 type SpreadPaymentEntry = Pick<
   SpendingEntry,
-  'amount' | 'transactionDate' | 'spreadStartDate' | 'spreadMonths' | 'isAccrual'
+  | 'amount'
+  | 'transactionDate'
+  | 'spreadStartDate'
+  | 'spreadMonths'
+  | 'isAccrual'
 >;
 
 export interface MonthlyTransactionImpact {
@@ -79,9 +83,7 @@ export function getSpreadPaymentConfig(
   return null;
 }
 
-export function hasSpreadPayment(
-  entry: SpreadPaymentEntry,
-): boolean {
+export function hasSpreadPayment(entry: SpreadPaymentEntry): boolean {
   return getSpreadPaymentConfig(entry) !== null;
 }
 

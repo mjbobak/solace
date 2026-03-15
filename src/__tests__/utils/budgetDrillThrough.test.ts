@@ -5,7 +5,9 @@ import { buildBudgetDrillThroughSearchParams } from '@/shared/utils/budgetDrillT
 describe('budget drill-through query builder', () => {
   it('maps full-year drill-through to planning year and exact budget id', () => {
     const searchParams = buildBudgetDrillThroughSearchParams({
-      baseSearchParams: new URLSearchParams('planningYear=2025&spendBasis=annual_full_year&q=old'),
+      baseSearchParams: new URLSearchParams(
+        'planningYear=2025&spendBasis=annual_full_year&q=old',
+      ),
       planningYear: 2025,
       spendBasis: 'annual_full_year',
       budgetId: 42,

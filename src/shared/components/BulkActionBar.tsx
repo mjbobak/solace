@@ -39,10 +39,8 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
 }) => {
   if (selectedCount === 0) return null;
 
-  const toolbarControlClassName =
-    'bulk-toolbar-control h-11 px-4';
-  const pendingChipClassName =
-    'bulk-toolbar-chip h-9 px-3';
+  const toolbarControlClassName = 'bulk-toolbar-control h-11 px-4';
+  const pendingChipClassName = 'bulk-toolbar-chip h-9 px-3';
   const iconButtonClassName =
     'inline-flex h-5 w-5 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white';
   const secondaryActionClassName = `${toolbarControlClassName} inline-flex items-center justify-center gap-2`;

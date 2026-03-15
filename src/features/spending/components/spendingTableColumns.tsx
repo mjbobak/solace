@@ -26,8 +26,12 @@ interface GetColumnsParams {
 export function getSpendingTableColumns(
   params: GetColumnsParams,
 ): Column<SpendingEntry>[] {
-  const { handleEditSpread, handleEdit, handleDelete, displayMonth = null } =
-    params;
+  const {
+    handleEditSpread,
+    handleEdit,
+    handleDelete,
+    displayMonth = null,
+  } = params;
 
   return [
     {
@@ -104,7 +108,8 @@ export function getSpendingTableColumns(
           displayMonth={displayMonth}
         />
       ),
-      sortValue: (row) => (hasSpreadPayment(row) ? 'Payment spread' : 'Not spread'),
+      sortValue: (row) =>
+        hasSpreadPayment(row) ? 'Payment spread' : 'Not spread',
       sortable: true,
       width: '210px',
     },

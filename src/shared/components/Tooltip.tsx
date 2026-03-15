@@ -135,9 +135,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             ref={tooltipRef}
             className={`fixed z-50 rounded px-3 py-2 text-xs shadow-lg transition-opacity duration-150 ${
               stacked ? 'whitespace-pre-line' : 'whitespace-nowrap'
-            } ${
-              position ? 'opacity-100' : 'opacity-0'
-            }`}
+            } ${position ? 'opacity-100' : 'opacity-0'}`}
             style={
               position
                 ? {

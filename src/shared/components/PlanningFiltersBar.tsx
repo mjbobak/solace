@@ -47,7 +47,8 @@ const CombinedPlanningFilter: React.FC<CombinedPlanningFilterProps> = ({
   const selectedOption =
     options.find(
       (option) =>
-        option.planningYear === planningYear && option.spendBasis === spendBasis,
+        option.planningYear === planningYear &&
+        option.spendBasis === spendBasis,
     ) ?? options[0];
   const primaryOptions = options.slice(0, DEFAULT_VISIBLE_COMBINED_OPTIONS);
   const overflowOptions = options.slice(DEFAULT_VISIBLE_COMBINED_OPTIONS);
@@ -108,7 +109,9 @@ const CombinedPlanningFilter: React.FC<CombinedPlanningFilterProps> = ({
           isSelected ? 'dropdown-option-active font-medium' : ''
         }`}
       >
-        <span className="font-semibold tabular-nums">{option.planningYear}</span>
+        <span className="font-semibold tabular-nums">
+          {option.planningYear}
+        </span>
         <span className="truncate text-sm text-muted">{option.basisLabel}</span>
       </button>
     );

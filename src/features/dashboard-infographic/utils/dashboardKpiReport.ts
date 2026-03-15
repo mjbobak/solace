@@ -1,6 +1,9 @@
-import type { BudgetEntry, SpendBasis } from '@/features/budget/types/budgetView';
-import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
+import type {
+  BudgetEntry,
+  SpendBasis,
+} from '@/features/budget/types/budgetView';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
+import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import type {
   IncomeProjectionTotals,
   TaxAdvantagedInvestments,
@@ -54,29 +57,29 @@ const KPI_BENCHMARKS: Record<string, string> = {
   'net-worth-growth-vs-income-growth':
     'Strong: net worth grows at least as fast as income.',
   'savings-rate': 'Strong: 20%+ of after-tax income.',
-  'annual-savings-amount': 'Strong: consistently positive and rising over time.',
+  'annual-savings-amount':
+    'Strong: consistently positive and rising over time.',
   'annual-investment-contributions':
     'Strong: steady annual contributions with room to increase.',
   'gross-income': 'Strong: stable or growing year over year.',
   'after-tax-income': 'Strong: enough to cover spending and still save 20%+.',
   'income-growth-rate': 'Strong: positive growth each year.',
-  'savings-efficiency': 'Strong: 15%+ of after-tax income remains as cash savings.',
-  'total-monthly-expenses': 'Strong: low enough to leave healthy room for saving.',
-  'annual-living-expenses':
-    'Strong: controlled relative to take-home income.',
-  'expense-growth-rate':
-    'Strong: grows slower than income over time.',
-  'essential-spending':
-    'Strong: essentials stay well below after-tax income.',
+  'savings-efficiency':
+    'Strong: 15%+ of after-tax income remains as cash savings.',
+  'total-monthly-expenses':
+    'Strong: low enough to leave healthy room for saving.',
+  'annual-living-expenses': 'Strong: controlled relative to take-home income.',
+  'expense-growth-rate': 'Strong: grows slower than income over time.',
+  'essential-spending': 'Strong: essentials stay well below after-tax income.',
   'funsies-spending': 'Strong: intentional and comfortably within your plan.',
   'expense-ratio': 'Strong: under 60% of after-tax income.',
-  'emergency-fund-balance': 'Strong: enough cash to cover 3-6 months of essentials.',
+  'emergency-fund-balance':
+    'Strong: enough cash to cover 3-6 months of essentials.',
   'emergency-fund-months': 'Strong: 3-6 months minimum, 6+ very solid.',
   'cash-reserves': 'Strong: covers near-term needs plus a buffer.',
   'tax-advantaged-contributions':
     'Strong: consistent annual contributions, ideally near account limits.',
-  'tax-advantaged-savings-ratio':
-    'Strong: 10%+ of after-tax income.',
+  'tax-advantaged-savings-ratio': 'Strong: 10%+ of after-tax income.',
   '401k-contributions':
     'Strong: enough to get the full match, ideally trending toward maxing.',
   'roth-ira-contributions':
@@ -146,15 +149,12 @@ function getBudgetComparisonAmount(
   spendBasis: SpendBasis,
   completedMonths: number,
 ): number {
-  return sumBudgetEntries(
-    budgetEntries,
-    predicate,
-    (entry) =>
-      getComparisonBudgetForSpendBasis({
-        spendBasis,
-        monthlyBudget: entry.budgeted,
-        completedMonths,
-      }),
+  return sumBudgetEntries(budgetEntries, predicate, (entry) =>
+    getComparisonBudgetForSpendBasis({
+      spendBasis,
+      monthlyBudget: entry.budgeted,
+      completedMonths,
+    }),
   );
 }
 
@@ -246,7 +246,8 @@ function createCurrencyRow(
   return {
     key,
     label,
-    benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
+    benchmark:
+      KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
     actualValue: createNumericDisplayValue(actualAmount, createCurrencyValue),
     plannedValue: createPlannedValue(plannedAmount, createCurrencyValue),
   };
@@ -261,7 +262,8 @@ function createPercentageRow(
   return {
     key,
     label,
-    benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
+    benchmark:
+      KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
     actualValue: createNumericDisplayValue(actualAmount, createPercentageValue),
     plannedValue: createPlannedValue(plannedAmount, createPercentageValue),
   };
@@ -271,7 +273,8 @@ function createUnsupportedRow(key: string, label: string): DashboardKpiRow {
   return {
     key,
     label,
-    benchmark: KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
+    benchmark:
+      KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
     actualValue: createNotAvailableValue(),
   };
 }
@@ -291,11 +294,7 @@ function calculateGrowthRate(
   currentValue: number | null,
   previousValue: number | null,
 ): number | null {
-  if (
-    currentValue === null ||
-    previousValue === null ||
-    previousValue === 0
-  ) {
+  if (currentValue === null || previousValue === null || previousValue === 0) {
     return null;
   }
 
@@ -350,7 +349,8 @@ export function buildDashboardKpiGroups({
 }: BuildDashboardKpiGroupsParams): DashboardKpiGroup[] {
   const currentGrossIncome = currentIncomeTotals?.plannedGross ?? null;
   const currentAfterTaxIncome = currentIncomeTotals?.plannedNet ?? null;
-  const currentCommittedAfterTaxIncome = currentIncomeTotals?.committedNet ?? null;
+  const currentCommittedAfterTaxIncome =
+    currentIncomeTotals?.committedNet ?? null;
   const previousGrossIncome = previousIncomeTotals?.plannedGross ?? null;
   const plannedLivingExpenses = budgetEntries
     ? getBudgetComparisonAmount(
@@ -448,15 +448,13 @@ export function buildDashboardKpiGroups({
         actualLivingExpenses -
         actualInvestmentContributions;
   const savingsRate = calculateRatio(
-    actualSavingsAmount === null ||
-      actualInvestmentContributions === null
+    actualSavingsAmount === null || actualInvestmentContributions === null
       ? null
       : actualSavingsAmount + actualInvestmentContributions,
     actualComparisonAfterTaxIncome,
   );
   const plannedSavingsRate = calculateRatio(
-    plannedSavingsAmount === null ||
-      plannedInvestmentContributions === null
+    plannedSavingsAmount === null || plannedInvestmentContributions === null
       ? null
       : plannedSavingsAmount + plannedInvestmentContributions,
     plannedComparisonAfterTaxIncome,

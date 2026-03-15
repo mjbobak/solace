@@ -26,9 +26,7 @@ export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
   return (
     <div className="surface-card">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="page-section-title mb-0">
-          Income & Spending Flow
-        </h3>
+        <h3 className="page-section-title mb-0">Income & Spending Flow</h3>
 
         <div className="flex items-center gap-4">
           {!externalPeriod && (

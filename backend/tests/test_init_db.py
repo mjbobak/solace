@@ -12,24 +12,12 @@ def test_drop_legacy_income_tables_removes_only_obsolete_tables(monkeypatch, tmp
 
     with engine.begin() as connection:
         connection.execute(text("CREATE TABLE income_deductions (id INTEGER PRIMARY KEY)"))
-        connection.execute(
-            text("CREATE TABLE income_effective_ranges (id INTEGER PRIMARY KEY)")
-        )
+        connection.execute(text("CREATE TABLE income_effective_ranges (id INTEGER PRIMARY KEY)"))
         connection.execute(text("CREATE TABLE incomes (id INTEGER PRIMARY KEY)"))
-        connection.execute(
-            text("CREATE TABLE household_members (id INTEGER PRIMARY KEY)")
-        )
-        connection.execute(
-            text(
-                "CREATE TABLE income_component_version_deductions (id INTEGER PRIMARY KEY)"
-            )
-        )
-        connection.execute(
-            text("CREATE TABLE income_occurrence_deductions (id INTEGER PRIMARY KEY)")
-        )
-        connection.execute(
-            text("CREATE TABLE income_sources (id INTEGER PRIMARY KEY)")
-        )
+        connection.execute(text("CREATE TABLE household_members (id INTEGER PRIMARY KEY)"))
+        connection.execute(text("CREATE TABLE income_component_version_deductions (id INTEGER PRIMARY KEY)"))
+        connection.execute(text("CREATE TABLE income_occurrence_deductions (id INTEGER PRIMARY KEY)"))
+        connection.execute(text("CREATE TABLE income_sources (id INTEGER PRIMARY KEY)"))
 
     monkeypatch.setattr(init_db_module, "engine", engine)
 
@@ -81,17 +69,13 @@ def test_ensure_income_sources_schema_removes_legacy_member_id_and_preserves_row
     init_db_module._ensure_income_sources_schema()
 
     inspector = inspect(engine)
-    column_names = {
-        column["name"] for column in inspector.get_columns("income_sources")
-    }
+    column_names = {column["name"] for column in inspector.get_columns("income_sources")}
 
     assert "member_id" not in column_names
     assert {"id", "name", "is_active", "sort_order", "created_at", "updated_at"} <= column_names
 
     with engine.begin() as connection:
-        rows = connection.execute(
-            text("SELECT id, name, is_active, sort_order FROM income_sources")
-        ).fetchall()
+        rows = connection.execute(text("SELECT id, name, is_active, sort_order FROM income_sources")).fetchall()
 
     assert rows == [(1, "Salary", 1, 3)]
 
@@ -123,10 +107,7 @@ def test_ensure_income_year_tax_advantaged_buckets_schema_creates_table(monkeypa
 
     inspector = inspect(engine)
     assert init_db_module.TAX_ADVANTAGED_BUCKET_TABLE in inspector.get_table_names()
-    column_names = {
-        column["name"]
-        for column in inspector.get_columns(init_db_module.TAX_ADVANTAGED_BUCKET_TABLE)
-    }
+    column_names = {column["name"] for column in inspector.get_columns(init_db_module.TAX_ADVANTAGED_BUCKET_TABLE)}
     assert {
         "id",
         "year_settings_id",

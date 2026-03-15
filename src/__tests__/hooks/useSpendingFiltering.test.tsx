@@ -41,7 +41,9 @@ const transactions: SpendingEntry[] = [
   },
 ];
 
-function createFilters(overrides: Partial<SpendingFilters> = {}): SpendingFilters {
+function createFilters(
+  overrides: Partial<SpendingFilters> = {},
+): SpendingFilters {
   return {
     year: [],
     month: [],

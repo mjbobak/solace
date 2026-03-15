@@ -98,11 +98,7 @@ def _drop_legacy_income_tables() -> None:
     """Remove obsolete income tables from pre-rebuild databases."""
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
-    tables_to_drop = [
-        table_name
-        for table_name in LEGACY_INCOME_TABLES
-        if table_name in existing_tables
-    ]
+    tables_to_drop = [table_name for table_name in LEGACY_INCOME_TABLES if table_name in existing_tables]
 
     if not tables_to_drop:
         return
@@ -123,9 +119,7 @@ def _ensure_income_sources_schema() -> None:
     if "income_sources" not in inspector.get_table_names():
         return
 
-    columns = {
-        column["name"] for column in inspector.get_columns("income_sources")
-    }
+    columns = {column["name"] for column in inspector.get_columns("income_sources")}
     if "member_id" not in columns:
         return
 
@@ -183,9 +177,7 @@ def _ensure_income_year_settings_columns() -> None:
     if "income_year_settings" not in inspector.get_table_names():
         return
 
-    existing_columns = {
-        column["name"] for column in inspector.get_columns("income_year_settings")
-    }
+    existing_columns = {column["name"] for column in inspector.get_columns("income_year_settings")}
     statements: list[str] = []
 
     if "emergency_fund_balance" not in existing_columns:
@@ -257,9 +249,7 @@ def _backfill_legacy_401k_buckets() -> None:
     if "income_year_settings" not in tables or TAX_ADVANTAGED_BUCKET_TABLE not in tables:
         return
 
-    columns = {
-        column["name"] for column in inspector.get_columns("income_year_settings")
-    }
+    columns = {column["name"] for column in inspector.get_columns("income_year_settings")}
     if "contributions_401k" not in columns:
         return
 
@@ -299,9 +289,7 @@ def _ensure_transaction_spread_columns() -> None:
     if "transactions" not in inspector.get_table_names():
         return
 
-    existing_columns = {
-        column["name"] for column in inspector.get_columns("transactions")
-    }
+    existing_columns = {column["name"] for column in inspector.get_columns("transactions")}
     statements: list[str] = []
 
     if "spread_start_date" not in existing_columns:

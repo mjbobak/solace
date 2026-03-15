@@ -211,7 +211,11 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
 
         {/* Actions */}
         <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
-          <Button onClick={handleCancel} variant="secondary" className="sm:min-w-32">
+          <Button
+            onClick={handleCancel}
+            variant="secondary"
+            className="sm:min-w-32"
+          >
             Cancel
           </Button>
           <Button
@@ -265,7 +269,11 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
           Review the rows you want to keep, then confirm the import.
         </p>
         <div className="flex flex-col-reverse gap-3 sm:flex-row">
-          <Button onClick={handleCancel} variant="secondary" className="sm:min-w-32">
+          <Button
+            onClick={handleCancel}
+            variant="secondary"
+            className="sm:min-w-32"
+          >
             Cancel
           </Button>
           <Button

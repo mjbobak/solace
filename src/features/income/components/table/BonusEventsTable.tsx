@@ -65,7 +65,9 @@ export function BonusEventsTable({
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${OCCURRENCE_STATUS_BADGE_CLASSES[occurrence.status]}`}
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${
+                      OCCURRENCE_STATUS_BADGE_CLASSES[occurrence.status]
+                    }`}
                   >
                     {occurrence.status}
                   </span>
@@ -94,7 +96,9 @@ export function BonusEventsTable({
                       className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-gray-50"
                       onClick={() => onEditBonus(component, occurrence)}
                       title={`Edit ${getComponentDisplayName(component)} event`}
-                      aria-label={`Edit ${getComponentDisplayName(component)} event`}
+                      aria-label={`Edit ${getComponentDisplayName(
+                        component,
+                      )} event`}
                     >
                       <LuPencil className="h-3.5 w-3.5" />
                     </button>
@@ -102,8 +106,12 @@ export function BonusEventsTable({
                       type="button"
                       className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-red-50"
                       onClick={() => onDeleteBonus(component, occurrence)}
-                      title={`Delete ${getComponentDisplayName(component)} event`}
-                      aria-label={`Delete ${getComponentDisplayName(component)} event`}
+                      title={`Delete ${getComponentDisplayName(
+                        component,
+                      )} event`}
+                      aria-label={`Delete ${getComponentDisplayName(
+                        component,
+                      )} event`}
                     >
                       <LuTrash2 className="h-3.5 w-3.5" />
                     </button>

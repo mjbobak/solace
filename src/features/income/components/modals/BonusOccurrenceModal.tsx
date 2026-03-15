@@ -223,7 +223,9 @@ export function BonusOccurrenceModal({
           <Button
             onClick={handleSubmit}
             isLoading={isSaving}
-            disabled={!label.trim() || !grossAmount || !netAmount || !plannedDate}
+            disabled={
+              !label.trim() || !grossAmount || !netAmount || !plannedDate
+            }
           >
             {isEditing ? 'Save Changes' : 'Save Bonus'}
           </Button>

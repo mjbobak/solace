@@ -32,7 +32,11 @@ interface DonutChartProps extends BaseChartProps {
   showPercentage?: boolean;
 }
 
-const DEFAULT_COLORS = [...chartPalette, 'var(--color-brand)', 'var(--color-warning)'];
+const DEFAULT_COLORS = [
+  ...chartPalette,
+  'var(--color-brand)',
+  'var(--color-warning)',
+];
 
 export const DonutChart: React.FC<DonutChartProps> = ({
   data,

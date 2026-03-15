@@ -84,12 +84,14 @@ export const CsvPreviewTableEnhanced: React.FC<
     },
     filtered: {
       title: 'Filtered out',
-      description: 'Rows excluded from import. Include any that should come back.',
+      description:
+        'Rows excluded from import. Include any that should come back.',
       accent: 'text-slate-700',
     },
     all: {
       title: 'All uploaded rows',
-      description: 'Complete file review, including importable, filtered, and error rows.',
+      description:
+        'Complete file review, including importable, filtered, and error rows.',
       accent: 'text-blue-700',
     },
   };
@@ -143,7 +145,9 @@ export const CsvPreviewTableEnhanced: React.FC<
                   <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
                     {item.label}
                   </dt>
-                  <dd className={`mt-1 text-lg font-semibold tabular-nums ${item.tone}`}>
+                  <dd
+                    className={`mt-1 text-lg font-semibold tabular-nums ${item.tone}`}
+                  >
                     {item.value}
                   </dd>
                 </div>

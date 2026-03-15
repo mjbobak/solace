@@ -350,7 +350,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 . Edit it from the table&apos;s Spread Payment column.
               </>
             ) : (
-              'Spread payment is managed from the table\'s Spread Payment column after you save the transaction.'
+              "Spread payment is managed from the table's Spread Payment column after you save the transaction."
             )}
           </div>
 

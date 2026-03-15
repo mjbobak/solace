@@ -92,7 +92,9 @@ export function aggregateSpendingByBudget(
     const budgetId = transaction.budgetId;
     const currentTotal = spendingByBudget.get(budgetId) ?? 0;
     const transactionTotal = getMonthlyTransactionImpacts(transaction)
-      .filter((impact) => isTransactionInRange(impact.monthStart, startDate, endDate))
+      .filter((impact) =>
+        isTransactionInRange(impact.monthStart, startDate, endDate),
+      )
       .reduce((sum, impact) => sum + impact.amount, 0);
 
     if (transactionTotal === 0) {

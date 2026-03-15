@@ -3,9 +3,10 @@ import { BsInfoCircle, BsPencil } from 'react-icons/bs';
 import { toast } from 'sonner';
 
 import type { SpendBasis } from '@/features/budget/types/budgetView';
-import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
+import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { Tooltip } from '@/shared/components/Tooltip';
+
 import { useDashboardKpiReport } from '../hooks/useDashboardKpiReport';
 import {
   formatDashboardKpiValue,
@@ -199,7 +200,8 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
       return;
     }
 
-    const nextEmergencyFundBalance = parseEmergencyFundInput(emergencyFundInput);
+    const nextEmergencyFundBalance =
+      parseEmergencyFundInput(emergencyFundInput);
 
     if (nextEmergencyFundBalance === null) {
       setEmergencyFundInput(String(savedEmergencyFundBalance));
@@ -329,4 +331,4 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
       )}
     </section>
   );
-}
+};

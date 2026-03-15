@@ -45,7 +45,10 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
     );
   }, [filters, hasDrillThroughBudgetFilter]);
 
-  const activeFilterChips = useMemo((): Array<{ key: string; label: string }> => {
+  const activeFilterChips = useMemo((): Array<{
+    key: string;
+    label: string;
+  }> => {
     const chips: Array<{ key: string; label: string }> = [];
 
     if (filters.searchQuery !== '') {
@@ -206,10 +209,7 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2.5 items-center">
           {activeFilterChips.map((chip) => (
-            <div
-              key={chip.key}
-              className="filter-chip group"
-            >
+            <div key={chip.key} className="filter-chip group">
               <span className="truncate max-w-xs">{chip.label}</span>
               <button
                 onClick={() => handleRemoveFilter(chip.key)}

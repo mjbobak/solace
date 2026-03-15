@@ -148,5 +148,7 @@ export function getSpendBasisHelpText(params: {
     'en-US',
     { month: 'short' },
   );
-  return `Using Jan-${endMonth} ${year} actuals (${completedMonths} completed month${completedMonths === 1 ? '' : 's'}).`;
+  return `Using Jan-${endMonth} ${year} actuals (${completedMonths} completed month${
+    completedMonths === 1 ? '' : 's'
+  }).`;
 }

@@ -45,9 +45,7 @@ class IncomeYearSettingsUpdate(BaseModel):
 class IncomeYearSettingsResponse(BaseModel):
     """Resource response for year-scoped income settings."""
 
-    tax_advantaged_buckets: list[TaxAdvantagedBucketEntryResponse] = Field(
-        default_factory=list
-    )
+    tax_advantaged_buckets: list[TaxAdvantagedBucketEntryResponse] = Field(default_factory=list)
     emergency_fund_balance: float = 0
     year: int
     created_at: datetime

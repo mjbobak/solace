@@ -18,7 +18,8 @@ export function useSankeyData(
   period: SankeyPeriod,
   year = new Date().getFullYear(),
 ): SankeyData {
-  const [incomeProjection, setIncomeProjection] = useState<IncomeYearProjection | null>(null);
+  const [incomeProjection, setIncomeProjection] =
+    useState<IncomeYearProjection | null>(null);
 
   useEffect(() => {
     const fetchIncomeData = async () => {

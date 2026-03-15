@@ -30,10 +30,10 @@ from backend.app.models.income import (
     IncomeProjectionTotalsResponse,
     IncomeSourceCreate,
     IncomeSourceResponse,
-    IncomeYearSettingsResponse,
-    IncomeYearSettingsUpdate,
     IncomeSourceUpdate,
     IncomeYearProjectionResponse,
+    IncomeYearSettingsResponse,
+    IncomeYearSettingsUpdate,
     ProjectedIncomeComponentResponse,
     ProjectedIncomeSourceResponse,
     TaxAdvantagedBucketEntryResponse,
@@ -161,11 +161,7 @@ class IncomeService:
         self.db = db
 
     def list_sources(self) -> list[IncomeSource]:
-        return (
-            self.db.query(IncomeSource)
-            .order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc())
-            .all()
-        )
+        return self.db.query(IncomeSource).order_by(IncomeSource.sort_order.asc(), IncomeSource.name.asc()).all()
 
     def create_source(self, source_in: IncomeSourceCreate) -> IncomeSource:
         sort_order = source_in.sort_order
@@ -323,11 +319,7 @@ class IncomeService:
         year: int,
         settings_in: IncomeYearSettingsUpdate,
     ) -> IncomeYearSettings:
-        settings = (
-            self.db.query(IncomeYearSettings)
-            .filter(IncomeYearSettings.year == year)
-            .first()
-        )
+        settings = self.db.query(IncomeYearSettings).filter(IncomeYearSettings.year == year).first()
         if settings is None:
             settings = IncomeYearSettings(
                 year=year,
@@ -350,9 +342,7 @@ class IncomeService:
     def get_year_projection(self, year: int) -> IncomeYearProjectionResponse:
         sources = self._load_sources_with_income()
         year_settings = self._get_year_settings(year)
-        tax_advantaged_investments = self._tax_advantaged_investments_response(
-            year_settings
-        )
+        tax_advantaged_investments = self._tax_advantaged_investments_response(year_settings)
         projected_sources: list[ProjectedIncomeSourceResponse] = []
         household_totals = _blank_projection_totals()
 
@@ -401,9 +391,7 @@ class IncomeService:
             year=year,
             totals=_projection_response(household_totals),
             emergency_fund_balance=round(
-                float(
-                    year_settings.emergency_fund_balance if year_settings else 18000
-                ),
+                float(year_settings.emergency_fund_balance if year_settings else 18000),
                 2,
             ),
             tax_advantaged_investments=tax_advantaged_investments,
@@ -428,9 +416,7 @@ class IncomeService:
     ) -> IncomeYearSettingsResponse:
         return IncomeYearSettingsResponse(
             year=settings.year,
-            tax_advantaged_buckets=self._tax_advantaged_bucket_entry_responses(
-                settings
-            ),
+            tax_advantaged_buckets=self._tax_advantaged_bucket_entry_responses(settings),
             emergency_fund_balance=settings.emergency_fund_balance,
             created_at=settings.created_at,
             updated_at=settings.updated_at,
@@ -537,21 +523,13 @@ class IncomeService:
         return component
 
     def _get_version_or_raise(self, version_id: int) -> IncomeComponentVersion:
-        version = (
-            self.db.query(IncomeComponentVersion)
-            .filter(IncomeComponentVersion.id == version_id)
-            .first()
-        )
+        version = self.db.query(IncomeComponentVersion).filter(IncomeComponentVersion.id == version_id).first()
         if version is None:
             raise ValueError(f"Income component version {version_id} not found")
         return version
 
     def _get_occurrence_or_raise(self, occurrence_id: int) -> IncomeOccurrence:
-        occurrence = (
-            self.db.query(IncomeOccurrence)
-            .filter(IncomeOccurrence.id == occurrence_id)
-            .first()
-        )
+        occurrence = self.db.query(IncomeOccurrence).filter(IncomeOccurrence.id == occurrence_id).first()
         if occurrence is None:
             raise ValueError(f"Income occurrence {occurrence_id} not found")
         return occurrence
@@ -600,9 +578,7 @@ class IncomeService:
         exclude_version_id: int | None = None,
     ) -> None:
         versions = (
-            self.db.query(IncomeComponentVersion)
-            .filter(IncomeComponentVersion.component_id == component_id)
-            .all()
+            self.db.query(IncomeComponentVersion).filter(IncomeComponentVersion.component_id == component_id).all()
         )
 
         for version in versions:
@@ -672,19 +648,11 @@ class IncomeService:
     ) -> TaxAdvantagedInvestmentsResponse:
         entries = self._tax_advantaged_bucket_entry_responses(settings)
         locked_total = round(
-            sum(
-                entry.annual_amount
-                for entry in entries
-                if not _is_spendable_tax_advantaged_bucket(entry.bucket_type)
-            ),
+            sum(entry.annual_amount for entry in entries if not _is_spendable_tax_advantaged_bucket(entry.bucket_type)),
             2,
         )
         spendable_total = round(
-            sum(
-                entry.annual_amount
-                for entry in entries
-                if _is_spendable_tax_advantaged_bucket(entry.bucket_type)
-            ),
+            sum(entry.annual_amount for entry in entries if _is_spendable_tax_advantaged_bucket(entry.bucket_type)),
             2,
         )
         return TaxAdvantagedInvestmentsResponse(
@@ -719,18 +687,11 @@ class IncomeService:
         seen_types: set[str] = set()
         for entry in bucket_updates:
             if entry.bucket_type in seen_types:
-                raise ValueError(
-                    f"Duplicate tax-advantaged bucket '{entry.bucket_type}'"
-                )
+                raise ValueError(f"Duplicate tax-advantaged bucket '{entry.bucket_type}'")
             seen_types.add(entry.bucket_type)
 
-        existing_by_type = {
-            bucket.bucket_type: bucket for bucket in settings.tax_advantaged_buckets
-        }
-        desired_amounts = {
-            entry.bucket_type: float(entry.annual_amount)
-            for entry in bucket_updates
-        }
+        existing_by_type = {bucket.bucket_type: bucket for bucket in settings.tax_advantaged_buckets}
+        desired_amounts = {entry.bucket_type: float(entry.annual_amount) for entry in bucket_updates}
 
         for bucket_type in TAX_ADVANTAGED_BUCKET_TYPES:
             next_amount = desired_amounts.get(bucket_type, 0.0)

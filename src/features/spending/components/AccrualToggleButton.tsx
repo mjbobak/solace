@@ -28,7 +28,9 @@ export const AccrualToggleButton: React.FC<AccrualToggleButtonProps> = ({
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50'
       }`}
       title={
-        isActive ? 'Disable payment spread for selected transactions' : 'Enable payment spread for selected transactions'
+        isActive
+          ? 'Disable payment spread for selected transactions'
+          : 'Enable payment spread for selected transactions'
       }
     >
       <BiRepeat size={16} />

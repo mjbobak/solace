@@ -117,11 +117,7 @@ export function useSharedPlanningFilters({
         fallbackYear,
         enableLegacyPlanningYearFallback,
       ),
-    [
-      enableLegacyPlanningYearFallback,
-      fallbackYear,
-      searchParams,
-    ],
+    [enableLegacyPlanningYearFallback, fallbackYear, searchParams],
   );
 
   const planningYear = useMemo(() => {

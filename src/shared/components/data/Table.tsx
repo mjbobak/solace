@@ -232,10 +232,10 @@ export function Table<T>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`table-header-cell ${getAlignClass(
-                  column.align,
-                )} ${
-                  column.sortable ? 'table-sortable cursor-pointer select-none' : ''
+                className={`table-header-cell ${getAlignClass(column.align)} ${
+                  column.sortable
+                    ? 'table-sortable cursor-pointer select-none'
+                    : ''
                 }`}
                 style={{ width: column.width }}
                 onClick={() => handleSort(column)}
@@ -304,9 +304,7 @@ export function Table<T>({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={`table-cell ${getAlignClass(
-                      column.align,
-                    )}`}
+                    className={`table-cell ${getAlignClass(column.align)}`}
                   >
                     {column.accessor(row)}
                   </td>

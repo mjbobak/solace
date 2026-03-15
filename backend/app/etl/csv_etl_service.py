@@ -144,9 +144,7 @@ class CsvEtlService:
                         chase_category=chase_category,
                         is_filtered=transaction_type.upper() == "PAYMENT",
                         filter_reason=(
-                            "Filtered 1466 payment transaction"
-                            if transaction_type.upper() == "PAYMENT"
-                            else None
+                            "Filtered 1466 payment transaction" if transaction_type.upper() == "PAYMENT" else None
                         ),
                     )
                 )

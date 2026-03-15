@@ -51,9 +51,7 @@ export const BudgetAnalysisSection: React.FC<
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h3 className="page-section-title">
-            Monthly Budget vs Actual
-          </h3>
+          <h3 className="page-section-title">Monthly Budget vs Actual</h3>
           {spendingData.length > 0 ? (
             <div className="surface-card">
               <div className="flex flex-col gap-6">

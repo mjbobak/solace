@@ -37,9 +37,7 @@ export const SpendingAnalysisSection: React.FC<
   return (
     <ScrollAnimatedSection className="space-y-8 border-t section-divider px-6 py-12">
       <div>
-        <h2 className="mb-4 text-2xl font-bold text-app">
-          Spending Analysis
-        </h2>
+        <h2 className="mb-4 text-2xl font-bold text-app">Spending Analysis</h2>
         <SectionNarrative text={narrative} highlight={true} />
       </div>
 

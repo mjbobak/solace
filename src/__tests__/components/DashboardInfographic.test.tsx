@@ -2,25 +2,39 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { DashboardInfographic } from '@/features/dashboard-infographic/components/DashboardInfographic';
+
 const { updateYearSettings } = vi.hoisted(() => ({
   updateYearSettings: vi.fn(),
 }));
 
-vi.mock('@/features/dashboard-infographic/components/FinancialHealthSection', () => ({
-  FinancialHealthSection: () => <div>Financial Health Section</div>,
-}));
+vi.mock(
+  '@/features/dashboard-infographic/components/FinancialHealthSection',
+  () => ({
+    FinancialHealthSection: () => <div>Financial Health Section</div>,
+  }),
+);
 
-vi.mock('@/features/dashboard-infographic/components/SpendingAnalysisSection', () => ({
-  SpendingAnalysisSection: () => <div>Spending Analysis Section</div>,
-}));
+vi.mock(
+  '@/features/dashboard-infographic/components/SpendingAnalysisSection',
+  () => ({
+    SpendingAnalysisSection: () => <div>Spending Analysis Section</div>,
+  }),
+);
 
-vi.mock('@/features/dashboard-infographic/components/SpendingPulseSection', () => ({
-  SpendingPulseSection: () => <div>Spending Pulse Section</div>,
-}));
+vi.mock(
+  '@/features/dashboard-infographic/components/SpendingPulseSection',
+  () => ({
+    SpendingPulseSection: () => <div>Spending Pulse Section</div>,
+  }),
+);
 
-vi.mock('@/features/dashboard-infographic/components/EmergencyRunwaySection', () => ({
-  EmergencyRunwaySection: () => <div>Emergency Runway Section</div>,
-}));
+vi.mock(
+  '@/features/dashboard-infographic/components/EmergencyRunwaySection',
+  () => ({
+    EmergencyRunwaySection: () => <div>Emergency Runway Section</div>,
+  }),
+);
 
 vi.mock('@/features/dashboard-infographic/components/MoneyFlowSection', () => ({
   MoneyFlowSection: () => <div>Money Flow Section</div>,
@@ -50,15 +64,16 @@ vi.mock('@/features/dashboard-infographic/hooks/useDashboardKpiReport', () => ({
               kind: 'currency',
               amount: emergencyFundBalance ?? 18000,
             },
-            benchmark:
-              'Strong: enough cash to cover 3-6 months of essentials.',
+            benchmark: 'Strong: enough cash to cover 3-6 months of essentials.',
           },
           {
             key: 'emergency-fund-months',
             label: 'Emergency Fund Months (Emergency Fund / Monthly Expenses)',
             actualValue: {
               kind: 'text',
-              text: `${(((emergencyFundBalance ?? 18000) / 3000) || 0).toFixed(1)} months`,
+              text: `${((emergencyFundBalance ?? 18000) / 3000 || 0).toFixed(
+                1,
+              )} months`,
             },
             benchmark: 'Strong: 3-6 months minimum, 6+ very solid.',
           },
@@ -83,8 +98,6 @@ vi.mock('@/features/income/services/incomeApiService', () => ({
     updateYearSettings,
   },
 }));
-
-import { DashboardInfographic } from '@/features/dashboard-infographic/components/DashboardInfographic';
 
 describe('DashboardInfographic', () => {
   it('toggles between visual and report modes and keeps the selected year in sync', async () => {
@@ -137,9 +150,7 @@ describe('DashboardInfographic', () => {
 
     fireEvent.blur(screen.getByLabelText('Emergency fund balance'));
 
-    await waitFor(() =>
-      expect(screen.getByText('$9,000')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('$9,000')).toBeInTheDocument());
     await waitFor(() =>
       expect(screen.getByText('3.0 months')).toBeInTheDocument(),
     );
@@ -148,7 +159,6 @@ describe('DashboardInfographic', () => {
         emergencyFundBalance: 9000,
       }),
     );
-
   });
 
   it('renders visual mode content when requested', () => {

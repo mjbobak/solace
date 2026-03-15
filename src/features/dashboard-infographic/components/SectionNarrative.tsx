@@ -15,7 +15,9 @@ export const SectionNarrative: React.FC<SectionNarrativeProps> = ({
 }) => {
   return (
     <p
-      className={`text-base leading-relaxed ${highlight ? 'font-medium text-app' : 'text-muted'}`}
+      className={`text-base leading-relaxed ${
+        highlight ? 'font-medium text-app' : 'text-muted'
+      }`}
     >
       {text}
     </p>

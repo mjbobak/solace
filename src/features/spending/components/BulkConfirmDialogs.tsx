@@ -98,8 +98,7 @@ export const BulkAccrualConfirm: React.FC<BulkAccrualConfirmProps> = ({
     message={
       <>
         {isAccrual ? 'Enable' : 'Disable'} payment spread for{' '}
-        <strong>{count}</strong> {count === 1 ? 'transaction' : 'transactions'}
-        ?
+        <strong>{count}</strong> {count === 1 ? 'transaction' : 'transactions'}?
       </>
     }
     confirmText={isAccrual ? 'Enable Payment Spread' : 'Disable Payment Spread'}

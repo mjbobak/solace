@@ -1,5 +1,4 @@
 import type { SpendBasis } from '@/features/budget/types/budgetView';
-
 import {
   setMultiValueParam,
   setNumberParam,
@@ -41,7 +40,12 @@ function setBudgetDrillThroughPeriod(params: {
   months?: string[];
   forceEmpty?: boolean;
 }): void {
-  const { searchParams, planningYear, months = [], forceEmpty = false } = params;
+  const {
+    searchParams,
+    planningYear,
+    months = [],
+    forceEmpty = false,
+  } = params;
 
   setMultiValueParam(
     searchParams,
@@ -52,7 +56,10 @@ function setBudgetDrillThroughPeriod(params: {
   setStringParam(searchParams, 'forceEmpty', forceEmpty ? '1' : undefined);
 }
 
-function getCompletedMonthsForYearAtDate(year: number, currentDate: Date): number {
+function getCompletedMonthsForYearAtDate(
+  year: number,
+  currentDate: Date,
+): number {
   const currentYear = currentDate.getFullYear();
 
   if (year < currentYear) return 12;

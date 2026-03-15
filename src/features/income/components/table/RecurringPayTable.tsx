@@ -62,7 +62,9 @@ export function RecurringPayTable({
                 </td>
                 <td className="px-4 py-3 text-muted">
                   {component.currentVersion
-                    ? `${formatDate(component.currentVersion.startDate)} to ${formatDate(component.currentVersion.endDate)}`
+                    ? `${formatDate(
+                        component.currentVersion.startDate,
+                      )} to ${formatDate(component.currentVersion.endDate)}`
                     : 'No active version'}
                 </td>
                 <td className="px-4 py-3 text-muted">
@@ -106,8 +108,12 @@ export function RecurringPayTable({
                         type="button"
                         className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-white"
                         onClick={() => onEditVersion(component, version)}
-                        title={`Edit ${getComponentDisplayName(component)} change`}
-                        aria-label={`Edit ${getComponentDisplayName(component)} change`}
+                        title={`Edit ${getComponentDisplayName(
+                          component,
+                        )} change`}
+                        aria-label={`Edit ${getComponentDisplayName(
+                          component,
+                        )} change`}
                       >
                         <LuPencil className="h-3.5 w-3.5" />
                       </button>
@@ -115,8 +121,12 @@ export function RecurringPayTable({
                         type="button"
                         className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-white"
                         onClick={() => onDeleteVersion(component, version)}
-                        title={`Delete ${getComponentDisplayName(component)} change`}
-                        aria-label={`Delete ${getComponentDisplayName(component)} change`}
+                        title={`Delete ${getComponentDisplayName(
+                          component,
+                        )} change`}
+                        aria-label={`Delete ${getComponentDisplayName(
+                          component,
+                        )} change`}
                       >
                         <LuTrash2 className="h-3.5 w-3.5" />
                       </button>

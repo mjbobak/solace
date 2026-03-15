@@ -13,7 +13,9 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`status-chip status-chip-brand rounded-full whitespace-nowrap ${className}`}>
+    <div
+      className={`status-chip status-chip-brand rounded-full whitespace-nowrap ${className}`}
+    >
       <span>{label}</span>
       <button
         onClick={onRemove}

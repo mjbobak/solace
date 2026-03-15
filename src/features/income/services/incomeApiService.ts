@@ -1,5 +1,5 @@
-import { DEFAULT_EMERGENCY_FUND_BALANCE } from '../constants/yearSettings';
 import { normalizeTaxAdvantagedBuckets } from '../constants/taxAdvantagedBuckets';
+import { DEFAULT_EMERGENCY_FUND_BALANCE } from '../constants/yearSettings';
 import type {
   CreateIncomeComponentInput,
   CreateIncomeOccurrenceInput,
@@ -58,7 +58,9 @@ function transformTaxAdvantagedInvestments(
   };
 }
 
-function transformTotals(data: Record<string, unknown>): IncomeProjectionTotals {
+function transformTotals(
+  data: Record<string, unknown>,
+): IncomeProjectionTotals {
   return {
     committedGross: Number(data.committed_gross ?? 0),
     committedCashNet: Number(data.committed_cash_net ?? 0),
@@ -92,7 +94,9 @@ function transformComponent(data: Record<string, unknown>): IncomeComponent {
   };
 }
 
-function transformVersion(data: Record<string, unknown>): RecurringIncomeVersion {
+function transformVersion(
+  data: Record<string, unknown>,
+): RecurringIncomeVersion {
   return {
     id: Number(data.id),
     componentId: Number(data.component_id),
@@ -126,8 +130,9 @@ function transformYearSettings(
   return {
     year: Number(data.year),
     taxAdvantagedBuckets: transformTaxAdvantagedBucketEntries(
-      (data.tax_advantaged_buckets as Array<Record<string, unknown>> | undefined) ??
-        [],
+      (data.tax_advantaged_buckets as
+        | Array<Record<string, unknown>>
+        | undefined) ?? [],
     ),
     emergencyFundBalance: Number(
       data.emergency_fund_balance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
@@ -191,10 +196,14 @@ async function request<T>(
             const detailItem = item as { loc?: unknown; msg?: unknown };
             const field = Array.isArray(detailItem.loc)
               ? detailItem.loc
-                  .filter((part) => typeof part === 'string' || typeof part === 'number')
+                  .filter(
+                    (part) =>
+                      typeof part === 'string' || typeof part === 'number',
+                  )
                   .join('.')
               : null;
-            const msg = typeof detailItem.msg === 'string' ? detailItem.msg : null;
+            const msg =
+              typeof detailItem.msg === 'string' ? detailItem.msg : null;
             return field && msg ? `${field}: ${msg}` : msg;
           })
           .filter((entry): entry is string => Boolean(entry))

@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 
 import type { SpendingEntry, SpendingFilters } from '../types/spendingView';
-import { getMonthlyTransactionImpacts, hasSpreadPayment } from '../utils/spreadPayments';
+import {
+  getMonthlyTransactionImpacts,
+  hasSpreadPayment,
+} from '../utils/spreadPayments';
 
 export function useSpendingFiltering(
   transactions: SpendingEntry[],

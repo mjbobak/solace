@@ -192,7 +192,9 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                       <span className="text-app text-sm transition-colors">
                         {option}
                       </span>
-                      {isSelected && <span className="ml-auto text-brand">✓</span>}
+                      {isSelected && (
+                        <span className="ml-auto text-brand">✓</span>
+                      )}
                     </label>
                   );
                 })}

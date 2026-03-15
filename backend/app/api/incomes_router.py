@@ -18,10 +18,10 @@ from backend.app.models.income import (
     IncomeOccurrenceUpdate,
     IncomeSourceCreate,
     IncomeSourceResponse,
-    IncomeYearSettingsResponse,
-    IncomeYearSettingsUpdate,
     IncomeSourceUpdate,
     IncomeYearProjectionResponse,
+    IncomeYearSettingsResponse,
+    IncomeYearSettingsUpdate,
 )
 from backend.app.services.income_service import IncomeService
 
@@ -60,9 +60,7 @@ async def update_income_year_settings(
 ):
     """Create or update year-scoped investment settings for income views."""
     try:
-        return service.serialize_year_settings(
-            service.upsert_year_settings(year, settings_in)
-        )
+        return service.serialize_year_settings(service.upsert_year_settings(year, settings_in))
     except ValueError as error:
         raise _handle_value_error(error)
 
@@ -110,7 +108,9 @@ async def delete_income_source(
         raise _handle_value_error(error)
 
 
-@router.post("/sources/{source_id}/components", response_model=IncomeComponentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/sources/{source_id}/components", response_model=IncomeComponentResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_income_component(
     source_id: int,
     component_in: IncomeComponentCreate,

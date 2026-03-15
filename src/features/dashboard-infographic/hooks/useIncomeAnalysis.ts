@@ -19,7 +19,20 @@ export interface IncomeAnalysisData {
   trend: { month: string; income: number }[];
 }
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 function flattenComponents(projection: IncomeYearProjection) {
   return projection.sources.flatMap((source) =>
@@ -32,8 +45,7 @@ function getMonthlyPlannedNet(
   year: number,
 ): number[] {
   const values = Array.from({ length: 12 }, () => 0);
-  const daysInYear =
-    new Date(year, 1, 29).getMonth() === 1 ? 366 : 365;
+  const daysInYear = new Date(year, 1, 29).getMonth() === 1 ? 366 : 365;
 
   component.versions.forEach((version) => {
     const rangeStart = parseDateOnly(version.startDate);
@@ -80,8 +92,12 @@ function getMonthlyPlannedNet(
   return values;
 }
 
-export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalysisData {
-  const [projection, setProjection] = useState<IncomeYearProjection | null>(null);
+export function useIncomeAnalysis(
+  year = new Date().getFullYear(),
+): IncomeAnalysisData {
+  const [projection, setProjection] = useState<IncomeYearProjection | null>(
+    null,
+  );
 
   useEffect(() => {
     const fetchProjection = async () => {
@@ -113,7 +129,9 @@ export function useIncomeAnalysis(year = new Date().getFullYear()): IncomeAnalys
         amount: source.totals.plannedCashNet,
         percentage:
           projection.totals.plannedCashNet > 0
-            ? (source.totals.plannedCashNet / projection.totals.plannedCashNet) * 100
+            ? (source.totals.plannedCashNet /
+                projection.totals.plannedCashNet) *
+              100
             : 0,
       }))
       .sort((left, right) => right.amount - left.amount);

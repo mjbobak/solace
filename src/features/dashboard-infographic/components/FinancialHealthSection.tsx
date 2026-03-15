@@ -6,8 +6,8 @@
 import React, { useEffect, useState } from 'react';
 import { LuTrendingDown, LuPiggyBank, LuDollarSign } from 'react-icons/lu';
 
-import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { useBudgetCalculations } from '@/features/budget/hooks/useBudgetCalculations';
+import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
 import { spendingService } from '@/features/spending/services/spendingService';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -55,11 +55,7 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   const monthlyIncome = annualNetIncome / 12;
 
   // Match budget page calculations so savings/investing stays in sync.
-  const { budgetEntries } = useBudgetData(
-    year,
-    'monthly_current_month',
-    false,
-  );
+  const { budgetEntries } = useBudgetData(year, 'monthly_current_month', false);
   const budgetCalculations = useBudgetCalculations(budgetEntries);
   const monthlyTotalBudgeted = budgetCalculations.budgeted;
 
@@ -71,8 +67,7 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   const monthlySavings = monthlyIncome - monthlyTotalBudgeted;
   const plannedSavings = Math.abs(monthlySavings);
   const monthlySpending = annualSpending / 12;
-  const monthlyWealthContribution =
-    plannedSavings + monthlyInvestments;
+  const monthlyWealthContribution = plannedSavings + monthlyInvestments;
 
   useEffect(() => {
     let isCancelled = false;

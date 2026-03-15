@@ -10,14 +10,14 @@ import {
 } from '@/features/budget/services/budgetAdapters';
 import { budgetService } from '@/features/budget/services/budgetService';
 import type { BudgetApiResponse } from '@/features/budget/types/budgetApi';
-import { getComparisonBudgetForSpendBasis } from '@/shared/utils/spendBasis';
+import {
+  getComparisonBudgetForSpendBasis,
+  getCompletedMonthsForYear,
+} from '@/shared/utils/spendBasis';
 
 import type { BudgetEntry, SpendBasis } from '../types/budgetView';
 
-import {
-  useBudgetSpending,
-} from './useBudgetSpending';
-import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
+import { useBudgetSpending } from './useBudgetSpending';
 
 interface UseBudgetDataReturn {
   budgetEntries: BudgetEntry[];

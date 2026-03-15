@@ -8,10 +8,7 @@ import {
 
 describe('planningYears utilities', () => {
   it('sorts, deduplicates, and ignores years before 2025', () => {
-    expect(sortPlanningYears([2026, 2025, 2026, 2024])).toEqual([
-      2025,
-      2026,
-    ]);
+    expect(sortPlanningYears([2026, 2025, 2026, 2024])).toEqual([2025, 2026]);
   });
 
   it('falls back to the latest available planning year', () => {

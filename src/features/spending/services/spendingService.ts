@@ -1,4 +1,5 @@
 import { getTodayDateOnly } from '@/shared/utils/dateOnly';
+
 import type { SpendingEntry } from '../types/spendingView';
 
 // API response type from backend
@@ -213,8 +214,7 @@ function csvRowToTransaction(
   return {
     account: getField(['account', 'bank', 'from account']),
     transactionDate:
-      getField(['date', 'transaction date', 'transactiondate']) ||
-      fallbackDate,
+      getField(['date', 'transaction date', 'transactiondate']) || fallbackDate,
     postDate: getField(['post date', 'postdate', 'date']) || fallbackDate,
     description: getField(['description', 'merchant', 'name', 'payee']),
     budgetLabel: 'Uncategorized',

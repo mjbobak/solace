@@ -1,16 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react';
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-  useLocation,
-} from 'react-router-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { BudgetView } from '@/features/budget/components/BudgetView';
@@ -125,10 +115,7 @@ function renderBudgetView(initialEntry: string) {
         <Route
           path="/budget"
           element={
-            <BudgetView
-              planningYear={2026}
-              spendBasis="annual_full_year"
-            />
+            <BudgetView planningYear={2026} spendBasis="annual_full_year" />
           }
         />
         <Route path="/spending" element={<div>Spending Destination</div>} />

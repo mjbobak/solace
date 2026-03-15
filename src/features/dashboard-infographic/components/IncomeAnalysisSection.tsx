@@ -33,7 +33,9 @@ export const IncomeAnalysisSection: React.FC<
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
-  })} of net income across ${incomeData.sourceBreakdown.length} income sources. Your largest source is ${incomeData.sourceBreakdown[0]
+  })} of net income across ${
+    incomeData.sourceBreakdown.length
+  } income sources. Your largest source is ${incomeData.sourceBreakdown[0]
     ?.source} at ${incomeData.sourceBreakdown[0]?.percentage.toFixed(
     1,
   )}% of total income.`;

@@ -307,7 +307,9 @@ export function useIncomeViewController(
     const label = getComponentDisplayName(component);
     if (
       !window.confirm(
-        `Delete the ${label} compensation change from ${formatDate(version.startDate)} to ${formatDate(version.endDate)}?`,
+        `Delete the ${label} compensation change from ${formatDate(
+          version.startDate,
+        )} to ${formatDate(version.endDate)}?`,
       )
     ) {
       return;
@@ -330,7 +332,9 @@ export function useIncomeViewController(
     const label = getComponentDisplayName(component);
     if (
       !window.confirm(
-        `Delete the ${label} event scheduled for ${formatDate(occurrence.paidDate ?? occurrence.plannedDate)}?`,
+        `Delete the ${label} event scheduled for ${formatDate(
+          occurrence.paidDate ?? occurrence.plannedDate,
+        )}?`,
       )
     ) {
       return;

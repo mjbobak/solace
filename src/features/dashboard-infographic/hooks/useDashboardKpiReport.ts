@@ -31,8 +31,11 @@ export function useDashboardKpiReport(
     useState<IncomeYearProjection | null>(null);
   const [incomeError, setIncomeError] = useState<string | null>(null);
   const [isIncomeLoading, setIsIncomeLoading] = useState(true);
-  const { budgetEntries, isLoading: isBudgetLoading, error: budgetError } =
-    useBudgetData(year, spendBasis, false);
+  const {
+    budgetEntries,
+    isLoading: isBudgetLoading,
+    error: budgetError,
+  } = useBudgetData(year, spendBasis, false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -45,9 +48,8 @@ export function useDashboardKpiReport(
         const previousYear = year - 1;
         const shouldLoadPreviousYear = availableYears.includes(previousYear);
 
-        const nextCurrentProjection = await incomeApiService.getYearProjection(
-          year,
-        );
+        const nextCurrentProjection =
+          await incomeApiService.getYearProjection(year);
         const nextPreviousProjection = shouldLoadPreviousYear
           ? await incomeApiService
               .getYearProjection(previousYear)
@@ -65,7 +67,10 @@ export function useDashboardKpiReport(
           return;
         }
 
-        console.error('Failed to load income projections for KPI report:', error);
+        console.error(
+          'Failed to load income projections for KPI report:',
+          error,
+        );
         setCurrentProjection(null);
         setPreviousProjection(null);
         setIncomeError(
@@ -111,8 +116,7 @@ export function useDashboardKpiReport(
   return {
     groups,
     savedEmergencyFundBalance:
-      currentProjection?.emergencyFundBalance ??
-      DEFAULT_EMERGENCY_FUND_BALANCE,
+      currentProjection?.emergencyFundBalance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
     isLoading: isIncomeLoading || isBudgetLoading,
     error: incomeError ?? budgetError,
   };

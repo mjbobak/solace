@@ -39,7 +39,9 @@ export function formatNetRangeSummary(
     return formatCurrency(component.totals.plannedCashNet);
   }
 
-  return `${formatCurrency(component.currentVersion.netAmount)} cash net x ${component.currentVersion.periodsPerYear}`;
+  return `${formatCurrency(component.currentVersion.netAmount)} cash net x ${
+    component.currentVersion.periodsPerYear
+  }`;
 }
 
 export function getOccurrenceEventDate(occurrence: IncomeOccurrence): string {

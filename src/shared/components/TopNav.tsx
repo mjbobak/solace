@@ -44,9 +44,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   }, []);
 
   return (
-    <nav
-      className={`app-nav ${isScrolled ? 'app-nav-scrolled' : ''}`}
-    >
+    <nav className={`app-nav ${isScrolled ? 'app-nav-scrolled' : ''}`}>
       <div className="app-nav-brand">
         <TbHomeStats className="w-6 h-6" />
         <h1 className="text-xl font-bold tracking-wide">Solace.</h1>
@@ -60,7 +58,9 @@ export const TopNav: React.FC<TopNavProps> = ({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`app-nav-link ${isActive ? 'app-nav-link-active' : ''}`}
+              className={`app-nav-link ${
+                isActive ? 'app-nav-link-active' : ''
+              }`}
             >
               <span className="font-medium text-sm">{item.label}</span>
             </button>
@@ -69,30 +69,34 @@ export const TopNav: React.FC<TopNavProps> = ({
       </div>
 
       <div className="app-nav-actions">
-        {rightContent ? <div className="app-nav-right-content">{rightContent}</div> : null}
+        {rightContent ? (
+          <div className="app-nav-right-content">{rightContent}</div>
+        ) : null}
         {showThemeToggle ? (
           <div className="theme-toggle-group" aria-label="Theme mode selector">
-            {([
-              {
-                value: 'light' as const,
-                label: 'Light theme',
-                icon: LuSunMedium,
-              },
-              {
-                value: 'dark' as const,
-                label: 'Dark theme',
-                icon: LuMoon,
-              },
-              {
-                value: 'system' as const,
-                label: 'System theme',
-                icon: LuMonitor,
-              },
-            ] satisfies Array<{
-              value: Theme;
-              label: string;
-              icon: React.ComponentType<{ className?: string }>;
-            }>).map(({ value, label, icon: Icon }) => (
+            {(
+              [
+                {
+                  value: 'light' as const,
+                  label: 'Light theme',
+                  icon: LuSunMedium,
+                },
+                {
+                  value: 'dark' as const,
+                  label: 'Dark theme',
+                  icon: LuMoon,
+                },
+                {
+                  value: 'system' as const,
+                  label: 'System theme',
+                  icon: LuMonitor,
+                },
+              ] satisfies Array<{
+                value: Theme;
+                label: string;
+                icon: React.ComponentType<{ className?: string }>;
+              }>
+            ).map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
                 type="button"

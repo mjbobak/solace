@@ -1,4 +1,5 @@
 import { toDateOnlyString } from '@/shared/utils/dateOnly';
+
 import type { SpendingEntry } from '../types/spendingView';
 
 const ACCOUNTS = [
@@ -83,8 +84,8 @@ function generateMockData(): SpendingEntry[] {
     }
   }
 
-  return data.sort(
-    (a, b) => b.transactionDate.localeCompare(a.transactionDate),
+  return data.sort((a, b) =>
+    b.transactionDate.localeCompare(a.transactionDate),
   );
 }
 

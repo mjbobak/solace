@@ -78,14 +78,16 @@ export const DashboardView: React.FC = () => {
       {visualizationType === 'comprehensive' && (
         <>
           <div className="surface-card">
-            <h3 className="page-section-title">
-              Monthly Spending vs Budget
-            </h3>
+            <h3 className="page-section-title">Monthly Spending vs Budget</h3>
             <BarChart
               data={spendingData}
               xAxisKey="month"
               bars={[
-                { dataKey: 'Budget', fill: statusPalette.budget, name: 'Budget' },
+                {
+                  dataKey: 'Budget',
+                  fill: statusPalette.budget,
+                  name: 'Budget',
+                },
                 {
                   dataKey: 'Actual',
                   fill: statusPalette.income,
@@ -100,9 +102,7 @@ export const DashboardView: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="surface-card">
-              <h3 className="page-section-title">
-                Savings Trend
-              </h3>
+              <h3 className="page-section-title">Savings Trend</h3>
               <LineChart
                 data={savingsData}
                 xAxisKey="month"
@@ -120,9 +120,7 @@ export const DashboardView: React.FC = () => {
             </div>
 
             <div className="surface-card">
-              <h3 className="page-section-title">
-                Spending by Category
-              </h3>
+              <h3 className="page-section-title">Spending by Category</h3>
               <DonutChart
                 data={categoryData}
                 dataKey="value"
@@ -141,14 +139,16 @@ export const DashboardView: React.FC = () => {
       {visualizationType === 'spending' && (
         <>
           <div className="surface-card">
-            <h3 className="page-section-title">
-              Monthly Spending vs Budget
-            </h3>
+            <h3 className="page-section-title">Monthly Spending vs Budget</h3>
             <BarChart
               data={spendingData}
               xAxisKey="month"
               bars={[
-                { dataKey: 'Budget', fill: statusPalette.budget, name: 'Budget' },
+                {
+                  dataKey: 'Budget',
+                  fill: statusPalette.budget,
+                  name: 'Budget',
+                },
                 {
                   dataKey: 'Actual',
                   fill: statusPalette.income,
@@ -162,9 +162,7 @@ export const DashboardView: React.FC = () => {
           </div>
 
           <div className="surface-card">
-            <h3 className="page-section-title">
-              Spending by Category
-            </h3>
+            <h3 className="page-section-title">Spending by Category</h3>
             <DonutChart
               data={categoryData}
               dataKey="value"
@@ -180,14 +178,16 @@ export const DashboardView: React.FC = () => {
       {visualizationType === 'budget' && (
         <>
           <div className="surface-card">
-            <h3 className="page-section-title">
-              Monthly Spending vs Budget
-            </h3>
+            <h3 className="page-section-title">Monthly Spending vs Budget</h3>
             <BarChart
               data={spendingData}
               xAxisKey="month"
               bars={[
-                { dataKey: 'Budget', fill: statusPalette.budget, name: 'Budget' },
+                {
+                  dataKey: 'Budget',
+                  fill: statusPalette.budget,
+                  name: 'Budget',
+                },
                 {
                   dataKey: 'Actual',
                   fill: statusPalette.income,

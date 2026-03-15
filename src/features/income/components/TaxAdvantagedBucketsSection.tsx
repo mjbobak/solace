@@ -91,7 +91,9 @@ export function TaxAdvantagedBucketsSection({
                 <p className="mt-3 text-2xl font-semibold text-app">
                   {formatCurrency(entryMap.get(bucket.type) ?? 0)}
                 </p>
-                <p className="mt-2 text-sm text-muted">{bucket.behaviorLabel}</p>
+                <p className="mt-2 text-sm text-muted">
+                  {bucket.behaviorLabel}
+                </p>
                 <p className="mt-1 text-sm text-muted">{bucket.description}</p>
               </article>
             ))}

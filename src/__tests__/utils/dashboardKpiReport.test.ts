@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
-import type {
-  IncomeProjectionTotals,
-  TaxAdvantagedInvestments,
-} from '@/features/income/types/income';
 import {
   buildDashboardKpiGroups,
   matchesBudgetLabel,
 } from '@/features/dashboard-infographic/utils/dashboardKpiReport';
+import type {
+  IncomeProjectionTotals,
+  TaxAdvantagedInvestments,
+} from '@/features/income/types/income';
 
 function createIncomeTotals(
   overrides?: Partial<IncomeProjectionTotals>,
@@ -41,9 +41,7 @@ function createTaxAdvantagedInvestments(
   };
 }
 
-function createBudgetEntry(
-  overrides?: Partial<BudgetEntry>,
-): BudgetEntry {
+function createBudgetEntry(overrides?: Partial<BudgetEntry>): BudgetEntry {
   return {
     id: 'BUD-0001',
     expenseType: 'ESSENTIAL',
@@ -221,7 +219,9 @@ describe('buildDashboardKpiGroups', () => {
       kind: 'currency',
       amount: 1200,
     });
-    expect(findRow(groups, 'tax-advantaged-contributions')?.actualValue).toEqual({
+    expect(
+      findRow(groups, 'tax-advantaged-contributions')?.actualValue,
+    ).toEqual({
       kind: 'currency',
       amount: 36200,
     });
@@ -311,11 +311,15 @@ describe('buildDashboardKpiGroups', () => {
       kind: 'currency',
       amount: 10200,
     });
-    expect(findRow(groups, 'annual-investment-contributions')?.plannedValue).toEqual({
+    expect(
+      findRow(groups, 'annual-investment-contributions')?.plannedValue,
+    ).toEqual({
       kind: 'currency',
       amount: 1500,
     });
-    expect(findRow(groups, 'annual-investment-contributions')?.actualValue).toEqual({
+    expect(
+      findRow(groups, 'annual-investment-contributions')?.actualValue,
+    ).toEqual({
       kind: 'currency',
       amount: 1500,
     });

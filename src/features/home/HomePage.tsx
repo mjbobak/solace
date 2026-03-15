@@ -14,10 +14,7 @@ import { SpendingView, type SpendingViewHandle } from '@/features/spending';
 import { Button } from '@/shared/components/Button';
 import { PlanningFiltersBar } from '@/shared/components/PlanningFiltersBar';
 import { useSharedPlanningFilters } from '@/shared/hooks/useSharedPlanningFilters';
-import {
-  setNumberParam,
-  setStringParam,
-} from '@/shared/utils/searchParams';
+import { setNumberParam, setStringParam } from '@/shared/utils/searchParams';
 
 import { TopNav } from '../../shared/components/TopNav';
 import type { TabType } from '../../shared/components/TopNav';

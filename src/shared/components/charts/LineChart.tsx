@@ -108,7 +108,9 @@ export const LineChart: React.FC<LineChartProps> = ({
               fontSize: chartTheme.fontSize,
             }}
           />
-          {showLegend && <Legend wrapperStyle={{ fontSize: chartTheme.fontSize }} />}
+          {showLegend && (
+            <Legend wrapperStyle={{ fontSize: chartTheme.fontSize }} />
+          )}
           {lines.map((line, index) => (
             <Line
               key={line.dataKey}

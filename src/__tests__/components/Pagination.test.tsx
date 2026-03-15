@@ -15,7 +15,9 @@ describe('Pagination', () => {
       />,
     );
 
-    expect(screen.getByText('Showing 11 to 20 of 42 results')).toBeInTheDocument();
+    expect(
+      screen.getByText('Showing 11 to 20 of 42 results'),
+    ).toBeInTheDocument();
     expect(screen.getByText('2 / 5')).toBeInTheDocument();
   });
 

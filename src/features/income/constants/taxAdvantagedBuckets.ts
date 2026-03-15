@@ -16,19 +16,22 @@ export const TAX_ADVANTAGED_BUCKET_DEFINITIONS: TaxAdvantagedBucketDefinition[] 
     {
       type: '401k',
       label: '401k',
-      description: 'Payroll retirement contributions that stay invested long-term.',
+      description:
+        'Payroll retirement contributions that stay invested long-term.',
       behaviorLabel: 'Locked savings',
     },
     {
       type: 'hsa',
       label: 'HSA',
-      description: 'Health savings account contributions tracked as long-term savings.',
+      description:
+        'Health savings account contributions tracked as long-term savings.',
       behaviorLabel: 'Locked savings',
     },
     {
       type: 'fsa_daycare',
       label: 'FSA Daycare',
-      description: 'Dependent care dollars available for eligible current-year spending.',
+      description:
+        'Dependent care dollars available for eligible current-year spending.',
       behaviorLabel: 'Spendable restricted',
     },
     {

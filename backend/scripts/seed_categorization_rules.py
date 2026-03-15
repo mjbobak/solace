@@ -46,7 +46,6 @@ RULES = [
     {"pattern": "COSTCO MEMBERSHIP", "expense_label": "SUB - COSTCO", "priority": 10},
     {"pattern": "APPLE.COM/BILL", "expense_label": "SUB - APPLE FAMILY PLAN"},
     {"pattern": "TESLA PREMIUM", "expense_label": "SUB - TESLA NAVIGATION"},
-
     # --- DAILY LIVING ---
     {"pattern": "TRADER JOE", "expense_label": "GROCERIES"},
     {"pattern": "WHOLE FOODS", "expense_label": "GROCERIES"},
@@ -59,7 +58,6 @@ RULES = [
     {"pattern": "RALPHS", "expense_label": "GROCERIES"},
     {"pattern": "VONS", "expense_label": "GROCERIES"},
     {"pattern": "ALDI", "expense_label": "GROCERIES"},
-
     # --- TRANSPORTATION / GAS ---
     {"pattern": "SHELL OIL", "expense_label": "GAS"},
     {"pattern": "CHEVRON", "expense_label": "GAS"},
@@ -71,7 +69,6 @@ RULES = [
     {"pattern": "CIRCLE K", "expense_label": "GAS"},
     {"pattern": "SPEEDWAY", "expense_label": "GAS"},
     {"pattern": "WAWA", "expense_label": "GAS"},
-
     # --- UTILITIES ---
     {"pattern": "SDG&E", "expense_label": "UTILS - ELECTRICITY"},
     {"pattern": "PG&E", "expense_label": "UTILS - ELECTRICITY"},
@@ -87,7 +84,6 @@ RULES = [
     {"pattern": "REPUBLIC SERVICES", "expense_label": "UTILS - TRASH"},
     {"pattern": "WATER DISTRICT", "expense_label": "UTILS - WATER/SEWER"},
     {"pattern": "CITY WATER", "expense_label": "UTILS - WATER/SEWER"},
-
     # --- FOOD & DRINK ---
     {"pattern": "DOORDASH", "expense_label": "FOOD & DRINK"},
     {"pattern": "UBER EATS", "expense_label": "FOOD & DRINK"},

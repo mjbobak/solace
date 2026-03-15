@@ -24,7 +24,8 @@ function getRunwayColor(months: number): RunwayColor {
 }
 
 export function useEmergencyCalculations(): EmergencyRunwayData {
-  const [incomeProjection, setIncomeProjection] = useState<IncomeYearProjection | null>(null);
+  const [incomeProjection, setIncomeProjection] =
+    useState<IncomeYearProjection | null>(null);
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {

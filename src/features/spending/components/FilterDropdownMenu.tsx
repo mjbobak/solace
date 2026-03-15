@@ -88,10 +88,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
           {yearOptions.map((year) => {
             const isSelected = filters.year.includes(year.value);
             return (
-              <label
-                key={year.value}
-                className="dropdown-check-option group"
-              >
+              <label key={year.value} className="dropdown-check-option group">
                 <input
                   type="checkbox"
                   checked={isSelected}
@@ -138,10 +135,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
           {monthOptions.map((month) => {
             const isSelected = filters.month.includes(month.value);
             return (
-              <label
-                key={month.value}
-                className="dropdown-check-option group"
-              >
+              <label key={month.value} className="dropdown-check-option group">
                 <input
                   type="checkbox"
                   checked={isSelected}
@@ -188,10 +182,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
           {accrualOptions.map((option) => {
             const isSelected = filters.accrualStatus.includes(option.value);
             return (
-              <label
-                key={option.value}
-                className="dropdown-check-option group"
-              >
+              <label key={option.value} className="dropdown-check-option group">
                 <input
                   type="checkbox"
                   checked={isSelected}
@@ -239,9 +230,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
       component: (
         <div className="space-y-3 px-1">
           <div>
-            <label className="dropdown-label mb-1.5 block">
-              Minimum ($)
-            </label>
+            <label className="dropdown-label mb-1.5 block">Minimum ($)</label>
             <Input
               type="number"
               placeholder="0.00"
@@ -257,9 +246,7 @@ export const FilterDropdownMenu: React.FC<FilterDropdownMenuProps> = ({
             />
           </div>
           <div>
-            <label className="dropdown-label mb-1.5 block">
-              Maximum ($)
-            </label>
+            <label className="dropdown-label mb-1.5 block">Maximum ($)</label>
             <Input
               type="number"
               placeholder="∞"

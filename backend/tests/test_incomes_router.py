@@ -278,11 +278,7 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
     }
     assert updated["emergency_fund_balance"] == 24000
 
-    db_row = (
-        db_session.query(IncomeYearSettings)
-        .filter(IncomeYearSettings.year == 2026)
-        .one()
-    )
+    db_row = db_session.query(IncomeYearSettings).filter(IncomeYearSettings.year == 2026).one()
     assert db_row.emergency_fund_balance == 24000
     bucket_rows = (
         db_session.query(IncomeYearTaxAdvantagedBucket)
@@ -323,11 +319,7 @@ def test_year_settings_partial_updates_preserve_existing_values(client, db_sessi
     }
     assert updated["emergency_fund_balance"] == 26000
 
-    db_row = (
-        db_session.query(IncomeYearSettings)
-        .filter(IncomeYearSettings.year == 2026)
-        .one()
-    )
+    db_row = db_session.query(IncomeYearSettings).filter(IncomeYearSettings.year == 2026).one()
     assert db_row.emergency_fund_balance == 26000
     bucket_rows = (
         db_session.query(IncomeYearTaxAdvantagedBucket)

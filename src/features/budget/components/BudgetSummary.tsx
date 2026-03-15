@@ -22,7 +22,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   savingsRate,
 }) => {
   const usedBudgetBase = totals.spent + totals.remaining;
-  const usedPercent = usedBudgetBase > 0 ? (totals.spent / usedBudgetBase) * 100 : 0;
+  const usedPercent =
+    usedBudgetBase > 0 ? (totals.spent / usedBudgetBase) * 100 : 0;
 
   const CurrencyStack = ({
     monthlyAmount,

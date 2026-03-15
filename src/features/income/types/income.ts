@@ -147,7 +147,9 @@ export interface UpdateIncomeYearSettingsInput {
   emergencyFundBalance?: number;
 }
 
-export function getComponentDisplayName(component: ProjectedIncomeComponent): string {
+export function getComponentDisplayName(
+  component: ProjectedIncomeComponent,
+): string {
   if (component.label?.trim()) {
     return component.label;
   }

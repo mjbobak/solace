@@ -120,7 +120,9 @@ export const BarChart: React.FC<BarChartProps> = ({
               fontSize: chartTheme.fontSize,
             }}
           />
-          {showLegend && <Legend wrapperStyle={{ fontSize: chartTheme.fontSize }} />}
+          {showLegend && (
+            <Legend wrapperStyle={{ fontSize: chartTheme.fontSize }} />
+          )}
           {bars.map((bar, index) => (
             <Bar
               key={bar.dataKey}

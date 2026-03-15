@@ -82,7 +82,9 @@ function sortTransactions(
     return data;
   }
 
-  const column = columns.find((candidate) => candidate.key === sortState.column);
+  const column = columns.find(
+    (candidate) => candidate.key === sortState.column,
+  );
   if (!column?.sortValue) {
     return data;
   }
@@ -195,7 +197,11 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       }
 
       if ('sortColumn' in updates) {
-        setStringParam(nextSearchParams, 'sort', updates.sortColumn ?? undefined);
+        setStringParam(
+          nextSearchParams,
+          'sort',
+          updates.sortColumn ?? undefined,
+        );
       }
 
       if ('sortDirection' in updates) {
@@ -260,7 +266,10 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     let hasUncategorized = false;
 
     for (const transaction of transactions) {
-      if (transaction.budgetLabel && transaction.budgetLabel !== 'Uncategorized') {
+      if (
+        transaction.budgetLabel &&
+        transaction.budgetLabel !== 'Uncategorized'
+      ) {
         budgetItems.add(transaction.budgetLabel);
       } else {
         hasUncategorized = true;
@@ -379,17 +388,14 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     setHighlightedIds(new Set([id]));
   }, []);
 
-  const columns = useMemo(
-    () => {
-      return getSpendingTableColumns({
-        handleEditSpread: handleSpreadEditClick,
-        handleEdit: handleEditClick,
-        handleDelete: handleDeleteClick,
-        displayMonth: getDisplayMonthContext(filters),
-      });
-    },
-    [filters, handleSpreadEditClick],
-  );
+  const columns = useMemo(() => {
+    return getSpendingTableColumns({
+      handleEditSpread: handleSpreadEditClick,
+      handleEdit: handleEditClick,
+      handleDelete: handleDeleteClick,
+      displayMonth: getDisplayMonthContext(filters),
+    });
+  }, [filters, handleSpreadEditClick]);
 
   const sortState = useMemo<SortState>(() => {
     const sortColumn = getStringParam(searchParams, 'sort');
@@ -419,7 +425,10 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   )
     ? pageSizeParam!
     : 50;
-  const totalPages = Math.max(1, Math.ceil(sortedFilteredData.length / pageSize));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedFilteredData.length / pageSize),
+  );
   const currentPage = Math.min(
     Math.max(getNumberParam(searchParams, 'page') ?? 1, 1),
     totalPages,
@@ -586,9 +595,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
 
   if (isLoading) {
     return (
-      <div className="p-6 text-center text-muted">
-        Loading transactions...
-      </div>
+      <div className="p-6 text-center text-muted">Loading transactions...</div>
     );
   }
 

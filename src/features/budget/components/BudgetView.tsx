@@ -27,6 +27,7 @@ import {
   setMultiValueParam,
   setStringParam,
 } from '@/shared/utils/searchParams';
+
 import { extractNumericId } from '../services/budgetAdapters';
 
 export interface BudgetViewHandle {
@@ -93,9 +94,8 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
     React.useEffect(() => {
       const loadPlannedIncome = async () => {
         try {
-          const projection = await incomeApiService.getYearProjection(
-            planningYear,
-          );
+          const projection =
+            await incomeApiService.getYearProjection(planningYear);
           setPlannedAnnualNetIncome(projection.totals.plannedNet);
         } catch (err) {
           console.error('Failed to load planned income projection:', err);
@@ -122,7 +122,10 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
 
       document.addEventListener('visibilitychange', handleVisibilityChange);
       return () =>
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        document.removeEventListener(
+          'visibilitychange',
+          handleVisibilityChange,
+        );
     }, [refetchSpending]);
 
     const budgetData = useBudgetFiltering(

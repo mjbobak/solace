@@ -29,7 +29,10 @@ export function SummaryCard({
       <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
-      <p className="text-2xl font-bold" style={{ color: getVariantClasses(variant) }}>
+      <p
+        className="text-2xl font-bold"
+        style={{ color: getVariantClasses(variant) }}
+      >
         {value}
       </p>
     </div>
