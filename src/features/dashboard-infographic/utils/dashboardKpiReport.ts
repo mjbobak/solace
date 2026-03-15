@@ -349,8 +349,6 @@ export function buildDashboardKpiGroups({
 }: BuildDashboardKpiGroupsParams): DashboardKpiGroup[] {
   const currentGrossIncome = currentIncomeTotals?.plannedGross ?? null;
   const currentAfterTaxIncome = currentIncomeTotals?.plannedNet ?? null;
-  const currentCommittedAfterTaxIncome =
-    currentIncomeTotals?.committedNet ?? null;
   const previousGrossIncome = previousIncomeTotals?.plannedGross ?? null;
   const plannedLivingExpenses = budgetEntries
     ? getBudgetComparisonAmount(
@@ -424,10 +422,10 @@ export function buildDashboardKpiGroups({
           completedMonths,
         });
   const actualComparisonAfterTaxIncome =
-    currentCommittedAfterTaxIncome === null
+    currentAfterTaxIncome === null
       ? null
       : scaleAnnualAmountForSpendBasis({
-          annualAmount: currentCommittedAfterTaxIncome,
+          annualAmount: currentAfterTaxIncome,
           spendBasis,
           completedMonths,
         });

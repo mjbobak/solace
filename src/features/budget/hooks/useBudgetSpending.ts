@@ -7,7 +7,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { spendingService } from '@/features/spending/services/spendingService';
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
 import { getMonthlyTransactionImpacts } from '@/features/spending/utils/spreadPayments';
-import { getMonthIndexFromDateOnly } from '@/shared/utils/dateOnly';
+import {
+  getMonthIndexFromDateOnly,
+  getYearFromDateOnly,
+} from '@/shared/utils/dateOnly';
 import {
   getCompletedMonthsForYear,
   getSpendBasisHelpText,
@@ -115,6 +118,10 @@ export function useBudgetSpending(
             buckets[impact.month - 1] += impact.amount;
           }
         }
+        continue;
+      }
+
+      if (getYearFromDateOnly(transaction.transactionDate) !== year) {
         continue;
       }
 

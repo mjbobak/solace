@@ -112,6 +112,10 @@ describe('buildDashboardKpiGroups', () => {
       kind: 'currency',
       amount: 210000,
     });
+    expect(findRow(groups, 'after-tax-income')?.actualValue).toEqual({
+      kind: 'currency',
+      amount: 160000,
+    });
     expect(findRow(groups, 'annual-living-expenses')?.plannedValue).toEqual({
       kind: 'currency',
       amount: 42000,
@@ -162,11 +166,11 @@ describe('buildDashboardKpiGroups', () => {
     });
     expect(findRow(groups, 'annual-savings-amount')?.actualValue).toEqual({
       kind: 'currency',
-      amount: 103400,
+      amount: 113400,
     });
     expect(findRow(groups, 'savings-rate')?.actualValue).toEqual({
       kind: 'percentage',
-      amount: 0.744,
+      amount: 0.76,
     });
     expect(findRow(groups, 'savings-rate')?.plannedValue).toEqual({
       kind: 'percentage',
@@ -189,7 +193,7 @@ describe('buildDashboardKpiGroups', () => {
     });
     expect(findRow(groups, 'savings-efficiency')?.actualValue).toEqual({
       kind: 'percentage',
-      amount: 0.6893333333333334,
+      amount: 0.70875,
     });
     expect(findRow(groups, 'expense-ratio')?.plannedValue).toEqual({
       kind: 'percentage',
@@ -197,7 +201,7 @@ describe('buildDashboardKpiGroups', () => {
     });
     expect(findRow(groups, 'expense-ratio')?.actualValue).toEqual({
       kind: 'percentage',
-      amount: 0.256,
+      amount: 0.24,
     });
     expect(findRow(groups, 'income-growth-rate')?.actualValue).toEqual({
       kind: 'percentage',
@@ -329,7 +333,19 @@ describe('buildDashboardKpiGroups', () => {
     });
     expect(findRow(groups, 'annual-savings-amount')?.actualValue).toEqual({
       kind: 'currency',
-      amount: 25800,
+      amount: 28300,
+    });
+    expect(findRow(groups, 'savings-rate')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.745,
+    });
+    expect(findRow(groups, 'savings-efficiency')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.7075,
+    });
+    expect(findRow(groups, 'expense-ratio')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.255,
     });
   });
 });
