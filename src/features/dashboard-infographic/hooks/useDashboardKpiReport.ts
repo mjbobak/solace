@@ -35,7 +35,7 @@ export function useDashboardKpiReport(
     budgetEntries,
     isLoading: isBudgetLoading,
     error: budgetError,
-  } = useBudgetData(year, spendBasis, false);
+  } = useBudgetData(year, spendBasis, true);
 
   useEffect(() => {
     let isCancelled = false;

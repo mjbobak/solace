@@ -89,4 +89,34 @@ describe('useBudgetSpending', () => {
     expect(result.current.monthlyRange).toEqual({ low: 80, high: 120 });
     expect(getAllTransactions).toHaveBeenCalledWith({ fetchAll: true });
   });
+
+  it('uses spread impacts instead of raw transaction timing when normalization is enabled', async () => {
+    getAllTransactions.mockResolvedValue([
+      createTransaction({
+        id: 'spread-home-insurance',
+        transactionDate: '2026-01-20',
+        amount: 600,
+        isAccrual: true,
+        spreadStartDate: '2026-01-01',
+        spreadMonths: 6,
+      }),
+      createTransaction({
+        id: 'march-groceries',
+        transactionDate: '2026-03-10',
+        amount: 50,
+      }),
+    ]);
+
+    const { result } = renderHook(() =>
+      useBudgetSpending(2026, 'monthly_current_month', true),
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.spendingByBudget.get(101)).toBe(150);
+    expect(result.current.monthlyRange).toEqual({ low: 100, high: 100 });
+  });
 });
