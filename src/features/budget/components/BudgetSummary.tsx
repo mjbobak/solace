@@ -3,7 +3,6 @@ import { motion, type Variants } from 'framer-motion';
 import { LuWallet, LuPiggyBank } from 'react-icons/lu';
 
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
-import { statusPalette } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 
 interface BudgetSummaryProps {
@@ -35,11 +34,21 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     monthlyClassName?: string;
   }) => (
     <div className="flex flex-col leading-tight">
-      <span className={`text-lg font-bold ${annualClassName}`}>
-        {formatCurrency(monthlyAmount * 12, '$')}
+      <span className="flex items-baseline gap-2">
+        <span className={`text-lg font-bold ${annualClassName}`}>
+          {formatCurrency(monthlyAmount * 12, '$')}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          annual
+        </span>
       </span>
-      <span className={`text-xs ${monthlyClassName}`}>
-        {formatCurrency(monthlyAmount, '$')}
+      <span className="flex items-baseline gap-2">
+        <span className={`text-xs ${monthlyClassName}`}>
+          {formatCurrency(monthlyAmount, '$')}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          monthly
+        </span>
       </span>
     </div>
   );
@@ -70,7 +79,11 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   };
 
   const theme = getSavingsTheme();
-  const plannedValueClasses = {
+  const neutralValueClasses = {
+    annualClassName: 'text-gray-900',
+    monthlyClassName: 'text-gray-500',
+  };
+  const highlightedValueClasses = {
     annualClassName: 'text-indigo-700',
     monthlyClassName: 'text-indigo-700/75',
   };
@@ -90,12 +103,12 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={getCardVariants(0)}
-          className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200"
+          className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 lg:col-span-1"
         >
           <div className="flex items-center gap-2 mb-6">
             <div className="p-2 bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-lg">
@@ -145,7 +158,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           initial="hidden"
           animate="visible"
           variants={getCardVariants(1)}
-          className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 lg:row-span-1"
+          className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 lg:col-span-2"
         >
           <div className="flex items-center gap-2 mb-6">
             <div className={`p-2 bg-gradient-to-br ${theme.bg} rounded-lg`}>
@@ -156,7 +169,19 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
             </h3>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
+                Planned Income
+              </p>
+              <div className="mb-1">
+                <CurrencyStack
+                  monthlyAmount={income}
+                  {...neutralValueClasses}
+                />
+              </div>
+            </div>
+
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
                 Planned Savings
@@ -164,14 +189,14 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
               <div className="mb-1">
                 <CurrencyStack
                   monthlyAmount={Math.abs(savings)}
-                  {...plannedValueClasses}
+                  {...neutralValueClasses}
                 />
               </div>
               <p className="text-xs text-gray-500">
                 {savingsRate > 0
                   ? savingsRate.toFixed(1)
                   : Math.abs(savingsRate).toFixed(1)}
-                %
+                % of income
               </p>
             </div>
 
@@ -182,28 +207,26 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
               <div className="mb-1">
                 <CurrencyStack
                   monthlyAmount={investments}
-                  {...plannedValueClasses}
+                  {...neutralValueClasses}
                 />
               </div>
               <p className="text-xs text-gray-500">
                 {income > 0 ? ((investments / income) * 100).toFixed(1) : '0'}%
+                of income
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-emerald-700 uppercase tracking-wider font-semibold mb-3">
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
                 Total Going to Wealth
               </p>
               <div className="mb-1">
                 <CurrencyStack
                   monthlyAmount={Math.abs(savings) + investments}
-                  {...plannedValueClasses}
+                  {...highlightedValueClasses}
                 />
               </div>
-              <p
-                className="text-xs opacity-75"
-                style={{ color: statusPalette.budget }}
-              >
+              <p className="text-xs text-gray-500">
                 {income > 0
                   ? (
                       ((Math.abs(savings) + investments) / income) *
