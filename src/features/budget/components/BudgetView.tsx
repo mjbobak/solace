@@ -234,6 +234,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       <div className="space-y-3">
         <BudgetSummary
           totals={totals}
+          totalBudgeted={overallTotals.budgeted}
           investments={investments}
           income={income}
           savings={savings}

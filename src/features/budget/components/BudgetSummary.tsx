@@ -7,6 +7,7 @@ import { formatCurrency } from '@/shared/utils/currency';
 
 interface BudgetSummaryProps {
   totals: BudgetTotals;
+  totalBudgeted: number;
   investments: number;
   income: number;
   savings: number;
@@ -15,6 +16,7 @@ interface BudgetSummaryProps {
 
 export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   totals,
+  totalBudgeted,
   investments,
   income,
   savings,
@@ -53,32 +55,6 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     </div>
   );
 
-  const getSavingsTheme = () => {
-    if (savings < 0) {
-      return {
-        bg: 'from-rose-50 to-red-50',
-        text: 'text-rose-700',
-      };
-    }
-    if (savingsRate >= 20) {
-      return {
-        bg: 'from-emerald-50 to-green-50',
-        text: 'text-emerald-700',
-      };
-    }
-    if (savingsRate >= 10) {
-      return {
-        bg: 'from-indigo-50 to-blue-50',
-        text: 'text-indigo-700',
-      };
-    }
-    return {
-      bg: 'from-amber-50 to-orange-50',
-      text: 'text-amber-700',
-    };
-  };
-
-  const theme = getSavingsTheme();
   const neutralValueClasses = {
     annualClassName: 'text-gray-900',
     monthlyClassName: 'text-gray-500',
@@ -87,6 +63,9 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     annualClassName: 'text-indigo-700',
     monthlyClassName: 'text-indigo-700/75',
   };
+  const cardIconContainerClass =
+    'p-2 rounded-lg bg-gradient-to-br from-sky-50 to-slate-100';
+  const cardIconClass = 'w-4 h-4 text-slate-500';
 
   const getCardVariants = (index: number): Variants => ({
     hidden: { opacity: 0, y: 20 },
@@ -111,8 +90,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 lg:col-span-1"
         >
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-lg">
-              <LuWallet className="w-4 h-4 text-indigo-600" />
+            <div className={cardIconContainerClass}>
+              <LuWallet className={cardIconClass} />
             </div>
             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
               Budget Utilization
@@ -161,15 +140,15 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 lg:col-span-2"
         >
           <div className="flex items-center gap-2 mb-6">
-            <div className={`p-2 bg-gradient-to-br ${theme.bg} rounded-lg`}>
-              <LuPiggyBank className={`w-4 h-4 ${theme.text}`} />
+            <div className={cardIconContainerClass}>
+              <LuPiggyBank className={cardIconClass} />
             </div>
             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
               Savings & Investing
             </h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
                 Planned Income
@@ -180,6 +159,22 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                   {...neutralValueClasses}
                 />
               </div>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
+                Total Budgeted
+              </p>
+              <div className="mb-1">
+                <CurrencyStack
+                  monthlyAmount={totalBudgeted}
+                  {...neutralValueClasses}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                {income > 0 ? ((totalBudgeted / income) * 100).toFixed(1) : '0'}
+                % of income
+              </p>
             </div>
 
             <div>
@@ -211,8 +206,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 />
               </div>
               <p className="text-xs text-gray-500">
-                {income > 0 ? ((investments / income) * 100).toFixed(1) : '0'}%
-                of income
+                {income > 0 ? ((investments / income) * 100).toFixed(1) : '0'}
+                % of income
               </p>
             </div>
 
