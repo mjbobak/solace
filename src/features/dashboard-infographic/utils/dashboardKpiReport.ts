@@ -522,14 +522,8 @@ export function buildDashboardKpiGroups({
       ],
     },
     {
-      title: '2. Savings Rate',
+      title: '2. Investment and Savings Efficiency',
       rows: [
-        createPercentageRow(
-          'savings-rate',
-          'Savings Rate',
-          savingsRate,
-          plannedSavingsRate,
-        ),
         createCurrencyRow(
           'annual-savings-amount',
           'Annual Savings Amount',
@@ -538,14 +532,26 @@ export function buildDashboardKpiGroups({
         ),
         createCurrencyRow(
           'annual-investment-contributions',
-          'Annual Investment Contributions',
+          'Annual Investment Amount',
           actualInvestmentContributions,
           plannedInvestmentContributions,
+        ),
+        createPercentageRow(
+          'savings-efficiency',
+          'Savings Rate (Savings / Income)',
+          savingsEfficiency,
+          plannedSavingsEfficiency,
+        ),
+        createPercentageRow(
+          'savings-rate',
+          'Investment Rate (Savings + Investments / Income)',
+          savingsRate,
+          plannedSavingsRate,
         ),
       ],
     },
     {
-      title: '4. Income Efficiency',
+      title: '3. Income Efficiency',
       rows: [
         createCurrencyRow('gross-income', 'Gross Income', currentGrossIncome),
         createCurrencyRow(
@@ -558,16 +564,10 @@ export function buildDashboardKpiGroups({
           'Income Growth Rate',
           incomeGrowthRate,
         ),
-        createPercentageRow(
-          'savings-efficiency',
-          'Savings Efficiency (Savings / After-Tax Income)',
-          savingsEfficiency,
-          plannedSavingsEfficiency,
-        ),
       ],
     },
     {
-      title: '5. Expense Structure',
+      title: '4. Expense Structure',
       rows: [
         createCurrencyRow(
           'total-monthly-expenses',
@@ -603,7 +603,7 @@ export function buildDashboardKpiGroups({
       ],
     },
     {
-      title: '7. Liquidity and Safety',
+      title: '5. Liquidity and Safety',
       rows: [
         createCurrencyRow(
           'emergency-fund-balance',
@@ -621,11 +621,10 @@ export function buildDashboardKpiGroups({
               ? createNotAvailableValue()
               : createTextValue(`${emergencyFundMonths.toFixed(1)} months`),
         },
-        createUnsupportedRow('cash-reserves', 'Cash Reserves'),
       ],
     },
     {
-      title: '9. Tax Efficiency',
+      title: '6. Tax Efficiency',
       rows: [
         createCurrencyRow(
           'tax-advantaged-contributions',
@@ -658,10 +657,6 @@ export function buildDashboardKpiGroups({
           '529-contributions',
           '529 Contributions',
           annual529Contributions?.amount ?? null,
-        ),
-        createUnsupportedRow(
-          'retirement-funding-ratio',
-          'Retirement Funding Ratio',
         ),
       ],
     },
