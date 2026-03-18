@@ -41,7 +41,7 @@ const METRIC_EXPLANATIONS: Record<string, string> = {
   'annual-living-expenses':
     'Total planned yearly spending on non-investment living categories.',
   'expense-growth-rate':
-    'Year-over-year change in expenses. General formula: (current expenses - prior expenses) / prior expenses.',
+    'Year-over-year change in living expenses. General formula: (current living expenses - prior living expenses) / prior living expenses.',
   'essential-spending':
     'Actual spent amount for living expenses marked as Essential in your budget types for the current report basis.',
   'funsies-spending':
@@ -90,6 +90,25 @@ function getMetricExplanation(row: DashboardKpiRow): string {
   return (
     METRIC_EXPLANATIONS[row.key] ??
     `${row.label} is a high-level planning metric shown here to summarize the relationship between income, expenses, savings, or reserves.`
+  );
+}
+
+function renderMetricLabel(label: string): React.ReactNode {
+  const labelMatch = label.match(/^(.*?)\s*\((.+)\)$/);
+
+  if (!labelMatch) {
+    return <span>{label}</span>;
+  }
+
+  const [, primaryLabel, formulaLabel] = labelMatch;
+
+  return (
+    <span className="block leading-snug">
+      <span className="block">{primaryLabel.trim()}</span>
+      <span className="mt-0.5 block text-xs font-normal text-muted">
+        ({formulaLabel.trim()})
+      </span>
+    </span>
   );
 }
 
@@ -283,8 +302,10 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
                         scope="row"
                         className="px-6 py-3 text-left font-medium text-app"
                       >
-                        <div className="flex items-center gap-2">
-                          <span>{row.label}</span>
+                        <div className="flex items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            {renderMetricLabel(row.label)}
+                          </div>
                           <Tooltip content={getMetricExplanation(row)} stacked>
                             <button
                               type="button"

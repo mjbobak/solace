@@ -36,6 +36,7 @@ export function useBudgetData(
   year: number,
   spendBasis: SpendBasis,
   normalizeAccrual: boolean,
+  completedMonthsOverride?: number,
 ): UseBudgetDataReturn {
   const [budgets, setBudgets] = useState<BudgetApiResponse[]>([]);
   const [isLoadingBudgets, setIsLoadingBudgets] = useState(true);
@@ -70,9 +71,15 @@ export function useBudgetData(
     monthlyRange,
     spendBasisLabel,
     spendBasisHelpText,
-  } = useBudgetSpending(year, spendBasis, normalizeAccrual);
+  } = useBudgetSpending(
+    year,
+    spendBasis,
+    normalizeAccrual,
+    completedMonthsOverride,
+  );
 
-  const completedMonths = getCompletedMonthsForYear(year);
+  const completedMonths =
+    completedMonthsOverride ?? getCompletedMonthsForYear(year);
 
   const budgetEntries = useMemo(() => {
     try {

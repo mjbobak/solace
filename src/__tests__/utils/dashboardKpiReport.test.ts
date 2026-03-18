@@ -69,6 +69,19 @@ describe('buildDashboardKpiGroups', () => {
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: createIncomeTotals({ plannedGross: 200000 }),
       currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      previousBudgetEntries: [
+        createBudgetEntry({ spent: 30000 }),
+        createBudgetEntry({
+          id: 'PREV-0002',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Restaurants',
+          budgeted: 400,
+          spent: 3600,
+          remaining: 0,
+          percentage: 1,
+        }),
+      ],
       spendBasis: 'annual_full_year',
       completedMonths: 12,
       emergencyFundBalance: 10000,
@@ -211,6 +224,10 @@ describe('buildDashboardKpiGroups', () => {
       kind: 'percentage',
       amount: 0.24,
     });
+    expect(findRow(groups, 'expense-growth-rate')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.14285714285714285,
+    });
     expect(findRow(groups, 'income-growth-rate')?.actualValue).toEqual({
       kind: 'percentage',
       amount: 0.05,
@@ -245,6 +262,7 @@ describe('buildDashboardKpiGroups', () => {
       previousIncomeTotals: null,
       currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
       budgetEntries: [createBudgetEntry()],
+      previousBudgetEntries: null,
       spendBasis: 'annual_full_year',
       completedMonths: 12,
     });
@@ -261,6 +279,7 @@ describe('buildDashboardKpiGroups', () => {
       previousIncomeTotals: null,
       currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
       budgetEntries: [createBudgetEntry()],
+      previousBudgetEntries: null,
       spendBasis: 'annual_full_year',
       completedMonths: 12,
     });
@@ -277,6 +296,7 @@ describe('buildDashboardKpiGroups', () => {
       previousIncomeTotals: null,
       currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
       budgetEntries: [createBudgetEntry()],
+      previousBudgetEntries: null,
       spendBasis: 'annual_full_year',
       completedMonths: 12,
     });
@@ -302,6 +322,19 @@ describe('buildDashboardKpiGroups', () => {
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: null,
       currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      previousBudgetEntries: [
+        createBudgetEntry({ spent: 8000 }),
+        createBudgetEntry({
+          id: 'PREV-0002',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Restaurants',
+          budgeted: 400,
+          spent: 1000,
+          remaining: 0,
+          percentage: 1,
+        }),
+      ],
       budgetEntries: [
         createBudgetEntry({ spent: 9000 }),
         createBudgetEntry({
@@ -369,6 +402,10 @@ describe('buildDashboardKpiGroups', () => {
     expect(findRow(groups, 'expense-ratio')?.actualValue).toEqual({
       kind: 'percentage',
       amount: 0.255,
+    });
+    expect(findRow(groups, 'expense-growth-rate')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.13333333333333333,
     });
   });
 });

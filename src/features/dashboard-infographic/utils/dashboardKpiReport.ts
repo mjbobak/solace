@@ -36,6 +36,7 @@ interface BuildDashboardKpiGroupsParams {
   previousIncomeTotals: IncomeProjectionTotals | null;
   currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null;
   budgetEntries: BudgetEntry[] | null;
+  previousBudgetEntries: BudgetEntry[] | null;
   spendBasis: SpendBasis;
   completedMonths: number;
   emergencyFundBalance?: number | null;
@@ -266,16 +267,6 @@ function createPercentageRow(
   };
 }
 
-function createUnsupportedRow(key: string, label: string): DashboardKpiRow {
-  return {
-    key,
-    label,
-    benchmark:
-      KPI_BENCHMARKS[key] ?? 'Strong: trending in a healthy direction.',
-    actualValue: createNotAvailableValue(),
-  };
-}
-
 function calculateRatio(
   numerator: number | null,
   denominator: number | null,
@@ -340,6 +331,7 @@ export function buildDashboardKpiGroups({
   previousIncomeTotals,
   currentTaxAdvantagedInvestments,
   budgetEntries,
+  previousBudgetEntries,
   spendBasis,
   completedMonths,
   emergencyFundBalance = DEFAULT_EMERGENCY_FUND_BALANCE,
@@ -357,6 +349,9 @@ export function buildDashboardKpiGroups({
     : null;
   const actualLivingExpenses = budgetEntries
     ? getSpentAmount(budgetEntries, isLivingExpense)
+    : null;
+  const previousLivingExpenses = previousBudgetEntries
+    ? getSpentAmount(previousBudgetEntries, isLivingExpense)
     : null;
   const totalMonthlyExpenses = budgetEntries
     ? getBudgetedAmount(budgetEntries, isLivingExpense)
@@ -478,6 +473,10 @@ export function buildDashboardKpiGroups({
     plannedLivingExpenses,
     plannedComparisonAfterTaxIncome,
   );
+  const expenseGrowthRate = calculateGrowthRate(
+    actualLivingExpenses,
+    previousLivingExpenses,
+  );
   const incomeGrowthRate = calculateGrowthRate(
     currentGrossIncome,
     previousGrossIncome,
@@ -578,7 +577,11 @@ export function buildDashboardKpiGroups({
           actualLivingExpenses,
           plannedLivingExpenses,
         ),
-        createUnsupportedRow('expense-growth-rate', 'Expense Growth Rate'),
+        createPercentageRow(
+          'expense-growth-rate',
+          'Expense Growth Rate (Year-over-Year)',
+          expenseGrowthRate,
+        ),
         createCurrencyRow(
           'essential-spending',
           'Essential',

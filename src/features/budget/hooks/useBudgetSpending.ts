@@ -63,6 +63,7 @@ export function useBudgetSpending(
   year: number,
   spendBasis: SpendBasis,
   normalizeAccrual: boolean,
+  completedMonthsOverride?: number,
 ): UseBudgetSpendingReturn {
   const [transactions, setTransactions] = useState<SpendingEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +94,8 @@ export function useBudgetSpending(
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const longMonth = now.toLocaleString('en-US', { month: 'long' });
-  const completedMonths = getCompletedMonthsForYear(year);
+  const completedMonths =
+    completedMonthsOverride ?? getCompletedMonthsForYear(year);
 
   const monthlyTotalsByBudget = useMemo(() => {
     const bucketsByBudget = new Map<number, number[]>();
