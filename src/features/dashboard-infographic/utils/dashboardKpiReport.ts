@@ -53,6 +53,7 @@ const TAX_ADVANTAGED_LABEL_MATCHERS = {
 
 const KPI_BENCHMARKS: Record<string, string> = {
   'savings-rate': 'Strong: 20%+ of after-tax income.',
+  'investment-rate': 'Strong: 15%+ of after-tax income invested consistently.',
   'annual-savings-amount':
     'Strong: consistently positive and rising over time.',
   'annual-investment-contributions':
@@ -453,6 +454,14 @@ export function buildDashboardKpiGroups({
       : plannedSavingsAmount + plannedInvestmentContributions,
     plannedComparisonAfterTaxIncome,
   );
+  const investmentRate = calculateRatio(
+    actualInvestmentContributions,
+    actualComparisonAfterTaxIncome,
+  );
+  const plannedInvestmentRate = calculateRatio(
+    plannedInvestmentContributions,
+    plannedComparisonAfterTaxIncome,
+  );
   const savingsEfficiency = calculateRatio(
     actualSavingsAmount,
     actualComparisonAfterTaxIncome,
@@ -525,8 +534,14 @@ export function buildDashboardKpiGroups({
           plannedSavingsEfficiency,
         ),
         createPercentageRow(
+          'investment-rate',
+          'Investment Rate (Investments / Income)',
+          investmentRate,
+          plannedInvestmentRate,
+        ),
+        createPercentageRow(
           'savings-rate',
-          'Investment Rate (Savings + Investments / Income)',
+          'Total Savings Rate (Savings + Investments / Income)',
           savingsRate,
           plannedSavingsRate,
         ),

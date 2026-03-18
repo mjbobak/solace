@@ -22,6 +22,8 @@ interface DashboardKpiReportProps {
 const METRIC_EXPLANATIONS: Record<string, string> = {
   'savings-rate':
     'Portion of after-tax income kept instead of spent. General formula: (savings + investment contributions) / after-tax income.',
+  'investment-rate':
+    'Share of after-tax income directed to investment contributions. General formula: investment contributions / after-tax income.',
   'annual-savings-amount':
     'After-tax income left over after living expenses and planned investment contributions.',
   'annual-investment-contributions':

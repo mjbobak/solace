@@ -179,6 +179,14 @@ describe('buildDashboardKpiGroups', () => {
     expect(findRow(groups, 'savings-rate')?.benchmark).toBe(
       'Strong: 20%+ of after-tax income.',
     );
+    expect(findRow(groups, 'investment-rate')?.plannedValue).toEqual({
+      kind: 'percentage',
+      amount: 0.05625,
+    });
+    expect(findRow(groups, 'investment-rate')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.05125,
+    });
     expect(findRow(groups, 'total-monthly-expenses')?.plannedValue).toEqual({
       kind: 'currency',
       amount: 3500,
@@ -349,6 +357,10 @@ describe('buildDashboardKpiGroups', () => {
     expect(findRow(groups, 'savings-rate')?.actualValue).toEqual({
       kind: 'percentage',
       amount: 0.745,
+    });
+    expect(findRow(groups, 'investment-rate')?.actualValue).toEqual({
+      kind: 'percentage',
+      amount: 0.0375,
     });
     expect(findRow(groups, 'savings-efficiency')?.actualValue).toEqual({
       kind: 'percentage',
