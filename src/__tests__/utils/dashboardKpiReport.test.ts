@@ -247,7 +247,7 @@ describe('buildDashboardKpiGroups', () => {
     });
   });
 
-  it('renders unsupported KPIs as N/A', () => {
+  it('renders still-unsupported KPIs as N/A', () => {
     const groups = buildDashboardKpiGroups({
       currentIncomeTotals: createIncomeTotals(),
       previousIncomeTotals: null,
@@ -257,18 +257,29 @@ describe('buildDashboardKpiGroups', () => {
       completedMonths: 12,
     });
 
-    expect(findRow(groups, 'net-worth')?.actualValue).toEqual({
+    expect(findRow(groups, 'expense-growth-rate')?.actualValue).toEqual({
       kind: 'text',
       text: 'N/A',
     });
-    expect(findRow(groups, 'cash-reserves')?.actualValue).toEqual({
-      kind: 'text',
-      text: 'N/A',
+  });
+
+  it('renumbers the remaining KPI groups after removing net worth growth', () => {
+    const groups = buildDashboardKpiGroups({
+      currentIncomeTotals: createIncomeTotals(),
+      previousIncomeTotals: null,
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      budgetEntries: [createBudgetEntry()],
+      spendBasis: 'annual_full_year',
+      completedMonths: 12,
     });
-    expect(findRow(groups, 'retirement-funding-ratio')?.actualValue).toEqual({
-      kind: 'text',
-      text: 'N/A',
-    });
+
+    expect(groups.map((group) => group.title)).toEqual([
+      '1. Investment and Savings Efficiency',
+      '2. Income Efficiency',
+      '3. Expense Structure',
+      '4. Liquidity and Safety',
+      '5. Tax Efficiency',
+    ]);
   });
 
   it('matches tax-advantaged budget labels for 529, HSA, and Roth', () => {

@@ -52,10 +52,6 @@ const TAX_ADVANTAGED_LABEL_MATCHERS = {
 } as const;
 
 const KPI_BENCHMARKS: Record<string, string> = {
-  'net-worth': 'Strong: trending upward year over year.',
-  'net-worth-growth-rate': 'Strong: outpaces inflation and stays positive.',
-  'net-worth-growth-vs-income-growth':
-    'Strong: net worth grows at least as fast as income.',
   'savings-rate': 'Strong: 20%+ of after-tax income.',
   'annual-savings-amount':
     'Strong: consistently positive and rising over time.',
@@ -508,21 +504,7 @@ export function buildDashboardKpiGroups({
 
   return [
     {
-      title: '1. Net Worth Growth',
-      rows: [
-        createUnsupportedRow('net-worth', 'Net Worth'),
-        createUnsupportedRow(
-          'net-worth-growth-rate',
-          'Net Worth Growth Rate (Year-over-Year)',
-        ),
-        createUnsupportedRow(
-          'net-worth-growth-vs-income-growth',
-          'Net Worth Growth vs Income Growth',
-        ),
-      ],
-    },
-    {
-      title: '2. Investment and Savings Efficiency',
+      title: '1. Investment and Savings Efficiency',
       rows: [
         createCurrencyRow(
           'annual-savings-amount',
@@ -551,7 +533,7 @@ export function buildDashboardKpiGroups({
       ],
     },
     {
-      title: '3. Income Efficiency',
+      title: '2. Income Efficiency',
       rows: [
         createCurrencyRow('gross-income', 'Gross Income', currentGrossIncome),
         createCurrencyRow(
@@ -567,7 +549,7 @@ export function buildDashboardKpiGroups({
       ],
     },
     {
-      title: '4. Expense Structure',
+      title: '3. Expense Structure',
       rows: [
         createCurrencyRow(
           'total-monthly-expenses',
@@ -603,7 +585,7 @@ export function buildDashboardKpiGroups({
       ],
     },
     {
-      title: '5. Liquidity and Safety',
+      title: '4. Liquidity and Safety',
       rows: [
         createCurrencyRow(
           'emergency-fund-balance',
@@ -624,7 +606,7 @@ export function buildDashboardKpiGroups({
       ],
     },
     {
-      title: '6. Tax Efficiency',
+      title: '5. Tax Efficiency',
       rows: [
         createCurrencyRow(
           'tax-advantaged-contributions',

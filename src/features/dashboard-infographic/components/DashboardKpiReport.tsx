@@ -20,12 +20,6 @@ interface DashboardKpiReportProps {
 }
 
 const METRIC_EXPLANATIONS: Record<string, string> = {
-  'net-worth':
-    'Total assets minus total liabilities. Think cash, investments, home equity, and debt balances rolled into one snapshot.',
-  'net-worth-growth-rate':
-    'Year-over-year change in net worth. General formula: (current net worth - prior net worth) / prior net worth.',
-  'net-worth-growth-vs-income-growth':
-    'Compares wealth growth to income growth to show whether net worth is growing faster than earnings.',
   'savings-rate':
     'Portion of after-tax income kept instead of spent. General formula: (savings + investment contributions) / after-tax income.',
   'annual-savings-amount':
