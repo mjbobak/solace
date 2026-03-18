@@ -133,6 +133,8 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       expenseTypeFilter,
       expenseCategoryFilter,
     );
+    const isBudgetFiltered =
+      expenseTypeFilter !== 'ALL' || expenseCategoryFilter.length > 0;
     const totals = useBudgetCalculations(budgetData);
     const overallTotals = useBudgetCalculations(budgetEntries);
 
@@ -239,6 +241,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
           income={income}
           savings={savings}
           savingsRate={savingsRate}
+          isBudgetFiltered={isBudgetFiltered}
         />
 
         <div className="surface-card">

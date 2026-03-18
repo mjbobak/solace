@@ -1,6 +1,13 @@
 import React from 'react';
 import { motion, type Variants } from 'framer-motion';
-import { LuWallet, LuPiggyBank } from 'react-icons/lu';
+import {
+  LuEqual,
+  LuFilter,
+  LuMinus,
+  LuPiggyBank,
+  LuPlus,
+  LuWallet,
+} from 'react-icons/lu';
 
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -12,6 +19,7 @@ interface BudgetSummaryProps {
   income: number;
   savings: number;
   savingsRate: number;
+  isBudgetFiltered: boolean;
 }
 
 export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
@@ -21,6 +29,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   income,
   savings,
   savingsRate,
+  isBudgetFiltered,
 }) => {
   const usedBudgetBase = totals.spent + totals.remaining;
   const usedPercent =
@@ -30,10 +39,12 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     monthlyAmount,
     annualClassName = 'text-gray-900',
     monthlyClassName = 'text-gray-500',
+    annualOperator,
   }: {
     monthlyAmount: number;
     annualClassName?: string;
     monthlyClassName?: string;
+    annualOperator?: React.ReactNode;
   }) => (
     <div className="flex flex-col leading-tight">
       <span className="flex items-baseline gap-2">
@@ -43,6 +54,11 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
         <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
           annual
         </span>
+        {annualOperator ? (
+          <span className="ml-auto hidden h-5 w-5 items-center justify-center rounded-full bg-sky-50 text-slate-400 sm:inline-flex">
+            {annualOperator}
+          </span>
+        ) : null}
       </span>
       <span className="flex items-baseline gap-2">
         <span className={`text-xs ${monthlyClassName}`}>
@@ -63,6 +79,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     annualClassName: 'text-indigo-700',
     monthlyClassName: 'text-indigo-700/75',
   };
+  const annualOperatorClass = 'h-3 w-3';
   const cardIconContainerClass =
     'p-2 rounded-lg bg-gradient-to-br from-sky-50 to-slate-100';
   const cardIconClass = 'w-4 h-4 text-slate-500';
@@ -93,9 +110,17 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
             <div className={cardIconContainerClass}>
               <LuWallet className={cardIconClass} />
             </div>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              Budget Utilization
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                Budget Utilization
+              </h3>
+              {isBudgetFiltered ? (
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-violet-600 shadow-sm backdrop-blur">
+                  <LuFilter className="h-3 w-3 text-sky-400" />
+                  Filtered Totals
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className="mb-4">
@@ -157,6 +182,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 <CurrencyStack
                   monthlyAmount={income}
                   {...neutralValueClasses}
+                  annualOperator={<LuMinus className={annualOperatorClass} />}
                 />
               </div>
             </div>
@@ -169,6 +195,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 <CurrencyStack
                   monthlyAmount={totalBudgeted}
                   {...neutralValueClasses}
+                  annualOperator={<LuEqual className={annualOperatorClass} />}
                 />
               </div>
               <p className="text-xs text-gray-500">
@@ -185,6 +212,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 <CurrencyStack
                   monthlyAmount={Math.abs(savings)}
                   {...neutralValueClasses}
+                  annualOperator={<LuPlus className={annualOperatorClass} />}
                 />
               </div>
               <p className="text-xs text-gray-500">
@@ -203,6 +231,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 <CurrencyStack
                   monthlyAmount={investments}
                   {...neutralValueClasses}
+                  annualOperator={<LuEqual className={annualOperatorClass} />}
                 />
               </div>
               <p className="text-xs text-gray-500">
