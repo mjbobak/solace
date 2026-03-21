@@ -15,14 +15,25 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-# Determine database path based on environment
-if os.getenv("DEV_MODE", "True").lower() == "true":
-    # Development: local SQLite file
-    db_path = Path(__file__).parent.parent.parent.parent / "data" / "database.db"
-    DATABASE_URL = f"sqlite:///{db_path}"
-else:
-    # Production (Docker): mounted volume
-    DATABASE_URL = "sqlite:////app/data/database.db"
+DEFAULT_DEV_DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "database.db"
+
+
+def _build_database_url() -> str:
+    explicit_database_url = os.getenv("DATABASE_URL")
+    if explicit_database_url:
+        return explicit_database_url
+
+    if os.getenv("DEV_MODE", "True").lower() == "true":
+        db_path_override = os.getenv("SOLACE_DB_PATH")
+        db_path = Path(db_path_override).expanduser() if db_path_override else DEFAULT_DEV_DB_PATH
+        if not db_path.is_absolute():
+            db_path = (Path.cwd() / db_path).resolve()
+        return f"sqlite:///{db_path}"
+
+    return "sqlite:////app/data/database.db"
+
+
+DATABASE_URL = _build_database_url()
 
 # Create SQLAlchemy engine
 # check_same_thread=False is required for SQLite with async/FastAPI
