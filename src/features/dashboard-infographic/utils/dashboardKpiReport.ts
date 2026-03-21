@@ -6,6 +6,8 @@ import { isInvestmentCategory } from '@/features/budget/utils/investmentCategori
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import type {
   IncomeProjectionTotals,
+  IncomeYearProjection,
+  ProjectedIncomeSource,
   TaxAdvantagedInvestments,
 } from '@/features/income/types/income';
 import {
@@ -40,6 +42,23 @@ export interface DashboardMoneyFlowSummary {
   preTax401kContribution: number | null;
   netIncomeWealthContribution: number | null;
   wealthContribution: number | null;
+}
+
+export interface EmergencyRunwayScenario {
+  key: 'striker' | 'serious';
+  label: string;
+  sourceName: string | null;
+  lostMonthlyIncome: number | null;
+  remainingMonthlyIncome: number | null;
+  monthlyShortfall: number | null;
+  runwayMonths: number | null;
+}
+
+export interface EmergencyRunwaySummary {
+  emergencyFundBalance: number | null;
+  monthlyEssentialExpenses: number | null;
+  baselineMonths: number | null;
+  scenarios: EmergencyRunwayScenario[];
 }
 
 interface BuildDashboardKpiGroupsParams {
@@ -121,6 +140,33 @@ function isFunsiesLivingExpense(entry: BudgetEntry): boolean {
   return entry.expenseType === 'FUNSIES' && isLivingExpense(entry);
 }
 
+function normalizeRunwaySourceName(name: string | null | undefined): string {
+  return (name ?? '').trim().toUpperCase();
+}
+
+function isIgnoredRunwaySource(source: ProjectedIncomeSource): boolean {
+  const normalizedName = normalizeRunwaySourceName(source.name);
+  return (
+    normalizedName.includes('NON STANDARD') ||
+    normalizedName.includes('NON-STANDARD')
+  );
+}
+
+function getRunwayScenarioSource(
+  sources: ProjectedIncomeSource[],
+  token: string,
+): ProjectedIncomeSource | null {
+  return (
+    sources.find((source) =>
+      normalizeRunwaySourceName(source.name).includes(token),
+    ) ?? null
+  );
+}
+
+function getSourceMonthlyCashNet(source: ProjectedIncomeSource): number {
+  return source.totals.plannedCashNet / 12;
+}
+
 function createCurrencyValue(amount: number): DashboardKpiValue {
   return {
     kind: 'currency',
@@ -187,6 +233,76 @@ function getBudgetedAmount(
   predicate: (entry: BudgetEntry) => boolean,
 ): number {
   return sumBudgetEntries(budgetEntries, predicate, (entry) => entry.budgeted);
+}
+
+export function buildEmergencyRunwaySummary({
+  projection,
+  budgetEntries,
+  emergencyFundBalance,
+}: {
+  projection: IncomeYearProjection | null;
+  budgetEntries: BudgetEntry[] | null;
+  emergencyFundBalance?: number | null;
+}): EmergencyRunwaySummary {
+  const resolvedEmergencyFundBalance =
+    emergencyFundBalance ?? projection?.emergencyFundBalance ?? null;
+  const monthlyEssentialExpenses = budgetEntries
+    ? getBudgetedAmount(budgetEntries, isEssentialLivingExpense)
+    : null;
+  const baselineMonths =
+    resolvedEmergencyFundBalance === null ||
+    monthlyEssentialExpenses === null ||
+    monthlyEssentialExpenses === 0
+      ? null
+      : resolvedEmergencyFundBalance / monthlyEssentialExpenses;
+  const relevantSources = (projection?.sources ?? []).filter(
+    (source) => !isIgnoredRunwaySource(source),
+  );
+  const totalRelevantMonthlyIncome = relevantSources.reduce(
+    (sum, source) => sum + getSourceMonthlyCashNet(source),
+    0,
+  );
+  const scenarios: EmergencyRunwayScenario[] = [
+    { key: 'striker', label: 'If Striker disappears' },
+    { key: 'serious', label: 'If Serious disappears' },
+  ].map((scenario) => {
+    const source = getRunwayScenarioSource(
+      relevantSources,
+      scenario.key.toUpperCase(),
+    );
+    const lostMonthlyIncome = source ? getSourceMonthlyCashNet(source) : null;
+    const remainingMonthlyIncome =
+      source && projection
+        ? Math.max(totalRelevantMonthlyIncome - lostMonthlyIncome, 0)
+        : null;
+    const monthlyShortfall =
+      monthlyEssentialExpenses === null || remainingMonthlyIncome === null
+        ? null
+        : Math.max(monthlyEssentialExpenses - remainingMonthlyIncome, 0);
+    const runwayMonths =
+      resolvedEmergencyFundBalance === null ||
+      monthlyShortfall === null ||
+      monthlyShortfall === 0
+        ? null
+        : resolvedEmergencyFundBalance / monthlyShortfall;
+
+    return {
+      key: scenario.key,
+      label: scenario.label,
+      sourceName: source?.name ?? null,
+      lostMonthlyIncome,
+      remainingMonthlyIncome,
+      monthlyShortfall,
+      runwayMonths,
+    };
+  });
+
+  return {
+    emergencyFundBalance: resolvedEmergencyFundBalance,
+    monthlyEssentialExpenses,
+    baselineMonths,
+    scenarios,
+  };
 }
 
 export function matchesBudgetLabel(
@@ -446,15 +562,11 @@ export function buildDashboardKpiGroups({
     spendBasis,
     completedMonths,
   );
-  const plannedMonthlyEssentialExpenses = budgetEntries
-    ? getBudgetedAmount(budgetEntries, isEssentialLivingExpense)
-    : null;
-  const emergencyFundMonths =
-    emergencyFundBalance === null ||
-    plannedMonthlyEssentialExpenses === null ||
-    plannedMonthlyEssentialExpenses === 0
-      ? null
-      : emergencyFundBalance / plannedMonthlyEssentialExpenses;
+  const emergencyFundMonths = buildEmergencyRunwaySummary({
+    projection: null,
+    budgetEntries,
+    emergencyFundBalance,
+  }).baselineMonths;
   const plannedInvestmentContributions = budgetEntries
     ? getBudgetComparisonAmount(
         budgetEntries,

@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import {
+  buildEmergencyRunwaySummary,
   buildDashboardMoneyFlowSummary,
   buildDashboardKpiGroups,
   matchesBudgetLabel,
 } from '@/features/dashboard-infographic/utils/dashboardKpiReport';
 import type {
   IncomeProjectionTotals,
+  IncomeYearProjection,
+  ProjectedIncomeSource,
   TaxAdvantagedInvestments,
 } from '@/features/income/types/income';
 
@@ -38,6 +41,39 @@ function createTaxAdvantagedInvestments(
     lockedTotal: 23200,
     spendableTotal: 4000,
     total: 27200,
+    ...overrides,
+  };
+}
+
+function createProjectedSource(
+  name: string,
+  plannedCashNet: number,
+): ProjectedIncomeSource {
+  return {
+    id: name.length,
+    name,
+    isActive: true,
+    sortOrder: 0,
+    createdAt: '2025-01-01T00:00:00Z',
+    updatedAt: '2025-01-01T00:00:00Z',
+    totals: createIncomeTotals({ plannedCashNet }),
+    components: [],
+  };
+}
+
+function createProjection(
+  overrides?: Partial<IncomeYearProjection>,
+): IncomeYearProjection {
+  return {
+    year: 2025,
+    totals: createIncomeTotals(),
+    emergencyFundBalance: 12000,
+    taxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+    sources: [
+      createProjectedSource('Striker', 36000),
+      createProjectedSource('Serious', 24000),
+      createProjectedSource('Non-Standard', 12000),
+    ],
     ...overrides,
   };
 }
@@ -449,5 +485,47 @@ describe('buildDashboardKpiGroups', () => {
     expect(summary.netIncomeWealthContribution).toBe(122800);
     expect(summary.wealthContribution).toBe(144800);
     expect(summary.funsiesSpending).toBe(4200);
+  });
+});
+
+describe('buildEmergencyRunwaySummary', () => {
+  it('builds loss-of-income scenarios from report inputs and ignores non-standard income', () => {
+    const summary = buildEmergencyRunwaySummary({
+      projection: createProjection(),
+      budgetEntries: [
+        createBudgetEntry({ budgeted: 4000 }),
+        createBudgetEntry({
+          id: 'BUD-0002',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Restaurants',
+          budgeted: 1200,
+        }),
+      ],
+    });
+
+    expect(summary.emergencyFundBalance).toBe(12000);
+    expect(summary.monthlyEssentialExpenses).toBe(4000);
+    expect(summary.baselineMonths).toBe(3);
+    expect(summary.scenarios).toEqual([
+      {
+        key: 'striker',
+        label: 'If Striker disappears',
+        sourceName: 'Striker',
+        lostMonthlyIncome: 3000,
+        remainingMonthlyIncome: 2000,
+        monthlyShortfall: 2000,
+        runwayMonths: 6,
+      },
+      {
+        key: 'serious',
+        label: 'If Serious disappears',
+        sourceName: 'Serious',
+        lostMonthlyIncome: 2000,
+        remainingMonthlyIncome: 3000,
+        monthlyShortfall: 1000,
+        runwayMonths: 12,
+      },
+    ]);
   });
 });
