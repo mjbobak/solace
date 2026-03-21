@@ -31,6 +31,17 @@ export interface DashboardKpiGroup {
   rows: DashboardKpiRow[];
 }
 
+export interface DashboardMoneyFlowSummary {
+  netIncome: number | null;
+  essentialSpending: number | null;
+  funsiesSpending: number | null;
+  savingsAmount: number | null;
+  investmentAmount: number | null;
+  preTax401kContribution: number | null;
+  netIncomeWealthContribution: number | null;
+  wealthContribution: number | null;
+}
+
 interface BuildDashboardKpiGroupsParams {
   currentIncomeTotals: IncomeProjectionTotals | null;
   previousIncomeTotals: IncomeProjectionTotals | null;
@@ -40,6 +51,14 @@ interface BuildDashboardKpiGroupsParams {
   spendBasis: SpendBasis;
   completedMonths: number;
   emergencyFundBalance?: number | null;
+}
+
+interface BuildDashboardMoneyFlowSummaryParams {
+  currentIncomeTotals: IncomeProjectionTotals | null;
+  currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null;
+  budgetEntries: BudgetEntry[] | null;
+  spendBasis: SpendBasis;
+  completedMonths: number;
 }
 
 const NOT_AVAILABLE_VALUE: DashboardKpiValue = {
@@ -326,6 +345,72 @@ export function formatDashboardKpiValue(value: DashboardKpiValue): string {
   }
 }
 
+export function buildDashboardMoneyFlowSummary({
+  currentIncomeTotals,
+  currentTaxAdvantagedInvestments,
+  budgetEntries,
+  spendBasis,
+  completedMonths,
+}: BuildDashboardMoneyFlowSummaryParams): DashboardMoneyFlowSummary {
+  const netIncome = currentIncomeTotals?.plannedNet ?? null;
+  const comparisonNetIncome =
+    netIncome === null
+      ? null
+      : scaleAnnualAmountForSpendBasis({
+          annualAmount: netIncome,
+          spendBasis,
+          completedMonths,
+        });
+  const livingExpenses = budgetEntries
+    ? getSpentAmount(budgetEntries, isLivingExpense)
+    : null;
+  const essentialSpending = budgetEntries
+    ? getSpentAmount(budgetEntries, isEssentialLivingExpense)
+    : null;
+  const investmentAmount = budgetEntries
+    ? getSpentAmount(budgetEntries, (entry) =>
+        isInvestmentCategory(entry.expenseCategory),
+      )
+    : null;
+  const preTax401kContribution = getTaxAdvantagedBucketAmount(
+    currentTaxAdvantagedInvestments,
+    '401k',
+  );
+  const savingsAmount =
+    comparisonNetIncome === null ||
+    livingExpenses === null ||
+    investmentAmount === null
+      ? null
+      : comparisonNetIncome - livingExpenses - investmentAmount;
+  const netIncomeWealthContribution =
+    savingsAmount === null || investmentAmount === null
+      ? null
+      : savingsAmount + investmentAmount;
+  const wealthContribution =
+    netIncomeWealthContribution === null && preTax401kContribution === null
+      ? null
+      : (netIncomeWealthContribution ?? 0) + (preTax401kContribution ?? 0);
+  const funsiesSpending =
+    comparisonNetIncome === null ||
+    essentialSpending === null ||
+    netIncomeWealthContribution === null
+      ? null
+      : comparisonNetIncome -
+        essentialSpending -
+        netIncomeWealthContribution;
+
+  return {
+    netIncome: comparisonNetIncome,
+    essentialSpending,
+    funsiesSpending,
+    savingsAmount,
+    investmentAmount,
+    preTax401kContribution,
+    netIncomeWealthContribution,
+    wealthContribution,
+  };
+}
+
 export function buildDashboardKpiGroups({
   currentIncomeTotals,
   previousIncomeTotals,
@@ -383,9 +468,6 @@ export function buildDashboardKpiGroups({
         isInvestmentCategory(entry.expenseCategory),
       )
     : null;
-  const actualEssentialSpending = budgetEntries
-    ? getSpentAmount(budgetEntries, isEssentialLivingExpense)
-    : null;
   const plannedEssentialSpending = budgetEntries
     ? getBudgetComparisonAmount(
         budgetEntries,
@@ -393,9 +475,6 @@ export function buildDashboardKpiGroups({
         spendBasis,
         completedMonths,
       )
-    : null;
-  const actualFunsiesSpending = budgetEntries
-    ? getSpentAmount(budgetEntries, isFunsiesLivingExpense)
     : null;
   const plannedFunsiesSpending = budgetEntries
     ? getBudgetComparisonAmount(
@@ -421,6 +500,13 @@ export function buildDashboardKpiGroups({
           spendBasis,
           completedMonths,
         });
+  const moneyFlowSummary = buildDashboardMoneyFlowSummary({
+    currentIncomeTotals,
+    currentTaxAdvantagedInvestments,
+    budgetEntries,
+    spendBasis,
+    completedMonths,
+  });
   const plannedSavingsAmount =
     plannedComparisonAfterTaxIncome === null ||
     plannedLivingExpenses === null ||
@@ -585,13 +671,13 @@ export function buildDashboardKpiGroups({
         createCurrencyRow(
           'essential-spending',
           'Essential',
-          actualEssentialSpending,
+          moneyFlowSummary.essentialSpending,
           plannedEssentialSpending,
         ),
         createCurrencyRow(
           'funsies-spending',
           'Funsies',
-          actualFunsiesSpending,
+          moneyFlowSummary.funsiesSpending,
           plannedFunsiesSpending,
         ),
         createPercentageRow(

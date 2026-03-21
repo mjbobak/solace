@@ -3,6 +3,7 @@ export type SankeyPeriod = 'monthly' | 'annual';
 
 export interface SankeyNode {
   name: string;
+  fill?: string;
 }
 
 export interface SankeyLink {

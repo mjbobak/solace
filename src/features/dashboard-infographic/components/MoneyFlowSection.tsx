@@ -5,22 +5,16 @@
 
 import React from 'react';
 
-import type { Period } from '../types/infographic';
-
 import { SankeyFlowChart } from './SankeyFlowChart';
 import { ScrollAnimatedSection } from './ScrollAnimatedSection';
 import { SectionNarrative } from './SectionNarrative';
 
 interface MoneyFlowSectionProps {
-  period: Period;
   year: number;
 }
 
-export const MoneyFlowSection: React.FC<MoneyFlowSectionProps> = ({
-  period,
-  year,
-}) => {
-  const narrative = `Visualize how your income flows from various sources into essential and discretionary spending categories.`;
+export const MoneyFlowSection: React.FC<MoneyFlowSectionProps> = ({ year }) => {
+  const narrative = `See how annual net income is ultimately allocated between essentials, lifestyle spending, and the dollars building long-term wealth through savings plus investments.`;
 
   return (
     <ScrollAnimatedSection className="space-y-8 border-t section-divider px-6 py-12">
@@ -29,7 +23,7 @@ export const MoneyFlowSection: React.FC<MoneyFlowSectionProps> = ({
         <SectionNarrative text={narrative} highlight={true} />
       </div>
 
-      <SankeyFlowChart period={period} year={year} />
+      <SankeyFlowChart year={year} />
     </ScrollAnimatedSection>
   );
 };

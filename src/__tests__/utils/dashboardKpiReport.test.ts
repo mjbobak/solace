@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import {
+  buildDashboardMoneyFlowSummary,
   buildDashboardKpiGroups,
   matchesBudgetLabel,
 } from '@/features/dashboard-infographic/utils/dashboardKpiReport';
@@ -407,5 +408,46 @@ describe('buildDashboardKpiGroups', () => {
       kind: 'percentage',
       amount: 0.13333333333333333,
     });
+  });
+
+  it('builds money-flow totals with wealth contributions separated from funsies', () => {
+    const summary = buildDashboardMoneyFlowSummary({
+      currentIncomeTotals: createIncomeTotals(),
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      budgetEntries: [
+        createBudgetEntry({ spent: 33000 }),
+        createBudgetEntry({
+          id: 'BUD-0002',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Restaurants',
+          budgeted: 400,
+          spent: 4200,
+          remaining: 0,
+          percentage: 1,
+        }),
+        createBudgetEntry({
+          id: 'BUD-0003',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'INVESTMENTS',
+          expenseLabel: 'Brokerage',
+          budgeted: 500,
+          spent: 5400,
+          remaining: 0,
+          percentage: 1,
+        }),
+      ],
+      spendBasis: 'annual_full_year',
+      completedMonths: 12,
+    });
+
+    expect(summary.netIncome).toBe(160000);
+    expect(summary.essentialSpending).toBe(33000);
+    expect(summary.investmentAmount).toBe(5400);
+    expect(summary.preTax401kContribution).toBe(22000);
+    expect(summary.savingsAmount).toBe(117400);
+    expect(summary.netIncomeWealthContribution).toBe(122800);
+    expect(summary.wealthContribution).toBe(144800);
+    expect(summary.funsiesSpending).toBe(4200);
   });
 });

@@ -1,170 +1,69 @@
-import { mockBudgetData } from '@/features/budget/services/mockBudgetData';
-import type { IncomeYearProjection } from '@/features/income';
 import { statusPalette } from '@/shared/theme';
 
-import type { SankeyData, SankeyPeriod } from '../types/sankeyTypes';
+import type { DashboardMoneyFlowSummary } from '../utils/dashboardKpiReport';
+import type { SankeyData } from '../types/sankeyTypes';
 
 const COLORS = {
   income: statusPalette.income,
-  spending: statusPalette.spending,
-  investments: statusPalette.investments,
-  essential: statusPalette.essential,
+  essential: statusPalette.budget,
   funsies: statusPalette.funsies,
+  wealth: statusPalette.investments,
 } as const;
 
-function getIncomeSources(
-  projection: IncomeYearProjection | null,
-  period: SankeyPeriod,
-) {
-  if (!projection) {
-    return [];
+function sanitizeAmount(amount: number | null): number {
+  if (amount === null || !Number.isFinite(amount) || amount <= 0) {
+    return 0;
   }
 
-  return projection.sources
-    .map((source) => ({
-      name: source.name,
-      amount:
-        period === 'annual'
-          ? source.totals.plannedNet
-          : source.totals.plannedNet / 12,
-    }))
-    .filter((source) => source.amount > 0);
+  return Math.round(amount * 100) / 100;
 }
 
-export function buildTopLevelSankeyData(
-  period: SankeyPeriod,
-  projection: IncomeYearProjection | null,
+export function buildAnnualMoneyFlowSankeyData(
+  summary: DashboardMoneyFlowSummary | null,
 ): SankeyData {
-  const incomeSources = getIncomeSources(projection, period);
-  const essentialTotal = mockBudgetData
-    .filter((entry) => entry.expenseType === 'ESSENTIAL')
-    .reduce((sum, entry) => sum + entry.budgeted, 0);
-  const funsiesTotal = mockBudgetData
-    .filter((entry) => entry.expenseType === 'FUNSIES')
-    .reduce((sum, entry) => sum + entry.budgeted, 0);
-  const totalBudget = essentialTotal + funsiesTotal;
-
-  const incomeNodes = incomeSources.map((source) => ({
-    name: source.name,
-    fill: COLORS.income,
-  }));
-  const expenseNodes = [
-    { name: 'ESSENTIAL', fill: COLORS.essential },
-    { name: 'FUNSIES', fill: COLORS.funsies },
-  ];
-  const spendingNode = { name: 'Spending', fill: COLORS.spending };
-  const nodes = [...incomeNodes, ...expenseNodes, spendingNode];
-
-  const incomeCount = incomeNodes.length;
-  const essentialIndex = incomeCount;
-  const funsiesIndex = incomeCount + 1;
-  const spendingIndex = incomeCount + 2;
-  const links: Array<{ source: number; target: number; value: number }> = [];
-
-  incomeSources.forEach((income, incomeIndex) => {
-    const essentialAllocation =
-      totalBudget > 0 ? (income.amount * essentialTotal) / totalBudget : 0;
-    const funsiesAllocation =
-      totalBudget > 0 ? (income.amount * funsiesTotal) / totalBudget : 0;
-
-    if (essentialAllocation > 0) {
-      links.push({
-        source: incomeIndex,
-        target: essentialIndex,
-        value: Math.round(essentialAllocation * 100) / 100,
-      });
-    }
-
-    if (funsiesAllocation > 0) {
-      links.push({
-        source: incomeIndex,
-        target: funsiesIndex,
-        value: Math.round(funsiesAllocation * 100) / 100,
-      });
-    }
-  });
-
-  links.push({
-    source: essentialIndex,
-    target: spendingIndex,
-    value: Math.round(essentialTotal * 100) / 100,
-  });
-  links.push({
-    source: funsiesIndex,
-    target: spendingIndex,
-    value: Math.round(funsiesTotal * 100) / 100,
-  });
-
-  return { nodes, links };
-}
-
-export function buildDetailedSankeyData(
-  period: SankeyPeriod,
-  projection: IncomeYearProjection | null,
-): SankeyData {
-  const incomeSources = getIncomeSources(projection, period);
-
-  const categoryTotals: Record<string, number> = {};
-  mockBudgetData.forEach((budget) => {
-    categoryTotals[budget.expenseCategory] =
-      (categoryTotals[budget.expenseCategory] || 0) + budget.budgeted;
-  });
-
-  const sortedCategories = Object.entries(categoryTotals)
-    .sort((left, right) => right[1] - left[1])
-    .slice(0, 8)
-    .map(([name, total]) => ({ name, total }));
-
-  const otherTotal =
-    Object.values(categoryTotals).reduce((sum, value) => sum + value, 0) -
-    sortedCategories.reduce((sum, category) => sum + category.total, 0);
-
-  if (otherTotal > 0) {
-    sortedCategories.push({ name: 'Other', total: otherTotal });
-  }
-
-  const totalBudget = Object.values(categoryTotals).reduce(
-    (sum, value) => sum + value,
-    0,
+  const netIncome = sanitizeAmount(summary?.netIncome ?? null);
+  const preTax401kContribution = sanitizeAmount(
+    summary?.preTax401kContribution ?? null,
   );
+  const essentialSpending = sanitizeAmount(summary?.essentialSpending ?? null);
+  const netIncomeWealthContribution = sanitizeAmount(
+    summary?.netIncomeWealthContribution ?? null,
+  );
+  const funsiesSpending = sanitizeAmount(summary?.funsiesSpending ?? null);
 
-  const incomeNodes = incomeSources.map((source) => ({
-    name: source.name,
-    fill: COLORS.income,
-  }));
-  const categoryNodes = sortedCategories.map((category) => ({
-    name: category.name,
-    fill: category.name.includes('INVESTMENT')
-      ? COLORS.investments
-      : COLORS.essential,
-  }));
-  const spendingNode = { name: 'Spending', fill: COLORS.spending };
-  const nodes = [...incomeNodes, ...categoryNodes, spendingNode];
-  const incomeCount = incomeNodes.length;
-  const spendingIndex = incomeCount + categoryNodes.length;
-  const links: Array<{ source: number; target: number; value: number }> = [];
+  if (netIncome === 0 && preTax401kContribution === 0) {
+    return { nodes: [], links: [] };
+  }
 
-  incomeSources.forEach((income, incomeIndex) => {
-    sortedCategories.forEach((category, categoryIndex) => {
-      const allocation =
-        totalBudget > 0 ? (income.amount * category.total) / totalBudget : 0;
-      if (allocation > 0) {
-        links.push({
-          source: incomeIndex,
-          target: incomeCount + categoryIndex,
-          value: Math.round(allocation * 100) / 100,
-        });
-      }
-    });
-  });
-
-  sortedCategories.forEach((category, categoryIndex) => {
-    links.push({
-      source: incomeCount + categoryIndex,
-      target: spendingIndex,
-      value: Math.round(category.total * 100) / 100,
-    });
-  });
-
-  return { nodes, links };
+  return {
+    nodes: [
+      { name: 'Annual Net Income', fill: COLORS.income },
+      { name: 'Pre-Tax 401(k)', fill: COLORS.wealth },
+      { name: 'Essential Spending', fill: COLORS.essential },
+      { name: 'Funsies Spending', fill: COLORS.funsies },
+      { name: 'Wealth Contribution', fill: COLORS.wealth },
+    ],
+    links: [
+      {
+        source: 0,
+        target: 2,
+        value: essentialSpending,
+      },
+      {
+        source: 0,
+        target: 3,
+        value: funsiesSpending,
+      },
+      {
+        source: 0,
+        target: 4,
+        value: netIncomeWealthContribution,
+      },
+      {
+        source: 1,
+        target: 4,
+        value: preTax401kContribution,
+      },
+    ].filter((link) => link.value > 0),
+  };
 }
