@@ -5,9 +5,9 @@
 
 import React from 'react';
 
-import { spendingData } from '@/features/home/services/mockDashboardData';
 import { statusPalette } from '@/shared/theme';
 
+import { spendingData } from '../services/mockDashboardData';
 import type { Period } from '../types/infographic';
 
 import { ScrollAnimatedSection } from './ScrollAnimatedSection';

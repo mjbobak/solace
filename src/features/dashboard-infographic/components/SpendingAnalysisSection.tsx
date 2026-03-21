@@ -5,10 +5,10 @@
 
 import React from 'react';
 
-import { categoryData } from '@/features/home/services/mockDashboardData';
 import { DonutChart, BarChart } from '@/shared/components/charts';
 import { statusPalette } from '@/shared/theme';
 
+import { categoryData } from '../services/mockDashboardData';
 import type { Period } from '../types/infographic';
 
 import { ScrollAnimatedSection } from './ScrollAnimatedSection';

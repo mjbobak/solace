@@ -18,11 +18,13 @@ vi.mock('@/features/spending/services/spendingService', () => ({
 function createTransaction(
   overrides: Partial<SpendingEntry> & Pick<SpendingEntry, 'id' | 'transactionDate'>,
 ): SpendingEntry {
+  const { id, transactionDate, ...rest } = overrides;
+
   return {
-    id: overrides.id,
+    id,
     account: 'Checking',
-    transactionDate: overrides.transactionDate,
-    postDate: overrides.transactionDate,
+    transactionDate,
+    postDate: transactionDate,
     description: 'Test transaction',
     budgetLabel: 'Groceries',
     budgetId: 101,
@@ -32,7 +34,7 @@ function createTransaction(
     isAccrual: false,
     spreadStartDate: null,
     spreadMonths: null,
-    ...overrides,
+    ...rest,
   };
 }
 

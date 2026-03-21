@@ -19,17 +19,16 @@ export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
   const [viewMode, setViewMode] = useState<SankeyViewMode>('top-level');
   const [period, setPeriod] = useState<SankeyPeriod>('monthly');
 
-  // Use external period if provided (from parent component), otherwise use internal state
   const activePeriod = externalPeriod || period;
   const sankeyData = useSankeyData(viewMode, activePeriod, year);
 
   return (
     <div className="surface-card">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h3 className="page-section-title mb-0">Income & Spending Flow</h3>
 
         <div className="flex items-center gap-4">
-          {!externalPeriod && (
+          {!externalPeriod ? (
             <ToggleButtonGroup
               value={period}
               options={[
@@ -38,7 +37,7 @@ export const SankeyFlowChart: React.FC<SankeyFlowChartProps> = ({
               ]}
               onChange={setPeriod}
             />
-          )}
+          ) : null}
 
           <ToggleButtonGroup
             value={viewMode}

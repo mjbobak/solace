@@ -4,13 +4,13 @@ import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type { IncomeYearProjection } from '@/features/income/types/income';
 
 import {
-  buildTopLevelSankeyData,
   buildDetailedSankeyData,
+  buildTopLevelSankeyData,
 } from '../services/sankeyDataService';
 import type {
-  SankeyViewMode,
-  SankeyPeriod,
   SankeyData,
+  SankeyPeriod,
+  SankeyViewMode,
 } from '../types/sankeyTypes';
 
 export function useSankeyData(

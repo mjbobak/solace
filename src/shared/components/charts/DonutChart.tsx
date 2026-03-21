@@ -6,6 +6,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  type PieLabelRenderProps,
 } from 'recharts';
 
 import { chartPalette, chartTheme } from '@/shared/theme';
@@ -84,9 +85,10 @@ export const DonutChart: React.FC<DonutChartProps> = ({
   );
 
   // Custom label renderer for percentages
-  const renderLabel = (entry: any) => {
+  const renderLabel = (entry: PieLabelRenderProps) => {
     if (!showPercentage) return null;
-    const percent = ((Number(entry[dataKey] ?? 0) / total) * 100).toFixed(1);
+    const value = (entry as unknown as Record<string, unknown>)[dataKey];
+    const percent = ((Number(value ?? 0) / total) * 100).toFixed(1);
     return `${percent}%`;
   };
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
@@ -13,11 +13,9 @@ import { IncomeView, type IncomeViewHandle } from '@/features/income';
 import { SpendingView, type SpendingViewHandle } from '@/features/spending';
 import { Button } from '@/shared/components/Button';
 import { PlanningFiltersBar } from '@/shared/components/PlanningFiltersBar';
+import { TopNav, type TabType } from '@/shared/components/TopNav';
 import { useSharedPlanningFilters } from '@/shared/hooks/useSharedPlanningFilters';
 import { setNumberParam, setStringParam } from '@/shared/utils/searchParams';
-
-import { TopNav } from '../../shared/components/TopNav';
-import type { TabType } from '../../shared/components/TopNav';
 
 import { MainContent } from './components/MainContent';
 
@@ -33,7 +31,7 @@ function buildSharedPlanningSearch(params: {
   return nextSearch.length > 0 ? `?${nextSearch}` : '';
 }
 
-const HomePage: React.FC = () => {
+const PlanningShellPage: React.FC = () => {
   const budgetViewRef = useRef<BudgetViewHandle>(null);
   const spendingViewRef = useRef<SpendingViewHandle>(null);
   const incomeViewRef = useRef<IncomeViewHandle>(null);
@@ -41,8 +39,7 @@ const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [dashboardMode, setDashboardMode] =
-    React.useState<DashboardMode>('report');
+  const [dashboardMode, setDashboardMode] = useState<DashboardMode>('report');
 
   const activeTab = useMemo<TabType>(() => {
     switch (location.pathname) {
@@ -74,51 +71,19 @@ const HomePage: React.FC = () => {
       activeTab === 'dashboard' || activeTab === 'budget',
   });
 
-  const getPageTitle = (): string => {
+  const pageTitle = useMemo(() => {
     switch (activeTab) {
-      case 'dashboard':
-        return 'Dashboard';
       case 'income':
         return 'Income';
       case 'spending':
         return 'Spending';
       case 'budget':
         return 'Budget';
+      case 'dashboard':
       default:
         return 'Dashboard';
     }
-  };
-
-  const renderDashboard = () => (
-    <DashboardInfographic
-      year={planningYear}
-      availableYears={availableYears}
-      spendBasis={spendBasis}
-      mode={dashboardMode}
-      onModeChange={setDashboardMode}
-    />
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      case 'income':
-        return <IncomeView ref={incomeViewRef} planningYear={planningYear} />;
-      case 'spending':
-        return <SpendingView ref={spendingViewRef} />;
-      case 'budget':
-        return (
-          <BudgetView
-            ref={budgetViewRef}
-            planningYear={planningYear}
-            spendBasis={spendBasis}
-          />
-        );
-      default:
-        return renderDashboard();
-    }
-  };
+  }, [activeTab]);
 
   const headerControls =
     activeTab === 'spending' ? null : (
@@ -133,6 +98,68 @@ const HomePage: React.FC = () => {
         showSpendBasis={true}
       />
     );
+
+  const headerAction = (() => {
+    switch (activeTab) {
+      case 'budget':
+        return (
+          <Button
+            onClick={() => budgetViewRef.current?.openAddBudgetModal()}
+            variant="primary"
+          >
+            + Add Budget Item
+          </Button>
+        );
+      case 'spending':
+        return (
+          <Button
+            onClick={() => spendingViewRef.current?.openAddTransactionModal()}
+            variant="primary"
+          >
+            + Add Transaction
+          </Button>
+        );
+      case 'income':
+        return (
+          <Button
+            onClick={() => incomeViewRef.current?.openAddIncomeModal()}
+            variant="primary"
+          >
+            + Add Income
+          </Button>
+        );
+      default:
+        return undefined;
+    }
+  })();
+
+  const content = (() => {
+    switch (activeTab) {
+      case 'income':
+        return <IncomeView ref={incomeViewRef} planningYear={planningYear} />;
+      case 'spending':
+        return <SpendingView ref={spendingViewRef} />;
+      case 'budget':
+        return (
+          <BudgetView
+            ref={budgetViewRef}
+            planningYear={planningYear}
+            spendBasis={spendBasis}
+          />
+        );
+      case 'dashboard':
+      default:
+        return (
+          <DashboardInfographic
+            year={planningYear}
+            availableYears={availableYears}
+            spendBasis={spendBasis}
+            mode={dashboardMode}
+            onModeChange={setDashboardMode}
+          />
+        );
+    }
+  })();
 
   return (
     <div className="min-h-screen">
@@ -152,48 +179,11 @@ const HomePage: React.FC = () => {
           }
         }}
       />
-      <MainContent
-        title={getPageTitle()}
-        headerAction={(() => {
-          switch (activeTab) {
-            case 'budget':
-              return (
-                <Button
-                  onClick={() => budgetViewRef.current?.openAddBudgetModal()}
-                  variant="primary"
-                >
-                  + Add Budget Item
-                </Button>
-              );
-            case 'spending':
-              return (
-                <Button
-                  onClick={() =>
-                    spendingViewRef.current?.openAddTransactionModal()
-                  }
-                  variant="primary"
-                >
-                  + Add Transaction
-                </Button>
-              );
-            case 'income':
-              return (
-                <Button
-                  onClick={() => incomeViewRef.current?.openAddIncomeModal()}
-                  variant="primary"
-                >
-                  + Add Income
-                </Button>
-              );
-            default:
-              return undefined;
-          }
-        })()}
-      >
-        {renderContent()}
+      <MainContent title={pageTitle} headerAction={headerAction}>
+        {content}
       </MainContent>
     </div>
   );
 };
 
-export default HomePage;
+export default PlanningShellPage;

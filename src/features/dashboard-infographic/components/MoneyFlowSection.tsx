@@ -5,10 +5,9 @@
 
 import React from 'react';
 
-import { SankeyFlowChart } from '@/features/home/components/SankeyFlowChart';
-
 import type { Period } from '../types/infographic';
 
+import { SankeyFlowChart } from './SankeyFlowChart';
 import { ScrollAnimatedSection } from './ScrollAnimatedSection';
 import { SectionNarrative } from './SectionNarrative';
 

@@ -31,9 +31,6 @@ function getIncomeSources(
     .filter((source) => source.amount > 0);
 }
 
-/**
- * Build Sankey data showing Income → Top-level categories (Essential/Funsies) → Spending
- */
 export function buildTopLevelSankeyData(
   period: SankeyPeriod,
   projection: IncomeYearProjection | null,
@@ -101,9 +98,6 @@ export function buildTopLevelSankeyData(
   return { nodes, links };
 }
 
-/**
- * Build Sankey data showing Income → Budget categories → Spending
- */
 export function buildDetailedSankeyData(
   period: SankeyPeriod,
   projection: IncomeYearProjection | null,

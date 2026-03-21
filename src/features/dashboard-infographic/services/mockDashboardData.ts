@@ -1,5 +1,3 @@
-// Mock data for Dashboard charts and metrics
-
 export interface SpendingData {
   month: string;
   Budget: number;
@@ -27,7 +25,6 @@ export interface DashboardMetrics {
   emergencyFundBalance?: number;
 }
 
-// 12 months of spending vs budget data
 export const spendingData: SpendingData[] = [
   { month: 'Jan', Budget: 5000, Actual: 4200 },
   { month: 'Feb', Budget: 5000, Actual: 4800 },
@@ -43,7 +40,6 @@ export const spendingData: SpendingData[] = [
   { month: 'Dec', Budget: 6000, Actual: 5900 },
 ];
 
-// Savings trend over time
 export const savingsData: SavingsData[] = [
   { month: 'Jan', savings: 800 },
   { month: 'Feb', savings: 1200 },
@@ -59,7 +55,6 @@ export const savingsData: SavingsData[] = [
   { month: 'Dec', savings: 1000 },
 ];
 
-// Category breakdown for donut chart
 export const categoryData: CategoryData[] = [
   { name: 'Groceries', value: 1200 },
   { name: 'Utilities', value: 400 },
@@ -71,7 +66,6 @@ export const categoryData: CategoryData[] = [
   { name: 'Other', value: 500 },
 ];
 
-// Key financial metrics
 export const dashboardMetrics: DashboardMetrics = {
   totalBalance: 25420,
   monthlySpending: 4650,

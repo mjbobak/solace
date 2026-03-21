@@ -4,7 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '@/features/auth';
 
 // Lazy load route components for better code splitting
-const HomePage = lazy(() => import('@/features/home'));
+const PlanningShellPage = lazy(() => import('@/features/planning-shell'));
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
 
 // Loading fallback component
@@ -26,7 +26,7 @@ const AppRoutes: React.FC = () => {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <PlanningShellPage />
             </ProtectedRoute>
           }
         />
@@ -35,7 +35,7 @@ const AppRoutes: React.FC = () => {
           path="/income"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <PlanningShellPage />
             </ProtectedRoute>
           }
         />
@@ -44,7 +44,7 @@ const AppRoutes: React.FC = () => {
           path="/spending"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <PlanningShellPage />
             </ProtectedRoute>
           }
         />
@@ -53,7 +53,7 @@ const AppRoutes: React.FC = () => {
           path="/budget"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <PlanningShellPage />
             </ProtectedRoute>
           }
         />
