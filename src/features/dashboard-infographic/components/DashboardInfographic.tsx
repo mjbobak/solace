@@ -32,8 +32,6 @@ export const DashboardInfographic: React.FC<DashboardInfographicProps> = ({
   mode,
   onModeChange,
 }) => {
-  const period = 'monthly' as const;
-
   return (
     <div>
       <main className="surface-card mx-auto max-w-6xl px-6">
@@ -62,18 +60,18 @@ export const DashboardInfographic: React.FC<DashboardInfographicProps> = ({
             </div>
 
             <div id="spending-analysis">
-              <SpendingAnalysisSection period={period} />
+              <SpendingAnalysisSection year={year} />
             </div>
 
             <div id="spending-pulse">
-              <SpendingPulseSection period={period} />
+              <SpendingPulseSection period={'monthly'} />
             </div>
 
             <div id="emergency-runway">
               <EmergencyRunwaySection
                 year={year}
                 spendBasis={spendBasis}
-                period={period}
+                period={'monthly'}
               />
             </div>
 
