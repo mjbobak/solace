@@ -6,6 +6,7 @@ interface TooltipProps {
   children: React.ReactNode;
   delay?: number; // milliseconds before showing tooltip
   stacked?: boolean;
+  followCursor?: boolean;
 }
 
 interface TooltipPosition {
@@ -24,6 +25,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   children,
   delay = 300,
   stacked = false,
+  followCursor = false,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [timeoutId, setTimeoutId] = useState<ReturnType<
@@ -33,6 +35,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const pointerPositionRef = useRef<{ x: number; y: number } | null>(null);
 
   const calculatePosition = (): TooltipPosition => {
     if (!triggerRef.current || !tooltipRef.current) {
@@ -44,9 +47,16 @@ export const Tooltip: React.FC<TooltipProps> = ({
     const PADDING = 8;
     const GAP = 8; // Space between trigger and tooltip
 
-    // Default: center tooltip above trigger
-    let top = triggerRect.top - tooltipRect.height - GAP;
-    let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+    const anchorX = followCursor
+      ? (pointerPositionRef.current?.x ?? triggerRect.left + triggerRect.width / 2)
+      : triggerRect.left + triggerRect.width / 2;
+    const anchorY = followCursor
+      ? (pointerPositionRef.current?.y ?? triggerRect.top)
+      : triggerRect.top;
+
+    // Default: center tooltip above the trigger or pointer
+    let top = anchorY - tooltipRect.height - GAP;
+    let left = anchorX - tooltipRect.width / 2;
 
     // Edge detection: adjust if off-screen
     if (left < PADDING) left = PADDING;
@@ -56,12 +66,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
     // If tooltip goes above viewport, show below trigger instead
     if (top < PADDING) {
-      top = triggerRect.bottom + GAP;
+      top = (followCursor ? anchorY : triggerRect.bottom) + GAP;
     }
 
-    // Arrow should point to center of trigger
-    const triggerCenter = triggerRect.left + triggerRect.width / 2;
-    const arrowLeft = triggerCenter - left;
+    // Arrow should point to center of trigger or current pointer
+    const arrowLeft = anchorX - left;
 
     return { top, left, arrowLeft };
   };
@@ -87,6 +96,21 @@ export const Tooltip: React.FC<TooltipProps> = ({
       setTimeoutId(null);
     }
     setIsVisible(false);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!followCursor) {
+      return;
+    }
+
+    pointerPositionRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+
+    if (isVisible) {
+      setPosition(calculatePosition());
+    }
   };
 
   // Calculate position when tooltip becomes visible
@@ -122,6 +146,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         className="inline-block"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
         onFocus={showTooltipImmediately}
         onBlur={handleMouseLeave}
       >

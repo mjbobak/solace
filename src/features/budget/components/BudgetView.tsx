@@ -151,7 +151,6 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       .reduce((sum, entry) => sum + entry.budgeted, 0);
 
     const savings = income - overallTotals.budgeted;
-    const savingsRate = income > 0 ? (savings / income) * 100 : 0;
 
     const handleAddClick = () => {
       setEditingItem(undefined);
@@ -240,8 +239,9 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
           investments={investments}
           income={income}
           savings={savings}
-          savingsRate={savingsRate}
           isBudgetFiltered={isBudgetFiltered}
+          planningYear={planningYear}
+          spendBasis={spendBasis}
         />
 
         <div className="surface-card">
