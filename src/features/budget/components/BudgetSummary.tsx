@@ -3,8 +3,6 @@ import { motion, type Variants } from 'framer-motion';
 import {
   LuAlignLeft,
   LuChartColumn,
-  LuChevronDown,
-  LuChevronRight,
   LuEqual,
   LuFilter,
   LuPiggyBank,
@@ -23,6 +21,8 @@ interface BudgetSummaryProps {
   investments: number;
   income: number;
   savings: number;
+  essentialBudget: number;
+  funsiesBudget: number;
   isBudgetFiltered: boolean;
   planningYear: number;
   spendBasis: SpendBasis;
@@ -34,16 +34,21 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   investments,
   income,
   savings,
+  essentialBudget,
+  funsiesBudget,
   isBudgetFiltered,
   planningYear,
   spendBasis,
 }) => {
-  const [isSavingsBreakdownExpanded, setIsSavingsBreakdownExpanded] =
-    useState(false);
+  const [incomeUtilizationView, setIncomeUtilizationView] = useState<
+    'chart' | 'numbers'
+  >('chart');
   const [budgetUtilizationView, setBudgetUtilizationView] = useState<
     'chart' | 'numbers'
   >('chart');
-  const savingsBreakdownId = useId();
+  const [savingsInvestingView, setSavingsInvestingView] = useState<
+    'chart' | 'numbers'
+  >('chart');
   const completedMonths = getCompletedMonthsForYear(planningYear);
   const usedBudgetBase = totals.spent + totals.remaining;
   const usedPercent =
@@ -78,13 +83,52 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     0,
   );
   const plannedSavings = Math.abs(savings);
+  const savingsForAllocation = totalWealthContribution(
+    plannedSavings,
+    investments,
+  );
   const totalWealth = plannedSavings + investments;
   const wealthRate = income > 0 ? (totalWealth / income) * 100 : 0;
+  const essentialIncomePercent =
+    income > 0 ? (essentialBudget / income) * 100 : 0;
+  const funsiesIncomePercent = income > 0 ? (funsiesBudget / income) * 100 : 0;
+  const investmentIncomePercent = income > 0 ? (investments / income) * 100 : 0;
+  const savingsIncomePercent =
+    income > 0 ? (savingsForAllocation / income) * 100 : 0;
+  const essentialWidth = Math.min(essentialIncomePercent, 100);
+  const funsiesWidth = Math.min(
+    funsiesIncomePercent,
+    Math.max(100 - essentialWidth, 0),
+  );
+  const savingsWidth = Math.min(
+    savingsIncomePercent,
+    Math.max(100 - essentialWidth - funsiesWidth, 0),
+  );
+  const wealthIncomePercent = income > 0 ? (totalWealth / income) * 100 : 0;
+  const savingsWealthWidth = Math.min(savingsIncomePercent, 100);
+  const investmentWealthWidth = Math.min(
+    investmentIncomePercent,
+    Math.max(100 - savingsWealthWidth, 0),
+  );
   const annualIncomeSummary = formatWholeCurrency(income * 12);
   const annualBudgetedSummary = formatWholeCurrency(budgetedForChart * 12);
   const annualSpentSummary = formatWholeCurrency(spentForChart * 12);
+  const annualEssentialSummary = formatWholeCurrency(essentialBudget * 12);
+  const annualFunsiesSummary = formatWholeCurrency(funsiesBudget * 12);
+  const annualWealthSummary = formatWholeCurrency(totalWealth * 12);
+  const annualSavingsSummary = formatWholeCurrency(plannedSavings * 12);
+  const annualInvestmentsSummary = formatWholeCurrency(investments * 12);
+  const nextIncomeUtilizationViewLabel =
+    incomeUtilizationView === 'chart' ? 'Show numbers view' : 'Show chart view';
   const nextBudgetUtilizationViewLabel =
     budgetUtilizationView === 'chart' ? 'Show numbers view' : 'Show chart view';
+  const nextSavingsInvestingViewLabel =
+    savingsInvestingView === 'chart' ? 'Show numbers view' : 'Show chart view';
+  const paletteBlue = 'bg-[#7BB6EB]';
+  const paletteGreen = 'bg-[#97DDAA]';
+  const palettePurple = 'bg-[#A890E6]';
+  const palettePurpleText = 'text-[#7B63C8]';
+  const palettePurpleTextMuted = 'text-[#7B63C8]/75';
 
   const CurrencyStack = ({
     monthlyAmount,
@@ -148,12 +192,69 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
       amount,
     )} monthly\n${percentOfIncome.toFixed(1)}% of income`;
 
+  const renderViewToggle = (
+    nextLabel: string,
+    currentView: 'chart' | 'numbers',
+    onToggle: () => void,
+  ) => (
+    <button
+      type="button"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+      onClick={onToggle}
+      aria-label={nextLabel}
+      title={nextLabel}
+    >
+      {currentView === 'chart' ? (
+        <LuAlignLeft className="h-4 w-4" />
+      ) : (
+        <LuChartColumn className="h-4 w-4" />
+      )}
+    </button>
+  );
+
+  const renderCardHeader = ({
+    icon,
+    title,
+    toggle,
+    showFilteredBadge = false,
+  }: {
+    icon: React.ReactNode;
+    title: string;
+    toggle?: React.ReactNode;
+    showFilteredBadge?: boolean;
+  }) => (
+    <div className="mb-5 flex items-start justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <div className={cardIconContainerClass}>{icon}</div>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+            {title}
+          </h3>
+          {showFilteredBadge ? (
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-violet-600 shadow-sm backdrop-blur">
+              <LuFilter className="h-3 w-3 text-sky-400" />
+              Filtered Totals
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {toggle}
+    </div>
+  );
+
   function formatWholeCurrency(value: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       maximumFractionDigits: 0,
     }).format(value);
+  }
+
+  function totalWealthContribution(
+    savingsAmount: number,
+    investmentAmount: number,
+  ) {
+    return savingsAmount + investmentAmount;
   }
 
   return (
@@ -163,44 +264,196 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           initial="hidden"
           animate="visible"
           variants={getCardVariants(0)}
-          className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg lg:col-span-1"
+          role="region"
+          aria-label="Income Utilization"
+          className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
         >
-          <div className="mb-5 flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <div className={cardIconContainerClass}>
-                <LuWallet className={cardIconClass} />
+          {renderCardHeader({
+            icon: <LuWallet className={cardIconClass} />,
+            title: 'Income Utilization',
+            toggle: renderViewToggle(
+              nextIncomeUtilizationViewLabel,
+              incomeUtilizationView,
+              () =>
+                setIncomeUtilizationView((current) =>
+                  current === 'chart' ? 'numbers' : 'chart',
+                ),
+            ),
+          })}
+
+          {incomeUtilizationView === 'chart' ? (
+            <div className="mb-1 flex flex-1 flex-col justify-end pt-2">
+              <div className="space-y-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
+                  Income Allocation
+                </p>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
+                  <span>
+                    {annualIncomeSummary} income / {annualEssentialSummary}{' '}
+                    essential / {annualFunsiesSummary} funsies /{' '}
+                    {annualWealthSummary} savings
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  Budget Utilization
-                </h3>
-                {isBudgetFiltered ? (
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-violet-600 shadow-sm backdrop-blur">
-                    <LuFilter className="h-3 w-3 text-sky-400" />
-                    Filtered Totals
+
+              <div className="mt-4 space-y-3">
+                <div className="relative h-8 overflow-hidden rounded-full bg-slate-100">
+                  <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
+                  <div
+                    className={`absolute inset-y-0 left-0 ${paletteBlue}`}
+                    style={{ width: `${essentialWidth}%` }}
+                  />
+                  <div
+                    className={`absolute inset-y-0 ${paletteGreen}`}
+                    style={{
+                      left: `${essentialWidth}%`,
+                      width: `${funsiesWidth}%`,
+                    }}
+                  />
+                  <div
+                    className={`absolute inset-y-0 ${palettePurple}`}
+                    style={{
+                      left: `${essentialWidth + funsiesWidth}%`,
+                      width: `${savingsWidth}%`,
+                    }}
+                  />
+
+                  {essentialWidth > 0 ? (
+                    <Tooltip
+                      content={getBarTooltipContent(
+                        'Essential',
+                        essentialBudget,
+                        essentialIncomePercent,
+                      )}
+                      stacked
+                      followCursor
+                    >
+                      <div
+                        className="absolute inset-y-0 left-0 cursor-pointer"
+                        style={{ width: `${essentialWidth}%` }}
+                        aria-label="Essential portion"
+                      />
+                    </Tooltip>
+                  ) : null}
+
+                  {funsiesWidth > 0 ? (
+                    <Tooltip
+                      content={getBarTooltipContent(
+                        'Funsies',
+                        funsiesBudget,
+                        funsiesIncomePercent,
+                      )}
+                      stacked
+                      followCursor
+                    >
+                      <div
+                        className="absolute inset-y-0 cursor-pointer"
+                        style={{
+                          left: `${essentialWidth}%`,
+                          width: `${funsiesWidth}%`,
+                        }}
+                        aria-label="Funsies portion"
+                      />
+                    </Tooltip>
+                  ) : null}
+
+                  {savingsWidth > 0 ? (
+                    <Tooltip
+                      content={getBarTooltipContent(
+                        'Savings',
+                        savingsForAllocation,
+                        savingsIncomePercent,
+                      )}
+                      stacked
+                      followCursor
+                    >
+                      <div
+                        className="absolute inset-y-0 cursor-pointer"
+                        style={{
+                          left: `${essentialWidth + funsiesWidth}%`,
+                          width: `${savingsWidth}%`,
+                        }}
+                        aria-label="Savings portion"
+                      />
+                    </Tooltip>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+                    <span>Income</span>
                   </div>
-                ) : null}
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`} />
+                    <span>Essential</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
+                    <span>Funsies</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${palettePurple}`} />
+                    <span>Savings</span>
+                  </div>
+                </div>
               </div>
             </div>
+          ) : (
+            <div className="mb-4 space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="mb-1 text-xs text-gray-500">Income</p>
+                  <CurrencyStack monthlyAmount={income} />
+                </div>
+                <div>
+                  <p className="mb-1 text-xs text-gray-500">Essential</p>
+                  <CurrencyStack monthlyAmount={essentialBudget} />
+                </div>
+              </div>
 
-            <button
-              type="button"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
-              onClick={() =>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <p className="mb-1 text-xs text-gray-500">Funsies</p>
+                  <CurrencyStack monthlyAmount={funsiesBudget} />
+                </div>
+                <div>
+                  <p className="mb-1 text-xs text-gray-500">Savings</p>
+                  <CurrencyStack monthlyAmount={savingsForAllocation} />
+                </div>
+                <div>
+                  <p className="mb-1 text-xs text-gray-500">Wealth Rate</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {wealthRate.toFixed(0)}%
+                  </p>
+                  <p className="text-xs text-gray-500">of income</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={getCardVariants(1)}
+          role="region"
+          aria-label="Budget Utilization"
+          className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
+        >
+          {renderCardHeader({
+            icon: <LuWallet className={cardIconClass} />,
+            title: 'Budget Utilization',
+            toggle: renderViewToggle(
+              nextBudgetUtilizationViewLabel,
+              budgetUtilizationView,
+              () =>
                 setBudgetUtilizationView((current) =>
                   current === 'chart' ? 'numbers' : 'chart',
-                )
-              }
-              aria-label={nextBudgetUtilizationViewLabel}
-              title={nextBudgetUtilizationViewLabel}
-            >
-              {budgetUtilizationView === 'chart' ? (
-                <LuAlignLeft className="h-4 w-4" />
-              ) : (
-                <LuChartColumn className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+                ),
+            ),
+            showFilteredBadge: isBudgetFiltered,
+          })}
 
           {budgetUtilizationView === 'chart' ? (
             <div className="mb-1 flex flex-1 flex-col justify-end pt-2">
@@ -210,8 +463,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 </p>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
                   <span>
-                    {annualIncomeSummary} income / {annualBudgetedSummary} budget
-                    / {annualSpentSummary} spent
+                    {annualIncomeSummary} income / {annualBudgetedSummary}{' '}
+                    budget / {annualSpentSummary} spent
                   </span>
                   <span>{usedPercent.toFixed(0)}% used</span>
                 </div>
@@ -221,13 +474,13 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                 <div className="relative h-8 overflow-hidden rounded-full bg-slate-100">
                   <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-sky-200"
+                    className={`absolute inset-y-0 left-0 rounded-full ${paletteBlue}`}
                     style={{
                       width: `${Math.min(budgetedIncomePercent, 100)}%`,
                     }}
                   />
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-sky-600"
+                    className={`absolute inset-y-0 left-0 rounded-full ${paletteGreen}`}
                     style={{ width: `${Math.min(spentIncomePercent, 100)}%` }}
                   />
 
@@ -298,11 +551,11 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                     <span>Income</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-sky-200" />
+                    <span className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`} />
                     <span>Budgeted</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-sky-600" />
+                    <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
                     <span>Spent</span>
                   </div>
                 </div>
@@ -357,172 +610,163 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
         <motion.div
           initial="hidden"
           animate="visible"
-          variants={getCardVariants(1)}
-          className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg lg:col-span-2"
+          variants={getCardVariants(2)}
+          role="region"
+          aria-label="Savings & Investing"
+          className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
         >
-          <div className="mb-5 flex items-center gap-2">
-            <div className={cardIconContainerClass}>
-              <LuPiggyBank className={cardIconClass} />
-            </div>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              Savings & Investing
-            </h3>
-          </div>
+          {renderCardHeader({
+            icon: <LuPiggyBank className={cardIconClass} />,
+            title: 'Savings & Investing',
+            toggle: renderViewToggle(
+              nextSavingsInvestingViewLabel,
+              savingsInvestingView,
+              () =>
+                setSavingsInvestingView((current) =>
+                  current === 'chart' ? 'numbers' : 'chart',
+                ),
+            ),
+          })}
 
           <div className="space-y-3">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-start gap-x-5 gap-y-2 text-sm text-gray-500">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Savings
+            {savingsInvestingView === 'chart' ? (
+              <div className="mb-1 flex flex-1 flex-col justify-end pt-2">
+                <div className="space-y-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
+                    Wealth Building
                   </p>
-                  <div className="mt-2">
-                    <CurrencyStack monthlyAmount={plannedSavings} />
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
+                    <span>
+                      {annualIncomeSummary} income / {annualSavingsSummary}{' '}
+                      savings / {annualInvestmentsSummary} investments
+                    </span>
+                    <span>{wealthIncomePercent.toFixed(0)}% to wealth</span>
                   </div>
                 </div>
 
-                <div className="pt-8 text-slate-400" aria-hidden="true">
-                  <LuPlus className="h-4 w-4" />
-                </div>
-
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Budgeted Investments
-                  </p>
-                  <div className="mt-2">
-                    <CurrencyStack monthlyAmount={investments} />
-                  </div>
-                </div>
-
-                <div className="pt-8 text-slate-400" aria-hidden="true">
-                  <LuEqual className="h-4 w-4" />
-                </div>
-
-                <div className="min-w-[12rem]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-700">
-                    Total Going to Wealth
-                  </p>
-                  <div className="mt-2">
-                    <CurrencyStack
-                      monthlyAmount={totalWealth}
-                      annualClassName="text-lg font-bold text-indigo-700"
-                      monthlyClassName="text-xs text-indigo-700/75"
+                <div className="mt-4 space-y-3">
+                  <div className="relative h-8 overflow-hidden rounded-full bg-slate-100">
+                    <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
+                    <div
+                      className={`absolute inset-y-0 left-0 ${paletteGreen}`}
+                      style={{ width: `${savingsWealthWidth}%` }}
                     />
+                    <div
+                      className={`absolute inset-y-0 ${palettePurple}`}
+                      style={{
+                        left: `${savingsWealthWidth}%`,
+                        width: `${investmentWealthWidth}%`,
+                      }}
+                    />
+
+                    {savingsWealthWidth > 0 ? (
+                      <Tooltip
+                        content={getBarTooltipContent(
+                          'Savings',
+                          plannedSavings,
+                          savingsIncomePercent,
+                        )}
+                        stacked
+                        followCursor
+                      >
+                        <div
+                          className="absolute inset-y-0 left-0 cursor-pointer"
+                          style={{ width: `${savingsWealthWidth}%` }}
+                          aria-label="Savings portion"
+                        />
+                      </Tooltip>
+                    ) : null}
+
+                    {investmentWealthWidth > 0 ? (
+                      <Tooltip
+                        content={getBarTooltipContent(
+                          'Budgeted investments',
+                          investments,
+                          investmentIncomePercent,
+                        )}
+                        stacked
+                        followCursor
+                      >
+                        <div
+                          className="absolute inset-y-0 cursor-pointer"
+                          style={{
+                            left: `${savingsWealthWidth}%`,
+                            width: `${investmentWealthWidth}%`,
+                          }}
+                          aria-label="Budgeted investments portion"
+                        />
+                      </Tooltip>
+                    ) : null}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+                      <span>Income</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
+                      <span>Savings</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${palettePurple}`} />
+                      <span>Budgeted Investments</span>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <div>
-                <p className="text-xs font-medium text-gray-500">
-                  {wealthRate.toFixed(1)}% of income
-                </p>
-              </div>
-            </div>
-
-            {isSavingsBreakdownExpanded ? (
-              <div
-                id={savingsBreakdownId}
-                className="border-t border-slate-200 pt-3"
-              >
-                <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+            ) : (
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-start gap-x-4 gap-y-2 text-xs text-gray-500 xl:flex-nowrap">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                      Planned Income
+                      Savings
                     </p>
-                    <p className="mt-2 text-lg font-semibold text-gray-900">
-                      {formatWholeCurrency(income)}
-                      <span className="ml-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-                        monthly
-                      </span>
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {formatWholeCurrency(income * 12)} annual
-                    </p>
+                    <div className="mt-2">
+                      <CurrencyStack monthlyAmount={plannedSavings} />
+                    </div>
+                  </div>
+
+                  <div className="pt-7 text-slate-400" aria-hidden="true">
+                    <LuPlus className="h-3.5 w-3.5" />
                   </div>
 
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                      Total Budgeted
+                      Budgeted Investments
                     </p>
-                    <p className="mt-2 text-lg font-semibold text-gray-900">
-                      {formatWholeCurrency(totalBudgeted)}
-                      <span className="ml-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-                        monthly
-                      </span>
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {formatWholeCurrency(totalBudgeted * 12)} annual
-                    </p>
+                    <div className="mt-2">
+                      <CurrencyStack monthlyAmount={investments} />
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                      Planned Savings
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-gray-900">
-                      {formatWholeCurrency(plannedSavings)}
-                      <span className="ml-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-                        monthly
-                      </span>
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {formatWholeCurrency(plannedSavings * 12)} annual
-                    </p>
+                  <div className="pt-7 text-slate-400" aria-hidden="true">
+                    <LuEqual className="h-3.5 w-3.5" />
                   </div>
 
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                      Planned Investments
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-gray-900">
-                      {formatWholeCurrency(investments)}
-                      <span className="ml-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-                        monthly
-                      </span>
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {formatWholeCurrency(investments * 12)} annual
-                    </p>
-                  </div>
-
-                  <div className="sm:col-span-2 xl:col-span-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-700">
+                  <div className="min-w-[10rem]">
+                    <p
+                      className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${palettePurpleText}`}
+                    >
                       Total Going to Wealth
                     </p>
-                    <p className="mt-2 text-lg font-semibold text-indigo-700">
-                      {formatWholeCurrency(totalWealth)}
-                      <span className="ml-2 text-xs font-medium uppercase tracking-wide text-indigo-500/70">
-                        monthly
-                      </span>
-                    </p>
-                    <p className="mt-1 text-xs text-indigo-700/80">
-                      {formatWholeCurrency(totalWealth * 12)} annual
-                    </p>
+                    <div className="mt-2">
+                      <CurrencyStack
+                        monthlyAmount={totalWealth}
+                        annualClassName={`text-lg font-bold ${palettePurpleText}`}
+                        monthlyClassName={`text-xs ${palettePurpleTextMuted}`}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : null}
 
-            <div className="flex justify-start pt-1">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                onClick={() =>
-                  setIsSavingsBreakdownExpanded((previous) => !previous)
-                }
-                aria-expanded={isSavingsBreakdownExpanded}
-                aria-controls={savingsBreakdownId}
-              >
-                {isSavingsBreakdownExpanded ? (
-                  <LuChevronDown className="h-4 w-4" />
-                ) : (
-                  <LuChevronRight className="h-4 w-4" />
-                )}
-                {isSavingsBreakdownExpanded
-                  ? 'Hide breakdown'
-                  : 'Show breakdown'}
-              </button>
-            </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500">
+                    {wealthRate.toFixed(1)}% of income
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

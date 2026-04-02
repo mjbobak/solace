@@ -151,6 +151,20 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       .reduce((sum, entry) => sum + entry.budgeted, 0);
 
     const savings = income - overallTotals.budgeted;
+    const essentialBudget = budgetEntries
+      .filter(
+        (entry) =>
+          entry.expenseType === 'ESSENTIAL' &&
+          !isInvestmentCategory(entry.expenseCategory),
+      )
+      .reduce((sum, entry) => sum + entry.budgeted, 0);
+    const funsiesBudget = budgetEntries
+      .filter(
+        (entry) =>
+          entry.expenseType === 'FUNSIES' &&
+          !isInvestmentCategory(entry.expenseCategory),
+      )
+      .reduce((sum, entry) => sum + entry.budgeted, 0);
 
     const handleAddClick = () => {
       setEditingItem(undefined);
@@ -239,6 +253,8 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
           investments={investments}
           income={income}
           savings={savings}
+          essentialBudget={essentialBudget}
+          funsiesBudget={funsiesBudget}
           isBudgetFiltered={isBudgetFiltered}
           planningYear={planningYear}
           spendBasis={spendBasis}
