@@ -10,16 +10,16 @@
   --color-text: oklch(23% 0.02 250);
   --color-text-muted: oklch(49% 0.02 250);
   --color-border: oklch(89% 0.01 250 / 0.95);
-  --color-brand: oklch(57% 0.2 258);
-  --color-brand-muted: oklch(94% 0.03 256);
+  --color-brand: oklch(67% 0.14 249);
+  --color-brand-muted: oklch(95% 0.03 244);
   --color-success: oklch(66% 0.17 155);
   --color-warning: oklch(79% 0.14 86);
   --color-danger: oklch(62% 0.23 28);
-  --color-focus: oklch(57% 0.2 258 / 0.22);
+  --color-focus: oklch(67% 0.14 249 / 0.22);
   --color-overlay: oklch(18% 0.02 255 / 0.36);
   --color-overlay-strong: oklch(30% 0.02 255 / 0.94);
   --color-inverse: oklch(99% 0 0);
-  --color-chart-1: oklch(57% 0.2 258);
+  --color-chart-1: oklch(67% 0.14 249);
   --color-chart-2: oklch(66% 0.17 155);
   --color-chart-3: oklch(79% 0.14 86);
   --color-chart-4: oklch(62% 0.23 28);
@@ -37,16 +37,16 @@
   --color-text: oklch(96% 0.01 250);
   --color-text-muted: oklch(74% 0.02 250);
   --color-border: oklch(37% 0.02 255 / 0.95);
-  --color-brand: oklch(72% 0.16 258);
-  --color-brand-muted: oklch(31% 0.06 256);
+  --color-brand: oklch(74% 0.13 249);
+  --color-brand-muted: oklch(34% 0.05 244);
   --color-success: oklch(73% 0.15 154);
   --color-warning: oklch(81% 0.12 88);
   --color-danger: oklch(69% 0.19 28);
-  --color-focus: oklch(72% 0.16 258 / 0.28);
+  --color-focus: oklch(74% 0.13 249 / 0.28);
   --color-overlay: oklch(3% 0.01 255 / 0.56);
   --color-overlay-strong: oklch(16% 0.02 255 / 0.96);
   --color-inverse: oklch(16% 0.02 255);
-  --color-chart-1: oklch(72% 0.16 258);
+  --color-chart-1: oklch(74% 0.13 249);
   --color-chart-2: oklch(73% 0.15 154);
   --color-chart-3: oklch(81% 0.12 88);
   --color-chart-4: oklch(69% 0.19 28);
@@ -220,15 +220,24 @@ body {
     color: var(--color-inverse);
     background: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--color-brand) 90%, white 10%),
-      color-mix(in srgb, var(--color-brand) 72%, black 28%)
+      color-mix(in srgb, var(--color-brand) 94%, white 6%),
+      color-mix(in srgb, var(--color-brand) 86%, white 14%)
     );
-    box-shadow: 0 18px 38px -24px color-mix(in srgb, var(--color-brand) 72%, transparent);
+    box-shadow:
+      0 14px 30px -22px color-mix(in srgb, var(--color-brand) 60%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 40%, transparent);
   }
 
   .button-primary:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 22px 42px -22px color-mix(in srgb, var(--color-brand) 68%, transparent);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand) 96%, white 4%),
+      color-mix(in srgb, var(--color-brand) 88%, white 12%)
+    );
+    box-shadow:
+      0 18px 34px -20px color-mix(in srgb, var(--color-brand) 64%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 48%, transparent);
   }
 
   .button-secondary {

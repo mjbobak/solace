@@ -41,7 +41,6 @@ describe('BudgetSummary', () => {
     expect(
       within(budgetCard).getByRole('button', { name: 'Show numbers view' }),
     ).toBeInTheDocument();
-    expect(within(budgetCard).getByText('Income Capacity')).toBeInTheDocument();
     expect(within(budgetCard).getByText('62% used')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Income')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Budgeted')).toBeInTheDocument();
@@ -49,7 +48,6 @@ describe('BudgetSummary', () => {
     expect(
       within(budgetCard).queryByText('Percent Used'),
     ).not.toBeInTheDocument();
-    expect(within(savingsCard).getByText('Wealth Building')).toBeInTheDocument();
     expect(within(savingsCard).getByText('31% to wealth')).toBeInTheDocument();
     expect(within(savingsCard).getByText('Income')).toBeInTheDocument();
     expect(within(savingsCard).getByText('Savings')).toBeInTheDocument();
@@ -64,7 +62,7 @@ describe('BudgetSummary', () => {
       name: 'Budget Utilization',
     });
 
-    expect(within(budgetCard).getByText('Income Capacity')).toBeInTheDocument();
+    expect(within(budgetCard).getByText('62% used')).toBeInTheDocument();
     fireEvent.click(
       within(budgetCard).getByRole('button', { name: 'Show numbers view' }),
     );
@@ -72,7 +70,7 @@ describe('BudgetSummary', () => {
     expect(
       within(budgetCard).getByRole('button', { name: 'Show chart view' }),
     ).toBeInTheDocument();
-    expect(within(budgetCard).queryByText('Income Capacity')).not.toBeInTheDocument();
+    expect(within(budgetCard).queryByText('62% used')).not.toBeInTheDocument();
     expect(within(budgetCard).getByText('Income')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Budgeted')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Spent')).toBeInTheDocument();
@@ -90,7 +88,6 @@ describe('BudgetSummary', () => {
       within(savingsCard).getByRole('button', { name: 'Show numbers view' }),
     );
 
-    expect(within(savingsCard).queryByText('Wealth Building')).not.toBeInTheDocument();
     expect(within(savingsCard).getByText('Total Going to Wealth')).toBeInTheDocument();
     expect(within(savingsCard).getByText('Savings')).toBeInTheDocument();
     expect(within(savingsCard).getByText('Budgeted Investments')).toBeInTheDocument();

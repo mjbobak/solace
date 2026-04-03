@@ -129,24 +129,31 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   const palettePurple = 'bg-[#A890E6]';
   const palettePurpleText = 'text-[#7B63C8]';
   const palettePurpleTextMuted = 'text-[#7B63C8]/75';
+  const compactCardContentHeight = 'min-h-[6.5rem]';
 
   const CurrencyStack = ({
     monthlyAmount,
     annualClassName = 'text-gray-900',
     monthlyClassName = 'text-gray-500',
     annualOperator,
+    compact = false,
   }: {
     monthlyAmount: number;
     annualClassName?: string;
     monthlyClassName?: string;
     annualOperator?: React.ReactNode;
+    compact?: boolean;
   }) => (
     <div className="flex flex-col leading-tight">
-      <span className="flex items-baseline gap-2">
-        <span className={`text-lg font-bold ${annualClassName}`}>
+      <span className={`flex items-baseline ${compact ? 'gap-1.5' : 'gap-2'}`}>
+        <span
+          className={`${compact ? 'text-base' : 'text-lg'} font-bold ${annualClassName}`}
+        >
           {formatWholeCurrency(monthlyAmount * 12)}
         </span>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+        <span
+          className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-wide text-gray-400`}
+        >
           annual
         </span>
         {annualOperator ? (
@@ -155,11 +162,13 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           </span>
         ) : null}
       </span>
-      <span className="flex items-baseline gap-2">
-        <span className={`text-xs ${monthlyClassName}`}>
+      <span className={`flex items-baseline ${compact ? 'gap-1.5' : 'gap-2'}`}>
+        <span className={`${compact ? 'text-[11px]' : 'text-xs'} ${monthlyClassName}`}>
           {formatWholeCurrency(monthlyAmount)}
         </span>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+        <span
+          className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-wide text-gray-400`}
+        >
           monthly
         </span>
       </span>
@@ -259,18 +268,18 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={getCardVariants(0)}
           role="region"
-          aria-label="Income Utilization"
+          aria-label="Income Allocation"
           className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
         >
           {renderCardHeader({
             icon: <LuWallet className={cardIconClass} />,
-            title: 'Income Utilization',
+            title: 'Income Allocation',
             toggle: renderViewToggle(
               nextIncomeUtilizationViewLabel,
               incomeUtilizationView,
@@ -282,11 +291,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           })}
 
           {incomeUtilizationView === 'chart' ? (
-            <div className="mb-1 flex flex-1 flex-col justify-end pt-2">
+            <div
+              className={`mb-1 flex flex-1 flex-col justify-end pt-2 ${compactCardContentHeight}`}
+            >
               <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
-                  Income Allocation
-                </p>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
                   <span>
                     {annualIncomeSummary} income / {annualEssentialSummary}{' '}
@@ -304,14 +312,14 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                     style={{ width: `${essentialWidth}%` }}
                   />
                   <div
-                    className={`absolute inset-y-0 ${paletteGreen}`}
+                    className={`absolute inset-y-0 ${palettePurple}`}
                     style={{
                       left: `${essentialWidth}%`,
                       width: `${funsiesWidth}%`,
                     }}
                   />
                   <div
-                    className={`absolute inset-y-0 ${palettePurple}`}
+                    className={`absolute inset-y-0 ${paletteGreen}`}
                     style={{
                       left: `${essentialWidth + funsiesWidth}%`,
                       width: `${savingsWidth}%`,
@@ -392,13 +400,13 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
+                      className={`h-2.5 w-2.5 rounded-full ${palettePurple}`}
                     />
                     <span>Funsies</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${palettePurple}`}
+                      className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
                     />
                     <span>Wealth</span>
                   </div>
@@ -406,211 +414,30 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
               </div>
             </div>
           ) : (
-            <div className="mb-4 space-y-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className={`pt-2 ${compactCardContentHeight}`}>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Income</p>
-                  <CurrencyStack monthlyAmount={income} />
+                  <p className="mb-1 text-[11px] text-gray-500">Income</p>
+                  <CurrencyStack monthlyAmount={income} compact />
                 </div>
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Essential</p>
-                  <CurrencyStack monthlyAmount={essentialBudget} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <p className="mb-1 text-xs text-gray-500">Funsies</p>
-                  <CurrencyStack monthlyAmount={funsiesBudget} />
+                  <p className="mb-1 text-[11px] text-gray-500">Essential</p>
+                  <CurrencyStack monthlyAmount={essentialBudget} compact />
                 </div>
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Savings</p>
-                  <CurrencyStack monthlyAmount={savingsForAllocation} />
+                  <p className="mb-1 text-[11px] text-gray-500">Funsies</p>
+                  <CurrencyStack monthlyAmount={funsiesBudget} compact />
                 </div>
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Wealth Rate</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="mb-1 text-[11px] text-gray-500">Savings</p>
+                  <CurrencyStack monthlyAmount={savingsForAllocation} compact />
+                </div>
+                <div>
+                  <p className="mb-1 text-[11px] text-gray-500">Wealth Rate</p>
+                  <p className="text-base font-bold text-gray-900">
                     {wealthRate.toFixed(0)}%
                   </p>
-                  <p className="text-xs text-gray-500">of income</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </motion.div>
-
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={getCardVariants(1)}
-          role="region"
-          aria-label="Budget Utilization"
-          className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
-        >
-          {renderCardHeader({
-            icon: <LuWallet className={cardIconClass} />,
-            title: 'Budget Utilization',
-            toggle: renderViewToggle(
-              nextBudgetUtilizationViewLabel,
-              budgetUtilizationView,
-              () =>
-                setBudgetUtilizationView((current) =>
-                  current === 'chart' ? 'numbers' : 'chart',
-                ),
-            ),
-            showFilteredBadge: isBudgetFiltered,
-          })}
-
-          {budgetUtilizationView === 'chart' ? (
-            <div className="mb-1 flex flex-1 flex-col justify-end pt-2">
-              <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
-                  Income Capacity
-                </p>
-                <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
-                  <span>
-                    {annualIncomeSummary} income / {annualBudgetedSummary}{' '}
-                    budget / {annualSpentSummary} spent
-                  </span>
-                  <span>{usedPercent.toFixed(0)}% used</span>
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <div className="relative h-8 overflow-hidden rounded-full bg-slate-100">
-                  <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
-                  <div
-                    className={`absolute inset-y-0 left-0 rounded-full ${paletteBlue}`}
-                    style={{
-                      width: `${Math.min(budgetedIncomePercent, 100)}%`,
-                    }}
-                  />
-                  <div
-                    className={`absolute inset-y-0 left-0 rounded-full ${paletteGreen}`}
-                    style={{ width: `${Math.min(spentIncomePercent, 100)}%` }}
-                  />
-
-                  {spentWidth > 0 ? (
-                    <Tooltip
-                      content={getBarTooltipContent(
-                        'Spent',
-                        spentForChart,
-                        spentIncomePercent,
-                      )}
-                      stacked
-                      followCursor
-                    >
-                      <div
-                        className="absolute inset-y-0 left-0 cursor-pointer rounded-full"
-                        style={{ width: `${spentWidth}%` }}
-                        aria-label="Spent portion"
-                      />
-                    </Tooltip>
-                  ) : null}
-
-                  {remainingBudgetWidth > 0 ? (
-                    <Tooltip
-                      content={getBarTooltipContent(
-                        'Budgeted but not spent',
-                        remainingBudgetForChart,
-                        budgetedIncomePercent - spentIncomePercent,
-                      )}
-                      stacked
-                      followCursor
-                    >
-                      <div
-                        className="absolute inset-y-0 cursor-pointer"
-                        style={{
-                          left: `${spentWidth}%`,
-                          width: `${remainingBudgetWidth}%`,
-                        }}
-                        aria-label="Remaining budget portion"
-                      />
-                    </Tooltip>
-                  ) : null}
-
-                  {unbudgetedIncomeWidth > 0 ? (
-                    <Tooltip
-                      content={getBarTooltipContent(
-                        'Income not budgeted',
-                        unbudgetedIncomeForChart,
-                        100 - budgetedIncomePercent,
-                      )}
-                      stacked
-                      followCursor
-                    >
-                      <div
-                        className="absolute inset-y-0 cursor-pointer rounded-full"
-                        style={{
-                          left: `${Math.min(budgetedIncomePercent, 100)}%`,
-                          width: `${unbudgetedIncomeWidth}%`,
-                        }}
-                        aria-label="Unbudgeted income portion"
-                      />
-                    </Tooltip>
-                  ) : null}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-                    <span>Income</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`}
-                    />
-                    <span>Budgeted</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
-                    />
-                    <span>Spent</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-4 space-y-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="mb-1 text-xs text-gray-500">Income</p>
-                  <CurrencyStack monthlyAmount={income} />
-                </div>
-                <div>
-                  <p className="mb-1 text-xs text-gray-500">Budgeted</p>
-                  <CurrencyStack monthlyAmount={budgetedForChart} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <p className="mb-1 text-xs text-gray-500">Spent</p>
-                  <CurrencyStack monthlyAmount={spentForChart} />
-                </div>
-                <div>
-                  <p className="mb-1 text-xs text-gray-500">Remaining</p>
-                  <CurrencyStack
-                    monthlyAmount={remainingForChart}
-                    annualClassName={
-                      totals.remaining < 0 ? 'text-red-600' : 'text-gray-900'
-                    }
-                    monthlyClassName={
-                      totals.remaining < 0 ? 'text-red-600/75' : 'text-gray-500'
-                    }
-                  />
-                </div>
-                <div>
-                  <p className="mb-1 text-xs text-gray-500">Percent Used</p>
-                  <p
-                    className={`text-lg font-bold ${
-                      usedPercent > 100 ? 'text-red-600' : 'text-gray-900'
-                    }`}
-                  >
-                    {usedPercent.toFixed(0)}%
-                  </p>
-                  <p className="text-xs text-gray-500">of budgeted amount</p>
+                  <p className="text-[11px] text-gray-500">of income</p>
                 </div>
               </div>
             </div>
@@ -642,9 +469,6 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
             {savingsInvestingView === 'chart' ? (
               <div className="mb-1 flex flex-1 flex-col justify-end pt-2">
                 <div className="space-y-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
-                    Wealth Building
-                  </p>
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
                     <span>
                       {annualIncomeSummary} income / {annualSavingsSummary}{' '}
@@ -784,6 +608,181 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           </div>
         </motion.div>
       </div>
+
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={getCardVariants(1)}
+        role="region"
+        aria-label="Budget Utilization"
+        className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
+      >
+        {renderCardHeader({
+          icon: <LuWallet className={cardIconClass} />,
+          title: 'Budget Utilization',
+          toggle: renderViewToggle(
+            nextBudgetUtilizationViewLabel,
+            budgetUtilizationView,
+            () =>
+              setBudgetUtilizationView((current) =>
+                current === 'chart' ? 'numbers' : 'chart',
+              ),
+          ),
+          showFilteredBadge: isBudgetFiltered,
+        })}
+
+        {budgetUtilizationView === 'chart' ? (
+          <div
+            className={`mb-1 flex flex-1 flex-col justify-end pt-2 ${compactCardContentHeight}`}
+          >
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
+                <span>
+                  {annualIncomeSummary} income / {annualBudgetedSummary} budget
+                  / {annualSpentSummary} spent
+                </span>
+                <span>{usedPercent.toFixed(0)}% used</span>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="relative h-8 overflow-hidden rounded-full bg-slate-100">
+                <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
+                <div
+                  className={`absolute inset-y-0 left-0 rounded-full ${paletteBlue}`}
+                  style={{
+                    width: `${Math.min(budgetedIncomePercent, 100)}%`,
+                  }}
+                />
+                <div
+                  className={`absolute inset-y-0 left-0 rounded-full ${paletteGreen}`}
+                  style={{ width: `${Math.min(spentIncomePercent, 100)}%` }}
+                />
+
+                {spentWidth > 0 ? (
+                  <Tooltip
+                    content={getBarTooltipContent(
+                      'Spent',
+                      spentForChart,
+                      spentIncomePercent,
+                    )}
+                    stacked
+                    followCursor
+                  >
+                    <div
+                      className="absolute inset-y-0 left-0 cursor-pointer rounded-full"
+                      style={{ width: `${spentWidth}%` }}
+                      aria-label="Spent portion"
+                    />
+                  </Tooltip>
+                ) : null}
+
+                {remainingBudgetWidth > 0 ? (
+                  <Tooltip
+                    content={getBarTooltipContent(
+                      'Budgeted but not spent',
+                      remainingBudgetForChart,
+                      budgetedIncomePercent - spentIncomePercent,
+                    )}
+                    stacked
+                    followCursor
+                  >
+                    <div
+                      className="absolute inset-y-0 cursor-pointer"
+                      style={{
+                        left: `${spentWidth}%`,
+                        width: `${remainingBudgetWidth}%`,
+                      }}
+                      aria-label="Remaining budget portion"
+                    />
+                  </Tooltip>
+                ) : null}
+
+                {unbudgetedIncomeWidth > 0 ? (
+                  <Tooltip
+                    content={getBarTooltipContent(
+                      'Income not budgeted',
+                      unbudgetedIncomeForChart,
+                      100 - budgetedIncomePercent,
+                    )}
+                    stacked
+                    followCursor
+                  >
+                    <div
+                      className="absolute inset-y-0 cursor-pointer rounded-full"
+                      style={{
+                        left: `${Math.min(budgetedIncomePercent, 100)}%`,
+                        width: `${unbudgetedIncomeWidth}%`,
+                      }}
+                      aria-label="Unbudgeted income portion"
+                    />
+                  </Tooltip>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+                  <span>Income</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`}
+                  />
+                  <span>Budgeted</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
+                  />
+                  <span>Spent</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className={`pt-2 ${compactCardContentHeight}`}>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div>
+                <p className="mb-1 text-[11px] text-gray-500">Income</p>
+                <CurrencyStack monthlyAmount={income} compact />
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] text-gray-500">Budgeted</p>
+                <CurrencyStack monthlyAmount={budgetedForChart} compact />
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] text-gray-500">Spent</p>
+                <CurrencyStack monthlyAmount={spentForChart} compact />
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] text-gray-500">Remaining</p>
+                <CurrencyStack
+                  monthlyAmount={remainingForChart}
+                  annualClassName={
+                    totals.remaining < 0 ? 'text-red-600' : 'text-gray-900'
+                  }
+                  monthlyClassName={
+                    totals.remaining < 0 ? 'text-red-600/75' : 'text-gray-500'
+                  }
+                  compact
+                />
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] text-gray-500">Percent Used</p>
+                <p
+                  className={`text-base font-bold ${
+                    usedPercent > 100 ? 'text-red-600' : 'text-gray-900'
+                  }`}
+                >
+                  {usedPercent.toFixed(0)}%
+                </p>
+                <p className="text-[11px] text-gray-500">of budgeted amount</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 };

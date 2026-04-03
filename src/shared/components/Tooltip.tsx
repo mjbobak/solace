@@ -23,7 +23,7 @@ interface TooltipPosition {
 export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
-  delay = 300,
+  delay = 0,
   stacked = false,
   followCursor = false,
 }) => {
