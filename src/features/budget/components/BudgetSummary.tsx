@@ -82,7 +82,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const funsiesIncomePercent = income > 0 ? (funsiesBudget / income) * 100 : 0;
   const investmentIncomePercent = income > 0 ? (investments / income) * 100 : 0;
   const savingsIncomePercent =
-    income > 0 ? (savingsForAllocation / income) * 100 : 0;
+    income > 0 ? (plannedSavings / income) * 100 : 0;
   const essentialWidth = Math.min(essentialIncomePercent, 100);
   const funsiesWidth = Math.min(
     funsiesIncomePercent,

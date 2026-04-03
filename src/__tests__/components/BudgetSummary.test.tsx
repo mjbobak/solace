@@ -35,7 +35,7 @@ describe('BudgetSummary', () => {
       name: 'Budget Utilization',
     });
     const savingsCard = screen.getByRole('region', {
-      name: 'Savings & Investing',
+      name: 'Wealth Contributions',
     });
 
     expect(
@@ -49,6 +49,11 @@ describe('BudgetSummary', () => {
       within(budgetCard).queryByText('Percent Used'),
     ).not.toBeInTheDocument();
     expect(within(savingsCard).getByText('31% to wealth')).toBeInTheDocument();
+    expect(
+      within(savingsCard).getByText(
+        'See how much of your income is going toward wealth generation through savings and investments.',
+      ),
+    ).toBeInTheDocument();
     expect(within(savingsCard).getByText('Income')).toBeInTheDocument();
     expect(within(savingsCard).getByText('Savings')).toBeInTheDocument();
     expect(
@@ -81,7 +86,7 @@ describe('BudgetSummary', () => {
   it('lets the user switch savings and investing between chart and numbers', () => {
     renderBudgetSummary();
     const savingsCard = screen.getByRole('region', {
-      name: 'Savings & Investing',
+      name: 'Wealth Contributions',
     });
 
     fireEvent.click(
@@ -110,5 +115,22 @@ describe('BudgetSummary', () => {
     expect(
       within(savingsCard).getByRole('button', { name: 'Show chart view' }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps savings and budgeted investments as separate portions in the chart', () => {
+    renderBudgetSummary();
+    const savingsCard = screen.getByRole('region', {
+      name: 'Wealth Contributions',
+    });
+
+    expect(
+      within(savingsCard).getByLabelText('Savings portion'),
+    ).toHaveStyle({ width: '11.016949152542372%' });
+    expect(
+      within(savingsCard).getByLabelText('Budgeted investments portion'),
+    ).toHaveStyle({
+      left: '11.016949152542372%',
+      width: '20.33898305084746%',
+    });
   });
 });

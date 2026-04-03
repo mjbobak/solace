@@ -49,17 +49,21 @@ export const SavingsInvestingCard: React.FC<SavingsInvestingCardProps> = ({
     animate="visible"
     variants={getCardVariants(2)}
     role="region"
-    aria-label="Savings & Investing"
+    aria-label="Wealth Contributions"
     className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg"
   >
     <SummaryCardHeader
       icon={<LuPiggyBank className={cardIconClass} />}
-      title="Savings & Investing"
+      title="Wealth Contributions"
       currentView={view}
       onToggle={onToggle}
     />
 
     <div className="space-y-3">
+      <p className="-mt-2 text-sm leading-relaxed text-gray-500">
+        See how much of your income is going toward wealth generation through
+        savings and investments.
+      </p>
       {view === 'chart' ? (
         <SavingsInvestingChart
           annualIncomeSummary={annualIncomeSummary}
