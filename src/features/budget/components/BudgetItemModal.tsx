@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BiRepeat } from 'react-icons/bi';
 import { BsInfoCircle } from 'react-icons/bs';
+import { LuTrendingUp } from 'react-icons/lu';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import { Button } from '@/shared/components/Button';
 import { CustomDropdown } from '@/shared/components/CustomDropdown';
 import type { DropdownOption } from '@/shared/components/CustomDropdown';
 import { Modal } from '@/shared/components/Modal';
-import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
 import type { ExpenseCategory } from '@/shared/types/category';
 import { formatCurrency } from '@/shared/utils/currency';
 
@@ -229,25 +229,6 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Investment
-          </label>
-          <ToggleButtonGroup
-            value={formData.isInvestment}
-            onChange={(value) => handleChange('isInvestment', value)}
-            options={[
-              { value: false, label: 'Not Investment' },
-              { value: true, label: 'Investment' },
-            ]}
-            variant="pill"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Investment items flow into wealth and investment reporting even if
-            they live under another expense category.
-          </p>
-        </div>
-
         {/* Expense Label */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -329,33 +310,65 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
         </div>
 
         {/* Reserve Monthly Toggle */}
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => handleChange('isAccrual', !formData.isAccrual)}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-              formData.isAccrual
-                ? 'bg-slate-200 text-slate-900 hover:bg-slate-300 ring-1 ring-slate-400'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-            title={
-              formData.isAccrual
-                ? 'Disable monthly reserve for this budget item'
-                : 'Enable monthly reserve for this budget item'
-            }
-          >
-            <BiRepeat size={14} />
-            {formData.isAccrual ? 'Reserved' : 'Reserve Monthly'}
-          </button>
-          <div className="flex items-center gap-1.5">
-            <label className="text-sm font-medium text-gray-700">
-              Reserve Monthly
-            </label>
-            <BsInfoCircle
-              size={14}
-              className="text-gray-400 hover:text-gray-600 cursor-help"
-              title="Use for bills paid less often than monthly so you can reserve a monthly amount (e.g., taxes, insurance, annual subscriptions)"
-            />
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <label className="text-sm font-medium text-gray-700">
+                Investment
+              </label>
+              <BsInfoCircle
+                size={14}
+                className="text-gray-400 hover:text-gray-600 cursor-help"
+                title="Investment items flow into wealth and investment reporting even if they live under another expense category"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => handleChange('isInvestment', !formData.isInvestment)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                formData.isInvestment
+                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 ring-1 ring-emerald-300'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              title={
+                formData.isInvestment
+                  ? 'Mark this budget item as not an investment'
+                  : 'Mark this budget item as an investment'
+              }
+            >
+              <LuTrendingUp size={14} />
+              {formData.isInvestment ? 'Investment' : 'Not Investment'}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <label className="text-sm font-medium text-gray-700">
+                Reserve Monthly
+              </label>
+              <BsInfoCircle
+                size={14}
+                className="text-gray-400 hover:text-gray-600 cursor-help"
+                title="Use for bills paid less often than monthly so you can reserve a monthly amount (e.g., taxes, insurance, annual subscriptions)"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => handleChange('isAccrual', !formData.isAccrual)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                formData.isAccrual
+                  ? 'bg-slate-200 text-slate-900 hover:bg-slate-300 ring-1 ring-slate-400'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              title={
+                formData.isAccrual
+                  ? 'Disable monthly reserve for this budget item'
+                  : 'Enable monthly reserve for this budget item'
+              }
+            >
+              <BiRepeat size={14} />
+              {formData.isAccrual ? 'Reserved' : 'Reserve Monthly'}
+            </button>
           </div>
         </div>
 

@@ -15,6 +15,14 @@ interface GetColumnsParams {
   handleViewSpending: (item: BudgetEntry) => void;
 }
 
+function formatRoundedCurrency(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 export function getBudgetTableColumns(
   params: GetColumnsParams,
 ): Column<BudgetEntry>[] {
@@ -113,11 +121,11 @@ export function getBudgetTableColumns(
       accessor: (row) => (
         <div className="flex flex-col items-end leading-tight">
           <span className="font-semibold">
-            {formatCurrency(row.budgeted * 12, '$')}
-            <span className="ml-1 text-xs font-normal text-gray-500">/year</span>
+            {formatRoundedCurrency(row.budgeted * 12)}
+            <span className="ml-1 text-xs font-normal text-gray-500">/yr</span>
           </span>
           <span className="text-xs text-gray-500">
-            {formatCurrency(row.budgeted, '$')}
+            {formatRoundedCurrency(row.budgeted)}
             <span className="ml-1">/mo</span>
           </span>
         </div>
@@ -139,7 +147,7 @@ export function getBudgetTableColumns(
             aria-label={`View transactions for ${row.expenseLabel}`}
             title={`View transactions for ${row.expenseLabel}`}
           >
-            {formatCurrency(row.spent, '$')}
+            {formatRoundedCurrency(row.spent)}
           </button>
         </div>
       ),
@@ -160,7 +168,7 @@ export function getBudgetTableColumns(
               isNegative ? 'text-red-600' : 'text-gray-900'
             }`}
           >
-            {formatCurrency(row.remaining, '$')}
+            {formatRoundedCurrency(row.remaining)}
           </span>
         );
       },
