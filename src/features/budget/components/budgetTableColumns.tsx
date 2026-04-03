@@ -161,13 +161,15 @@ export function getBudgetTableColumns(
       header: 'Remaining',
       accessor: (row) => {
         const isNegative = row.remaining < 0;
+        const isInvestment = isInvestmentBudgetEntry(row);
+        const colorClass = isNegative
+          ? isInvestment
+            ? 'text-emerald-600'
+            : 'text-red-600'
+          : 'text-gray-900';
 
         return (
-          <span
-            className={`font-semibold ${
-              isNegative ? 'text-red-600' : 'text-gray-900'
-            }`}
-          >
+          <span className={`font-semibold ${colorClass}`}>
             {formatRoundedCurrency(row.remaining)}
           </span>
         );
@@ -181,14 +183,16 @@ export function getBudgetTableColumns(
       key: 'percentage',
       header: '% Used',
       accessor: (row) => {
-        const isNegative = row.remaining < 0;
+        const isOverBudget = row.remaining < 0;
+        const isInvestment = isInvestmentBudgetEntry(row);
+        const colorClass = isOverBudget
+          ? isInvestment
+            ? 'text-emerald-600'
+            : 'text-red-600'
+          : 'text-gray-900';
 
         return (
-          <span
-            className={`font-semibold ${
-              isNegative ? 'text-red-600' : 'text-gray-900'
-            }`}
-          >
+          <span className={`font-semibold ${colorClass}`}>
             {row.percentage.toFixed(0)}%
           </span>
         );
