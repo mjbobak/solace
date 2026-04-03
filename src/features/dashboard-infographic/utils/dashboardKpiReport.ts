@@ -2,7 +2,7 @@ import type {
   BudgetEntry,
   SpendBasis,
 } from '@/features/budget/types/budgetView';
-import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
+import { isInvestmentBudgetEntry } from '@/features/budget/utils/investmentCategories';
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '@/features/income/constants/yearSettings';
 import type {
   IncomeProjectionTotals,
@@ -129,7 +129,7 @@ const KPI_BENCHMARKS: Record<string, string> = {
 };
 
 function isLivingExpense(entry: BudgetEntry): boolean {
-  return !isInvestmentCategory(entry.expenseCategory);
+  return !isInvestmentBudgetEntry(entry);
 }
 
 function isEssentialLivingExpense(entry: BudgetEntry): boolean {
@@ -485,7 +485,7 @@ export function buildDashboardMoneyFlowSummary({
     : null;
   const investmentAmount = budgetEntries
     ? getSpentAmount(budgetEntries, (entry) =>
-        isInvestmentCategory(entry.expenseCategory),
+        isInvestmentBudgetEntry(entry),
       )
     : null;
   const preTax401kContribution = getTaxAdvantagedBucketAmount(
@@ -570,14 +570,14 @@ export function buildDashboardKpiGroups({
   const plannedInvestmentContributions = budgetEntries
     ? getBudgetComparisonAmount(
         budgetEntries,
-        (entry) => isInvestmentCategory(entry.expenseCategory),
+        (entry) => isInvestmentBudgetEntry(entry),
         spendBasis,
         completedMonths,
       )
     : null;
   const actualInvestmentContributions = budgetEntries
     ? getSpentAmount(budgetEntries, (entry) =>
-        isInvestmentCategory(entry.expenseCategory),
+        isInvestmentBudgetEntry(entry),
       )
     : null;
   const plannedEssentialSpending = budgetEntries

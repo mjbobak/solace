@@ -486,6 +486,43 @@ describe('buildDashboardKpiGroups', () => {
     expect(summary.wealthContribution).toBe(144800);
     expect(summary.funsiesSpending).toBe(4200);
   });
+
+  it('uses the explicit investment flag instead of relying on expense category names', () => {
+    const summary = buildDashboardMoneyFlowSummary({
+      currentIncomeTotals: createIncomeTotals(),
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      budgetEntries: [
+        createBudgetEntry({ spent: 33000 }),
+        createBudgetEntry({
+          id: 'BUD-0002',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Brokerage',
+          budgeted: 500,
+          spent: 5400,
+          remaining: 0,
+          percentage: 1,
+          isInvestment: true,
+        }),
+        createBudgetEntry({
+          id: 'BUD-0003',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'INVESTMENTS',
+          expenseLabel: 'Legacy Category',
+          budgeted: 250,
+          spent: 0,
+          remaining: 250,
+          percentage: 0,
+          isInvestment: false,
+        }),
+      ],
+      spendBasis: 'annual_full_year',
+      completedMonths: 12,
+    });
+
+    expect(summary.investmentAmount).toBe(5400);
+    expect(summary.funsiesSpending).toBe(0);
+  });
 });
 
 describe('buildEmergencyRunwaySummary', () => {

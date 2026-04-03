@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/Button';
 import { CustomDropdown } from '@/shared/components/CustomDropdown';
 import type { DropdownOption } from '@/shared/components/CustomDropdown';
 import { Modal } from '@/shared/components/Modal';
+import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
 import type { ExpenseCategory } from '@/shared/types/category';
 import { formatCurrency } from '@/shared/utils/currency';
 
@@ -27,6 +28,7 @@ interface FormData {
   expenseCategory: string;
   expenseLabel: string;
   expenseLabelNote: string;
+  isInvestment: boolean;
   budgeted: number;
   monthlyInput: number | '';
   annualInput: number | '';
@@ -55,6 +57,7 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
     expenseCategory: 'DAILY LIVING',
     expenseLabel: '',
     expenseLabelNote: '',
+    isInvestment: false,
     budgeted: 0,
     monthlyInput: '',
     annualInput: '',
@@ -71,10 +74,11 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
         expenseCategory: item.expenseCategory,
         expenseLabel: item.expenseLabel,
         expenseLabelNote: item.expenseLabelNote || '',
+        isInvestment: item.isInvestment ?? false,
         budgeted: item.budgeted,
         monthlyInput: item.budgeted,
         annualInput: item.budgeted * 12,
-        isAccrual: item.isAccrual || false,
+        isAccrual: item.isAccrual ?? false,
       });
       setErrors({});
     } else if (isOpen) {
@@ -84,6 +88,7 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
         expenseCategory: 'DAILY LIVING',
         expenseLabel: '',
         expenseLabelNote: '',
+        isInvestment: false,
         budgeted: 0,
         monthlyInput: '',
         annualInput: '',
@@ -159,6 +164,7 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
       expenseCategory: formData.expenseCategory,
       expenseLabel: formData.expenseLabel,
       expenseLabelNote: formData.expenseLabelNote,
+      isInvestment: formData.isInvestment,
       budgeted: formData.budgeted,
       isAccrual: formData.isAccrual,
     });
@@ -221,6 +227,25 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
               }
             }}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Investment
+          </label>
+          <ToggleButtonGroup
+            value={formData.isInvestment}
+            onChange={(value) => handleChange('isInvestment', value)}
+            options={[
+              { value: false, label: 'Not Investment' },
+              { value: true, label: 'Investment' },
+            ]}
+            variant="pill"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Investment items flow into wealth and investment reporting even if
+            they live under another expense category.
+          </p>
         </div>
 
         {/* Expense Label */}

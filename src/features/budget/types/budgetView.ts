@@ -14,6 +14,7 @@ export interface BudgetEntry {
   expenseCategory: string;
   expenseLabel: string;
   expenseLabelNote?: string; // Optional note displayed as tooltip
+  isInvestment?: boolean;
   budgeted: number;
   spent: number;
   remaining: number;

@@ -127,6 +127,7 @@ export function useBudgetData(
         expense_category: entry.expenseCategory,
         expense_label: entry.expenseLabel,
         expense_label_note: entry.expenseLabelNote,
+        is_investment: entry.isInvestment ?? false,
         budgeted: entry.budgeted,
         is_accrual: entry.isAccrual ?? false,
         created_at: existing?.created_at ?? nowIso,

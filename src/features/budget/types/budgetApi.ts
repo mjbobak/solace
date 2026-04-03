@@ -13,6 +13,7 @@ export interface BudgetApiResponse {
   expense_category: string;
   expense_label: string;
   expense_label_note?: string;
+  is_investment: boolean;
   budgeted: number;
   is_accrual: boolean;
   created_at: string;
@@ -28,6 +29,7 @@ export interface BudgetApiCreate {
   expense_category: string;
   expense_label: string;
   expense_label_note?: string;
+  is_investment: boolean;
   budgeted: number;
   is_accrual: boolean;
 }
@@ -42,6 +44,7 @@ export interface BudgetApiUpdate {
   expense_category?: string;
   expense_label?: string;
   expense_label_note?: string;
+  is_investment?: boolean;
   budgeted?: number;
   is_accrual?: boolean;
 }

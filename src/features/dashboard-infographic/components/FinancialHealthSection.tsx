@@ -8,7 +8,7 @@ import { LuTrendingDown, LuPiggyBank, LuDollarSign } from 'react-icons/lu';
 
 import { useBudgetCalculations } from '@/features/budget/hooks/useBudgetCalculations';
 import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
-import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
+import { isInvestmentBudgetEntry } from '@/features/budget/utils/investmentCategories';
 import { spendingService } from '@/features/spending/services/spendingService';
 import { formatCurrency } from '@/shared/utils/currency';
 
@@ -61,7 +61,7 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
 
   // Investment calculation (from budget data)
   const monthlyInvestments = budgetEntries
-    .filter((entry) => isInvestmentCategory(entry.expenseCategory))
+    .filter((entry) => isInvestmentBudgetEntry(entry))
     .reduce((sum, entry) => sum + entry.budgeted, 0);
 
   const monthlySavings = monthlyIncome - monthlyTotalBudgeted;

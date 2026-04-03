@@ -1,8 +1,9 @@
 import { BiRepeat } from 'react-icons/bi';
 import { BsInfoCircle } from 'react-icons/bs';
-import { LuPencil, LuTrash2 } from 'react-icons/lu';
+import { LuPencil, LuTrendingUp, LuTrash2 } from 'react-icons/lu';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
+import { isInvestmentBudgetEntry } from '@/features/budget/utils/investmentCategories';
 import type { Column } from '@/shared/components/data/Table';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -80,6 +81,15 @@ export function getBudgetTableColumns(
           <span className="truncate" title={row.expenseLabel}>
             {row.expenseLabel}
           </span>
+          {isInvestmentBudgetEntry(row) && (
+            <span
+              className="inline-flex flex-shrink-0 items-center justify-center text-emerald-600"
+              title="Marked as an investment"
+              aria-label="Investment item"
+            >
+              <LuTrendingUp size={14} />
+            </span>
+          )}
           {row.expenseLabelNote && (
             <Tooltip content={row.expenseLabelNote}>
               <button

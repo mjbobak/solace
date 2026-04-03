@@ -23,6 +23,7 @@ LEGACY_INCOME_TABLES = (
     "income_occurrence_deductions",
 )
 TAX_ADVANTAGED_BUCKET_TABLE = "income_year_tax_advantaged_buckets"
+LEGACY_INVESTMENT_CATEGORY_PATTERN = "%INVEST%"
 
 
 def init_db() -> None:
@@ -51,6 +52,7 @@ def init_db() -> None:
     _drop_legacy_income_tables()
     _ensure_transaction_spread_columns()
     _migrate_legacy_transaction_spreads()
+    _ensure_budget_investment_column()
 
     logger.info("Database initialized - all tables created")
 
@@ -338,3 +340,40 @@ def _migrate_legacy_transaction_spreads() -> None:
                 """
             )
         )
+
+
+def _ensure_budget_investment_column() -> None:
+    """Add the investment flag to existing budget tables if needed."""
+    inspector = inspect(engine)
+    if "budgets" not in inspector.get_table_names():
+        return
+
+    existing_columns = {column["name"] for column in inspector.get_columns("budgets")}
+    if "is_investment" in existing_columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                ALTER TABLE budgets
+                ADD COLUMN is_investment BOOLEAN DEFAULT 0 NOT NULL
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                UPDATE budgets
+                SET is_investment = 1
+                WHERE expense_category_id IN (
+                    SELECT id
+                    FROM expense_categories
+                    WHERE UPPER(name) LIKE :investment_pattern
+                )
+                """
+            ),
+            {"investment_pattern": LEGACY_INVESTMENT_CATEGORY_PATTERN},
+        )
+
+    logger.info("Ensured budget investment flag exists and backfilled legacy investment rows")

@@ -16,7 +16,7 @@ import type {
   BudgetEntry,
   SpendBasis,
 } from '@/features/budget/types/budgetView';
-import { isInvestmentCategory } from '@/features/budget/utils/investmentCategories';
+import { isInvestmentBudgetEntry } from '@/features/budget/utils/investmentCategories';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Table } from '@/shared/components/data/Table';
@@ -172,7 +172,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
     const income = plannedAnnualNetIncome / 12;
 
     const investments = budgetEntries
-      .filter((entry) => isInvestmentCategory(entry.expenseCategory))
+      .filter((entry) => isInvestmentBudgetEntry(entry))
       .reduce((sum, entry) => sum + entry.budgeted, 0);
 
     const savings = income - overallTotals.budgeted;
@@ -180,14 +180,14 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       .filter(
         (entry) =>
           entry.expenseType === 'ESSENTIAL' &&
-          !isInvestmentCategory(entry.expenseCategory),
+          !isInvestmentBudgetEntry(entry),
       )
       .reduce((sum, entry) => sum + entry.budgeted, 0);
     const funsiesBudget = budgetEntries
       .filter(
         (entry) =>
           entry.expenseType === 'FUNSIES' &&
-          !isInvestmentCategory(entry.expenseCategory),
+          !isInvestmentBudgetEntry(entry),
       )
       .reduce((sum, entry) => sum + entry.budgeted, 0);
 

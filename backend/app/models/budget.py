@@ -46,6 +46,10 @@ class BudgetBase(BaseModel):
         description="Optional descriptive note for the expense label",
         examples=["Diapers, Creams, Wipes, etc.", "Includes utilities and internet"],
     )
+    is_investment: bool = Field(
+        default=False,
+        description="True when this budget item should count as an investment contribution",
+    )
     budgeted: float = Field(
         ...,
         ge=0,
@@ -94,6 +98,10 @@ class BudgetUpdate(BaseModel):
         None,
         max_length=500,
         description="Optional descriptive note for the expense label",
+    )
+    is_investment: Optional[bool] = Field(
+        None,
+        description="True when this budget item should count as an investment contribution",
     )
     budgeted: Optional[float] = Field(None, ge=0, description="Budgeted amount")
     is_accrual: Optional[bool] = Field(None, description="True for quarterly/annual items")

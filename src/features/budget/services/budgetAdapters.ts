@@ -37,6 +37,7 @@ export function backendToView(
     expenseCategory: apiResponse.expense_category,
     expenseLabel: apiResponse.expense_label,
     expenseLabelNote: apiResponse.expense_label_note,
+    isInvestment: apiResponse.is_investment,
     budgeted,
     spent,
     remaining: comparisonBudget - spent,
@@ -60,6 +61,7 @@ export function viewToCreateRequest(
     expense_category: entry.expenseCategory,
     expense_label: entry.expenseLabel,
     expense_label_note: entry.expenseLabelNote,
+    is_investment: entry.isInvestment ?? false,
     budgeted: entry.budgeted,
     is_accrual: entry.isAccrual ?? false,
   };
@@ -83,6 +85,8 @@ export function viewToUpdateRequest(
     request.expense_label = updates.expenseLabel;
   if (updates.expenseLabelNote !== undefined)
     request.expense_label_note = updates.expenseLabelNote;
+  if (updates.isInvestment !== undefined)
+    request.is_investment = updates.isInvestment;
   if (updates.budgeted !== undefined) request.budgeted = updates.budgeted;
   if (updates.isAccrual !== undefined) request.is_accrual = updates.isAccrual;
 

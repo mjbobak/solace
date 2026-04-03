@@ -19,6 +19,10 @@ DB_PATH = Path(__file__).parent.parent.parent.parent / "backend" / "data" / "dat
 BACKUP_DIR = Path(__file__).parent.parent.parent.parent / "backend" / "data" / "backups"
 
 
+def is_investment_category_name(category_name: str | None) -> bool:
+    return "INVEST" in (category_name or "").strip().upper()
+
+
 def ensure_schema():
     """Ensure database schema is created."""
     print("Step 1: Ensuring database schema exists...")
@@ -75,26 +79,32 @@ def restore_data():
 
     session.commit()
     print(f"  ✓ Restored {len(categories)} expense categories")
+    category_name_by_id = {category["id"]: category["name"] for category in categories}
 
     # Restore budgets
     with open(latest_budgets_file, "r") as f:
         budgets = json.load(f)
 
     for budget in budgets:
+        category_name = category_name_by_id.get(budget["expense_category_id"], "")
+        restored_budget = {
+            **budget,
+            "is_investment": is_investment_category_name(category_name),
+        }
         session.execute(
             text(
                 """
             INSERT INTO budgets (
                 id, expense_type, expense_category_id, expense_label,
-                expense_label_note, budgeted, is_accrual, created_at, updated_at
+                expense_label_note, is_investment, budgeted, is_accrual, created_at, updated_at
             )
             VALUES (
                 :id, :expense_type, :expense_category_id, :expense_label,
-                :expense_label_note, :budgeted, :is_accrual, :created_at, :updated_at
+                :expense_label_note, :is_investment, :budgeted, :is_accrual, :created_at, :updated_at
             )
         """
             ),
-            budget,
+            restored_budget,
         )
 
     session.commit()

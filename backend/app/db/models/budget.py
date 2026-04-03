@@ -45,6 +45,12 @@ class Budget(Base):
         nullable=True,
         comment="Optional descriptive note for the expense label",
     )
+    is_investment = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="True when this budget item should count toward investments/wealth contributions",
+    )
     budgeted = Column(
         Float,
         nullable=False,

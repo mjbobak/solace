@@ -23,6 +23,10 @@ from backend.app.db.models.budget import Budget  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
+
+def infer_is_investment(expense_category: str) -> bool:
+    return "INVEST" in expense_category.strip().upper()
+
 # Mock budget data extracted from src/features/budget/services/mockBudgetData.ts
 # Includes: id, expenseType, expenseCategory, expenseLabel, budgeted, isAccrual
 # Excludes: spent, remaining, percentage (calculated fields)
@@ -332,7 +336,10 @@ def seed_budgets() -> None:
 
         # Insert mock data
         for data in MOCK_BUDGETS:
-            budget = Budget(**data)
+            budget = Budget(
+                **data,
+                is_investment=infer_is_investment(data["expense_category"]),
+            )
             db.add(budget)
 
         db.commit()

@@ -27,7 +27,7 @@ const METRIC_EXPLANATIONS: Record<string, string> = {
   'annual-savings-amount':
     'After-tax income left over after living expenses and planned investment contributions.',
   'annual-investment-contributions':
-    'Total planned annual dollars directed to investment categories, usually monthly amounts multiplied across 12 months.',
+    'Total planned annual dollars directed to budget items marked as investments, usually monthly amounts multiplied across 12 months.',
   'gross-income':
     'Income before taxes and other payroll deductions are taken out.',
   'after-tax-income':
