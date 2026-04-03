@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { BudgetSummary } from '@/features/budget/components/BudgetSummary';

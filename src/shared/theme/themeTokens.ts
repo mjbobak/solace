@@ -51,3 +51,17 @@ export const chartTheme = {
   tooltipBorderRadius: '0.75rem',
   fontSize: '12px',
 } as const;
+
+export const budgetSummaryTheme = {
+  allocationBlue: 'bg-[#7BB6EB]',
+  allocationGreen: 'bg-[#97DDAA]',
+  allocationPurple: 'bg-[#A890E6]',
+  allocationPurpleText: 'text-[#7B63C8]',
+  allocationPurpleTextMuted: 'text-[#7B63C8]/75',
+  iconContainer:
+    'rounded-lg bg-gradient-to-br from-sky-50 to-slate-100 p-2',
+  icon: 'h-4 w-4 text-slate-500',
+  filteredBadge:
+    'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-violet-600 shadow-sm backdrop-blur',
+  filteredBadgeIcon: 'h-3 w-3 text-sky-400',
+} as const;
