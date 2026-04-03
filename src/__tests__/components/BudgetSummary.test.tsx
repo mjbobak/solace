@@ -60,9 +60,15 @@ describe('BudgetSummary', () => {
       within(budgetCard).getByRole('button', { name: 'Show numbers view' }),
     ).toBeInTheDocument();
     expect(getByExactText(budgetCard, '62% used')).toBeInTheDocument();
-    expect(within(budgetCard).getByText('Income')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Budgeted')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Spent')).toBeInTheDocument();
+    expect(
+      within(budgetCard).getAllByText((_, element) =>
+        (element?.textContent ?? '').includes(
+          '$5,900 income / $4,050 budget / $2,500 spent',
+        ),
+      ).length,
+    ).toBeGreaterThan(0);
     expect(
       within(incomeCard).getByText(
         'See how much of your income is distributed across different spending categories.',

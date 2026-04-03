@@ -16,14 +16,9 @@ interface BudgetUtilizationCardProps {
   budgetedSummary: string;
   spentSummary: string;
   usedPercent: number;
-  budgetedIncomePercent: number;
-  spentIncomePercent: number;
   spentWidth: number;
-  remainingBudgetWidth: number;
-  unbudgetedIncomeWidth: number;
   spentForChart: number;
   remainingBudgetForChart: number;
-  unbudgetedIncomeForChart: number;
   amountContextLabel: string;
   income: number;
   budgetedForChart: number;
@@ -40,14 +35,9 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   budgetedSummary,
   spentSummary,
   usedPercent,
-  budgetedIncomePercent,
-  spentIncomePercent,
   spentWidth,
-  remainingBudgetWidth,
-  unbudgetedIncomeWidth,
   spentForChart,
   remainingBudgetForChart,
-  unbudgetedIncomeForChart,
   amountContextLabel,
   income,
   budgetedForChart,
@@ -77,14 +67,9 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
         budgetedSummary={budgetedSummary}
         spentSummary={spentSummary}
         usedPercent={usedPercent}
-        budgetedIncomePercent={budgetedIncomePercent}
-        spentIncomePercent={spentIncomePercent}
         spentWidth={spentWidth}
-        remainingBudgetWidth={remainingBudgetWidth}
-        unbudgetedIncomeWidth={unbudgetedIncomeWidth}
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
-        unbudgetedIncomeForChart={unbudgetedIncomeForChart}
         amountContextLabel={amountContextLabel}
       />
     ) : (

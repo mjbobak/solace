@@ -15,14 +15,9 @@ interface BudgetUtilizationChartProps {
   budgetedSummary: string;
   spentSummary: string;
   usedPercent: number;
-  budgetedIncomePercent: number;
-  spentIncomePercent: number;
   spentWidth: number;
-  remainingBudgetWidth: number;
-  unbudgetedIncomeWidth: number;
   spentForChart: number;
   remainingBudgetForChart: number;
-  unbudgetedIncomeForChart: number;
   amountContextLabel: string;
 }
 
@@ -32,14 +27,9 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
   budgetedSummary,
   spentSummary,
   usedPercent,
-  budgetedIncomePercent,
-  spentIncomePercent,
   spentWidth,
-  remainingBudgetWidth,
-  unbudgetedIncomeWidth,
   spentForChart,
   remainingBudgetForChart,
-  unbudgetedIncomeForChart,
   amountContextLabel,
 }) => (
   <div
@@ -61,14 +51,13 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
 
     <div className="mt-4 space-y-3">
       <div className="relative h-8 overflow-hidden rounded-full bg-slate-100">
-        <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
         <div
-          className={`absolute inset-y-0 left-0 rounded-full ${paletteBlue}`}
-          style={{ width: `${Math.min(budgetedIncomePercent, 100)}%` }}
+          className={`absolute inset-0 rounded-full ${paletteBlue}`}
+          aria-label="Budgeted portion"
         />
         <div
           className={`absolute inset-y-0 left-0 rounded-full ${paletteGreen}`}
-          style={{ width: `${Math.min(spentIncomePercent, 100)}%` }}
+          style={{ width: `${spentWidth}%` }}
         />
 
         {spentWidth > 0 ? (
@@ -77,7 +66,7 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
               'Spent',
               spentForChart,
               amountContextLabel,
-              spentIncomePercent,
+              usedPercent,
             )}
             stacked
             followCursor
@@ -90,53 +79,27 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
           </Tooltip>
         ) : null}
 
-        {remainingBudgetWidth > 0 ? (
+        {remainingBudgetForChart > 0 ? (
           <Tooltip
             content={getBarTooltipContent(
               'Budgeted but not spent',
               remainingBudgetForChart,
               amountContextLabel,
-              budgetedIncomePercent - spentIncomePercent,
+              Math.max(100 - usedPercent, 0),
             )}
             stacked
             followCursor
           >
             <div
               className="absolute inset-y-0 cursor-pointer"
-              style={{ left: `${spentWidth}%`, width: `${remainingBudgetWidth}%` }}
+              style={{ left: `${spentWidth}%`, width: `${Math.max(100 - spentWidth, 0)}%` }}
               aria-label="Remaining budget portion"
-            />
-          </Tooltip>
-        ) : null}
-
-        {unbudgetedIncomeWidth > 0 ? (
-          <Tooltip
-            content={getBarTooltipContent(
-              'Income not budgeted',
-              unbudgetedIncomeForChart,
-              amountContextLabel,
-              100 - budgetedIncomePercent,
-            )}
-            stacked
-            followCursor
-          >
-            <div
-              className="absolute inset-y-0 cursor-pointer rounded-full"
-              style={{
-                left: `${Math.min(budgetedIncomePercent, 100)}%`,
-                width: `${unbudgetedIncomeWidth}%`,
-              }}
-              aria-label="Unbudgeted income portion"
             />
           </Tooltip>
         ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-          <span>Income</span>
-        </div>
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`} />
           <span>Budgeted</span>

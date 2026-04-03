@@ -63,24 +63,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const usedPercent =
     budgetedForChart > 0 ? (budgetUtilizationTotals.spent / budgetedForChart) * 100 : 0;
   const spendBasisLabel = getSpendBasisLabel(spendBasis);
-  const budgetedIncomePercent =
-    comparisonIncome > 0 ? (budgetedForChart / comparisonIncome) * 100 : 0;
-  const spentIncomePercent =
-    comparisonIncome > 0 ? (spentForChart / comparisonIncome) * 100 : 0;
   const remainingBudgetForChart = Math.max(budgetedForChart - spentForChart, 0);
-  const unbudgetedIncomeForChart = Math.max(
-    comparisonIncome - budgetedForChart,
-    0,
-  );
-  const spentWidth = Math.min(spentIncomePercent, 100);
-  const remainingBudgetWidth = Math.max(
-    Math.min(budgetedIncomePercent, 100) - spentWidth,
-    0,
-  );
-  const unbudgetedIncomeWidth = Math.max(
-    100 - Math.min(budgetedIncomePercent, 100),
-    0,
-  );
+  const spentWidth = Math.min(usedPercent, 100);
   const plannedSavings = Math.abs(savings);
   const savingsForAllocation = plannedSavings + investments;
   const totalWealth = plannedSavings + investments;
@@ -169,14 +153,9 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
         budgetedSummary={formatWholeCurrency(budgetedForChart)}
         spentSummary={formatWholeCurrency(spentForChart)}
         usedPercent={usedPercent}
-        budgetedIncomePercent={budgetedIncomePercent}
-        spentIncomePercent={spentIncomePercent}
         spentWidth={spentWidth}
-        remainingBudgetWidth={remainingBudgetWidth}
-        unbudgetedIncomeWidth={unbudgetedIncomeWidth}
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
-        unbudgetedIncomeForChart={unbudgetedIncomeForChart}
         amountContextLabel={spendBasisLabel}
         income={comparisonIncome}
         budgetedForChart={budgetedForChart}
