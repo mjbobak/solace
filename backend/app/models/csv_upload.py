@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 class ParsedTransaction(BaseModel):
     """Single transaction parsed from CSV file."""
 
+    preview_id: str = Field(default="", description="Unique identifier for this parsed preview row")
     row_number: int = Field(..., description="Original CSV row number (for tracking)")
     account: str = Field(..., description="Account identifier (1466 or 2939)")
     account_name: str = Field(..., description="Display name (Chase Credit Card or Chase Checking)")
@@ -44,3 +45,12 @@ class CsvUploadConfirm(BaseModel):
 
     transactions: List[ParsedTransaction] = Field(..., description="Transactions to import (may be edited by user)")
     import_batch_id: str = Field(..., description="UUID tracking this import batch")
+
+
+class CsvUploadConfirmResult(BaseModel):
+    """Result returned after a confirmed CSV import."""
+
+    message: str = Field(..., description="Human-readable import summary")
+    import_batch_id: str = Field(..., description="UUID tracking this import batch")
+    count: int = Field(..., description="Number of newly created transactions")
+    skipped_duplicates: int = Field(default=0, description="Transactions skipped because they matched existing imports")

@@ -57,18 +57,18 @@ export function useCsvUpload(onSuccess: () => void) {
   };
 
   const handleEditTransaction = (
-    rowNumber: number,
+    previewId: string,
     updates: Partial<ParsedTransaction>,
   ) => {
     setEditedTransactions((prev) =>
-      prev.map((t) => (t.row_number === rowNumber ? { ...t, ...updates } : t)),
+      prev.map((t) => (t.preview_id === previewId ? { ...t, ...updates } : t)),
     );
   };
 
-  const handleToggleFiltered = (rowNumber: number) => {
+  const handleToggleFiltered = (previewId: string) => {
     setEditedTransactions((prev) =>
       prev.map((t) =>
-        t.row_number === rowNumber
+        t.preview_id === previewId
           ? {
               ...t,
               is_filtered: !t.is_filtered,
@@ -89,7 +89,21 @@ export function useCsvUpload(onSuccess: () => void) {
         import_batch_id: uuidv4(),
       });
 
-      toast.success(`✓ Imported ${result.count} transactions successfully`);
+      if (result.count > 0) {
+        const duplicateSummary =
+          result.skipped_duplicates > 0
+            ? ` Skipped ${result.skipped_duplicates} duplicate transaction(s).`
+            : '';
+        toast.success(
+          `✓ Imported ${result.count} transaction(s) successfully.${duplicateSummary}`,
+        );
+      } else if (result.skipped_duplicates > 0) {
+        toast.info(
+          `No new transactions were imported. Skipped ${result.skipped_duplicates} duplicate transaction(s).`,
+        );
+      } else {
+        toast.info('No new transactions were imported.');
+      }
 
       // Reset state
       setUploadedFiles([]);

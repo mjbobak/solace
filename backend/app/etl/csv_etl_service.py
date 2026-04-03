@@ -28,6 +28,11 @@ ADDITIONAL_MORTGAGE_BUDGET_ID = 28
 class CsvEtlService:
     """Service for parsing and transforming CSV files into transactions."""
 
+    @staticmethod
+    def _build_preview_id(filename: str, row_number: int, split_index: int = 0) -> str:
+        """Build a stable unique ID for a preview row across files and splits."""
+        return f"{filename}:{row_number}:{split_index}"
+
     async def parse_csv_files(self, files: List[UploadFile]) -> CsvParseResult:
         """
         Parse multiple CSV files and return preview data.
@@ -46,7 +51,7 @@ class CsvEtlService:
             try:
                 account = self._detect_account(filename)
                 content = await file.read()
-                transactions = await self._parse_file(content, account)
+                transactions = await self._parse_file(content, account, filename)
                 all_transactions.extend(transactions)
             except Exception as e:
                 error_msg = f"{filename}: {str(e)}"
@@ -89,7 +94,12 @@ class CsvEtlService:
 
         raise ValueError(f"Cannot detect account from filename: {filename}. Expected 1466 or 2939.")
 
-    async def _parse_file(self, content: bytes, account: str) -> List[ParsedTransaction]:
+    async def _parse_file(
+        self,
+        content: bytes,
+        account: str,
+        filename: str = "preview.csv",
+    ) -> List[ParsedTransaction]:
         """
         Parse a single CSV file and return parsed transactions.
 
@@ -105,16 +115,20 @@ class CsvEtlService:
             reader = csv.DictReader(StringIO(text))
 
             if account == "1466":
-                return self._parse_chase_1466(reader)
+                return self._parse_chase_1466(reader, filename)
             elif account == "2939":
-                return self._parse_chase_2939(reader)
+                return self._parse_chase_2939(reader, filename)
             else:
                 raise ValueError(f"Unknown account: {account}")
         except Exception as e:
             logger.error(f"Error parsing CSV: {str(e)}")
             raise
 
-    def _parse_chase_1466(self, reader: csv.DictReader) -> List[ParsedTransaction]:
+    def _parse_chase_1466(
+        self,
+        reader: csv.DictReader,
+        filename: str = "preview.csv",
+    ) -> List[ParsedTransaction]:
         """
         Parse Chase credit card CSV (account 1466).
 
@@ -134,6 +148,7 @@ class CsvEtlService:
 
                 transactions.append(
                     ParsedTransaction(
+                        preview_id=self._build_preview_id(filename, row_num),
                         row_number=row_num,
                         account="1466",
                         account_name=ACCOUNT_CONFIG["1466"]["name"],
@@ -153,6 +168,7 @@ class CsvEtlService:
                 logger.warning(f"Error parsing row {row_num}: {str(e)}")
                 transactions.append(
                     ParsedTransaction(
+                        preview_id=self._build_preview_id(filename, row_num),
                         row_number=row_num,
                         account="1466",
                         account_name=ACCOUNT_CONFIG["1466"]["name"],
@@ -166,7 +182,11 @@ class CsvEtlService:
 
         return transactions
 
-    def _parse_chase_2939(self, reader: csv.DictReader) -> List[ParsedTransaction]:
+    def _parse_chase_2939(
+        self,
+        reader: csv.DictReader,
+        filename: str = "preview.csv",
+    ) -> List[ParsedTransaction]:
         """
         Parse Chase checking account CSV (account 2939).
 
@@ -185,6 +205,7 @@ class CsvEtlService:
 
                 transactions.extend(
                     self._build_chase_2939_transactions(
+                        filename=filename,
                         row_number=row_num,
                         post_date=post_date,
                         description=description,
@@ -197,6 +218,7 @@ class CsvEtlService:
                 logger.warning(f"Error parsing row {row_num}: {str(e)}")
                 transactions.append(
                     ParsedTransaction(
+                        preview_id=self._build_preview_id(filename, row_num),
                         row_number=row_num,
                         account="2939",
                         account_name=ACCOUNT_CONFIG["2939"]["name"],
@@ -214,6 +236,7 @@ class CsvEtlService:
     def _build_chase_2939_transactions(
         self,
         *,
+        filename: str,
         row_number: int,
         post_date,
         description: str,
@@ -224,6 +247,7 @@ class CsvEtlService:
         if self._should_split_servicemac_transaction(description=description, amount=amount):
             return [
                 self._create_chase_2939_transaction(
+                    preview_id=self._build_preview_id(filename, row_number, 0),
                     row_number=row_number,
                     post_date=post_date,
                     description=description,
@@ -232,6 +256,7 @@ class CsvEtlService:
                     budget_id=MORTGAGE_BUDGET_ID,
                 ),
                 self._create_chase_2939_transaction(
+                    preview_id=self._build_preview_id(filename, row_number, 1),
                     row_number=row_number,
                     post_date=post_date,
                     description=description,
@@ -243,6 +268,7 @@ class CsvEtlService:
 
         return [
             self._create_chase_2939_transaction(
+                preview_id=self._build_preview_id(filename, row_number),
                 row_number=row_number,
                 post_date=post_date,
                 description=description,
@@ -254,6 +280,7 @@ class CsvEtlService:
     def _create_chase_2939_transaction(
         self,
         *,
+        preview_id: str,
         row_number: int,
         post_date,
         description: str,
@@ -263,6 +290,7 @@ class CsvEtlService:
     ) -> ParsedTransaction:
         """Create a parsed checking transaction with optional pre-categorization."""
         return ParsedTransaction(
+            preview_id=preview_id,
             row_number=row_number,
             account="2939",
             account_name=ACCOUNT_CONFIG["2939"]["name"],

@@ -1,6 +1,8 @@
 """Transaction service for business logic."""
 
+import logging
 from datetime import date
+from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Optional
 
 from sqlalchemy import and_
@@ -8,8 +10,13 @@ from sqlalchemy.orm import Session, joinedload
 
 from backend.app.db.models.budget import Budget
 from backend.app.db.models.transaction import Transaction, TransactionStatus
+from backend.app.models.csv_upload import ParsedTransaction
 from backend.app.models.transaction import TransactionCreate, TransactionUpdate
 from backend.app.services.base_service import BaseService
+
+logger = logging.getLogger(__name__)
+
+DUPLICATE_IMPORT_FILTER_REASON = "Already imported (matched on date, description, amount, and account)"
 
 
 class TransactionService(BaseService[Transaction, TransactionCreate, TransactionUpdate]):
@@ -63,6 +70,138 @@ class TransactionService(BaseService[Transaction, TransactionCreate, Transaction
         update_data["spread_start_date"] = None
         update_data["spread_months"] = None
         update_data["is_accrual"] = False
+
+    @staticmethod
+    def _normalize_duplicate_text(value: Optional[str]) -> str:
+        """Normalize text fields used in duplicate matching."""
+        return " ".join((value or "").strip().upper().split())
+
+    @staticmethod
+    def _normalize_duplicate_amount(value: Decimal) -> Decimal:
+        """Normalize imported amounts to 2 decimal places for matching."""
+        return Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    @classmethod
+    def _build_duplicate_signature(
+        cls,
+        *,
+        transaction_date: date,
+        description: str,
+        amount: Decimal,
+        account: Optional[str],
+    ) -> tuple[date, str, Decimal, str]:
+        """Build a normalized signature used to identify duplicate imports."""
+        return (
+            transaction_date,
+            cls._normalize_duplicate_text(description),
+            cls._normalize_duplicate_amount(amount),
+            cls._normalize_duplicate_text(account),
+        )
+
+    def _get_existing_duplicate_signatures(
+        self,
+        *,
+        user_id: int,
+        transaction_dates: set[date],
+    ) -> set[tuple[date, str, Decimal, str]]:
+        """Load existing transaction signatures for the relevant transaction dates."""
+        if not transaction_dates:
+            return set()
+
+        existing_transactions = (
+            self.db.query(
+                self.model.transaction_date,
+                self.model.description,
+                self.model.amount,
+                self.model.account,
+            )
+            .filter(
+                and_(
+                    self.model.user_id == user_id,
+                    self.model.status != TransactionStatus.DELETED.value,
+                    self.model.transaction_date.in_(sorted(transaction_dates)),
+                )
+            )
+            .all()
+        )
+
+        return {
+            self._build_duplicate_signature(
+                transaction_date=transaction_date,
+                description=description,
+                amount=amount,
+                account=account,
+            )
+            for transaction_date, description, amount, account in existing_transactions
+        }
+
+    def flag_existing_import_duplicates(
+        self,
+        transactions: List[ParsedTransaction],
+        *,
+        user_id: int,
+    ) -> int:
+        """Mark preview rows as filtered when they match already-imported transactions."""
+        transaction_dates = {
+            txn.transaction_date or txn.post_date
+            for txn in transactions
+            if not txn.validation_errors
+        }
+        existing_signatures = self._get_existing_duplicate_signatures(
+            user_id=user_id,
+            transaction_dates=transaction_dates,
+        )
+
+        duplicate_count = 0
+        for txn in transactions:
+            if txn.validation_errors or txn.is_filtered:
+                continue
+
+            signature = self._build_duplicate_signature(
+                transaction_date=txn.transaction_date or txn.post_date,
+                description=txn.description,
+                amount=txn.amount,
+                account=txn.account_name,
+            )
+            if signature not in existing_signatures:
+                continue
+
+            txn.is_filtered = True
+            txn.filter_reason = DUPLICATE_IMPORT_FILTER_REASON
+            duplicate_count += 1
+
+        return duplicate_count
+
+    def split_existing_import_duplicates(
+        self,
+        transactions: List[TransactionCreate],
+        *,
+        user_id: int,
+    ) -> tuple[List[TransactionCreate], int]:
+        """Partition bulk-import rows into new transactions and duplicates."""
+        transaction_dates = {txn.date for txn in transactions}
+        existing_signatures = self._get_existing_duplicate_signatures(
+            user_id=user_id,
+            transaction_dates=transaction_dates,
+        )
+
+        new_transactions: List[TransactionCreate] = []
+        skipped_duplicates = 0
+
+        for txn in transactions:
+            signature = self._build_duplicate_signature(
+                transaction_date=txn.date,
+                description=txn.description,
+                amount=txn.amount,
+                account=txn.account,
+            )
+            if signature in existing_signatures:
+                skipped_duplicates += 1
+                continue
+
+            new_transactions.append(txn)
+
+        return new_transactions, skipped_duplicates
 
     def create(self, obj_in: TransactionCreate, user_id: int, **extra_fields) -> Transaction:
         """
@@ -334,7 +473,7 @@ class TransactionService(BaseService[Transaction, TransactionCreate, Transaction
                 created_count += 1
             except Exception as e:
                 # Log error but continue processing remaining transactions
-                print(f"Error creating transaction: {e}")
+                logger.exception("Error creating transaction during bulk import: %s", e)
                 continue
 
         return created_count

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from backend.app.db.database import get_db
 from backend.app.db.models import ReviewStatus, TransactionStatus
 from backend.app.etl.csv_etl_service import CsvEtlService
-from backend.app.models.csv_upload import CsvParseResult, CsvUploadConfirm
+from backend.app.models.csv_upload import CsvParseResult, CsvUploadConfirm, CsvUploadConfirmResult
 from backend.app.models.transaction import TransactionCreate
 from backend.app.services.categorization_service import CategorizationService
 from backend.app.services.transaction_service import TransactionService
@@ -68,17 +68,28 @@ async def preview_csv_upload(
         categorization_service = CategorizationService(db)
         categorization_service.categorize(result.transactions)
 
+        transaction_service = TransactionService(db)
+        duplicate_count = transaction_service.flag_existing_import_duplicates(
+            result.transactions,
+            user_id=DEFAULT_USER_ID,
+        )
+        if duplicate_count:
+            logger.info("Filtered %s already-imported transaction(s) during CSV preview", duplicate_count)
+
+        result.filtered_count = sum(1 for t in result.transactions if t.is_filtered)
+        result.import_count = result.total_count - result.filtered_count
+
         return result
     except Exception as e:
         logger.error(f"Preview error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Preview failed: {str(e)}")
 
 
-@router.post("/confirm", status_code=201)
+@router.post("/confirm", status_code=201, response_model=CsvUploadConfirmResult)
 async def confirm_csv_upload(
     confirm: CsvUploadConfirm,
     db: Session = Depends(get_db),
-) -> dict:
+) -> CsvUploadConfirmResult:
     """
     Confirm and save transactions to database.
 
@@ -139,9 +150,24 @@ async def confirm_csv_upload(
         )
 
     if not transaction_creates:
-        raise HTTPException(
-            status_code=400,
-            detail="No valid transactions to import after filtering errors",
+        raise HTTPException(status_code=400, detail="No valid transactions to import after filtering errors")
+
+    transaction_creates, skipped_duplicates = transaction_service.split_existing_import_duplicates(
+        transaction_creates,
+        user_id=DEFAULT_USER_ID,
+    )
+
+    if not transaction_creates:
+        logger.info(
+            "Skipped %s duplicate transaction(s); no new transactions imported (batch: %s)",
+            skipped_duplicates,
+            confirm.import_batch_id,
+        )
+        return CsvUploadConfirmResult(
+            message=f"No new transactions imported; skipped {skipped_duplicates} duplicate transaction(s)",
+            import_batch_id=confirm.import_batch_id,
+            count=0,
+            skipped_duplicates=skipped_duplicates,
         )
 
     # Bulk create transactions
@@ -152,13 +178,23 @@ async def confirm_csv_upload(
             import_batch_id=confirm.import_batch_id,
         )
 
-        logger.info(f"Successfully imported {created_count} transactions (batch: {confirm.import_batch_id})")
+        logger.info(
+            "Successfully imported %s transactions and skipped %s duplicate(s) (batch: %s)",
+            created_count,
+            skipped_duplicates,
+            confirm.import_batch_id,
+        )
 
-        return {
-            "message": f"Successfully imported {created_count} transactions",
-            "import_batch_id": confirm.import_batch_id,
-            "count": created_count,
-        }
+        message = f"Successfully imported {created_count} transactions"
+        if skipped_duplicates:
+            message = f"{message}; skipped {skipped_duplicates} duplicate transaction(s)"
+
+        return CsvUploadConfirmResult(
+            message=message,
+            import_batch_id=confirm.import_batch_id,
+            count=created_count,
+            skipped_duplicates=skipped_duplicates,
+        )
     except Exception as e:
         logger.error(f"Import failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")

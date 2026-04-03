@@ -1,12 +1,17 @@
 """Tests for the TransactionService."""
 
 from datetime import date
+from decimal import Decimal
 
 import pytest
 
-from backend.app.db.models.transaction import ReviewStatus, TransactionStatus
+from backend.app.db.models.transaction import ReviewStatus, Transaction, TransactionStatus
+from backend.app.models.csv_upload import ParsedTransaction
 from backend.app.models.transaction import TransactionCreate, TransactionUpdate
-from backend.app.services.transaction_service import TransactionService
+from backend.app.services.transaction_service import (
+    DUPLICATE_IMPORT_FILTER_REASON,
+    TransactionService,
+)
 
 
 class TestTransactionServiceCreate:
@@ -269,6 +274,106 @@ class TestTransactionServiceUpdate:
         assert result.spread_start_date == date(2025, 2, 1)
         assert result.spread_months == 6
         assert result.is_accrual is True
+
+
+class TestTransactionServiceDuplicateImports:
+    """Test duplicate detection for CSV imports."""
+
+    def test_flag_existing_import_duplicates_marks_preview_rows(self, db_session, sample_user):
+        """Preview rows that match an existing import should be filtered."""
+        db_session.add(
+            Transaction(
+                user_id=sample_user.id,
+                transaction_date=date(2026, 3, 1),
+                post_date=date(2026, 3, 2),
+                description="Coffee Shop",
+                merchant="Coffee Shop",
+                account="Chase Credit Card",
+                amount=Decimal("6.25"),
+                is_accrual=False,
+                status=TransactionStatus.ACTIVE.value,
+                review_status=ReviewStatus.PENDING.value,
+            )
+        )
+        db_session.commit()
+
+        service = TransactionService(db_session)
+        preview_transactions = [
+            ParsedTransaction(
+                row_number=2,
+                account="1466",
+                account_name="Chase Credit Card",
+                transaction_date=date(2026, 3, 1),
+                post_date=date(2026, 3, 2),
+                description="  coffee   shop ",
+                amount=Decimal("6.25"),
+                chase_category="Food & Drink",
+            ),
+            ParsedTransaction(
+                row_number=3,
+                account="1466",
+                account_name="Chase Credit Card",
+                transaction_date=date(2026, 3, 1),
+                post_date=date(2026, 3, 2),
+                description="Different Merchant",
+                amount=Decimal("6.25"),
+                chase_category="Food & Drink",
+            ),
+        ]
+
+        duplicate_count = service.flag_existing_import_duplicates(preview_transactions, user_id=sample_user.id)
+
+        assert duplicate_count == 1
+        assert preview_transactions[0].is_filtered is True
+        assert preview_transactions[0].filter_reason == DUPLICATE_IMPORT_FILTER_REASON
+        assert preview_transactions[1].is_filtered is False
+
+    def test_split_existing_import_duplicates_skips_matches(self, db_session, sample_user):
+        """Bulk import should keep only transactions that do not already exist."""
+        db_session.add(
+            Transaction(
+                user_id=sample_user.id,
+                transaction_date=date(2026, 3, 5),
+                post_date=date(2026, 3, 5),
+                description="Grocery Store",
+                merchant="Grocery Store",
+                account="Chase Checking",
+                amount=Decimal("42.15"),
+                is_accrual=False,
+                status=TransactionStatus.ACTIVE.value,
+                review_status=ReviewStatus.PENDING.value,
+            )
+        )
+        db_session.commit()
+
+        service = TransactionService(db_session)
+        transactions = [
+            TransactionCreate(
+                date=date(2026, 3, 5),
+                post_date=date(2026, 3, 5),
+                description="grocery   store",
+                merchant="grocery   store",
+                amount=Decimal("42.15"),
+                account="Chase Checking",
+            ),
+            TransactionCreate(
+                date=date(2026, 3, 6),
+                post_date=date(2026, 3, 6),
+                description="Gas Station",
+                merchant="Gas Station",
+                amount=Decimal("30.00"),
+                account="Chase Checking",
+            ),
+        ]
+
+        new_transactions, skipped_duplicates = service.split_existing_import_duplicates(
+            transactions,
+            user_id=sample_user.id,
+        )
+
+        assert skipped_duplicates == 1
+        assert len(new_transactions) == 1
+        assert new_transactions[0].description == "Gas Station"
 
     def test_update_transaction_clear_spread_fields(self, db_session, sample_transaction):
         """Test clearing spread metadata resets the legacy flag."""

@@ -4,6 +4,7 @@
 
 import React, { useRef, useEffect } from 'react';
 
+import type { BudgetApiResponse } from '@/features/budget/types/budgetApi';
 import { Button } from '@/shared/components/Button';
 
 import { useCsvUpload } from '../hooks/useCsvUpload';
@@ -12,11 +13,15 @@ import { CsvPreviewTableEnhanced } from './CsvPreviewTableEnhanced';
 
 interface CsvUploadModalProps {
   onSuccess: () => void;
+  budgets: BudgetApiResponse[];
+  isLoadingBudgets?: boolean;
   onPreviewStateChange?: (showing: boolean) => void;
 }
 
 export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   onSuccess,
+  budgets,
+  isLoadingBudgets = false,
   onPreviewStateChange,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -237,6 +242,8 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
     <div className="space-y-4">
       <CsvPreviewTableEnhanced
         transactions={editedTransactions}
+        budgets={budgets}
+        isLoadingBudgets={isLoadingBudgets}
         onEditTransaction={handleEditTransaction}
         onToggleFiltered={handleToggleFiltered}
         stats={{

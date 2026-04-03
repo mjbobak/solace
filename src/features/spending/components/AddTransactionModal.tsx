@@ -160,8 +160,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       isOpen={isOpen}
       onClose={handleClose}
       title={modalTitle}
-      maxWidth={isUploadMode ? '6xl' : '3xl'}
-      contentClassName={isUploadMode ? 'px-5 py-5 sm:px-6 sm:py-6' : ''}
+      maxWidth={isUploadMode ? 'full' : '3xl'}
+      panelClassName={isUploadMode ? 'w-[min(96vw,1800px)]' : ''}
+      contentClassName={isUploadMode ? 'px-4 py-5 sm:px-5 sm:py-6' : ''}
     >
       {/* Tab Navigation - Only show for add mode */}
       {!isEditMode && (
@@ -390,6 +391,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       {/* Upload File Tab */}
       {activeTab === 'upload' && (
         <CsvUploadModal
+          budgets={budgets}
+          isLoadingBudgets={isLoadingBudgets}
           onSuccess={() => {
             handleClose();
           }}

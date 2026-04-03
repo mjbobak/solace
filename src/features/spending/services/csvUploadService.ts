@@ -2,7 +2,11 @@
  * CSV upload service for API communication
  */
 
-import type { CsvParseResult, CsvUploadConfirm } from '../types/csvUpload';
+import type {
+  CsvParseResult,
+  CsvUploadConfirm,
+  CsvUploadConfirmResult,
+} from '../types/csvUpload';
 
 export const csvUploadService = {
   /**
@@ -38,7 +42,7 @@ export const csvUploadService = {
    */
   confirmCsvUpload: async (
     data: CsvUploadConfirm,
-  ): Promise<{ count: number }> => {
+  ): Promise<CsvUploadConfirmResult> => {
     const response = await fetch('/api/transactions/upload/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
