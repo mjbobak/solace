@@ -7,11 +7,11 @@ import {
   getCardVariants,
   type SummaryView,
 } from './constants';
-import { SavingsInvestingChart } from './SavingsInvestingChart';
+import { WealthContributionsChart } from './WealthContributionsChart';
 import { SavingsInvestingNumbers } from './SavingsInvestingNumbers';
 import { SummaryCardHeader } from './SummaryCardChrome';
 
-interface SavingsInvestingCardProps {
+interface WealthContributionsCardProps {
   view: SummaryView;
   onToggle: () => void;
   annualIncomeSummary: string;
@@ -28,7 +28,9 @@ interface SavingsInvestingCardProps {
   wealthRate: number;
 }
 
-export const SavingsInvestingCard: React.FC<SavingsInvestingCardProps> = ({
+export const WealthContributionsCard: React.FC<
+  WealthContributionsCardProps
+> = ({
   view,
   onToggle,
   annualIncomeSummary,
@@ -65,7 +67,7 @@ export const SavingsInvestingCard: React.FC<SavingsInvestingCardProps> = ({
         savings and investments.
       </p>
       {view === 'chart' ? (
-        <SavingsInvestingChart
+        <WealthContributionsChart
           annualIncomeSummary={annualIncomeSummary}
           annualSavingsSummary={annualSavingsSummary}
           annualInvestmentsSummary={annualInvestmentsSummary}

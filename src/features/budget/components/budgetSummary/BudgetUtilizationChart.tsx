@@ -44,10 +44,13 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
     <div className="space-y-1">
       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
         <span>
-          {annualIncomeSummary} income / {annualBudgetedSummary} budget /{' '}
-          {annualSpentSummary} spent
+          <span className="text-gray-600">{annualIncomeSummary}</span> income /{' '}
+          <span className="text-gray-600">{annualBudgetedSummary}</span> budget /{' '}
+          <span className="text-gray-600">{annualSpentSummary}</span> spent
         </span>
-        <span>{usedPercent.toFixed(0)}% used</span>
+        <span>
+          <span className="text-gray-600">{usedPercent.toFixed(0)}%</span> used
+        </span>
       </div>
     </div>
 

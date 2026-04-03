@@ -47,8 +47,13 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
     <div className="space-y-1">
       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
         <span>
-          {annualIncomeSummary} income / {annualEssentialSummary} essential /{' '}
-          {annualFunsiesSummary} funsies / {annualWealthSummary} wealth
+          <span className="text-gray-600">{annualIncomeSummary}</span> income /{' '}
+          <span className="text-gray-600">{annualEssentialSummary}</span>{' '}
+          essential spending /{' '}
+          <span className="text-gray-600">{annualFunsiesSummary}</span>{' '}
+          funsies spending /{' '}
+          <span className="text-gray-600">{annualWealthSummary}</span> wealth
+          contribution
         </span>
       </div>
     </div>
@@ -73,7 +78,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
         {essentialWidth > 0 ? (
           <Tooltip
             content={getBarTooltipContent(
-              'Essential',
+              'Essential Spending',
               essentialBudget,
               essentialIncomePercent,
             )}
@@ -90,7 +95,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
         {funsiesWidth > 0 ? (
           <Tooltip
             content={getBarTooltipContent(
-              'Funsies',
+              'Funsies Spending',
               funsiesBudget,
               funsiesIncomePercent,
             )}
@@ -107,7 +112,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
         {savingsWidth > 0 ? (
           <Tooltip
             content={getBarTooltipContent(
-              'Wealth',
+              'Wealth Contribution',
               savingsForAllocation,
               wealthIncomePercent,
             )}
@@ -132,15 +137,15 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`} />
-          <span>Essential</span>
+          <span>Essential Spending</span>
         </div>
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${palettePurple}`} />
-          <span>Funsies</span>
+          <span>Funsies Spending</span>
         </div>
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${paletteOrange}`} />
-          <span>Wealth</span>
+          <span>Wealth Contribution</span>
         </div>
       </div>
     </div>

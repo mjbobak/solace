@@ -8,7 +8,7 @@ import {
   palettePurple,
 } from './constants';
 
-interface SavingsInvestingChartProps {
+interface WealthContributionsChartProps {
   annualIncomeSummary: string;
   annualSavingsSummary: string;
   annualInvestmentsSummary: string;
@@ -21,7 +21,9 @@ interface SavingsInvestingChartProps {
   investmentIncomePercent: number;
 }
 
-export const SavingsInvestingChart: React.FC<SavingsInvestingChartProps> = ({
+export const WealthContributionsChart: React.FC<
+  WealthContributionsChartProps
+> = ({
   annualIncomeSummary,
   annualSavingsSummary,
   annualInvestmentsSummary,
@@ -37,10 +39,17 @@ export const SavingsInvestingChart: React.FC<SavingsInvestingChartProps> = ({
     <div className="space-y-1">
       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
         <span>
-          {annualIncomeSummary} income / {annualSavingsSummary} savings /{' '}
-          {annualInvestmentsSummary} investments
+          <span className="text-gray-600">{annualIncomeSummary}</span> income /{' '}
+          <span className="text-gray-600">{annualSavingsSummary}</span> savings /{' '}
+          <span className="text-gray-600">{annualInvestmentsSummary}</span>{' '}
+          investments
         </span>
-        <span>{wealthIncomePercent.toFixed(0)}% to wealth</span>
+        <span>
+          <span className="text-gray-600">
+            {wealthIncomePercent.toFixed(0)}%
+          </span>{' '}
+          to wealth
+        </span>
       </div>
     </div>
 

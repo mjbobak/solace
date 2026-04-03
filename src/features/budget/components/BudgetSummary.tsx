@@ -6,7 +6,7 @@ import {
   type SummaryView,
 } from '@/features/budget/components/budgetSummary/constants';
 import { IncomeAllocationCard } from '@/features/budget/components/budgetSummary/IncomeAllocationCard';
-import { SavingsInvestingCard } from '@/features/budget/components/budgetSummary/SavingsInvestingCard';
+import { WealthContributionsCard } from '@/features/budget/components/budgetSummary/WealthContributionsCard';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
@@ -126,7 +126,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           wealthRate={wealthRate}
         />
 
-        <SavingsInvestingCard
+        <WealthContributionsCard
           view={savingsInvestingView}
           onToggle={() =>
             setSavingsInvestingView((current) =>
