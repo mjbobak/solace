@@ -6,7 +6,7 @@ import {
   compactCardContentHeight,
   getBarTooltipContent,
   paletteBlue,
-  paletteGreen,
+  paletteOrange,
   palettePurple,
 } from './constants';
 
@@ -23,7 +23,7 @@ interface IncomeAllocationChartProps {
   savingsForAllocation: number;
   essentialIncomePercent: number;
   funsiesIncomePercent: number;
-  savingsIncomePercent: number;
+  wealthIncomePercent: number;
 }
 
 export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
@@ -39,7 +39,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
   savingsForAllocation,
   essentialIncomePercent,
   funsiesIncomePercent,
-  savingsIncomePercent,
+  wealthIncomePercent,
 }) => (
   <div
     className={`mb-1 flex flex-1 flex-col justify-end pt-2 ${compactCardContentHeight}`}
@@ -64,7 +64,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
           style={{ left: `${essentialWidth}%`, width: `${funsiesWidth}%` }}
         />
         <div
-          className={`absolute inset-y-0 ${paletteGreen}`}
+          className={`absolute inset-y-0 ${paletteOrange}`}
           style={{
             left: `${essentialWidth + funsiesWidth}%`,
             width: `${savingsWidth}%`,
@@ -109,7 +109,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
             content={getBarTooltipContent(
               'Wealth',
               savingsForAllocation,
-              savingsIncomePercent,
+              wealthIncomePercent,
             )}
             stacked
             followCursor
@@ -120,7 +120,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
                 left: `${essentialWidth + funsiesWidth}%`,
                 width: `${savingsWidth}%`,
               }}
-              aria-label="Savings portion"
+              aria-label="Wealth portion"
             />
           </Tooltip>
         ) : null}
@@ -139,7 +139,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
           <span>Funsies</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
+          <span className={`h-2.5 w-2.5 rounded-full ${paletteOrange}`} />
           <span>Wealth</span>
         </div>
       </div>

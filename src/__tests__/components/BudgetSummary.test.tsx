@@ -21,6 +21,8 @@ function renderBudgetSummary() {
       investments={1200}
       income={5900}
       savings={650}
+      essentialBudget={2300}
+      funsiesBudget={1750}
       isBudgetFiltered={false}
       planningYear={2026}
       spendBasis="monthly_avg_12"
@@ -31,6 +33,9 @@ function renderBudgetSummary() {
 describe('BudgetSummary', () => {
   it('shows a slim savings and investing summary by default', () => {
     renderBudgetSummary();
+    const incomeCard = screen.getByRole('region', {
+      name: 'Income Allocation',
+    });
     const budgetCard = screen.getByRole('region', {
       name: 'Budget Utilization',
     });
@@ -45,6 +50,11 @@ describe('BudgetSummary', () => {
     expect(within(budgetCard).getByText('Income')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Budgeted')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Spent')).toBeInTheDocument();
+    expect(
+      within(incomeCard).getByText(
+        'See how much of your income is distributed across different spending categories.',
+      ),
+    ).toBeInTheDocument();
     expect(
       within(budgetCard).queryByText('Percent Used'),
     ).not.toBeInTheDocument();
@@ -63,11 +73,18 @@ describe('BudgetSummary', () => {
 
   it('lets the user switch budget utilization between chart and numbers', () => {
     renderBudgetSummary();
+    const incomeCard = screen.getByRole('region', {
+      name: 'Income Allocation',
+    });
     const budgetCard = screen.getByRole('region', {
       name: 'Budget Utilization',
     });
 
     expect(within(budgetCard).getByText('62% used')).toBeInTheDocument();
+    expect(within(incomeCard).getByText('Wealth')).toBeInTheDocument();
+    expect(
+      within(incomeCard).getByLabelText('Wealth portion'),
+    ).toBeInTheDocument();
     fireEvent.click(
       within(budgetCard).getByRole('button', { name: 'Show numbers view' }),
     );
@@ -81,6 +98,24 @@ describe('BudgetSummary', () => {
     expect(within(budgetCard).getByText('Spent')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Remaining')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Percent Used')).toBeInTheDocument();
+  });
+
+  it('shows total wealth in income allocation numbers', () => {
+    renderBudgetSummary();
+    const incomeCard = screen.getByRole('region', {
+      name: 'Income Allocation',
+    });
+
+    fireEvent.click(
+      within(incomeCard).getByRole('button', { name: 'Show numbers view' }),
+    );
+
+    expect(within(incomeCard).getByText('Wealth')).toBeInTheDocument();
+    expect(
+      within(incomeCard).getByText((_, element) =>
+        element?.textContent === '$22,200annual',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('lets the user switch savings and investing between chart and numbers', () => {

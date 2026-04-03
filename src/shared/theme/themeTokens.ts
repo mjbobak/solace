@@ -55,6 +55,7 @@ export const chartTheme = {
 export const budgetSummaryTheme = {
   allocationBlue: 'bg-[#7BB6EB]',
   allocationGreen: 'bg-[#97DDAA]',
+  allocationOrange: 'bg-[#F2A36B]',
   allocationPurple: 'bg-[#A890E6]',
   allocationPurpleText: 'text-[#7B63C8]',
   allocationPurpleTextMuted: 'text-[#7B63C8]/75',

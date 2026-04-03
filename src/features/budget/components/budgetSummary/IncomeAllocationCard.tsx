@@ -26,7 +26,7 @@ interface IncomeAllocationCardProps {
   savingsForAllocation: number;
   essentialIncomePercent: number;
   funsiesIncomePercent: number;
-  savingsIncomePercent: number;
+  wealthIncomePercent: number;
   income: number;
   wealthRate: number;
 }
@@ -46,7 +46,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   savingsForAllocation,
   essentialIncomePercent,
   funsiesIncomePercent,
-  savingsIncomePercent,
+  wealthIncomePercent,
   income,
   wealthRate,
 }) => (
@@ -65,7 +65,13 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
       onToggle={onToggle}
     />
 
-    {view === 'chart' ? (
+    <div className="space-y-3">
+      <p className="-mt-2 text-sm leading-relaxed text-gray-500">
+        See how much of your income is distributed across different spending
+        categories.
+      </p>
+
+      {view === 'chart' ? (
       <IncomeAllocationChart
         annualIncomeSummary={annualIncomeSummary}
         annualEssentialSummary={annualEssentialSummary}
@@ -79,7 +85,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
         savingsForAllocation={savingsForAllocation}
         essentialIncomePercent={essentialIncomePercent}
         funsiesIncomePercent={funsiesIncomePercent}
-        savingsIncomePercent={savingsIncomePercent}
+        wealthIncomePercent={wealthIncomePercent}
       />
     ) : (
       <IncomeAllocationNumbers
@@ -89,6 +95,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
         savingsForAllocation={savingsForAllocation}
         wealthRate={wealthRate}
       />
-    )}
+      )}
+    </div>
   </motion.div>
 );

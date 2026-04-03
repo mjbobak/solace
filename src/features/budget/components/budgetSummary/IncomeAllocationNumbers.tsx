@@ -33,7 +33,7 @@ export const IncomeAllocationNumbers: React.FC<IncomeAllocationNumbersProps> = (
         <CurrencyStack monthlyAmount={funsiesBudget} compact />
       </div>
       <div>
-        <p className="mb-1 text-[11px] text-gray-500">Savings</p>
+        <p className="mb-1 text-[11px] text-gray-500">Wealth</p>
         <CurrencyStack monthlyAmount={savingsForAllocation} compact />
       </div>
       <div>

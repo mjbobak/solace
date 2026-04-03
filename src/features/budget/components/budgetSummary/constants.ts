@@ -6,6 +6,7 @@ export type SummaryView = 'chart' | 'numbers';
 
 export const paletteBlue = budgetSummaryTheme.allocationBlue;
 export const paletteGreen = budgetSummaryTheme.allocationGreen;
+export const paletteOrange = budgetSummaryTheme.allocationOrange;
 export const palettePurple = budgetSummaryTheme.allocationPurple;
 export const palettePurpleText = budgetSummaryTheme.allocationPurpleText;
 export const palettePurpleTextMuted =

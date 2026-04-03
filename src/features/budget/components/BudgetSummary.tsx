@@ -81,19 +81,19 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     income > 0 ? (essentialBudget / income) * 100 : 0;
   const funsiesIncomePercent = income > 0 ? (funsiesBudget / income) * 100 : 0;
   const investmentIncomePercent = income > 0 ? (investments / income) * 100 : 0;
-  const savingsIncomePercent =
+  const plannedSavingsIncomePercent =
     income > 0 ? (plannedSavings / income) * 100 : 0;
+  const wealthIncomePercent = income > 0 ? (totalWealth / income) * 100 : 0;
   const essentialWidth = Math.min(essentialIncomePercent, 100);
   const funsiesWidth = Math.min(
     funsiesIncomePercent,
     Math.max(100 - essentialWidth, 0),
   );
   const savingsWidth = Math.min(
-    savingsIncomePercent,
+    wealthIncomePercent,
     Math.max(100 - essentialWidth - funsiesWidth, 0),
   );
-  const wealthIncomePercent = income > 0 ? (totalWealth / income) * 100 : 0;
-  const savingsWealthWidth = Math.min(savingsIncomePercent, 100);
+  const savingsWealthWidth = Math.min(plannedSavingsIncomePercent, 100);
   const investmentWealthWidth = Math.min(
     investmentIncomePercent,
     Math.max(100 - savingsWealthWidth, 0),
@@ -121,7 +121,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           savingsForAllocation={savingsForAllocation}
           essentialIncomePercent={essentialIncomePercent}
           funsiesIncomePercent={funsiesIncomePercent}
-          savingsIncomePercent={savingsIncomePercent}
+          wealthIncomePercent={wealthIncomePercent}
           income={income}
           wealthRate={wealthRate}
         />
@@ -141,7 +141,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           investmentWealthWidth={investmentWealthWidth}
           plannedSavings={plannedSavings}
           investments={investments}
-          savingsIncomePercent={savingsIncomePercent}
+          savingsIncomePercent={plannedSavingsIncomePercent}
           investmentIncomePercent={investmentIncomePercent}
           totalWealth={totalWealth}
           wealthRate={wealthRate}
