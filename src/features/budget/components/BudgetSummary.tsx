@@ -291,7 +291,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                   <span>
                     {annualIncomeSummary} income / {annualEssentialSummary}{' '}
                     essential / {annualFunsiesSummary} funsies /{' '}
-                    {annualWealthSummary} savings
+                    {annualWealthSummary} wealth
                   </span>
                 </div>
               </div>
@@ -385,16 +385,22 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                     <span>Income</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`} />
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`}
+                    />
                     <span>Essential</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
+                    />
                     <span>Funsies</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${palettePurple}`} />
-                    <span>Savings</span>
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${palettePurple}`}
+                    />
+                    <span>Wealth</span>
                   </div>
                 </div>
               </div>
@@ -551,11 +557,15 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                     <span>Income</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`} />
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${paletteBlue}`}
+                    />
                     <span>Budgeted</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
+                    />
                     <span>Spent</span>
                   </div>
                 </div>
@@ -705,11 +715,15 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                       <span>Income</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`} />
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${paletteGreen}`}
+                      />
                       <span>Savings</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full ${palettePurple}`} />
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${palettePurple}`}
+                      />
                       <span>Budgeted Investments</span>
                     </div>
                   </div>
