@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BudgetSummary } from '@/features/budget/components/BudgetSummary';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
@@ -35,6 +35,15 @@ function renderBudgetSummary() {
 }
 
 describe('BudgetSummary', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-03T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('shows a slim savings and investing summary by default', () => {
     renderBudgetSummary();
     const incomeCard = screen.getByRole('region', {
@@ -170,5 +179,49 @@ describe('BudgetSummary', () => {
       left: '11.016949152542372%',
       width: '20.33898305084746%',
     });
+  });
+
+  it('uses completed-month totals only for budget utilization', () => {
+    render(
+      <BudgetSummary
+        totals={totals}
+        totalBudgeted={4050}
+        budgetUtilizationTotals={{
+          budgeted: 4050,
+          spent: 32000,
+          remaining: 12865,
+          percentage: 71.3295441885,
+        }}
+        investments={1200}
+        income={20000}
+        savings={650}
+        essentialBudget={2300}
+        funsiesBudget={1750}
+        isBudgetFiltered={true}
+        planningYear={2026}
+        spendBasis="monthly_avg_elapsed"
+      />,
+    );
+
+    const budgetCard = screen.getByRole('region', {
+      name: 'Budget Utilization',
+    });
+
+    expect(
+      within(budgetCard).getByText((_, element) =>
+        element?.textContent ===
+        'Total for completed months: $60,000 income / $44,865 budget / $32,000 spent',
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      within(budgetCard).getByRole('button', { name: 'Show numbers view' }),
+    );
+
+    expect(within(budgetCard).getAllByText('Total for completed months')).toHaveLength(
+      4,
+    );
+    expect(within(budgetCard).getByText('$44,865')).toBeInTheDocument();
+    expect(within(budgetCard).getByText('$32,000')).toBeInTheDocument();
   });
 });

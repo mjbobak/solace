@@ -41,9 +41,14 @@ export function getCardVariants(index: number): Variants {
 export function getBarTooltipContent(
   label: string,
   amount: number,
-  percentOfIncome: number,
+  amountContextLabelOrPercent: string | number,
+  percentOfIncome?: number,
 ): string {
+  if (typeof amountContextLabelOrPercent === 'string') {
+    return `${label}\n${formatWholeCurrency(amount)} ${amountContextLabelOrPercent.toLowerCase()}\n${(percentOfIncome ?? 0).toFixed(1)}% of income`;
+  }
+
   return `${label}\n${formatWholeCurrency(amount * 12)} annual\n${formatWholeCurrency(
     amount,
-  )} monthly\n${percentOfIncome.toFixed(1)}% of income`;
+  )} monthly\n${amountContextLabelOrPercent.toFixed(1)}% of income`;
 }

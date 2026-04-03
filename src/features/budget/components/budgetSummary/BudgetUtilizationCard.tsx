@@ -11,9 +11,10 @@ interface BudgetUtilizationCardProps {
   view: SummaryView;
   onToggle: () => void;
   showFilteredBadge: boolean;
-  annualIncomeSummary: string;
-  annualBudgetedSummary: string;
-  annualSpentSummary: string;
+  spendBasisLabel: string;
+  incomeSummary: string;
+  budgetedSummary: string;
+  spentSummary: string;
   usedPercent: number;
   budgetedIncomePercent: number;
   spentIncomePercent: number;
@@ -23,6 +24,7 @@ interface BudgetUtilizationCardProps {
   spentForChart: number;
   remainingBudgetForChart: number;
   unbudgetedIncomeForChart: number;
+  amountContextLabel: string;
   income: number;
   budgetedForChart: number;
   remainingForChart: number;
@@ -33,9 +35,10 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   view,
   onToggle,
   showFilteredBadge,
-  annualIncomeSummary,
-  annualBudgetedSummary,
-  annualSpentSummary,
+  spendBasisLabel,
+  incomeSummary,
+  budgetedSummary,
+  spentSummary,
   usedPercent,
   budgetedIncomePercent,
   spentIncomePercent,
@@ -45,6 +48,7 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   spentForChart,
   remainingBudgetForChart,
   unbudgetedIncomeForChart,
+  amountContextLabel,
   income,
   budgetedForChart,
   remainingForChart,
@@ -68,9 +72,10 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
 
     {view === 'chart' ? (
       <BudgetUtilizationChart
-        annualIncomeSummary={annualIncomeSummary}
-        annualBudgetedSummary={annualBudgetedSummary}
-        annualSpentSummary={annualSpentSummary}
+        spendBasisLabel={spendBasisLabel}
+        incomeSummary={incomeSummary}
+        budgetedSummary={budgetedSummary}
+        spentSummary={spentSummary}
         usedPercent={usedPercent}
         budgetedIncomePercent={budgetedIncomePercent}
         spentIncomePercent={spentIncomePercent}
@@ -80,6 +85,7 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
         unbudgetedIncomeForChart={unbudgetedIncomeForChart}
+        amountContextLabel={amountContextLabel}
       />
     ) : (
       <BudgetUtilizationNumbers
@@ -89,6 +95,7 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
         remainingForChart={remainingForChart}
         remainingTotal={remainingTotal}
         usedPercent={usedPercent}
+        amountContextLabel={amountContextLabel}
       />
     )}
   </motion.div>

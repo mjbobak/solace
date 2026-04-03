@@ -10,9 +10,10 @@ import {
 } from './constants';
 
 interface BudgetUtilizationChartProps {
-  annualIncomeSummary: string;
-  annualBudgetedSummary: string;
-  annualSpentSummary: string;
+  spendBasisLabel: string;
+  incomeSummary: string;
+  budgetedSummary: string;
+  spentSummary: string;
   usedPercent: number;
   budgetedIncomePercent: number;
   spentIncomePercent: number;
@@ -22,12 +23,14 @@ interface BudgetUtilizationChartProps {
   spentForChart: number;
   remainingBudgetForChart: number;
   unbudgetedIncomeForChart: number;
+  amountContextLabel: string;
 }
 
 export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
-  annualIncomeSummary,
-  annualBudgetedSummary,
-  annualSpentSummary,
+  spendBasisLabel,
+  incomeSummary,
+  budgetedSummary,
+  spentSummary,
   usedPercent,
   budgetedIncomePercent,
   spentIncomePercent,
@@ -37,6 +40,7 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
   spentForChart,
   remainingBudgetForChart,
   unbudgetedIncomeForChart,
+  amountContextLabel,
 }) => (
   <div
     className={`mb-1 flex flex-1 flex-col justify-end pt-2 ${compactCardContentHeight}`}
@@ -44,9 +48,10 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
     <div className="space-y-1">
       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
         <span>
-          <span className="text-gray-600">{annualIncomeSummary}</span> income /{' '}
-          <span className="text-gray-600">{annualBudgetedSummary}</span> budget /{' '}
-          <span className="text-gray-600">{annualSpentSummary}</span> spent
+          <span className="text-gray-500">{spendBasisLabel}:</span>{' '}
+          <span className="text-gray-600">{incomeSummary}</span> income /{' '}
+          <span className="text-gray-600">{budgetedSummary}</span> budget /{' '}
+          <span className="text-gray-600">{spentSummary}</span> spent
         </span>
         <span>
           <span className="text-gray-600">{usedPercent.toFixed(0)}%</span> used
@@ -68,7 +73,12 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
 
         {spentWidth > 0 ? (
           <Tooltip
-            content={getBarTooltipContent('Spent', spentForChart, spentIncomePercent)}
+            content={getBarTooltipContent(
+              'Spent',
+              spentForChart,
+              amountContextLabel,
+              spentIncomePercent,
+            )}
             stacked
             followCursor
           >
@@ -85,6 +95,7 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
             content={getBarTooltipContent(
               'Budgeted but not spent',
               remainingBudgetForChart,
+              amountContextLabel,
               budgetedIncomePercent - spentIncomePercent,
             )}
             stacked
@@ -103,6 +114,7 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
             content={getBarTooltipContent(
               'Income not budgeted',
               unbudgetedIncomeForChart,
+              amountContextLabel,
               100 - budgetedIncomePercent,
             )}
             stacked

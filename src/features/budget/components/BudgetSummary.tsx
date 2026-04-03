@@ -9,7 +9,11 @@ import { IncomeAllocationCard } from '@/features/budget/components/budgetSummary
 import { WealthContributionsCard } from '@/features/budget/components/budgetSummary/WealthContributionsCard';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 import type { SpendBasis } from '@/features/budget/types/budgetView';
-import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
+import {
+  getCompletedMonthsForYear,
+  getSpendBasisLabel,
+  scaleAnnualAmountForSpendBasis,
+} from '@/shared/utils/spendBasis';
 
 interface BudgetSummaryProps {
   totals: BudgetTotals;
@@ -47,26 +51,27 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     useState<SummaryView>('chart');
 
   const completedMonths = getCompletedMonthsForYear(planningYear);
-  const usedBudgetBase =
+  const comparisonIncome = scaleAnnualAmountForSpendBasis({
+    annualAmount: income * 12,
+    spendBasis,
+    completedMonths,
+  });
+  const budgetedForChart =
     budgetUtilizationTotals.spent + budgetUtilizationTotals.remaining;
+  const spentForChart = budgetUtilizationTotals.spent;
+  const remainingForChart = budgetUtilizationTotals.remaining;
   const usedPercent =
-    usedBudgetBase > 0 ? (budgetUtilizationTotals.spent / usedBudgetBase) * 100 : 0;
-  const budgetedForChart = budgetUtilizationTotals.budgeted;
-  const spentForChart = normalizeToMonthlyComparison(
-    budgetUtilizationTotals.spent,
-    spendBasis,
-    completedMonths,
-  );
-  const remainingForChart = normalizeToMonthlyComparison(
-    budgetUtilizationTotals.remaining,
-    spendBasis,
-    completedMonths,
-  );
+    budgetedForChart > 0 ? (budgetUtilizationTotals.spent / budgetedForChart) * 100 : 0;
+  const spendBasisLabel = getSpendBasisLabel(spendBasis);
   const budgetedIncomePercent =
-    income > 0 ? (budgetedForChart / income) * 100 : 0;
-  const spentIncomePercent = income > 0 ? (spentForChart / income) * 100 : 0;
+    comparisonIncome > 0 ? (budgetedForChart / comparisonIncome) * 100 : 0;
+  const spentIncomePercent =
+    comparisonIncome > 0 ? (spentForChart / comparisonIncome) * 100 : 0;
   const remainingBudgetForChart = Math.max(budgetedForChart - spentForChart, 0);
-  const unbudgetedIncomeForChart = Math.max(income - budgetedForChart, 0);
+  const unbudgetedIncomeForChart = Math.max(
+    comparisonIncome - budgetedForChart,
+    0,
+  );
   const spentWidth = Math.min(spentIncomePercent, 100);
   const remainingBudgetWidth = Math.max(
     Math.min(budgetedIncomePercent, 100) - spentWidth,
@@ -159,9 +164,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           )
         }
         showFilteredBadge={isBudgetFiltered}
-        annualIncomeSummary={formatWholeCurrency(income * 12)}
-        annualBudgetedSummary={formatWholeCurrency(budgetedForChart * 12)}
-        annualSpentSummary={formatWholeCurrency(spentForChart * 12)}
+        spendBasisLabel={spendBasisLabel}
+        incomeSummary={formatWholeCurrency(comparisonIncome)}
+        budgetedSummary={formatWholeCurrency(budgetedForChart)}
+        spentSummary={formatWholeCurrency(spentForChart)}
         usedPercent={usedPercent}
         budgetedIncomePercent={budgetedIncomePercent}
         spentIncomePercent={spentIncomePercent}
@@ -171,7 +177,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
         unbudgetedIncomeForChart={unbudgetedIncomeForChart}
-        income={income}
+        amountContextLabel={spendBasisLabel}
+        income={comparisonIncome}
         budgetedForChart={budgetedForChart}
         remainingForChart={remainingForChart}
         remainingTotal={budgetUtilizationTotals.remaining}
@@ -179,20 +186,3 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     </div>
   );
 };
-
-function normalizeToMonthlyComparison(
-  amount: number,
-  spendBasis: SpendBasis,
-  completedMonths: number,
-) {
-  switch (spendBasis) {
-    case 'annual_full_year':
-      return amount / 12;
-    case 'monthly_avg_elapsed':
-      return completedMonths > 0 ? amount / completedMonths : 0;
-    case 'monthly_current_month':
-    case 'monthly_avg_12':
-    default:
-      return amount;
-  }
-}
