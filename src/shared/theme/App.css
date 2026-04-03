@@ -214,6 +214,18 @@ body {
 
   .button-base {
     @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50;
+    --button-scale: 1;
+    --button-translate-y: 0px;
+    transform: translateY(var(--button-translate-y)) scale(var(--button-scale));
+    will-change: transform;
+  }
+
+  .button-base:hover:not(:disabled) {
+    --button-scale: 1.03;
+  }
+
+  .button-base:active:not(:disabled) {
+    --button-scale: 0.97;
   }
 
   .button-primary {
@@ -229,7 +241,7 @@ body {
   }
 
   .button-primary:hover:not(:disabled) {
-    transform: translateY(-1px);
+    --button-translate-y: -1px;
     background: linear-gradient(
       135deg,
       color-mix(in srgb, var(--color-brand) 96%, white 4%),
@@ -266,7 +278,7 @@ body {
   }
 
   .button-danger:hover:not(:disabled) {
-    transform: translateY(-1px);
+    --button-translate-y: -1px;
     box-shadow: 0 22px 42px -22px color-mix(in srgb, var(--color-danger) 66%, transparent);
   }
 
