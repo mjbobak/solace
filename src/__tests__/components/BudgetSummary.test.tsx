@@ -4,6 +4,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { BudgetSummary } from '@/features/budget/components/BudgetSummary';
+import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 
 const totals: BudgetTotals = {
@@ -13,11 +14,35 @@ const totals: BudgetTotals = {
   percentage: 61.7283950617,
 };
 
+const budgetEntries: BudgetEntry[] = [
+  {
+    id: 'groceries',
+    expenseType: 'ESSENTIAL',
+    expenseCategory: 'HOME',
+    expenseLabel: 'Groceries',
+    budgeted: 2300,
+    spent: 1300,
+    remaining: 1000,
+    percentage: 56.5217391304,
+  },
+  {
+    id: 'dining-out',
+    expenseType: 'FUNSIES',
+    expenseCategory: 'LIFESTYLE',
+    expenseLabel: 'Dining Out',
+    budgeted: 1750,
+    spent: 1200,
+    remaining: 550,
+    percentage: 68.5714285714,
+  },
+];
+
 function renderBudgetSummary() {
   render(
     <BudgetSummary
       totals={totals}
       totalBudgeted={4050}
+      budgetEntries={budgetEntries}
       investments={1200}
       income={5900}
       savings={650}
@@ -98,6 +123,43 @@ describe('BudgetSummary', () => {
     expect(within(budgetCard).getByText('Spent')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Remaining')).toBeInTheDocument();
     expect(within(budgetCard).getByText('Percent Used')).toBeInTheDocument();
+  });
+
+  it('lets the user narrow budget utilization to selected components', () => {
+    renderBudgetSummary();
+    const budgetCard = screen.getByRole('region', {
+      name: 'Budget Utilization',
+    });
+
+    expect(within(budgetCard).getByText('62% used')).toBeInTheDocument();
+
+    fireEvent.click(
+      within(budgetCard).getByLabelText(
+        'Include Dining Out in budget utilization',
+      ),
+    );
+
+    expect(within(budgetCard).getByText('57% used')).toBeInTheDocument();
+    expect(within(budgetCard).getByText('$70,800')).toBeInTheDocument();
+    expect(within(budgetCard).getByText('$27,600')).toBeInTheDocument();
+    expect(within(budgetCard).getByText('$15,600')).toBeInTheDocument();
+  });
+
+  it('shows an empty-state prompt when no components are selected', () => {
+    renderBudgetSummary();
+    const budgetCard = screen.getByRole('region', {
+      name: 'Budget Utilization',
+    });
+
+    fireEvent.click(
+      within(budgetCard).getByLabelText('Select all budget components'),
+    );
+
+    expect(
+      within(budgetCard).getByText(
+        'Select at least one component to preview budget utilization.',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('shows total wealth in income allocation numbers', () => {

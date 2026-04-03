@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { BudgetUtilizationCard } from '@/features/budget/components/budgetSummary/BudgetUtilizationCard';
 import {
@@ -8,12 +8,13 @@ import {
 import { IncomeAllocationCard } from '@/features/budget/components/budgetSummary/IncomeAllocationCard';
 import { WealthContributionsCard } from '@/features/budget/components/budgetSummary/WealthContributionsCard';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
-import type { SpendBasis } from '@/features/budget/types/budgetView';
+import type { BudgetEntry, SpendBasis } from '@/features/budget/types/budgetView';
 import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
 
 interface BudgetSummaryProps {
   totals: BudgetTotals;
   totalBudgeted: number;
+  budgetEntries: BudgetEntry[];
   investments: number;
   income: number;
   savings: number;
@@ -27,6 +28,7 @@ interface BudgetSummaryProps {
 export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const {
     totals,
+    budgetEntries,
     investments,
     income,
     savings,
@@ -43,19 +45,64 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     useState<SummaryView>('chart');
   const [savingsInvestingView, setSavingsInvestingView] =
     useState<SummaryView>('chart');
+  const [selectedBudgetEntryIds, setSelectedBudgetEntryIds] = useState<string[]>(
+    () => budgetEntries.map((entry) => entry.id),
+  );
+
+  useEffect(() => {
+    const availableIds = budgetEntries.map((entry) => entry.id);
+
+    setSelectedBudgetEntryIds((current) => {
+      if (current.length === 0) {
+        return availableIds;
+      }
+
+      const availableIdSet = new Set(availableIds);
+      const nextSelection = current.filter((id) => availableIdSet.has(id));
+      return nextSelection.length > 0 ? nextSelection : availableIds;
+    });
+  }, [budgetEntries]);
+
+  const budgetComponentOptions = useMemo(
+    () =>
+      budgetEntries.map((entry) => ({
+        id: entry.id,
+        label: entry.expenseLabel,
+      })),
+    [budgetEntries],
+  );
+
+  const selectedBudgetEntries = useMemo(() => {
+    if (selectedBudgetEntryIds.length === 0) {
+      return [];
+    }
+
+    const selectedIdSet = new Set(selectedBudgetEntryIds);
+    return budgetEntries.filter((entry) => selectedIdSet.has(entry.id));
+  }, [budgetEntries, selectedBudgetEntryIds]);
+
+  const budgetUtilizationTotals = useMemo(
+    () => ({
+      budgeted: selectedBudgetEntries.reduce((sum, entry) => sum + entry.budgeted, 0),
+      spent: selectedBudgetEntries.reduce((sum, entry) => sum + entry.spent, 0),
+      remaining: selectedBudgetEntries.reduce((sum, entry) => sum + entry.remaining, 0),
+    }),
+    [selectedBudgetEntries],
+  );
 
   const completedMonths = getCompletedMonthsForYear(planningYear);
-  const usedBudgetBase = totals.spent + totals.remaining;
+  const usedBudgetBase =
+    budgetUtilizationTotals.spent + budgetUtilizationTotals.remaining;
   const usedPercent =
-    usedBudgetBase > 0 ? (totals.spent / usedBudgetBase) * 100 : 0;
-  const budgetedForChart = totals.budgeted;
+    usedBudgetBase > 0 ? (budgetUtilizationTotals.spent / usedBudgetBase) * 100 : 0;
+  const budgetedForChart = budgetUtilizationTotals.budgeted;
   const spentForChart = normalizeToMonthlyComparison(
-    totals.spent,
+    budgetUtilizationTotals.spent,
     spendBasis,
     completedMonths,
   );
   const remainingForChart = normalizeToMonthlyComparison(
-    totals.remaining,
+    budgetUtilizationTotals.remaining,
     spendBasis,
     completedMonths,
   );
@@ -168,10 +215,13 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
         unbudgetedIncomeForChart={unbudgetedIncomeForChart}
+        componentOptions={budgetComponentOptions}
+        selectedComponentIds={selectedBudgetEntryIds}
+        onSelectedComponentIdsChange={setSelectedBudgetEntryIds}
         income={income}
         budgetedForChart={budgetedForChart}
         remainingForChart={remainingForChart}
-        remainingTotal={totals.remaining}
+        remainingTotal={budgetUtilizationTotals.remaining}
       />
     </div>
   );

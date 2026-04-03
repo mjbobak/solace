@@ -247,12 +247,13 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
 
     return (
       <div className="space-y-3">
-        <BudgetSummary
-          totals={totals}
-          totalBudgeted={overallTotals.budgeted}
-          investments={investments}
-          income={income}
-          savings={savings}
+      <BudgetSummary
+        totals={totals}
+        totalBudgeted={overallTotals.budgeted}
+        budgetEntries={budgetData}
+        investments={investments}
+        income={income}
+        savings={savings}
           essentialBudget={essentialBudget}
           funsiesBudget={funsiesBudget}
           isBudgetFiltered={isBudgetFiltered}
