@@ -101,16 +101,16 @@ export function getBudgetTableColumns(
       key: 'budget',
       header: 'Budget',
       accessor: (row) => (
-        <Tooltip content={'Top: Annual\nBottom: Monthly'} stacked>
-          <div className="flex flex-col items-end leading-tight">
-            <span className="font-semibold">
-              {formatCurrency(row.budgeted * 12, '$')}
-            </span>
-            <span className="text-xs text-gray-500">
-              {formatCurrency(row.budgeted, '$')}
-            </span>
-          </div>
-        </Tooltip>
+        <div className="flex flex-col items-end leading-tight">
+          <span className="font-semibold">
+            {formatCurrency(row.budgeted * 12, '$')}
+            <span className="ml-1 text-xs font-normal text-gray-500">/year</span>
+          </span>
+          <span className="text-xs text-gray-500">
+            {formatCurrency(row.budgeted, '$')}
+            <span className="ml-1">/mo</span>
+          </span>
+        </div>
       ),
       sortValue: (row) => row.budgeted * 12,
       sortable: true,

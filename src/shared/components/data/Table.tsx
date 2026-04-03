@@ -96,6 +96,7 @@ export function Table<T>({
   onSortChange,
 }: TableProps<T>) {
   const checkboxClassName = 'checkbox-input';
+  const hasHighlightedColumn = highlightedIds.size > 0;
 
   const [internalSortState, setInternalSortState] = useState<SortState>({
     column: null,
@@ -179,7 +180,7 @@ export function Table<T>({
                   {column.header}
                 </th>
               ))}
-              <th className="w-12 px-3 py-1" />
+              {hasHighlightedColumn && <th className="w-12 px-3 py-1" />}
             </tr>
           </thead>
           <tbody>
@@ -195,7 +196,9 @@ export function Table<T>({
                     <div className="table-skeleton h-4 animate-pulse rounded" />
                   </td>
                 ))}
-                <td className="px-3 py-1 w-12 flex items-center justify-end" />
+                {hasHighlightedColumn && (
+                  <td className="px-3 py-1 w-12 flex items-center justify-end" />
+                )}
               </tr>
             ))}
           </tbody>
@@ -265,7 +268,9 @@ export function Table<T>({
                 </div>
               </th>
             ))}
-            <th className="table-header-cell w-12 px-3 py-3.5 text-right" />
+            {hasHighlightedColumn && (
+              <th className="table-header-cell w-12 px-3 py-3.5 text-right" />
+            )}
           </tr>
         </thead>
         <tbody>
@@ -309,14 +314,16 @@ export function Table<T>({
                     {column.accessor(row)}
                   </td>
                 ))}
-                <td className="px-3 text-right">
-                  {highlightedIds.has(rowKey(row)) && (
-                    <div
-                      className="table-highlight-dot inline-block h-2 w-2 animate-pulse rounded-full"
-                      title="Recently modified"
-                    />
-                  )}
-                </td>
+                {hasHighlightedColumn && (
+                  <td className="px-3 text-right">
+                    {highlightedIds.has(rowKey(row)) && (
+                      <div
+                        className="table-highlight-dot inline-block h-2 w-2 animate-pulse rounded-full"
+                        title="Recently modified"
+                      />
+                    )}
+                  </td>
+                )}
               </tr>
             );
           })}
