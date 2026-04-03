@@ -107,7 +107,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
         {savingsWidth > 0 ? (
           <Tooltip
             content={getBarTooltipContent(
-              'Savings',
+              'Wealth',
               savingsForAllocation,
               savingsIncomePercent,
             )}
