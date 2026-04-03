@@ -76,6 +76,9 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
     const [editingItem, setEditingItem] = useState<BudgetEntry | undefined>(
       undefined,
     );
+    const [selectedBudgetIds, setSelectedBudgetIds] = useState<Set<string>>(
+      () => new Set(),
+    );
     const [plannedAnnualNetIncome, setPlannedAnnualNetIncome] = useState(0);
 
     const normalizeAccrual = true;
@@ -133,10 +136,32 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       expenseTypeFilter,
       expenseCategoryFilter,
     );
+
+    React.useEffect(() => {
+      const availableIds = new Set(budgetData.map((entry) => entry.id));
+
+      setSelectedBudgetIds((current) => {
+        if (current.size === 0) {
+          return current;
+        }
+
+        const next = new Set(
+          [...current].filter((id) => availableIds.has(id)),
+        );
+
+        return next.size === current.size ? current : next;
+      });
+    }, [budgetData]);
+
     const isBudgetFiltered =
       expenseTypeFilter !== 'ALL' || expenseCategoryFilter.length > 0;
     const totals = useBudgetCalculations(budgetData);
     const overallTotals = useBudgetCalculations(budgetEntries);
+    const selectedBudgetData =
+      selectedBudgetIds.size > 0
+        ? budgetData.filter((entry) => selectedBudgetIds.has(entry.id))
+        : budgetData;
+    const budgetUtilizationTotals = useBudgetCalculations(selectedBudgetData);
 
     const operations = useBudgetOperations(budgetEntries, {
       upsertBudgetEntry,
@@ -236,6 +261,27 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       handleDelete: handleDeleteClick,
       handleViewSpending: handleViewSpendingClick,
     });
+    const handleSelectionChange = (id: string) => {
+      setSelectedBudgetIds((current) => {
+        const next = new Set(current);
+
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+
+        return next;
+      });
+    };
+    const handleSelectAll = () => {
+      setSelectedBudgetIds((current) => {
+        const allVisibleIds = budgetData.map((entry) => entry.id);
+        const allVisibleSelected = allVisibleIds.every((id) => current.has(id));
+
+        return allVisibleSelected ? new Set() : new Set(allVisibleIds);
+      });
+    };
 
     if (isLoadingBudgets) {
       return (
@@ -250,13 +296,13 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       <BudgetSummary
         totals={totals}
         totalBudgeted={overallTotals.budgeted}
-        budgetEntries={budgetData}
+        budgetUtilizationTotals={budgetUtilizationTotals}
         investments={investments}
         income={income}
         savings={savings}
           essentialBudget={essentialBudget}
           funsiesBudget={funsiesBudget}
-          isBudgetFiltered={isBudgetFiltered}
+          isBudgetFiltered={isBudgetFiltered || selectedBudgetIds.size > 0}
           planningYear={planningYear}
           spendBasis={spendBasis}
         />
@@ -285,6 +331,10 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
             columns={columns}
             data={budgetData}
             rowKey={(row) => row.id}
+            selectable
+            selectedIds={selectedBudgetIds}
+            onSelectionChange={handleSelectionChange}
+            onSelectAll={handleSelectAll}
             emptyMessage="No budget entries found"
           />
         </div>

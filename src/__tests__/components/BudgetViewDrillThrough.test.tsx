@@ -6,25 +6,42 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { BudgetView } from '@/features/budget/components/BudgetView';
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 
-const { getYearProjection, handleToggleAccrual, handleDelete, budgetEntries } =
-  vi.hoisted(() => ({
-    getYearProjection: vi.fn(),
-    handleToggleAccrual: vi.fn(),
-    handleDelete: vi.fn(),
-    budgetEntries: [
-      {
-        id: 'BUD-0042',
-        expenseType: 'ESSENTIAL',
-        expenseCategory: 'HOME',
-        expenseLabel: 'Groceries',
-        budgeted: 600,
-        spent: 275,
-        remaining: 325,
-        percentage: 45.8,
-        isAccrual: false,
-      },
-    ] satisfies BudgetEntry[],
-  }));
+const {
+  budgetSummarySpy,
+  getYearProjection,
+  handleToggleAccrual,
+  handleDelete,
+  budgetEntries,
+} = vi.hoisted(() => ({
+  budgetSummarySpy: vi.fn(),
+  getYearProjection: vi.fn(),
+  handleToggleAccrual: vi.fn(),
+  handleDelete: vi.fn(),
+  budgetEntries: [
+    {
+      id: 'BUD-0042',
+      expenseType: 'ESSENTIAL',
+      expenseCategory: 'HOME',
+      expenseLabel: 'Groceries',
+      budgeted: 600,
+      spent: 275,
+      remaining: 325,
+      percentage: 45.8,
+      isAccrual: false,
+    },
+    {
+      id: 'BUD-0099',
+      expenseType: 'FUNSIES',
+      expenseCategory: 'HOME',
+      expenseLabel: 'Dining Out',
+      budgeted: 300,
+      spent: 125,
+      remaining: 175,
+      percentage: 41.7,
+      isAccrual: false,
+    },
+  ] satisfies BudgetEntry[],
+}));
 
 vi.mock('sonner', () => ({
   toast: {
@@ -59,12 +76,18 @@ vi.mock('@/features/budget/hooks/useBudgetFiltering', () => ({
 }));
 
 vi.mock('@/features/budget/hooks/useBudgetCalculations', () => ({
-  useBudgetCalculations: () => ({
-    budgeted: 600,
-    spent: 275,
-    remaining: 325,
-    percentage: 45.8,
-  }),
+  useBudgetCalculations: (entries: BudgetEntry[]) => {
+    const budgeted = entries.reduce((sum, entry) => sum + entry.budgeted, 0);
+    const spent = entries.reduce((sum, entry) => sum + entry.spent, 0);
+    const remaining = entries.reduce((sum, entry) => sum + entry.remaining, 0);
+
+    return {
+      budgeted,
+      spent,
+      remaining,
+      percentage: budgeted > 0 ? (spent / budgeted) * 100 : 0,
+    };
+  },
 }));
 
 vi.mock('@/features/budget/hooks/useBudgetOperations', () => ({
@@ -85,7 +108,10 @@ vi.mock('@/features/budget/hooks/useCustomOptions', () => ({
 }));
 
 vi.mock('@/features/budget/components/BudgetSummary', () => ({
-  BudgetSummary: () => <div>Budget Summary</div>,
+  BudgetSummary: (props: unknown) => {
+    budgetSummarySpy(props);
+    return <div>Budget Summary</div>;
+  },
 }));
 
 vi.mock('@/features/budget/components/BudgetItemModal', () => ({
@@ -129,6 +155,7 @@ describe('BudgetView drill-through', () => {
     getYearProjection.mockResolvedValue({
       totals: { plannedNet: 120000 },
     });
+    budgetSummarySpy.mockClear();
     handleToggleAccrual.mockClear();
     handleDelete.mockClear();
   });
@@ -174,7 +201,7 @@ describe('BudgetView drill-through', () => {
       name: 'View transactions for Groceries',
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reserve Monthly' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Reserve Monthly' })[0]);
     expect(handleToggleAccrual).toHaveBeenCalledWith('BUD-0042');
     expect(screen.getByTestId('location')).toHaveTextContent('/budget');
 
@@ -184,5 +211,31 @@ describe('BudgetView drill-through', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete Groceries' }));
     expect(screen.getByTestId('location')).toHaveTextContent('/budget');
     expect(screen.queryByText('Spending Destination')).not.toBeInTheDocument();
+  });
+
+  it('uses selected table rows to scope budget utilization totals', async () => {
+    renderBudgetView(
+      '/budget?planningYear=2026&spendBasis=annual_full_year&type=ALL&category=HOME',
+    );
+
+    await screen.findByRole('button', {
+      name: 'View transactions for Groceries',
+    });
+
+    fireEvent.click(screen.getAllByLabelText('Select row')[0]);
+
+    await waitFor(() =>
+      expect(
+        budgetSummarySpy.mock.lastCall?.[0],
+      ).toEqual(
+        expect.objectContaining({
+          budgetUtilizationTotals: expect.objectContaining({
+            budgeted: 600,
+            spent: 275,
+            remaining: 325,
+          }),
+        }),
+      ),
+    );
   });
 });

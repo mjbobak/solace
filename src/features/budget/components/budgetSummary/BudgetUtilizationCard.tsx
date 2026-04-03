@@ -23,12 +23,6 @@ interface BudgetUtilizationCardProps {
   spentForChart: number;
   remainingBudgetForChart: number;
   unbudgetedIncomeForChart: number;
-  componentOptions: Array<{
-    id: string;
-    label: string;
-  }>;
-  selectedComponentIds: string[];
-  onSelectedComponentIdsChange: (ids: string[]) => void;
   income: number;
   budgetedForChart: number;
   remainingForChart: number;
@@ -51,9 +45,6 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   spentForChart,
   remainingBudgetForChart,
   unbudgetedIncomeForChart,
-  componentOptions,
-  selectedComponentIds,
-  onSelectedComponentIdsChange,
   income,
   budgetedForChart,
   remainingForChart,
@@ -89,9 +80,6 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
         unbudgetedIncomeForChart={unbudgetedIncomeForChart}
-        componentOptions={componentOptions}
-        selectedComponentIds={selectedComponentIds}
-        onSelectedComponentIdsChange={onSelectedComponentIdsChange}
       />
     ) : (
       <BudgetUtilizationNumbers
