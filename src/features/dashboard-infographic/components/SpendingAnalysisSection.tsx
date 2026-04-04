@@ -83,6 +83,7 @@ export const SpendingAnalysisSection: React.FC<SpendingAnalysisSectionProps> = (
     ...categoryMixData.map((category) => category.value),
     0,
   );
+  const axisDomainMax = Math.max(Math.ceil(axisMax * AXIS_MAX_PADDING), 1);
   const narrative = topCategory
     ? `Your largest ${
         FILTER_LABELS[activeFilter]
@@ -152,6 +153,12 @@ export const SpendingAnalysisSection: React.FC<SpendingAnalysisSectionProps> = (
                           strokeDasharray="3 3"
                           stroke={chartTheme.grid}
                         />
+                        <XAxis
+                          type="number"
+                          hide={true}
+                          domain={[0, axisDomainMax]}
+                          allowDataOverflow={true}
+                        />
                         <YAxis
                           type="category"
                           dataKey="name"
@@ -201,7 +208,8 @@ export const SpendingAnalysisSection: React.FC<SpendingAnalysisSectionProps> = (
                       >
                         <XAxis
                           type="number"
-                          domain={[0, Math.ceil(axisMax * AXIS_MAX_PADDING)]}
+                          domain={[0, axisDomainMax]}
+                          allowDataOverflow={true}
                           stroke={chartTheme.axis}
                           style={{ fontSize: chartTheme.fontSize }}
                           tickFormatter={(value: number) =>
