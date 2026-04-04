@@ -9,6 +9,7 @@ import { parseDateOnly } from '@/shared/utils/dateOnly';
 
 export interface IncomeAnalysisData {
   totalIncome: number;
+  plannedNetIncome: number;
   sourceBreakdown: {
     source: string;
     member: string;
@@ -116,6 +117,7 @@ export function useIncomeAnalysis(
     if (!projection) {
       return {
         totalIncome: 0,
+        plannedNetIncome: 0,
         sourceBreakdown: [],
         typeBreakdown: [],
         trend: [],
@@ -171,6 +173,7 @@ export function useIncomeAnalysis(
 
     return {
       totalIncome: projection.totals.plannedCashNet,
+      plannedNetIncome: projection.totals.plannedNet,
       sourceBreakdown,
       typeBreakdown,
       trend,
