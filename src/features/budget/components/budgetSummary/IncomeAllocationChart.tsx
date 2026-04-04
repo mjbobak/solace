@@ -58,12 +58,12 @@ const SegmentLabel: React.FC<SegmentLabelProps> = ({
   >
     <span className="flex min-w-0 items-baseline gap-2 truncate">
       <span
-        className={`truncate text-[11px] font-semibold tracking-[0.02em] ${valueClassName}`}
+        className={`truncate text-[13px] font-semibold tracking-[0.02em] ${valueClassName}`}
       >
         {value}
       </span>
       <span
-        className={`truncate text-[10px] font-medium uppercase tracking-[0.12em] ${labelClassName}`}
+        className={`truncate text-xs font-medium uppercase tracking-[0.12em] ${labelClassName}`}
       >
         {label}
       </span>
@@ -114,7 +114,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
       className={`flex flex-1 flex-col justify-start pt-0 ${compactCardContentHeight}`}
     >
       <div className="space-y-1">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.14em] text-gray-400">
           <span>
             <span className="text-gray-600">{annualIncomeSummary}</span> income /{' '}
             <span className="text-gray-600">{annualEssentialSummary}</span>{' '}
@@ -127,7 +127,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
         </div>
       </div>
       <div className="mt-2">
-        <div className="relative h-8 overflow-visible">
+        <div className="relative h-10 overflow-visible">
           <AnimatePresence initial={false}>
             {isWealthExpanded ? (
               <motion.div
@@ -136,9 +136,9 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 6 }}
                 transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute inset-x-0 bottom-[calc(100%+0.625rem)] z-10 h-8 overflow-visible"
+                className="absolute inset-x-0 bottom-[calc(100%+0.625rem)] z-10 h-10 overflow-visible"
               >
-                <div className="relative h-8">
+                <div className="relative h-10">
                   {savingsBreakdownWidth > 0 ? (
                     <Tooltip
                       content={getBarTooltipContent(
@@ -194,7 +194,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
             ) : null}
           </AnimatePresence>
 
-          <div className="absolute inset-x-0 bottom-0 h-8 overflow-hidden rounded-full bg-slate-100">
+          <div className="absolute inset-x-0 bottom-0 h-10 overflow-hidden rounded-full bg-slate-100">
             <div className="absolute inset-y-0 left-0 w-full rounded-full bg-slate-200" />
             <div
               className={`absolute inset-y-0 left-0 overflow-hidden ${paletteBlue}`}
