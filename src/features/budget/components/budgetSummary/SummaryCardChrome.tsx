@@ -74,7 +74,7 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
     currentView === 'chart' ? 'Show numbers view' : 'Show chart view';
 
   return (
-    <div className="mb-5 flex items-start justify-between gap-3">
+    <div className="mb-4 flex items-start justify-between gap-3">
       <div className="flex items-center gap-2">
         <div className={cardIconContainerClass}>{icon}</div>
         <div className="flex items-center gap-2">

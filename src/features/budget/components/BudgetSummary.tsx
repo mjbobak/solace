@@ -6,7 +6,6 @@ import {
   type SummaryView,
 } from '@/features/budget/components/budgetSummary/constants';
 import { IncomeAllocationCard } from '@/features/budget/components/budgetSummary/IncomeAllocationCard';
-import { WealthContributionsCard } from '@/features/budget/components/budgetSummary/WealthContributionsCard';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 import type { SpendBasis } from '@/features/budget/types/budgetView';
 import {
@@ -47,8 +46,6 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     useState<SummaryView>('chart');
   const [budgetUtilizationView, setBudgetUtilizationView] =
     useState<SummaryView>('chart');
-  const [savingsInvestingView, setSavingsInvestingView] =
-    useState<SummaryView>('chart');
 
   const completedMonths = getCompletedMonthsForYear(planningYear);
   const comparisonIncome = scaleAnnualAmountForSpendBasis({
@@ -85,16 +82,11 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     wealthIncomePercent,
     Math.max(100 - essentialWidth - funsiesWidth, 0),
   );
-  const savingsWealthWidth = Math.min(plannedSavingsIncomePercent, 100);
-  const investmentWealthWidth = Math.min(
-    investmentIncomePercent,
-    Math.max(100 - savingsWealthWidth, 0),
-  );
-
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
         <IncomeAllocationCard
+          className="lg:col-span-2"
           view={incomeUtilizationView}
           onToggle={() =>
             setIncomeUtilizationView((current) =>
@@ -116,27 +108,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           wealthIncomePercent={wealthIncomePercent}
           income={income}
           wealthRate={wealthRate}
-        />
-
-        <WealthContributionsCard
-          view={savingsInvestingView}
-          onToggle={() =>
-            setSavingsInvestingView((current) =>
-              current === 'chart' ? 'numbers' : 'chart',
-            )
-          }
-          annualIncomeSummary={formatWholeCurrency(income * 12)}
-          annualSavingsSummary={formatWholeCurrency(plannedSavings * 12)}
-          annualInvestmentsSummary={formatWholeCurrency(investments * 12)}
-          wealthIncomePercent={wealthIncomePercent}
-          savingsWealthWidth={savingsWealthWidth}
-          investmentWealthWidth={investmentWealthWidth}
           plannedSavings={plannedSavings}
           investments={investments}
           savingsIncomePercent={plannedSavingsIncomePercent}
           investmentIncomePercent={investmentIncomePercent}
-          totalWealth={totalWealth}
-          wealthRate={wealthRate}
         />
       </div>
 
