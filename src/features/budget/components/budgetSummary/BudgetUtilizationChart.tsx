@@ -8,6 +8,8 @@ import {
   getBarTooltipContent,
   paletteBlue,
   paletteGreen,
+  pillLabelTextClass,
+  pillValueTextClass,
 } from './constants';
 
 interface BudgetUtilizationChartProps {
@@ -45,10 +47,14 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
     </span>
   ) : (
     <span className="flex min-w-0 items-baseline gap-2 truncate">
-      <span className="truncate text-[11px] font-semibold tracking-[0.02em] text-white/95">
+      <span
+        className={`truncate text-[11px] font-semibold tracking-[0.02em] ${pillValueTextClass}`}
+      >
         {remainingSummary}
       </span>
-      <span className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-white/70">
+      <span
+        className={`truncate text-[10px] font-medium uppercase tracking-[0.12em] ${pillLabelTextClass}`}
+      >
         Remaining
       </span>
     </span>
@@ -81,10 +87,14 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
           >
             <div className="pointer-events-none flex h-full items-center pl-3">
               <span className="flex min-w-0 items-baseline gap-2 truncate">
-                <span className="truncate text-[11px] font-semibold tracking-[0.02em] text-white/95">
+                <span
+                  className={`truncate text-[11px] font-semibold tracking-[0.02em] ${pillValueTextClass}`}
+                >
                   {spentSummary}
                 </span>
-                <span className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-white/72">
+                <span
+                  className={`truncate text-[10px] font-medium uppercase tracking-[0.12em] ${pillLabelTextClass}`}
+                >
                   Spent
                 </span>
               </span>

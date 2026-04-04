@@ -16,6 +16,8 @@ export const compactSummaryLabelClass =
   'mb-1 text-[11px] uppercase tracking-[0.12em] text-gray-500';
 export const compactSummaryMetaClass =
   'text-[11px] uppercase tracking-[0.12em] text-gray-500';
+export const pillValueTextClass = 'text-slate-800';
+export const pillLabelTextClass = 'text-slate-600';
 export const cardIconContainerClass = budgetSummaryTheme.iconContainer;
 export const cardIconClass = budgetSummaryTheme.icon;
 

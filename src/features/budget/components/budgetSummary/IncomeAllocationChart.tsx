@@ -9,6 +9,8 @@ import {
   getBarTooltipContent,
   paletteBlue,
   paletteGreen,
+  pillLabelTextClass,
+  pillValueTextClass,
   palettePurple,
 } from './constants';
 
@@ -45,8 +47,8 @@ interface SegmentLabelProps {
 const SegmentLabel: React.FC<SegmentLabelProps> = ({
   value,
   label,
-  valueClassName = 'text-white/95',
-  labelClassName = 'text-white/70',
+  valueClassName = pillValueTextClass,
+  labelClassName = pillLabelTextClass,
   align = 'start',
 }) => (
   <div
@@ -158,7 +160,6 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
                         <SegmentLabel
                           value={annualSavingsSummary}
                           label="Savings"
-                          labelClassName="text-white/72"
                         />
                       </div>
                     </Tooltip>
