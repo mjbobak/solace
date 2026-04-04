@@ -43,7 +43,9 @@ export const CurrencyStack: React.FC<CurrencyStackProps> = ({
       ) : null}
     </span>
     <span className={`flex items-baseline ${compact ? 'gap-1.5' : 'gap-2'}`}>
-      <span className={`${compact ? 'text-[11px]' : 'text-xs'} ${monthlyClassName}`}>
+      <span
+        className={`${compact ? 'text-[11px]' : 'text-xs'} ${monthlyClassName}`}
+      >
         {formatWholeCurrency(monthlyAmount)}
       </span>
       <span
@@ -74,7 +76,7 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
     currentView === 'chart' ? 'Show numbers view' : 'Show chart view';
 
   return (
-    <div className="mb-4 flex items-start justify-between gap-3">
+    <div className="mb-3 flex items-start justify-between gap-3">
       <div className="flex items-center gap-2">
         <div className={cardIconContainerClass}>{icon}</div>
         <div className="flex items-center gap-2">

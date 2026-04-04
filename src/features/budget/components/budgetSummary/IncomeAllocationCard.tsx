@@ -113,8 +113,6 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
             funsiesBudget={funsiesBudget}
             savingsForAllocation={savingsForAllocation}
             wealthRate={wealthRate}
-            plannedSavings={plannedSavings}
-            investments={investments}
           />
         )}
       </div>

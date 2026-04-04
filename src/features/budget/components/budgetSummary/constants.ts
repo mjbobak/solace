@@ -11,7 +11,11 @@ export const palettePurple = budgetSummaryTheme.allocationPurple;
 export const palettePurpleText = budgetSummaryTheme.allocationPurpleText;
 export const palettePurpleTextMuted =
   budgetSummaryTheme.allocationPurpleTextMuted;
-export const compactCardContentHeight = 'min-h-[5.25rem]';
+export const compactCardContentHeight = 'min-h-[4rem]';
+export const compactSummaryLabelClass =
+  'mb-1 text-[11px] uppercase tracking-[0.12em] text-gray-500';
+export const compactSummaryMetaClass =
+  'text-[11px] uppercase tracking-[0.12em] text-gray-500';
 export const cardIconContainerClass = budgetSummaryTheme.iconContainer;
 export const cardIconClass = budgetSummaryTheme.icon;
 

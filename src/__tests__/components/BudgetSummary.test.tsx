@@ -136,12 +136,8 @@ describe('BudgetSummary', () => {
         element?.textContent === '$22,200annual',
       ),
     ).toBeInTheDocument();
-    expect(within(incomeCard).getByText('Savings')).toBeInTheDocument();
-    expect(
-      within(incomeCard).getByText('Budgeted Investments'),
-    ).toBeInTheDocument();
-    expect(within(incomeCard).getByText('35%')).toBeInTheDocument();
-    expect(within(incomeCard).getByText('65%')).toBeInTheDocument();
+    expect(within(incomeCard).queryByText('Budgeted Investments')).not.toBeInTheDocument();
+    expect(within(incomeCard).queryAllByText('Savings')).toHaveLength(0);
   });
 
   it('lets the user switch budget utilization between chart and numbers', () => {
@@ -209,5 +205,35 @@ describe('BudgetSummary', () => {
     );
     expect(within(budgetCard).getByText('$44,865')).toBeInTheDocument();
     expect(within(budgetCard).getByText('$32,000')).toBeInTheDocument();
+  });
+
+  it('shows over-budget text in the chart when spending exceeds budget', () => {
+    render(
+      <BudgetSummary
+        totals={totals}
+        totalBudgeted={4050}
+        budgetUtilizationTotals={{
+          budgeted: 4050,
+          spent: 5000,
+          remaining: -950,
+          percentage: 123.4567901235,
+        }}
+        investments={1200}
+        income={5900}
+        savings={650}
+        essentialBudget={2300}
+        funsiesBudget={1750}
+        isBudgetFiltered={false}
+        planningYear={2026}
+        spendBasis="monthly_avg_12"
+      />,
+    );
+
+    const budgetCard = screen.getByRole('region', {
+      name: 'Budget Utilization',
+    });
+
+    expect(within(budgetCard).getByText('$950 over')).toBeInTheDocument();
+    expect(within(budgetCard).queryByText('$0')).not.toBeInTheDocument();
   });
 });

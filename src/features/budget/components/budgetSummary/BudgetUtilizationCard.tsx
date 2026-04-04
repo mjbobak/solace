@@ -70,6 +70,7 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
         spentWidth={spentWidth}
         spentForChart={spentForChart}
         remainingBudgetForChart={remainingBudgetForChart}
+        remainingTotal={remainingTotal}
         amountContextLabel={amountContextLabel}
       />
     ) : (

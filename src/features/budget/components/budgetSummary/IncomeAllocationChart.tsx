@@ -8,7 +8,7 @@ import {
   formatWholeCurrency,
   getBarTooltipContent,
   paletteBlue,
-  paletteOrange,
+  paletteGreen,
   palettePurple,
 } from './constants';
 
@@ -90,8 +90,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
   savingsIncomePercent,
   investmentIncomePercent,
 }) => {
-  const savingsBreakdownClass = 'bg-[#E9C46A]';
-  const investmentBreakdownClass = 'bg-[#C96C2B]';
+  const wealthBreakdownClass = paletteGreen;
   const wealthOffset = essentialWidth + funsiesWidth;
   const totalWealth = plannedSavings + investments;
   const savingsShareOfWealth =
@@ -110,7 +109,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
 
   return (
     <div
-      className={`mb-1 flex flex-1 flex-col justify-end pt-2 ${compactCardContentHeight}`}
+      className={`flex flex-1 flex-col justify-start pt-0 ${compactCardContentHeight}`}
     >
       <div className="space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
@@ -125,7 +124,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
           </span>
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-2">
         <div className="relative h-8 overflow-visible">
           <AnimatePresence initial={false}>
             {isWealthExpanded ? (
@@ -149,7 +148,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
                       followCursor
                     >
                       <div
-                        className={`absolute inset-y-0 overflow-hidden ${savingsBreakdownClass}`}
+                        className={`absolute inset-y-0 overflow-hidden ${wealthBreakdownClass}`}
                         style={{
                           left: `${wealthOffset}%`,
                           width: `${savingsBreakdownWidth}%`,
@@ -175,7 +174,7 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
                       followCursor
                     >
                       <div
-                        className={`absolute inset-y-0 overflow-hidden rounded-r-full ${investmentBreakdownClass}`}
+                        className={`absolute inset-y-0 overflow-hidden rounded-r-full ${wealthBreakdownClass}`}
                         style={{
                           left: `${investmentBreakdownOffset}%`,
                           width: `${investmentBreakdownWidth}%`,
@@ -209,9 +208,9 @@ export const IncomeAllocationChart: React.FC<IncomeAllocationChartProps> = ({
               <SegmentLabel value={annualFunsiesSummary} label="Funsies" />
             </div>
             <div
-              className={`absolute inset-y-0 overflow-hidden ${paletteOrange} transition-all ${
+              className={`absolute inset-y-0 overflow-hidden ${paletteGreen} transition-all ${
                 isWealthExpanded
-                  ? 'shadow-[0_0_0_2px_rgba(255,255,255,0.9),0_0_0_3px_rgba(251,146,60,0.35)]'
+                  ? 'shadow-[0_0_0_2px_rgba(255,255,255,0.9),0_0_0_3px_rgba(34,197,94,0.25)]'
                   : ''
               }`}
               style={{
