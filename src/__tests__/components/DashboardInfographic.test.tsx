@@ -16,13 +16,6 @@ vi.mock(
 );
 
 vi.mock(
-  '@/features/dashboard-infographic/components/SpendingAnalysisSection',
-  () => ({
-    SpendingAnalysisSection: () => <div>Spending Analysis Section</div>,
-  }),
-);
-
-vi.mock(
   '@/features/dashboard-infographic/components/SpendingPulseSection',
   () => ({
     SpendingPulseSection: () => <div>Spending Pulse Section</div>,
