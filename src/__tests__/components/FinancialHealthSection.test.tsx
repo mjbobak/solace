@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { FinancialHealthSection } from '@/features/dashboard-infographic/components/FinancialHealthSection';
@@ -39,33 +38,74 @@ vi.mock('@/features/budget/hooks/useBudgetData', () => ({
   useBudgetData: () => ({
     budgetEntries: [
       {
-        id: 'essential',
+        id: 'essential-housing',
         expenseType: 'ESSENTIAL',
-        expenseCategory: 'Housing',
-        expenseLabel: 'Rent',
-        budgeted: 300,
-        spent: 280,
-        remaining: 20,
-        percentage: 93.3,
-      },
-      {
-        id: 'funsies',
-        expenseType: 'FUNSIES',
-        expenseCategory: 'Fun',
-        expenseLabel: 'Dining',
+        expenseCategory: 'HOUSING',
+        expenseLabel: 'Mortgage',
         budgeted: 200,
-        spent: 180,
-        remaining: 20,
-        percentage: 90,
+        spent: 200,
+        remaining: 0,
+        percentage: 100,
       },
       {
-        id: 'investment',
+        id: 'essential-utilities',
         expenseType: 'ESSENTIAL',
-        expenseCategory: 'Investments',
+        expenseCategory: 'UTILITIES',
+        expenseLabel: 'Utilities',
+        budgeted: 100,
+        spent: 95,
+        remaining: 5,
+        percentage: 95,
+      },
+      {
+        id: 'funsies-entertainment',
+        expenseType: 'FUNSIES',
+        expenseCategory: 'ENTERTAINMENT',
+        expenseLabel: 'Dining',
+        budgeted: 120,
+        spent: 110,
+        remaining: 10,
+        percentage: 91.7,
+      },
+      {
+        id: 'funsies-family',
+        expenseType: 'FUNSIES',
+        expenseCategory: 'FLEXIBLE FAMILY SPENDING',
+        expenseLabel: 'Travel',
+        budgeted: 80,
+        spent: 65,
+        remaining: 15,
+        percentage: 81.3,
+      },
+      {
+        id: 'funsies-unflagged-investments',
+        expenseType: 'FUNSIES',
+        expenseCategory: 'INVESTMENTS',
+        expenseLabel: 'Future Goals',
+        budgeted: 50,
+        spent: 40,
+        remaining: 10,
+        percentage: 80,
+      },
+      {
+        id: 'investment-essential',
+        expenseType: 'ESSENTIAL',
+        expenseCategory: 'INVESTMENTS',
         expenseLabel: 'Brokerage',
         isInvestment: true,
         budgeted: 100,
         spent: 100,
+        remaining: 0,
+        percentage: 100,
+      },
+      {
+        id: 'investment-funsies',
+        expenseType: 'FUNSIES',
+        expenseCategory: 'INVESTMENTS',
+        expenseLabel: '529',
+        isInvestment: true,
+        budgeted: 50,
+        spent: 50,
         remaining: 0,
         percentage: 100,
       },
@@ -76,12 +116,12 @@ vi.mock('@/features/budget/hooks/useBudgetData', () => ({
 }));
 
 describe('FinancialHealthSection', () => {
-  it('renders the income allocation card as a horizontal waterfall', () => {
+  it('renders the income allocation card as a horizontal waterfall overview', () => {
     render(<FinancialHealthSection year={2026} />);
 
     expect(screen.getByText('Income Allocation')).toBeInTheDocument();
     expect(
-      screen.getByRole('img', { name: 'Income allocation waterfall chart' }),
+      screen.getByRole('group', { name: 'Income allocation waterfall chart' }),
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText('Essential waterfall segment')).toHaveStyle({
@@ -90,23 +130,150 @@ describe('FinancialHealthSection', () => {
     });
     expect(screen.getByLabelText('Funsies waterfall segment')).toHaveStyle({
       left: '30%',
-      width: '20%',
+      width: '25%',
     });
     expect(screen.getByLabelText('Investments waterfall segment')).toHaveStyle({
-      left: '50%',
-      width: '10%',
+      left: '55.00000000000001%',
+      width: '15%',
     });
     expect(screen.getByLabelText('Savings waterfall segment')).toHaveStyle({
-      left: '60%',
-      width: '40%',
+      left: '70%',
+      width: '30%',
     });
     expect(screen.getByLabelText('Total income waterfall segment')).toHaveStyle({
       width: '100%',
     });
     expect(
-      screen.getByText('Wealth capture is 50.0% of income.'),
+      screen.getByText('Wealth capture is 45.0% of income.'),
     ).toBeInTheDocument();
-    expect(screen.getByText('$6,000 annual')).toBeInTheDocument();
-    expect(screen.getByText('40.0%')).toBeInTheDocument();
+    expect(screen.getByText('$5,400 annual')).toBeInTheDocument();
+    expect(screen.getAllByText('30.0%')).toHaveLength(2);
+    expect(
+      screen.getByRole('button', { name: 'Show Funsies category breakdown' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Show Savings category breakdown' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('lets the user toggle funsies detail between categories and labels, then restore the overview', () => {
+    render(<FinancialHealthSection year={2026} />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Show Funsies category breakdown' }),
+    );
+
+    expect(screen.getByText('Funsies Breakdown')).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Funsies allocation waterfall chart' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Funsies Total')).toBeInTheDocument();
+    expect(screen.getByLabelText('ENTERTAINMENT waterfall segment')).toHaveStyle({
+      left: '0%',
+      width: '48%',
+    });
+    expect(
+      screen.getByLabelText('FLEXIBLE FAMILY SPENDING waterfall segment'),
+    ).toHaveStyle({
+      left: '48%',
+      width: '32%',
+    });
+    expect(screen.getByLabelText('INVESTMENTS waterfall segment')).toHaveStyle({
+      left: '80%',
+      width: '20%',
+    });
+    expect(screen.getByLabelText('Funsies total waterfall segment')).toHaveStyle({
+      width: '100%',
+    });
+    expect(screen.getByText('$3,000')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Categories' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Labels' }));
+
+    expect(screen.getByRole('button', { name: 'Labels' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByText('Dining')).toBeInTheDocument();
+    expect(screen.getByText('Travel')).toBeInTheDocument();
+    expect(screen.getByText('Future Goals')).toBeInTheDocument();
+    expect(screen.queryByText('ENTERTAINMENT')).not.toBeInTheDocument();
+    expect(screen.queryByText('FLEXIBLE FAMILY SPENDING')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to allocation' }));
+
+    expect(
+      screen.getByRole('group', { name: 'Income allocation waterfall chart' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Funsies Breakdown')).not.toBeInTheDocument();
+  });
+
+  it('defaults investments to labels and lets the user switch back to categories', () => {
+    render(<FinancialHealthSection year={2026} />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Show Investments category breakdown' }),
+    );
+
+    expect(screen.getByText('Investments Breakdown')).toBeInTheDocument();
+    expect(screen.getByText('Investments Total')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Labels' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Brokerage waterfall segment')).toHaveStyle({
+      left: '0%',
+      width: '66.66666666666666%',
+    });
+    expect(screen.getByLabelText('529 waterfall segment')).toHaveStyle({
+      left: '66.66666666666666%',
+      width: '33.33333333333333%',
+    });
+    expect(
+      screen.getByLabelText('Investments total waterfall segment'),
+    ).toHaveStyle({
+      width: '100%',
+    });
+    expect(screen.queryByText(/^INVESTMENTS$/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Future Goals')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Categories' }));
+
+    expect(
+      screen.getByRole('button', { name: 'Categories' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('INVESTMENTS')).toBeInTheDocument();
+    expect(screen.queryByText('Brokerage')).not.toBeInTheDocument();
+    expect(screen.queryByText('529')).not.toBeInTheDocument();
+  });
+
+  it('drills into essential categories without including reclassified investments', () => {
+    render(<FinancialHealthSection year={2026} />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Show Essential category breakdown' }),
+    );
+
+    expect(screen.getByText('Essential Breakdown')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Categories' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('HOUSING waterfall segment')).toHaveStyle({
+      left: '0%',
+      width: '66.66666666666666%',
+    });
+    expect(screen.getByLabelText('UTILITIES waterfall segment')).toHaveStyle({
+      left: '66.66666666666666%',
+      width: '33.33333333333333%',
+    });
+    expect(screen.queryByText('INVESTMENTS')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Labels' }));
+
+    expect(screen.getByText('Mortgage')).toBeInTheDocument();
+    expect(screen.getByText('Utilities')).toBeInTheDocument();
+    expect(screen.queryByText('HOUSING')).not.toBeInTheDocument();
   });
 });
