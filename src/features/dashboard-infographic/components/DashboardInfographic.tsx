@@ -59,7 +59,7 @@ export const DashboardInfographic: React.FC<DashboardInfographicProps> = ({
             </div>
 
             <div id="spending-pulse">
-              <SpendingPulseSection period={'monthly'} />
+              <SpendingPulseSection year={year} />
             </div>
 
             <div id="emergency-runway">
