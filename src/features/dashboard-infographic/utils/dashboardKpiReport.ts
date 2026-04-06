@@ -45,8 +45,9 @@ export interface DashboardMoneyFlowSummary {
 }
 
 export interface EmergencyRunwayScenario {
-  key: 'striker' | 'serious';
+  key: 'primary' | 'secondary';
   label: string;
+  sourceId: number | null;
   sourceName: string | null;
   lostMonthlyIncome: number | null;
   remainingMonthlyIncome: number | null;
@@ -59,6 +60,11 @@ export interface EmergencyRunwaySummary {
   monthlyEssentialExpenses: number | null;
   baselineMonths: number | null;
   scenarios: EmergencyRunwayScenario[];
+}
+
+interface RunwayScenarioDefinition {
+  key: EmergencyRunwayScenario['key'];
+  fallbackLabel: string;
 }
 
 interface BuildDashboardKpiGroupsParams {
@@ -104,6 +110,11 @@ const TAX_ADVANTAGED_LABEL_MATCHERS = {
   contributions529: '529',
   roth: 'ROTH',
 } as const;
+
+const RUNWAY_SCENARIO_DEFINITIONS: ReadonlyArray<RunwayScenarioDefinition> = [
+  { key: 'primary', fallbackLabel: 'Primary income loss' },
+  { key: 'secondary', fallbackLabel: 'Secondary income loss' },
+];
 
 const KPI_BENCHMARKS: Record<string, string> = {
   'savings-rate': 'Strong: 20%+ of after-tax income.',
@@ -167,15 +178,78 @@ function isIgnoredRunwaySource(source: ProjectedIncomeSource): boolean {
   );
 }
 
-function getRunwayScenarioSource(
-  sources: ProjectedIncomeSource[],
-  token: string,
-): ProjectedIncomeSource | null {
-  return (
-    sources.find((source) =>
-      normalizeRunwaySourceName(source.name).includes(token),
-    ) ?? null
+function getRelevantRunwaySources(
+  projection: IncomeYearProjection | null,
+): ProjectedIncomeSource[] {
+  return (projection?.sources ?? []).filter(
+    (source) => !isIgnoredRunwaySource(source),
   );
+}
+
+function compareRunwaySourcePriority(
+  left: ProjectedIncomeSource,
+  right: ProjectedIncomeSource,
+): number {
+  const monthlyNetDifference =
+    getSourceMonthlyCashNet(right) - getSourceMonthlyCashNet(left);
+  if (monthlyNetDifference !== 0) {
+    return monthlyNetDifference;
+  }
+
+  const sortOrderDifference = left.sortOrder - right.sortOrder;
+  if (sortOrderDifference !== 0) {
+    return sortOrderDifference;
+  }
+
+  const nameDifference = left.name.localeCompare(right.name);
+  if (nameDifference !== 0) {
+    return nameDifference;
+  }
+
+  return left.id - right.id;
+}
+
+function resolveRunwayScenarioSources(
+  projection: IncomeYearProjection | null,
+): Record<EmergencyRunwayScenario['key'], ProjectedIncomeSource | null> {
+  const relevantSources = getRelevantRunwaySources(projection);
+  const sourcesById = new Map(
+    relevantSources.map((source) => [source.id, source] as const),
+  );
+  const fallbackSources = [...relevantSources].sort(compareRunwaySourcePriority);
+  const configuredSourceIds = [
+    projection?.primaryRunwaySourceId ?? null,
+    projection?.secondaryRunwaySourceId ?? null,
+  ];
+  const usedSourceIds = new Set<number>();
+  const resolvedSources = {} as Record<
+    EmergencyRunwayScenario['key'],
+    ProjectedIncomeSource | null
+  >;
+
+  RUNWAY_SCENARIO_DEFINITIONS.forEach((scenario, index) => {
+    const configuredSourceId = configuredSourceIds[index];
+
+    if (
+      configuredSourceId !== null &&
+      sourcesById.has(configuredSourceId) &&
+      !usedSourceIds.has(configuredSourceId)
+    ) {
+      usedSourceIds.add(configuredSourceId);
+      resolvedSources[scenario.key] = sourcesById.get(configuredSourceId) ?? null;
+      return;
+    }
+
+    const fallbackSource =
+      fallbackSources.find((source) => !usedSourceIds.has(source.id)) ?? null;
+    if (fallbackSource) {
+      usedSourceIds.add(fallbackSource.id);
+    }
+
+    resolvedSources[scenario.key] = fallbackSource;
+  });
+
+  return resolvedSources;
 }
 
 function getSourceMonthlyCashNet(source: ProjectedIncomeSource): number {
@@ -306,21 +380,15 @@ export function buildEmergencyRunwaySummary({
     monthlyEssentialExpenses === 0
       ? null
       : resolvedEmergencyFundBalance / monthlyEssentialExpenses;
-  const relevantSources = (projection?.sources ?? []).filter(
-    (source) => !isIgnoredRunwaySource(source),
-  );
+  const relevantSources = getRelevantRunwaySources(projection);
   const totalRelevantMonthlyIncome = relevantSources.reduce(
     (sum, source) => sum + getSourceMonthlyCashNet(source),
     0,
   );
-  const scenarios: EmergencyRunwayScenario[] = [
-    { key: 'striker', label: 'If Striker disappears' },
-    { key: 'serious', label: 'If Serious disappears' },
-  ].map((scenario) => {
-    const source = getRunwayScenarioSource(
-      relevantSources,
-      scenario.key.toUpperCase(),
-    );
+  const scenarioSources = resolveRunwayScenarioSources(projection);
+  const scenarios: EmergencyRunwayScenario[] =
+    RUNWAY_SCENARIO_DEFINITIONS.map((scenario) => {
+      const source = scenarioSources[scenario.key];
     const lostMonthlyIncome = source ? getSourceMonthlyCashNet(source) : null;
     const remainingMonthlyIncome =
       source && projection
@@ -339,14 +407,17 @@ export function buildEmergencyRunwaySummary({
 
     return {
       key: scenario.key,
-      label: scenario.label,
+      label: source
+        ? `If ${source.name} disappears`
+        : scenario.fallbackLabel,
+      sourceId: source?.id ?? null,
       sourceName: source?.name ?? null,
       lostMonthlyIncome,
       remainingMonthlyIncome,
       monthlyShortfall,
       runwayMonths,
     };
-  });
+    });
 
   return {
     emergencyFundBalance: resolvedEmergencyFundBalance,

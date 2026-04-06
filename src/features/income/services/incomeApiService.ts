@@ -58,6 +58,14 @@ function transformTaxAdvantagedInvestments(
   };
 }
 
+function transformNullableId(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return Number(value);
+}
+
 function transformTotals(
   data: Record<string, unknown>,
 ): IncomeProjectionTotals {
@@ -136,6 +144,10 @@ function transformYearSettings(
     ),
     emergencyFundBalance: Number(
       data.emergency_fund_balance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
+    ),
+    primaryRunwaySourceId: transformNullableId(data.primary_runway_source_id),
+    secondaryRunwaySourceId: transformNullableId(
+      data.secondary_runway_source_id,
     ),
     createdAt: String(data.created_at),
     updatedAt: String(data.updated_at),
@@ -277,6 +289,10 @@ export const incomeApiService = {
       totals: transformTotals(data.totals as Record<string, unknown>),
       emergencyFundBalance: Number(
         data.emergency_fund_balance ?? DEFAULT_EMERGENCY_FUND_BALANCE,
+      ),
+      primaryRunwaySourceId: transformNullableId(data.primary_runway_source_id),
+      secondaryRunwaySourceId: transformNullableId(
+        data.secondary_runway_source_id,
       ),
       taxAdvantagedInvestments: transformTaxAdvantagedInvestments(
         (data.tax_advantaged_investments as Record<string, unknown> | null) ??
@@ -461,6 +477,12 @@ export const incomeApiService = {
             : {}),
           ...(input.emergencyFundBalance !== undefined
             ? { emergency_fund_balance: input.emergencyFundBalance }
+            : {}),
+          ...(input.primaryRunwaySourceId !== undefined
+            ? { primary_runway_source_id: input.primaryRunwaySourceId }
+            : {}),
+          ...(input.secondaryRunwaySourceId !== undefined
+            ? { secondary_runway_source_id: input.secondaryRunwaySourceId }
             : {}),
         }),
       },

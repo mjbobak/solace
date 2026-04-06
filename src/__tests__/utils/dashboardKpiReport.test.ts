@@ -49,16 +49,18 @@ function createTaxAdvantagedInvestments(
 function createProjectedSource(
   name: string,
   plannedCashNet: number,
+  overrides?: Partial<ProjectedIncomeSource>,
 ): ProjectedIncomeSource {
   return {
-    id: name.length,
+    id: overrides?.id ?? name.length,
     name,
     isActive: true,
-    sortOrder: 0,
+    sortOrder: overrides?.sortOrder ?? 0,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
     totals: createIncomeTotals({ plannedCashNet }),
-    components: [],
+    components: overrides?.components ?? [],
+    ...overrides,
   };
 }
 
@@ -69,11 +71,13 @@ function createProjection(
     year: 2025,
     totals: createIncomeTotals(),
     emergencyFundBalance: 12000,
+    primaryRunwaySourceId: null,
+    secondaryRunwaySourceId: null,
     taxAdvantagedInvestments: createTaxAdvantagedInvestments(),
     sources: [
-      createProjectedSource('Striker', 36000),
-      createProjectedSource('Serious', 24000),
-      createProjectedSource('Non-Standard', 12000),
+      createProjectedSource('Striker', 36000, { id: 101 }),
+      createProjectedSource('Serious', 24000, { id: 202 }),
+      createProjectedSource('Non-Standard', 12000, { id: 303 }),
     ],
     ...overrides,
   };
@@ -566,9 +570,15 @@ describe('buildDashboardKpiGroups', () => {
 });
 
 describe('buildEmergencyRunwaySummary', () => {
-  it('builds loss-of-income scenarios from report inputs and ignores non-standard income', () => {
+  it('builds loss-of-income scenarios from the top two standard income sources', () => {
     const summary = buildEmergencyRunwaySummary({
-      projection: createProjection(),
+      projection: createProjection({
+        sources: [
+          createProjectedSource('Main Job', 36000, { id: 101 }),
+          createProjectedSource('Consulting', 24000, { id: 202 }),
+          createProjectedSource('Non-Standard', 12000, { id: 303 }),
+        ],
+      }),
       budgetEntries: [
         createBudgetEntry({ budgeted: 4000 }),
         createBudgetEntry({
@@ -586,22 +596,61 @@ describe('buildEmergencyRunwaySummary', () => {
     expect(summary.baselineMonths).toBe(3);
     expect(summary.scenarios).toEqual([
       {
-        key: 'striker',
-        label: 'If Striker disappears',
-        sourceName: 'Striker',
+        key: 'primary',
+        label: 'If Main Job disappears',
+        sourceId: 101,
+        sourceName: 'Main Job',
         lostMonthlyIncome: 3000,
         remainingMonthlyIncome: 2000,
         monthlyShortfall: 2000,
         runwayMonths: 6,
       },
       {
-        key: 'serious',
-        label: 'If Serious disappears',
-        sourceName: 'Serious',
+        key: 'secondary',
+        label: 'If Consulting disappears',
+        sourceId: 202,
+        sourceName: 'Consulting',
         lostMonthlyIncome: 2000,
         remainingMonthlyIncome: 3000,
         monthlyShortfall: 1000,
         runwayMonths: 12,
+      },
+    ]);
+  });
+
+  it('uses configured runway source ids so scenario bindings survive renames', () => {
+    const summary = buildEmergencyRunwaySummary({
+      projection: createProjection({
+        primaryRunwaySourceId: 202,
+        secondaryRunwaySourceId: 101,
+        sources: [
+          createProjectedSource('Renamed Salary', 36000, { id: 101 }),
+          createProjectedSource('Renamed Side Gig', 24000, { id: 202 }),
+        ],
+      }),
+      budgetEntries: [createBudgetEntry({ budgeted: 4000 })],
+    });
+
+    expect(summary.scenarios).toEqual([
+      {
+        key: 'primary',
+        label: 'If Renamed Side Gig disappears',
+        sourceId: 202,
+        sourceName: 'Renamed Side Gig',
+        lostMonthlyIncome: 2000,
+        remainingMonthlyIncome: 3000,
+        monthlyShortfall: 1000,
+        runwayMonths: 12,
+      },
+      {
+        key: 'secondary',
+        label: 'If Renamed Salary disappears',
+        sourceId: 101,
+        sourceName: 'Renamed Salary',
+        lostMonthlyIncome: 3000,
+        remainingMonthlyIncome: 2000,
+        monthlyShortfall: 2000,
+        runwayMonths: 6,
       },
     ]);
   });

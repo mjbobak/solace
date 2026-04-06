@@ -190,6 +190,22 @@ def _ensure_income_year_settings_columns() -> None:
             """
         )
 
+    if "primary_runway_source_id" not in existing_columns:
+        statements.append(
+            """
+            ALTER TABLE income_year_settings
+            ADD COLUMN primary_runway_source_id INTEGER
+            """
+        )
+
+    if "secondary_runway_source_id" not in existing_columns:
+        statements.append(
+            """
+            ALTER TABLE income_year_settings
+            ADD COLUMN secondary_runway_source_id INTEGER
+            """
+        )
+
     with engine.begin() as connection:
         for statement in statements:
             connection.execute(text(statement))

@@ -319,16 +319,32 @@ class IncomeService:
         year: int,
         settings_in: IncomeYearSettingsUpdate,
     ) -> IncomeYearSettings:
+        updates = settings_in.model_dump(exclude_unset=True)
+        runway_source_selection = self._validate_runway_source_selection(updates)
+
         settings = self.db.query(IncomeYearSettings).filter(IncomeYearSettings.year == year).first()
         if settings is None:
             settings = IncomeYearSettings(
                 year=year,
-                emergency_fund_balance=settings_in.emergency_fund_balance or 18000,
+                emergency_fund_balance=(
+                    settings_in.emergency_fund_balance
+                    if settings_in.emergency_fund_balance is not None
+                    else 18000
+                ),
+                primary_runway_source_id=runway_source_selection["primary"],
+                secondary_runway_source_id=runway_source_selection["secondary"],
             )
             self.db.add(settings)
         else:
-            if settings_in.emergency_fund_balance is not None:
+            if (
+                "emergency_fund_balance" in updates
+                and settings_in.emergency_fund_balance is not None
+            ):
                 settings.emergency_fund_balance = settings_in.emergency_fund_balance
+            if "primary_runway_source_id" in updates:
+                settings.primary_runway_source_id = runway_source_selection["primary"]
+            if "secondary_runway_source_id" in updates:
+                settings.secondary_runway_source_id = runway_source_selection["secondary"]
         self.db.flush()
 
         if settings_in.tax_advantaged_buckets is not None:
@@ -394,6 +410,12 @@ class IncomeService:
                 float(year_settings.emergency_fund_balance if year_settings else 18000),
                 2,
             ),
+            primary_runway_source_id=(
+                year_settings.primary_runway_source_id if year_settings else None
+            ),
+            secondary_runway_source_id=(
+                year_settings.secondary_runway_source_id if year_settings else None
+            ),
             tax_advantaged_investments=tax_advantaged_investments,
             sources=projected_sources,
         )
@@ -418,6 +440,8 @@ class IncomeService:
             year=settings.year,
             tax_advantaged_buckets=self._tax_advantaged_bucket_entry_responses(settings),
             emergency_fund_balance=settings.emergency_fund_balance,
+            primary_runway_source_id=settings.primary_runway_source_id,
+            secondary_runway_source_id=settings.secondary_runway_source_id,
             created_at=settings.created_at,
             updated_at=settings.updated_at,
         )
@@ -678,6 +702,46 @@ class IncomeService:
             )
             for bucket_type in TAX_ADVANTAGED_BUCKET_TYPES
         ]
+
+    def _validate_runway_source_id(self, source_id: object) -> int | None:
+        if source_id is None:
+            return None
+
+        normalized_source_id = int(source_id)
+        source_exists = (
+            self.db.query(IncomeSource.id)
+            .filter(IncomeSource.id == normalized_source_id)
+            .first()
+        )
+        if source_exists is None:
+            raise ValueError(f"Income source {normalized_source_id} not found")
+
+        return normalized_source_id
+
+    def _validate_runway_source_selection(
+        self,
+        updates: dict[str, object],
+    ) -> dict[str, int | None]:
+        runway_source_selection = {
+            "primary": self._validate_runway_source_id(
+                updates.get("primary_runway_source_id"),
+            ),
+            "secondary": self._validate_runway_source_id(
+                updates.get("secondary_runway_source_id"),
+            ),
+        }
+
+        if (
+            runway_source_selection["primary"] is not None
+            and runway_source_selection["secondary"] is not None
+            and runway_source_selection["primary"]
+            == runway_source_selection["secondary"]
+        ):
+            raise ValueError(
+                "Primary and secondary runway scenarios must use different income sources"
+            )
+
+        return runway_source_selection
 
     def _replace_tax_advantaged_buckets(
         self,

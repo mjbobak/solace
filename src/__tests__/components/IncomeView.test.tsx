@@ -56,6 +56,8 @@ const projection: IncomeYearProjection = {
     plannedNet: 105000,
   },
   emergencyFundBalance: 18000,
+  primaryRunwaySourceId: null,
+  secondaryRunwaySourceId: null,
   taxAdvantagedInvestments: {
     entries: [
       { bucketType: '401k', annualAmount: 22000 },
@@ -269,6 +271,8 @@ describe('IncomeView', () => {
         { bucketType: 'fsa_medical', annualAmount: 500 },
       ],
       emergencyFundBalance: 18000,
+      primaryRunwaySourceId: null,
+      secondaryRunwaySourceId: null,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-02T00:00:00Z',
     });

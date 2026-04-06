@@ -93,6 +93,8 @@ export interface IncomeYearProjection {
   year: number;
   totals: IncomeProjectionTotals;
   emergencyFundBalance: number;
+  primaryRunwaySourceId: number | null;
+  secondaryRunwaySourceId: number | null;
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
   sources: ProjectedIncomeSource[];
 }
@@ -101,6 +103,8 @@ export interface IncomeYearSettings {
   year: number;
   taxAdvantagedBuckets: TaxAdvantagedBucketEntry[];
   emergencyFundBalance: number;
+  primaryRunwaySourceId: number | null;
+  secondaryRunwaySourceId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -145,6 +149,8 @@ export type UpdateIncomeOccurrenceInput = Partial<CreateIncomeOccurrenceInput>;
 export interface UpdateIncomeYearSettingsInput {
   taxAdvantagedBuckets?: TaxAdvantagedBucketEntry[];
   emergencyFundBalance?: number;
+  primaryRunwaySourceId?: number | null;
+  secondaryRunwaySourceId?: number | null;
 }
 
 export function getComponentDisplayName(

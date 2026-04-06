@@ -98,12 +98,18 @@ def update_year_settings(
     *,
     tax_advantaged_buckets: list[dict] | None = None,
     emergency_fund_balance: float | None = None,
+    primary_runway_source_id: int | None = None,
+    secondary_runway_source_id: int | None = None,
 ) -> dict:
     payload: dict[str, object] = {}
     if tax_advantaged_buckets is not None:
         payload["tax_advantaged_buckets"] = tax_advantaged_buckets
     if emergency_fund_balance is not None:
         payload["emergency_fund_balance"] = emergency_fund_balance
+    if primary_runway_source_id is not None:
+        payload["primary_runway_source_id"] = primary_runway_source_id
+    if secondary_runway_source_id is not None:
+        payload["secondary_runway_source_id"] = secondary_runway_source_id
 
     response = client.put(
         f"/api/incomes/year-settings/{year}",
@@ -242,9 +248,13 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
         {"bucket_type": "fsa_medical", "annual_amount": 500},
     ]
     assert created["emergency_fund_balance"] == 18000
+    assert created["primary_runway_source_id"] is None
+    assert created["secondary_runway_source_id"] is None
 
     projection = get_projection(client, 2026)
     assert projection["emergency_fund_balance"] == 18000
+    assert projection["primary_runway_source_id"] is None
+    assert projection["secondary_runway_source_id"] is None
     assert projection["tax_advantaged_investments"] == {
         "entries": [
             {"bucket_type": "401k", "annual_amount": 19500},
@@ -277,9 +287,13 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
         "annual_amount": 22000,
     }
     assert updated["emergency_fund_balance"] == 24000
+    assert updated["primary_runway_source_id"] is None
+    assert updated["secondary_runway_source_id"] is None
 
     db_row = db_session.query(IncomeYearSettings).filter(IncomeYearSettings.year == 2026).one()
     assert db_row.emergency_fund_balance == 24000
+    assert db_row.primary_runway_source_id is None
+    assert db_row.secondary_runway_source_id is None
     bucket_rows = (
         db_session.query(IncomeYearTaxAdvantagedBucket)
         .filter(IncomeYearTaxAdvantagedBucket.year_settings_id == db_row.id)
@@ -295,10 +309,39 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
 
     projection = get_projection(client, 2026)
     assert projection["emergency_fund_balance"] == 24000
+    assert projection["primary_runway_source_id"] is None
+    assert projection["secondary_runway_source_id"] is None
+
+
+def test_year_settings_can_store_runway_source_ids(client, db_session):
+    """Runway scenarios should persist stable source ids instead of matching source names."""
+    primary_source = create_source(client, "Main Job")
+    secondary_source = create_source(client, "Side Gig")
+
+    updated = update_year_settings(
+        client,
+        2026,
+        primary_runway_source_id=primary_source["id"],
+        secondary_runway_source_id=secondary_source["id"],
+    )
+
+    assert updated["primary_runway_source_id"] == primary_source["id"]
+    assert updated["secondary_runway_source_id"] == secondary_source["id"]
+
+    db_row = db_session.query(IncomeYearSettings).filter(IncomeYearSettings.year == 2026).one()
+    assert db_row.primary_runway_source_id == primary_source["id"]
+    assert db_row.secondary_runway_source_id == secondary_source["id"]
+
+    projection = get_projection(client, 2026)
+    assert projection["primary_runway_source_id"] == primary_source["id"]
+    assert projection["secondary_runway_source_id"] == secondary_source["id"]
 
 
 def test_year_settings_partial_updates_preserve_existing_values(client, db_session):
     """Saving one year setting should not overwrite the others."""
+    primary_source = create_source(client, "Main Job")
+    secondary_source = create_source(client, "Side Gig")
+
     update_year_settings(
         client,
         2026,
@@ -309,6 +352,8 @@ def test_year_settings_partial_updates_preserve_existing_values(client, db_sessi
             {"bucket_type": "fsa_medical", "annual_amount": 300},
         ],
         emergency_fund_balance=21000,
+        primary_runway_source_id=primary_source["id"],
+        secondary_runway_source_id=secondary_source["id"],
     )
 
     updated = update_year_settings(client, 2026, emergency_fund_balance=26000)
@@ -318,9 +363,13 @@ def test_year_settings_partial_updates_preserve_existing_values(client, db_sessi
         "annual_amount": 19500,
     }
     assert updated["emergency_fund_balance"] == 26000
+    assert updated["primary_runway_source_id"] == primary_source["id"]
+    assert updated["secondary_runway_source_id"] == secondary_source["id"]
 
     db_row = db_session.query(IncomeYearSettings).filter(IncomeYearSettings.year == 2026).one()
     assert db_row.emergency_fund_balance == 26000
+    assert db_row.primary_runway_source_id == primary_source["id"]
+    assert db_row.secondary_runway_source_id == secondary_source["id"]
     bucket_rows = (
         db_session.query(IncomeYearTaxAdvantagedBucket)
         .filter(IncomeYearTaxAdvantagedBucket.year_settings_id == db_row.id)

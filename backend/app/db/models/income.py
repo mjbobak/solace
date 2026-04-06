@@ -142,6 +142,8 @@ class IncomeYearSettings(Base):
         default=18000,
         server_default="18000",
     )
+    primary_runway_source_id = Column(Integer, nullable=True)
+    secondary_runway_source_id = Column(Integer, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
@@ -156,7 +158,9 @@ class IncomeYearSettings(Base):
             "<IncomeYearSettings("
             f"year={self.year}, "
             f"contributions_401k={self.contributions_401k}, "
-            f"emergency_fund_balance={self.emergency_fund_balance}"
+            f"emergency_fund_balance={self.emergency_fund_balance}, "
+            f"primary_runway_source_id={self.primary_runway_source_id}, "
+            f"secondary_runway_source_id={self.secondary_runway_source_id}"
             ")>"
         )
 

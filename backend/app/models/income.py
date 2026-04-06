@@ -40,6 +40,8 @@ class IncomeYearSettingsUpdate(BaseModel):
 
     tax_advantaged_buckets: Optional[list[TaxAdvantagedBucketEntryUpdate]] = None
     emergency_fund_balance: Optional[float] = Field(None, ge=0)
+    primary_runway_source_id: Optional[int] = Field(None, ge=1)
+    secondary_runway_source_id: Optional[int] = Field(None, ge=1)
 
 
 class IncomeYearSettingsResponse(BaseModel):
@@ -47,6 +49,8 @@ class IncomeYearSettingsResponse(BaseModel):
 
     tax_advantaged_buckets: list[TaxAdvantagedBucketEntryResponse] = Field(default_factory=list)
     emergency_fund_balance: float = 0
+    primary_runway_source_id: Optional[int] = None
+    secondary_runway_source_id: Optional[int] = None
     year: int
     created_at: datetime
     updated_at: datetime
@@ -220,6 +224,8 @@ class IncomeYearProjectionResponse(BaseModel):
     year: int
     totals: IncomeProjectionTotalsResponse
     emergency_fund_balance: float = 18000
+    primary_runway_source_id: Optional[int] = None
+    secondary_runway_source_id: Optional[int] = None
     tax_advantaged_investments: TaxAdvantagedInvestmentsResponse = Field(
         default_factory=TaxAdvantagedInvestmentsResponse
     )

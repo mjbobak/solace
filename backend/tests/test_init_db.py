@@ -118,6 +118,40 @@ def test_ensure_income_year_tax_advantaged_buckets_schema_creates_table(monkeypa
     } <= column_names
 
 
+def test_ensure_income_year_settings_columns_adds_runway_source_columns(monkeypatch, tmp_path):
+    """Year settings should gain the runway scenario source id columns."""
+    db_path = tmp_path / "init-db-income-year-settings.sqlite"
+    engine = create_engine(f"sqlite:///{db_path}")
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                CREATE TABLE income_year_settings (
+                    id INTEGER PRIMARY KEY,
+                    year INTEGER NOT NULL,
+                    contributions_401k FLOAT NOT NULL DEFAULT 0,
+                    emergency_fund_balance FLOAT NOT NULL DEFAULT 18000,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+
+    monkeypatch.setattr(init_db_module, "engine", engine)
+
+    init_db_module._ensure_income_year_settings_columns()
+
+    column_names = {
+        column["name"]
+        for column in inspect(engine).get_columns("income_year_settings")
+    }
+
+    assert "primary_runway_source_id" in column_names
+    assert "secondary_runway_source_id" in column_names
+
+
 def test_backfill_legacy_401k_buckets_is_idempotent(monkeypatch, tmp_path):
     """Legacy 401k values should backfill once without creating duplicates."""
     db_path = tmp_path / "init-db-income-bucket-backfill.sqlite"
