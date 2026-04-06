@@ -33,14 +33,27 @@ import { AddTransactionModal } from './AddTransactionModal';
 import { BulkAccountDropdown } from './BulkAccountDropdown';
 import { BulkBudgetDropdown } from './BulkBudgetDropdown';
 import { BulkDeleteConfirm } from './BulkConfirmDialogs';
+import {
+  BulkSpreadDropdown,
+  type BulkSpreadOption,
+} from './BulkSpreadDropdown';
 import { SpendingFilters } from './SpendingFilters';
 import { getSpendingTableColumns } from './spendingTableColumns';
 import { SpreadPaymentModal } from './SpreadPaymentModal';
 
-interface PendingBulkOperation {
-  type: 'category' | 'account';
-  value?: string | { id: number; label: string; category: string };
-}
+type PendingBulkOperation =
+  | {
+      type: 'category';
+      value: { id: number; label: string; category: string };
+    }
+  | {
+      type: 'account';
+      value: string;
+    }
+  | {
+      type: 'spread';
+      value: BulkSpreadOption;
+    };
 
 interface SpreadEditorState {
   transaction: SpendingEntry;
@@ -489,6 +502,13 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
     ]);
   };
 
+  const handleBulkSpreadSelect = (option: BulkSpreadOption) => {
+    setPendingOperations((prev) => [
+      ...prev.filter((op) => op.type !== 'spread'),
+      { type: 'spread', value: option },
+    ]);
+  };
+
   const handleSave = async () => {
     if (pendingOperations.length === 0) return;
     const selectedIds = Array.from(selection.selectedIds);
@@ -508,8 +528,15 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
           case 'account':
             await bulkOps.handleBulkUpdateAccount(
               selectedIds,
-              op.value as string,
+              op.value,
             );
+            break;
+          case 'spread':
+            if (op.value === 'fiscalYear') {
+              await bulkOps.handleBulkSetFiscalYearSpread(selectedIds);
+            } else {
+              await bulkOps.handleBulkRemoveSpread(selectedIds);
+            }
             break;
         }
       }
@@ -561,15 +588,18 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       let label = '';
       switch (op.type) {
         case 'category': {
-          const budgetValue =
-            typeof op.value === 'object'
-              ? `${op.value.label} (${op.value.category})`
-              : op.value;
+          const budgetValue = `${op.value.label} (${op.value.category})`;
           label = `Budget: ${budgetValue}`;
           break;
         }
         case 'account':
           label = `Account: ${op.value}`;
+          break;
+        case 'spread':
+          label =
+            op.value === 'fiscalYear'
+              ? 'Spread: 12 months fiscal year'
+              : 'Spread: removed';
           break;
       }
 
@@ -630,6 +660,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
             accounts={availableAccounts}
             onSelectAccount={handleBulkAccountSelect}
           />
+          <BulkSpreadDropdown onSelectSpread={handleBulkSpreadSelect} />
         </BulkActionBar>
 
         <Table

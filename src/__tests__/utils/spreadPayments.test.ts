@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
 import {
+  getFiscalYearMonthRange,
   getImpactForMonth,
   getMonthlyTransactionImpacts,
 } from '@/features/spending/utils/spreadPayments';
@@ -23,6 +24,13 @@ function createTransaction(overrides?: Partial<SpendingEntry>): SpendingEntry {
 }
 
 describe('spreadPayments', () => {
+  it('returns the full transaction-year range for fiscal year presets', () => {
+    expect(getFiscalYearMonthRange('2026-07-15')).toEqual({
+      startMonth: '2026-01',
+      endMonth: '2026-12',
+    });
+  });
+
   it('keeps a non-spread transaction in its transaction month', () => {
     const impacts = getMonthlyTransactionImpacts(createTransaction());
 

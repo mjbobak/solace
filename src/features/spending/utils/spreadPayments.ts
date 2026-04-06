@@ -21,6 +21,11 @@ export interface MonthlyTransactionImpact {
   monthStart: string;
 }
 
+export interface SpreadMonthRange {
+  startMonth: string;
+  endMonth: string;
+}
+
 function parseIsoDate(dateString: string): Date {
   const [year, month, day] = dateString.split('-').map(Number);
   return new Date(year, month - 1, day);
@@ -51,6 +56,17 @@ export function toMonthInputValue(dateString: string): string {
 
 export function monthInputToIsoDate(monthInput: string): string {
   return `${monthInput}-01`;
+}
+
+export function getFiscalYearMonthRange(
+  transactionDate: string,
+): SpreadMonthRange {
+  const year = parseIsoDate(transactionDate).getFullYear();
+
+  return {
+    startMonth: `${year}-01`,
+    endMonth: `${year}-12`,
+  };
 }
 
 export function getInclusiveMonthCount(

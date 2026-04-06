@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom';
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
 import {
   formatSpreadRangeLabel,
+  getFiscalYearMonthRange,
   getInclusiveMonthCount,
   getSpreadEndDate,
   getSpreadPaymentConfig,
@@ -157,6 +158,14 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
       spreadMonths: monthCount,
     };
   }, [isValidRange, monthCount, startMonth, transaction]);
+
+  const fiscalYearRange = useMemo(() => {
+    if (!transaction) {
+      return null;
+    }
+
+    return getFiscalYearMonthRange(transaction.transactionDate);
+  }, [transaction]);
 
   const calculatePosition = useCallback((): PopoverPosition => {
     return getPopoverPosition({
@@ -373,6 +382,23 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
                   {months} months
                 </button>
               ))}
+              {fiscalYearRange && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStartMonth(fiscalYearRange.startMonth);
+                    setEndMonth(fiscalYearRange.endMonth);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    startMonth === fiscalYearRange.startMonth &&
+                    endMonth === fiscalYearRange.endMonth
+                      ? 'border-purple-400 bg-purple-50 text-purple-700'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  12 months fiscal year
+                </button>
+              )}
             </div>
           </div>
 

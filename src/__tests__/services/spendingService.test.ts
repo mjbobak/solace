@@ -103,3 +103,77 @@ describe('spendingService.updateTransaction', () => {
     });
   });
 });
+
+describe('spendingService.bulkUpdateTransactionsIndividually', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('sends each transaction its own spread payload', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () =>
+          createTransactionApiResponse({
+            id: 1,
+            date: '2026-07-15',
+            spread_start_date: '2026-01-01',
+            spread_months: 12,
+            is_accrual: true,
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () =>
+          createTransactionApiResponse({
+            id: 2,
+            date: '2027-02-10',
+            spread_start_date: '2027-01-01',
+            spread_months: 12,
+            is_accrual: true,
+          }),
+      });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await spendingService.bulkUpdateTransactionsIndividually([
+      {
+        id: '1',
+        updates: {
+          isAccrual: true,
+          spreadStartDate: '2026-01-01',
+          spreadMonths: 12,
+        },
+      },
+      {
+        id: '2',
+        updates: {
+          isAccrual: true,
+          spreadStartDate: '2027-01-01',
+          spreadMonths: 12,
+        },
+      },
+    ]);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/transactions/1', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        is_accrual: true,
+        spread_start_date: '2026-01-01',
+        spread_months: 12,
+      }),
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/transactions/2', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        is_accrual: true,
+        spread_start_date: '2027-01-01',
+        spread_months: 12,
+      }),
+    });
+  });
+});

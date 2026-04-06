@@ -3,6 +3,10 @@ import { toast } from 'sonner';
 
 import { spendingService } from '@/features/spending/services/spendingService';
 import type { SpendingEntry } from '@/features/spending/types/spendingView';
+import {
+  getFiscalYearMonthRange,
+  monthInputToIsoDate,
+} from '@/features/spending/utils/spreadPayments';
 
 export function useBulkSpendingOperations(
   transactions: SpendingEntry[],
@@ -130,6 +134,69 @@ export function useBulkSpendingOperations(
   };
 
   /**
+   * Bulk spread payments across each transaction's full calendar year.
+   */
+  const handleBulkSetFiscalYearSpread = async (ids: string[]) => {
+    setIsLoading(true);
+
+    const previousTransactions = [...transactions];
+    const selectedTransactions = transactions.filter((transaction) =>
+      ids.includes(transaction.id),
+    );
+    const spreadUpdatesById = new Map(
+      selectedTransactions.map((transaction) => {
+        const fiscalYearRange = getFiscalYearMonthRange(
+          transaction.transactionDate,
+        );
+
+        return [
+          transaction.id,
+          {
+            isAccrual: true,
+            spreadStartDate: monthInputToIsoDate(fiscalYearRange.startMonth),
+            spreadMonths: 12,
+          },
+        ] as const;
+      }),
+    );
+
+    setTransactions((prev) =>
+      prev.map((transaction) =>
+        spreadUpdatesById.has(transaction.id)
+          ? {
+              ...transaction,
+              ...spreadUpdatesById.get(transaction.id)!,
+            }
+          : transaction,
+      ),
+    );
+
+    try {
+      await spendingService.bulkUpdateTransactionsIndividually(
+        selectedTransactions.map((transaction) => ({
+          id: transaction.id,
+          updates: spreadUpdatesById.get(transaction.id)!,
+        })),
+      );
+      toast.success(
+        `Payment spread set to full transaction year for ${
+          selectedTransactions.length
+        } ${
+          selectedTransactions.length === 1 ? 'transaction' : 'transactions'
+        }`,
+      );
+    } catch (error) {
+      setTransactions(previousTransactions);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to update payment spread: ${message}`);
+      console.error('Bulk set fiscal year spread error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
    * Bulk update account
    */
   const handleBulkUpdateAccount = async (ids: string[], account: string) => {
@@ -164,6 +231,7 @@ export function useBulkSpendingOperations(
     handleBulkDelete,
     handleBulkUpdateBudget,
     handleBulkUpdateAccount,
+    handleBulkSetFiscalYearSpread,
     handleBulkRemoveSpread,
     isLoading,
   };

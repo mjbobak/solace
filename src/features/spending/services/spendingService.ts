@@ -50,6 +50,11 @@ type TransactionUpdatePayload = {
   spread_months?: number | null;
 };
 
+interface BulkTransactionUpdate {
+  id: string;
+  updates: Partial<SpendingEntry>;
+}
+
 const TRANSACTIONS_API_BASE = '/api/transactions';
 const DEFAULT_PAGE_SIZE = 500;
 
@@ -225,6 +230,32 @@ function csvRowToTransaction(
   };
 }
 
+async function runBulkTransactionUpdates(
+  updatesByTransaction: BulkTransactionUpdate[],
+): Promise<SpendingEntry[]> {
+  const updatePromises = updatesByTransaction.map(({ id, updates }) =>
+    fetch(`/api/transactions/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(mapSpendingEntryToApi(updates)),
+    }),
+  );
+
+  const results = await Promise.all(updatePromises);
+  const updatedTransactions: SpendingEntry[] = [];
+
+  for (const result of results) {
+    if (!result.ok) {
+      throw new Error(`Failed to update transaction: ${result.statusText}`);
+    }
+
+    const apiResponse = (await result.json()) as TransactionAPI;
+    updatedTransactions.push(mapApiToSpendingEntry(apiResponse));
+  }
+
+  return updatedTransactions;
+}
+
 // API client for transactions
 export const spendingService = {
   getAllTransactions: async (
@@ -393,28 +424,20 @@ export const spendingService = {
     try {
       // Update each transaction individually
       // TODO: Implement bulk update endpoint on backend for better performance
-      const updatePromises = ids.map((id) =>
-        fetch(`/api/transactions/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(mapSpendingEntryToApi(updates)),
-        }),
+      return await runBulkTransactionUpdates(
+        ids.map((id) => ({ id, updates })),
       );
+    } catch (error) {
+      console.error('Error bulk updating transactions:', error);
+      throw error;
+    }
+  },
 
-      const results = await Promise.all(updatePromises);
-      const updatedTransactions: SpendingEntry[] = [];
-
-      // Collect all updated transactions
-      for (const result of results) {
-        if (!result.ok) {
-          throw new Error(`Failed to update transaction: ${result.statusText}`);
-        }
-
-        const apiResponse = (await result.json()) as TransactionAPI;
-        updatedTransactions.push(mapApiToSpendingEntry(apiResponse));
-      }
-
-      return updatedTransactions;
+  bulkUpdateTransactionsIndividually: async (
+    updatesByTransaction: BulkTransactionUpdate[],
+  ): Promise<SpendingEntry[]> => {
+    try {
+      return await runBulkTransactionUpdates(updatesByTransaction);
     } catch (error) {
       console.error('Error bulk updating transactions:', error);
       throw error;
