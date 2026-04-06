@@ -3,12 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type { IncomeYearProjection } from '@/features/income/types/income';
-import { getCompletedMonthsForYear } from '@/shared/utils/spendBasis';
 
 import { buildAnnualMoneyFlowSankeyData } from '../services/sankeyDataService';
 import type { SankeyData } from '../types/sankeyTypes';
 import {
-  buildDashboardMoneyFlowSummary,
+  buildPlannedDashboardMoneyFlowSummary,
   type DashboardMoneyFlowSummary,
 } from '../utils/dashboardKpiReport';
 
@@ -31,7 +30,6 @@ const EMPTY_SUMMARY: DashboardMoneyFlowSummary = {
 };
 
 export function useSankeyData(year: number): UseSankeyDataResult {
-  const completedMonths = getCompletedMonthsForYear(year);
   const [incomeProjection, setIncomeProjection] =
     useState<IncomeYearProjection | null>(null);
   const [incomeError, setIncomeError] = useState<string | null>(null);
@@ -85,15 +83,13 @@ export function useSankeyData(year: number): UseSankeyDataResult {
       return EMPTY_SUMMARY;
     }
 
-    return buildDashboardMoneyFlowSummary({
+    return buildPlannedDashboardMoneyFlowSummary({
       currentIncomeTotals: incomeProjection?.totals ?? null,
       currentTaxAdvantagedInvestments:
         incomeProjection?.taxAdvantagedInvestments ?? null,
       budgetEntries,
-      spendBasis: 'annual_full_year',
-      completedMonths,
     });
-  }, [budgetEntries, budgetError, completedMonths, incomeProjection]);
+  }, [budgetEntries, budgetError, incomeProjection]);
 
   return {
     data: buildAnnualMoneyFlowSankeyData(summary),

@@ -145,7 +145,7 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({
   const monthlyWealthContribution = plannedSavings + allocationTotals.investments;
 
   const getPercentage = (value: number) =>
-    monthlyIncome > 0 ? ((value / monthlyIncome) * 100).toFixed(1) : '0.0';
+    monthlyIncome > 0 ? String(Math.round((value / monthlyIncome) * 100)) : '0';
 
   const overviewSteps: IncomeAllocationWaterfallStep[] = [
     {

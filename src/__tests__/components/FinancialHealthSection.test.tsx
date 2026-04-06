@@ -144,10 +144,10 @@ describe('FinancialHealthSection', () => {
       width: '100%',
     });
     expect(
-      screen.getByText('Wealth capture is 45.0% of income.'),
+      screen.getByText('Wealth capture is 45% of income.'),
     ).toBeInTheDocument();
     expect(screen.getByText('$5,400 annual')).toBeInTheDocument();
-    expect(screen.getAllByText('30.0%')).toHaveLength(2);
+    expect(screen.getAllByText('30%')).toHaveLength(2);
     expect(
       screen.getByRole('button', { name: 'Show Funsies category breakdown' }),
     ).toBeInTheDocument();

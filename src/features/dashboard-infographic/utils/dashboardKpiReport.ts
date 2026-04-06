@@ -80,6 +80,21 @@ interface BuildDashboardMoneyFlowSummaryParams {
   completedMonths: number;
 }
 
+interface BuildPlannedDashboardMoneyFlowSummaryParams {
+  currentIncomeTotals: IncomeProjectionTotals | null;
+  currentTaxAdvantagedInvestments: TaxAdvantagedInvestments | null;
+  budgetEntries: BudgetEntry[] | null;
+}
+
+interface CreateDashboardMoneyFlowSummaryParams {
+  netIncome: number | null;
+  essentialSpending: number | null;
+  funsiesSpending: number | null;
+  savingsAmount: number | null;
+  investmentAmount: number | null;
+  preTax401kContribution: number | null;
+}
+
 const NOT_AVAILABLE_VALUE: DashboardKpiValue = {
   kind: 'text',
   text: 'N/A',
@@ -233,6 +248,42 @@ function getBudgetedAmount(
   predicate: (entry: BudgetEntry) => boolean,
 ): number {
   return sumBudgetEntries(budgetEntries, predicate, (entry) => entry.budgeted);
+}
+
+function getAnnualBudgetedAmount(
+  budgetEntries: BudgetEntry[],
+  predicate: (entry: BudgetEntry) => boolean,
+): number {
+  return formatAnnualBudgetAmount(getBudgetedAmount(budgetEntries, predicate));
+}
+
+function createDashboardMoneyFlowSummary({
+  netIncome,
+  essentialSpending,
+  funsiesSpending,
+  savingsAmount,
+  investmentAmount,
+  preTax401kContribution,
+}: CreateDashboardMoneyFlowSummaryParams): DashboardMoneyFlowSummary {
+  const netIncomeWealthContribution =
+    savingsAmount === null || investmentAmount === null
+      ? null
+      : savingsAmount + investmentAmount;
+  const wealthContribution =
+    netIncomeWealthContribution === null && preTax401kContribution === null
+      ? null
+      : (netIncomeWealthContribution ?? 0) + (preTax401kContribution ?? 0);
+
+  return {
+    netIncome,
+    essentialSpending,
+    funsiesSpending,
+    savingsAmount,
+    investmentAmount,
+    preTax401kContribution,
+    netIncomeWealthContribution,
+    wealthContribution,
+  };
 }
 
 export function buildEmergencyRunwaySummary({
@@ -498,33 +549,65 @@ export function buildDashboardMoneyFlowSummary({
     investmentAmount === null
       ? null
       : comparisonNetIncome - livingExpenses - investmentAmount;
-  const netIncomeWealthContribution =
-    savingsAmount === null || investmentAmount === null
-      ? null
-      : savingsAmount + investmentAmount;
-  const wealthContribution =
-    netIncomeWealthContribution === null && preTax401kContribution === null
-      ? null
-      : (netIncomeWealthContribution ?? 0) + (preTax401kContribution ?? 0);
   const funsiesSpending =
     comparisonNetIncome === null ||
     essentialSpending === null ||
-    netIncomeWealthContribution === null
+    savingsAmount === null ||
+    investmentAmount === null
       ? null
       : comparisonNetIncome -
         essentialSpending -
-        netIncomeWealthContribution;
+        savingsAmount -
+        investmentAmount;
 
-  return {
+  return createDashboardMoneyFlowSummary({
     netIncome: comparisonNetIncome,
     essentialSpending,
     funsiesSpending,
     savingsAmount,
     investmentAmount,
     preTax401kContribution,
-    netIncomeWealthContribution,
-    wealthContribution,
-  };
+  });
+}
+
+export function buildPlannedDashboardMoneyFlowSummary({
+  currentIncomeTotals,
+  currentTaxAdvantagedInvestments,
+  budgetEntries,
+}: BuildPlannedDashboardMoneyFlowSummaryParams): DashboardMoneyFlowSummary {
+  const netIncome = currentIncomeTotals?.plannedNet ?? null;
+  const livingExpenses = budgetEntries
+    ? getAnnualBudgetedAmount(budgetEntries, isLivingExpense)
+    : null;
+  const essentialSpending = budgetEntries
+    ? getAnnualBudgetedAmount(budgetEntries, isEssentialLivingExpense)
+    : null;
+  const investmentAmount = budgetEntries
+    ? getAnnualBudgetedAmount(budgetEntries, (entry) =>
+        isInvestmentBudgetEntry(entry),
+      )
+    : null;
+  const preTax401kContribution = getTaxAdvantagedBucketAmount(
+    currentTaxAdvantagedInvestments,
+    '401k',
+  );
+  const savingsAmount =
+    netIncome === null || livingExpenses === null || investmentAmount === null
+      ? null
+      : netIncome - livingExpenses - investmentAmount;
+  const funsiesSpending =
+    livingExpenses === null || essentialSpending === null
+      ? null
+      : livingExpenses - essentialSpending;
+
+  return createDashboardMoneyFlowSummary({
+    netIncome,
+    essentialSpending,
+    funsiesSpending,
+    savingsAmount,
+    investmentAmount,
+    preTax401kContribution,
+  });
 }
 
 export function buildDashboardKpiGroups({

@@ -4,6 +4,7 @@ import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import {
   buildEmergencyRunwaySummary,
   buildDashboardMoneyFlowSummary,
+  buildPlannedDashboardMoneyFlowSummary,
   buildDashboardKpiGroups,
   matchesBudgetLabel,
 } from '@/features/dashboard-infographic/utils/dashboardKpiReport';
@@ -485,6 +486,45 @@ describe('buildDashboardKpiGroups', () => {
     expect(summary.netIncomeWealthContribution).toBe(122800);
     expect(summary.wealthContribution).toBe(144800);
     expect(summary.funsiesSpending).toBe(4200);
+  });
+
+  it('builds planned money-flow totals from annual budget allocations', () => {
+    const summary = buildPlannedDashboardMoneyFlowSummary({
+      currentIncomeTotals: createIncomeTotals(),
+      currentTaxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+      budgetEntries: [
+        createBudgetEntry({ budgeted: 3000, spent: 33000 }),
+        createBudgetEntry({
+          id: 'BUD-0002',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'DINING',
+          expenseLabel: 'Restaurants',
+          budgeted: 400,
+          spent: 4200,
+          remaining: 0,
+          percentage: 1,
+        }),
+        createBudgetEntry({
+          id: 'BUD-0003',
+          expenseType: 'FUNSIES',
+          expenseCategory: 'INVESTMENTS',
+          expenseLabel: 'Brokerage',
+          budgeted: 500,
+          spent: 5400,
+          remaining: 0,
+          percentage: 1,
+        }),
+      ],
+    });
+
+    expect(summary.netIncome).toBe(160000);
+    expect(summary.essentialSpending).toBe(36000);
+    expect(summary.funsiesSpending).toBe(4800);
+    expect(summary.investmentAmount).toBe(6000);
+    expect(summary.savingsAmount).toBe(113200);
+    expect(summary.netIncomeWealthContribution).toBe(119200);
+    expect(summary.preTax401kContribution).toBe(22000);
+    expect(summary.wealthContribution).toBe(141200);
   });
 
   it('uses the explicit investment flag instead of relying on expense category names', () => {

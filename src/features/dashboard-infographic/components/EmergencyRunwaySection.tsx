@@ -9,7 +9,6 @@ import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type { IncomeYearProjection } from '@/features/income/types/income';
-import { formatCurrency } from '@/shared/utils/currency';
 
 import type { Period } from '../types/infographic';
 import { buildEmergencyRunwaySummary } from '../utils/dashboardKpiReport';
@@ -112,7 +111,7 @@ export const EmergencyRunwaySection: React.FC<
                 <p className="mt-2 text-2xl font-bold text-app">
                   {runwaySummary.emergencyFundBalance === null
                     ? 'N/A'
-                    : formatCurrency(runwaySummary.emergencyFundBalance)}
+                    : formatWholeCurrency(runwaySummary.emergencyFundBalance)}
                 </p>
               </div>
               <div>
@@ -122,7 +121,7 @@ export const EmergencyRunwaySection: React.FC<
                 <p className="mt-2 text-2xl font-bold text-app">
                   {runwaySummary.monthlyEssentialExpenses === null
                     ? 'N/A'
-                    : formatCurrency(runwaySummary.monthlyEssentialExpenses)}
+                    : formatWholeCurrency(runwaySummary.monthlyEssentialExpenses)}
                 </p>
               </div>
             </div>
@@ -225,12 +224,20 @@ function MetricRow({
   );
 }
 
+function formatWholeCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(Math.round(amount));
+}
+
 function formatOptionalCurrency(amount: number | null): string {
-  return amount === null ? 'N/A' : formatCurrency(amount);
+  return amount === null ? 'N/A' : formatWholeCurrency(amount);
 }
 
 function formatRunwayLabel(months: number | null): string {
-  return months === null ? 'N/A' : `${months.toFixed(1)} months`;
+  return months === null ? 'N/A' : `${Math.round(months)} months`;
 }
 
 function formatShortfallValue(amount: number | null): string {
@@ -242,7 +249,7 @@ function formatShortfallValue(amount: number | null): string {
     return 'No draw needed';
   }
 
-  return formatCurrency(amount);
+  return formatWholeCurrency(amount);
 }
 
 function formatScenarioRunwayLabel(

@@ -120,10 +120,12 @@ describe('useSpendingPulseData', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(result.current.coverageLabel).toBe('Jan-Mar 2026 (completed months)');
-    expect(result.current.rows).toEqual([
+    expect(result.current.rows).toHaveLength(12);
+    expect(result.current.rows.slice(0, 3)).toEqual([
       {
         month: 'Jan',
         monthIndex: 1,
+        isRelevant: true,
         budget: 150,
         actual: 80,
         variance: 70,
@@ -132,6 +134,7 @@ describe('useSpendingPulseData', () => {
       {
         month: 'Feb',
         monthIndex: 2,
+        isRelevant: true,
         budget: 150,
         actual: 40,
         variance: 110,
@@ -140,17 +143,27 @@ describe('useSpendingPulseData', () => {
       {
         month: 'Mar',
         monthIndex: 3,
+        isRelevant: true,
         budget: 150,
         actual: 40,
         variance: 110,
         overBudgetLabels: [],
       },
     ]);
+    expect(result.current.rows[3]).toEqual({
+      month: 'Apr',
+      monthIndex: 4,
+      isRelevant: false,
+      budget: 0,
+      actual: 0,
+      variance: 0,
+      overBudgetLabels: [],
+    });
     expect(getAllBudgets).toHaveBeenCalledWith({ limit: 1000 });
     expect(getAllTransactions).toHaveBeenCalledWith({ fetchAll: true });
   });
 
-  it('returns an empty data set when the selected year has no completed spending activity', async () => {
+  it('returns muted out-of-scope month slots when the selected year has no completed months yet', async () => {
     getAllBudgets.mockResolvedValue([createBudget({ id: 101, budgeted: 100 })]);
     getAllTransactions.mockResolvedValue([]);
 
@@ -163,7 +176,16 @@ describe('useSpendingPulseData', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(result.current.coverageLabel).toBeNull();
-    expect(result.current.rows).toEqual([]);
+    expect(result.current.rows).toHaveLength(12);
+    expect(
+      result.current.rows.every(
+        (row) =>
+          row.isRelevant === false &&
+          row.budget === 0 &&
+          row.actual === 0 &&
+          row.variance === 0,
+      ),
+    ).toBe(true);
   });
 
   it('captures monthly expense-label overages for the drill-down view', async () => {
@@ -214,6 +236,11 @@ describe('useSpendingPulseData', () => {
       await Promise.resolve();
     });
 
+    expect(result.current.rows[0]).toMatchObject({
+      month: 'Jan',
+      monthIndex: 1,
+      isRelevant: true,
+    });
     expect(result.current.rows[0]?.overBudgetLabels).toEqual([
       {
         label: 'Groceries',
@@ -228,5 +255,11 @@ describe('useSpendingPulseData', () => {
         variance: -5,
       },
     ]);
+    expect(result.current.rows[4]).toMatchObject({
+      month: 'May',
+      monthIndex: 5,
+      isRelevant: false,
+      variance: 0,
+    });
   });
 });

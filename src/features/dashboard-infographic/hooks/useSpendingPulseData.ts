@@ -9,6 +9,7 @@ import { getMonthlyTransactionImpacts } from '@/features/spending/utils/spreadPa
 export interface SpendingPulseRow {
   month: string;
   monthIndex: number;
+  isRelevant: boolean;
   budget: number;
   actual: number;
   variance: number;
@@ -30,6 +31,8 @@ interface UseSpendingPulseDataResult {
 }
 
 type MonthlyLabelTotals = Map<string, number>[];
+
+const TOTAL_MONTHS = 12;
 
 function isLinkedToBudget(transaction: SpendingEntry): boolean {
   return transaction.budgetId !== null && transaction.budgetId !== undefined;
@@ -73,8 +76,8 @@ function buildCoverageLabel(
   return `${startMonth}-${endMonth} ${year} (completed months)`;
 }
 
-function createMonthlyLabelTotals(visibleMonthCount: number): MonthlyLabelTotals {
-  return Array.from({ length: visibleMonthCount }, () => new Map<string, number>());
+function createMonthlyLabelTotals(): MonthlyLabelTotals {
+  return Array.from({ length: TOTAL_MONTHS }, () => new Map<string, number>());
 }
 
 function addMonthlyBudgetTotalsByLabel(
@@ -175,8 +178,9 @@ export function buildSpendingPulseRows(params: {
 } {
   const { year, budgets, transactions, now = new Date() } = params;
   const visibleMonthCount = getVisibleMonthCount(year, now);
+  const hasAnyConfiguredBudget = budgets.some((budget) => budget.budgeted !== 0);
 
-  if (visibleMonthCount === 0) {
+  if (visibleMonthCount === 0 && !hasAnyConfiguredBudget) {
     return {
       rows: [],
       coverageLabel: null,
@@ -190,9 +194,9 @@ export function buildSpendingPulseRows(params: {
   const budgetLabelById = new Map(
     budgets.map((budget) => [budget.id, budget.expense_label]),
   );
-  const monthlyLabelBudgets = createMonthlyLabelTotals(visibleMonthCount);
-  const monthlyActuals = Array.from({ length: visibleMonthCount }, () => 0);
-  const monthlyLabelActuals = createMonthlyLabelTotals(visibleMonthCount);
+  const monthlyLabelBudgets = createMonthlyLabelTotals();
+  const monthlyActuals = Array.from({ length: TOTAL_MONTHS }, () => 0);
+  const monthlyLabelActuals = createMonthlyLabelTotals();
 
   addMonthlyBudgetTotalsByLabel(budgets, monthlyLabelBudgets);
   addMonthlyActualTotalsByLabel({
@@ -204,8 +208,10 @@ export function buildSpendingPulseRows(params: {
     year,
   });
 
-  const hasAnyActuals = monthlyActuals.some((amount) => amount !== 0);
-  if (!hasAnyActuals) {
+  const hasAnyRelevantActuals = monthlyActuals
+    .slice(0, visibleMonthCount)
+    .some((amount) => amount !== 0);
+  if (!hasAnyConfiguredBudget && !hasAnyRelevantActuals) {
     return {
       rows: [],
       coverageLabel: null,
@@ -213,18 +219,26 @@ export function buildSpendingPulseRows(params: {
   }
 
   return {
-    rows: monthlyActuals.map((actual, index) => ({
-      month: formatMonthLabel(year, index + 1),
-      monthIndex: index + 1,
-      budget: monthlyBudgetTotal,
-      actual,
-      variance: monthlyBudgetTotal - actual,
-      overBudgetLabels: buildOverBudgetLabels({
-        monthIndex: index,
-        monthlyLabelBudgets,
-        monthlyLabelActuals,
-      }),
-    })),
+    rows: Array.from({ length: TOTAL_MONTHS }, (_, index) => {
+      const isRelevant = index < visibleMonthCount;
+      const actual = monthlyActuals[index] ?? 0;
+
+      return {
+        month: formatMonthLabel(year, index + 1),
+        monthIndex: index + 1,
+        isRelevant,
+        budget: isRelevant ? monthlyBudgetTotal : 0,
+        actual: isRelevant ? actual : 0,
+        variance: isRelevant ? monthlyBudgetTotal - actual : 0,
+        overBudgetLabels: isRelevant
+          ? buildOverBudgetLabels({
+              monthIndex: index,
+              monthlyLabelBudgets,
+              monthlyLabelActuals,
+            })
+          : [],
+      };
+    }),
     coverageLabel: buildCoverageLabel(year, visibleMonthCount),
   };
 }

@@ -36,6 +36,7 @@ describe('SpendingPulseSection', () => {
         {
           month: 'Jan',
           monthIndex: 1,
+          isRelevant: true,
           budget: 150,
           actual: 80,
           variance: 70,
@@ -44,6 +45,7 @@ describe('SpendingPulseSection', () => {
         {
           month: 'Feb',
           monthIndex: 2,
+          isRelevant: true,
           budget: 150,
           actual: 200,
           variance: -50,
@@ -62,6 +64,15 @@ describe('SpendingPulseSection', () => {
             },
           ],
         },
+        {
+          month: 'Mar',
+          monthIndex: 3,
+          isRelevant: false,
+          budget: 0,
+          actual: 0,
+          variance: 0,
+          overBudgetLabels: [],
+        },
       ],
       coverageLabel: 'Jan-Feb 2026 (completed months)',
       isLoading: false,
@@ -70,14 +81,23 @@ describe('SpendingPulseSection', () => {
 
     render(<SpendingPulseSection year={2026} />);
 
-    expect(screen.getByText('Jan-Feb 2026 (completed months)')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Jan-Feb 2026 (completed months)'),
+    ).not.toBeInTheDocument();
     expect(screen.getByText('+ $70')).toBeInTheDocument();
     expect(screen.getByText('- $50')).toBeInTheDocument();
     expect(screen.getByText('Under Budget')).toBeInTheDocument();
     expect(screen.getByText('Over Budget')).toBeInTheDocument();
+    expect(screen.getByText('Not In Scope')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: 'Mar is outside the current analysis window',
+      }),
+    ).toBeDisabled();
+    expect(screen.getByText('N/A')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Select a month to inspect which expense labels ran over budget.',
+        'Track how your monthly spending compares to budget. Green indicates you stayed under budget, red means you spent more than planned. Select a month to inspect which expense labels ran over budget.',
       ),
     ).toBeInTheDocument();
   });
@@ -114,6 +134,7 @@ describe('SpendingPulseSection', () => {
         {
           month: 'Jan',
           monthIndex: 1,
+          isRelevant: true,
           budget: 150,
           actual: 80,
           variance: 70,
@@ -122,6 +143,7 @@ describe('SpendingPulseSection', () => {
         {
           month: 'Feb',
           monthIndex: 2,
+          isRelevant: true,
           budget: 150,
           actual: 200,
           variance: -50,
@@ -151,8 +173,8 @@ describe('SpendingPulseSection', () => {
     expect(screen.getByText('Feb Drill Down')).toBeInTheDocument();
     expect(screen.getByText('Expense Labels Over Budget')).toBeInTheDocument();
     expect(screen.getByText('Date Night')).toBeInTheDocument();
-    expect(screen.getByText('Budget $75.00 vs actual $110.00')).toBeInTheDocument();
-    expect(screen.getByText('$35.00 over')).toBeInTheDocument();
+    expect(screen.getByText('$110 actual vs $75 planned')).toBeInTheDocument();
+    expect(screen.getAllByText('$35 over')).toHaveLength(1);
   });
 
   it('shows a clear empty state when the selected month has no over-budget expense labels', () => {
@@ -161,6 +183,7 @@ describe('SpendingPulseSection', () => {
         {
           month: 'Jan',
           monthIndex: 1,
+          isRelevant: true,
           budget: 150,
           actual: 80,
           variance: 70,

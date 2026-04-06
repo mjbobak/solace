@@ -72,7 +72,7 @@ function formatPercentage(value: number | null | undefined): string {
 
   return new Intl.NumberFormat('en-US', {
     style: 'percent',
-    maximumFractionDigits: 1,
+    maximumFractionDigits: 0,
   }).format(value);
 }
 

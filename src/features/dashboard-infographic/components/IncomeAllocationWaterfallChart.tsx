@@ -57,10 +57,10 @@ function formatWholeCurrency(amount: number): string {
 
 function formatIncomePercent(amount: number, totalIncome: number): string {
   if (totalIncome <= 0) {
-    return '0.0%';
+    return '0%';
   }
 
-  return `${((amount / totalIncome) * 100).toFixed(1)}%`;
+  return `${Math.round((amount / totalIncome) * 100)}%`;
 }
 
 function buildSteps(
@@ -201,7 +201,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
             <p className="text-sm font-semibold text-app">
               {formatAnnualAmount(safeTotalAmount)}
             </p>
-            <p className="text-xs text-muted sm:mt-1">100.0%</p>
+            <p className="text-xs text-muted sm:mt-1">100%</p>
           </div>
 
           {onTotalSelect != null ? (
