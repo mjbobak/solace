@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 
 import { BudgetUtilizationCard } from '@/features/budget/components/budgetSummary/BudgetUtilizationCard';
-import {
-  formatWholeCurrency,
-  type SummaryView,
-} from '@/features/budget/components/budgetSummary/constants';
-import { IncomeAllocationCard } from '@/features/budget/components/budgetSummary/IncomeAllocationCard';
+import { formatWholeCurrency, type SummaryView } from '@/features/budget/components/budgetSummary/constants';
+import { IncomeAllocationCard } from '@/features/dashboard-infographic/components/IncomeAllocationCard';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
-import type { SpendBasis } from '@/features/budget/types/budgetView';
+import type { BudgetEntry, SpendBasis } from '@/features/budget/types/budgetView';
 import {
   getCompletedMonthsForYear,
   getSpendBasisLabel,
@@ -15,14 +12,10 @@ import {
 } from '@/shared/utils/spendBasis';
 
 interface BudgetSummaryProps {
+  budgetEntries: BudgetEntry[];
   totals: BudgetTotals;
-  totalBudgeted: number;
   budgetUtilizationTotals?: BudgetTotals;
-  investments: number;
   income: number;
-  savings: number;
-  essentialBudget: number;
-  funsiesBudget: number;
   isBudgetFiltered: boolean;
   planningYear: number;
   spendBasis: SpendBasis;
@@ -30,20 +23,15 @@ interface BudgetSummaryProps {
 
 export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const {
+    budgetEntries,
     totals,
     budgetUtilizationTotals = totals,
-    investments,
     income,
-    savings,
-    essentialBudget,
-    funsiesBudget,
     isBudgetFiltered,
     planningYear,
     spendBasis,
   } = props;
 
-  const [incomeUtilizationView, setIncomeUtilizationView] =
-    useState<SummaryView>('chart');
   const [budgetUtilizationView, setBudgetUtilizationView] =
     useState<SummaryView>('chart');
 
@@ -62,56 +50,14 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const spendBasisLabel = getSpendBasisLabel(spendBasis);
   const remainingBudgetForChart = Math.max(budgetedForChart - spentForChart, 0);
   const spentWidth = Math.min(usedPercent, 100);
-  const plannedSavings = Math.abs(savings);
-  const savingsForAllocation = plannedSavings + investments;
-  const totalWealth = plannedSavings + investments;
-  const wealthRate = income > 0 ? (totalWealth / income) * 100 : 0;
-  const essentialIncomePercent =
-    income > 0 ? (essentialBudget / income) * 100 : 0;
-  const funsiesIncomePercent = income > 0 ? (funsiesBudget / income) * 100 : 0;
-  const investmentIncomePercent = income > 0 ? (investments / income) * 100 : 0;
-  const plannedSavingsIncomePercent =
-    income > 0 ? (plannedSavings / income) * 100 : 0;
-  const wealthIncomePercent = income > 0 ? (totalWealth / income) * 100 : 0;
-  const essentialWidth = Math.min(essentialIncomePercent, 100);
-  const funsiesWidth = Math.min(
-    funsiesIncomePercent,
-    Math.max(100 - essentialWidth, 0),
-  );
-  const savingsWidth = Math.min(
-    wealthIncomePercent,
-    Math.max(100 - essentialWidth - funsiesWidth, 0),
-  );
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
         <IncomeAllocationCard
-          className="lg:col-span-2"
-          view={incomeUtilizationView}
-          onToggle={() =>
-            setIncomeUtilizationView((current) =>
-              current === 'chart' ? 'numbers' : 'chart',
-            )
-          }
-          annualIncomeSummary={formatWholeCurrency(income * 12)}
-          annualEssentialSummary={formatWholeCurrency(essentialBudget * 12)}
-          annualFunsiesSummary={formatWholeCurrency(funsiesBudget * 12)}
-          annualWealthSummary={formatWholeCurrency(totalWealth * 12)}
-          essentialWidth={essentialWidth}
-          funsiesWidth={funsiesWidth}
-          savingsWidth={savingsWidth}
-          essentialBudget={essentialBudget}
-          funsiesBudget={funsiesBudget}
-          savingsForAllocation={savingsForAllocation}
-          essentialIncomePercent={essentialIncomePercent}
-          funsiesIncomePercent={funsiesIncomePercent}
-          wealthIncomePercent={wealthIncomePercent}
-          income={income}
-          wealthRate={wealthRate}
-          plannedSavings={plannedSavings}
-          investments={investments}
-          savingsIncomePercent={plannedSavingsIncomePercent}
-          investmentIncomePercent={investmentIncomePercent}
+          className="h-full lg:col-span-2"
+          monthlyIncome={income}
+          budgetEntries={budgetEntries}
         />
       </div>
 

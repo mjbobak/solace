@@ -13,6 +13,71 @@ const totals: BudgetTotals = {
   percentage: 61.7283950617,
 };
 
+const budgetEntries = [
+  {
+    id: 'essential-housing',
+    expenseType: 'ESSENTIAL' as const,
+    expenseCategory: 'HOUSING',
+    expenseLabel: 'Mortgage',
+    budgeted: 1500,
+    spent: 1500,
+    remaining: 0,
+    percentage: 100,
+  },
+  {
+    id: 'essential-utilities',
+    expenseType: 'ESSENTIAL' as const,
+    expenseCategory: 'UTILITIES',
+    expenseLabel: 'Utilities',
+    budgeted: 800,
+    spent: 750,
+    remaining: 50,
+    percentage: 93.75,
+  },
+  {
+    id: 'funsies-dining',
+    expenseType: 'FUNSIES' as const,
+    expenseCategory: 'ENTERTAINMENT',
+    expenseLabel: 'Dining',
+    budgeted: 900,
+    spent: 700,
+    remaining: 200,
+    percentage: 77.8,
+  },
+  {
+    id: 'funsies-travel',
+    expenseType: 'FUNSIES' as const,
+    expenseCategory: 'FLEXIBLE FAMILY SPENDING',
+    expenseLabel: 'Travel',
+    budgeted: 850,
+    spent: 650,
+    remaining: 200,
+    percentage: 76.5,
+  },
+  {
+    id: 'investment-brokerage',
+    expenseType: 'ESSENTIAL' as const,
+    expenseCategory: 'INVESTMENTS',
+    expenseLabel: 'Brokerage',
+    isInvestment: true,
+    budgeted: 800,
+    spent: 800,
+    remaining: 0,
+    percentage: 100,
+  },
+  {
+    id: 'investment-529',
+    expenseType: 'FUNSIES' as const,
+    expenseCategory: 'INVESTMENTS',
+    expenseLabel: '529',
+    isInvestment: true,
+    budgeted: 400,
+    spent: 400,
+    remaining: 0,
+    percentage: 100,
+  },
+];
+
 function getByExactText(container: HTMLElement, text: string) {
   return within(container).getByText((_, element) => element?.textContent === text);
 }
@@ -20,13 +85,9 @@ function getByExactText(container: HTMLElement, text: string) {
 function renderBudgetSummary() {
   render(
     <BudgetSummary
+      budgetEntries={budgetEntries}
       totals={totals}
-      totalBudgeted={4050}
-      investments={1200}
       income={5900}
-      savings={650}
-      essentialBudget={2300}
-      funsiesBudget={1750}
       isBudgetFiltered={false}
       planningYear={2026}
       spendBasis="monthly_avg_12"
@@ -73,23 +134,32 @@ describe('BudgetSummary', () => {
     expect(within(budgetCard).getByText('$1,550')).toBeInTheDocument();
     expect(
       within(incomeCard).getByText(
-        'See how much of your income is distributed across different spending categories.',
+        'A waterfall view of how your current monthly plan allocates total income across essentials, funsies, and wealth.',
       ),
     ).toBeInTheDocument();
     expect(
       within(incomeCard).getByRole('button', {
-        name: 'Expand wealth contribution breakdown',
+        name: 'Show Wealth category breakdown',
       }),
     ).toBeInTheDocument();
+    expect(
+      within(incomeCard).getByLabelText('Wealth waterfall segment'),
+    ).toHaveStyle({
+      left: '68.64406779661016%',
+      width: '31.35593220338983%',
+    });
     expect(
       within(budgetCard).queryByText('Percent Used'),
     ).not.toBeInTheDocument();
     expect(
-      within(incomeCard).queryByLabelText('Savings breakdown bar'),
+      within(incomeCard).queryByRole('button', { name: 'Show numbers view' }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(incomeCard).queryByLabelText('Savings waterfall segment'),
     ).not.toBeInTheDocument();
   });
 
-  it('expands the wealth portion inside income allocation', () => {
+  it('uses the shared wealth drilldown behavior inside income allocation', () => {
     renderBudgetSummary();
     const incomeCard = screen.getByRole('region', {
       name: 'Income Allocation',
@@ -97,47 +167,50 @@ describe('BudgetSummary', () => {
 
     fireEvent.click(
       within(incomeCard).getByRole('button', {
-        name: 'Expand wealth contribution breakdown',
+        name: 'Show Wealth category breakdown',
       }),
     );
 
     expect(
-      within(incomeCard).getByLabelText('Savings breakdown bar'),
+      within(incomeCard).getByRole('button', { name: 'Labels' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(within(incomeCard).getByText('Wealth Breakdown')).toBeInTheDocument();
+    expect(within(incomeCard).getByText('Wealth Total')).toBeInTheDocument();
+    expect(
+      within(incomeCard).getByLabelText('Brokerage waterfall segment'),
     ).toHaveStyle({
-      left: '68.64406779661016%',
-      width: '10.771003206596427%',
+      left: '0%',
+      width: '43.24324324324324%',
     });
     expect(
-      within(incomeCard).getByLabelText('Budgeted investments breakdown bar'),
+      within(incomeCard).getByLabelText('Savings waterfall segment'),
     ).toHaveStyle({
-      left: '80.11507100320659%',
-      width: '19.884928996793404%',
+      left: '43.24324324324324%',
+      width: '35.13513513513514%',
     });
-    expect(within(incomeCard).getAllByText('$27,600').length).toBeGreaterThan(1);
-    expect(within(incomeCard).getAllByText('$21,000').length).toBeGreaterThan(1);
-    expect(within(incomeCard).getAllByText('$22,200').length).toBeGreaterThan(1);
-    expect(within(incomeCard).getByText('$7,800')).toBeInTheDocument();
-    expect(within(incomeCard).getByText('$14,400')).toBeInTheDocument();
-  });
-
-  it('shows total wealth in income allocation numbers', () => {
-    renderBudgetSummary();
-    const incomeCard = screen.getByRole('region', {
-      name: 'Income Allocation',
-    });
-
     fireEvent.click(
-      within(incomeCard).getByRole('button', { name: 'Show numbers view' }),
+      within(incomeCard).getByRole('button', { name: 'Categories' }),
     );
 
-    expect(within(incomeCard).getByText('Wealth')).toBeInTheDocument();
     expect(
-      within(incomeCard).getByText((_, element) =>
-        element?.textContent === '$22,200annual',
-      ),
+      within(incomeCard).getByRole('button', { name: 'Categories' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(within(incomeCard).getByText('INVESTMENTS')).toBeInTheDocument();
+    expect(within(incomeCard).getByText('SAVINGS')).toBeInTheDocument();
+    expect(within(incomeCard).queryByText('Brokerage')).not.toBeInTheDocument();
+
+    fireEvent.click(
+      within(incomeCard).getByRole('button', { name: 'Back to allocation' }),
+    );
+
+    expect(
+      within(incomeCard).getByRole('group', {
+        name: 'Income allocation waterfall chart',
+      }),
     ).toBeInTheDocument();
-    expect(within(incomeCard).queryByText('Budgeted Investments')).not.toBeInTheDocument();
-    expect(within(incomeCard).queryAllByText('Savings')).toHaveLength(0);
+    expect(
+      within(incomeCard).queryByText('Wealth Breakdown'),
+    ).not.toBeInTheDocument();
   });
 
   it('lets the user switch budget utilization between chart and numbers', () => {
@@ -166,19 +239,15 @@ describe('BudgetSummary', () => {
   it('uses completed-month totals only for budget utilization', () => {
     render(
       <BudgetSummary
+        budgetEntries={budgetEntries}
         totals={totals}
-        totalBudgeted={4050}
         budgetUtilizationTotals={{
           budgeted: 4050,
           spent: 32000,
           remaining: 12865,
           percentage: 71.3295441885,
         }}
-        investments={1200}
         income={20000}
-        savings={650}
-        essentialBudget={2300}
-        funsiesBudget={1750}
         isBudgetFiltered={true}
         planningYear={2026}
         spendBasis="monthly_avg_elapsed"
@@ -210,19 +279,15 @@ describe('BudgetSummary', () => {
   it('shows over-budget text in the chart when spending exceeds budget', () => {
     render(
       <BudgetSummary
+        budgetEntries={budgetEntries}
         totals={totals}
-        totalBudgeted={4050}
         budgetUtilizationTotals={{
           budgeted: 4050,
           spent: 5000,
           remaining: -950,
           percentage: 123.4567901235,
         }}
-        investments={1200}
         income={5900}
-        savings={650}
-        essentialBudget={2300}
-        funsiesBudget={1750}
         isBudgetFiltered={false}
         planningYear={2026}
         spendBasis="monthly_avg_12"

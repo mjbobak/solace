@@ -132,25 +132,26 @@ describe('FinancialHealthSection', () => {
       left: '30%',
       width: '25%',
     });
-    expect(screen.getByLabelText('Investments waterfall segment')).toHaveStyle({
+    expect(screen.getByLabelText('Wealth waterfall segment')).toHaveStyle({
       left: '55.00000000000001%',
-      width: '15%',
-    });
-    expect(screen.getByLabelText('Savings waterfall segment')).toHaveStyle({
-      left: '70%',
-      width: '30%',
+      width: '45%',
     });
     expect(screen.getByLabelText('Total income waterfall segment')).toHaveStyle({
       width: '100%',
     });
-    expect(
-      screen.getByText('Wealth capture is 45% of income.'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('$5,400 annual')).toBeInTheDocument();
-    expect(screen.getAllByText('30%')).toHaveLength(2);
+    expect(screen.getByText('45%')).toBeInTheDocument();
+    expect(screen.getAllByText('30%')).toHaveLength(1);
     expect(
       screen.getByRole('button', { name: 'Show Funsies category breakdown' }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Show Wealth category breakdown' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {
+        name: 'Show Investments category breakdown',
+      }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Show Savings category breakdown' }),
     ).not.toBeInTheDocument();
@@ -185,7 +186,11 @@ describe('FinancialHealthSection', () => {
     expect(screen.getByLabelText('Funsies total waterfall segment')).toHaveStyle({
       width: '100%',
     });
-    expect(screen.getByText('$3,000')).toBeInTheDocument();
+    expect(
+      screen.getAllByText((_, element) =>
+        (element?.textContent ?? '').includes('$250 / mo'),
+      ).length,
+    ).toBeGreaterThan(0);
     expect(
       screen.getByRole('button', { name: 'Categories' }),
     ).toHaveAttribute('aria-pressed', 'true');
@@ -210,40 +215,46 @@ describe('FinancialHealthSection', () => {
     expect(screen.queryByText('Funsies Breakdown')).not.toBeInTheDocument();
   });
 
-  it('defaults investments to labels and lets the user switch back to categories', () => {
+  it('defaults wealth to labels and lets the user switch back to categories', () => {
     render(<FinancialHealthSection year={2026} />);
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Show Investments category breakdown' }),
+      screen.getByRole('button', { name: 'Show Wealth category breakdown' }),
     );
 
-    expect(screen.getByText('Investments Breakdown')).toBeInTheDocument();
-    expect(screen.getByText('Investments Total')).toBeInTheDocument();
+    expect(screen.getByText('Wealth Breakdown')).toBeInTheDocument();
+    expect(screen.getByText('Wealth Total')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Labels' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    expect(screen.getByLabelText('Brokerage waterfall segment')).toHaveStyle({
+    expect(screen.getByLabelText('Savings waterfall segment')).toHaveStyle({
       left: '0%',
       width: '66.66666666666666%',
     });
-    expect(screen.getByLabelText('529 waterfall segment')).toHaveStyle({
+    expect(screen.getByLabelText('Brokerage waterfall segment')).toHaveStyle({
       left: '66.66666666666666%',
-      width: '33.33333333333333%',
+      width: '22.22222222222222%',
+    });
+    expect(screen.getByLabelText('529 waterfall segment')).toHaveStyle({
+      left: '88.88888888888889%',
+      width: '11.11111111111111%',
     });
     expect(
-      screen.getByLabelText('Investments total waterfall segment'),
+      screen.getByLabelText('Wealth total waterfall segment'),
     ).toHaveStyle({
       width: '100%',
     });
     expect(screen.queryByText(/^INVESTMENTS$/)).not.toBeInTheDocument();
     expect(screen.queryByText('Future Goals')).not.toBeInTheDocument();
+    expect(screen.getByText('Savings')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Categories' }));
 
     expect(
       screen.getByRole('button', { name: 'Categories' }),
     ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('SAVINGS')).toBeInTheDocument();
     expect(screen.getByText('INVESTMENTS')).toBeInTheDocument();
     expect(screen.queryByText('Brokerage')).not.toBeInTheDocument();
     expect(screen.queryByText('529')).not.toBeInTheDocument();

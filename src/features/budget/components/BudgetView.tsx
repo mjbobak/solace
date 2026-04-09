@@ -16,7 +16,6 @@ import type {
   BudgetEntry,
   SpendBasis,
 } from '@/features/budget/types/budgetView';
-import { isInvestmentBudgetEntry } from '@/features/budget/utils/investmentCategories';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Table } from '@/shared/components/data/Table';
@@ -171,26 +170,6 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
 
     const income = plannedAnnualNetIncome / 12;
 
-    const investments = budgetEntries
-      .filter((entry) => isInvestmentBudgetEntry(entry))
-      .reduce((sum, entry) => sum + entry.budgeted, 0);
-
-    const savings = income - overallTotals.budgeted;
-    const essentialBudget = budgetEntries
-      .filter(
-        (entry) =>
-          entry.expenseType === 'ESSENTIAL' &&
-          !isInvestmentBudgetEntry(entry),
-      )
-      .reduce((sum, entry) => sum + entry.budgeted, 0);
-    const funsiesBudget = budgetEntries
-      .filter(
-        (entry) =>
-          entry.expenseType === 'FUNSIES' &&
-          !isInvestmentBudgetEntry(entry),
-      )
-      .reduce((sum, entry) => sum + entry.budgeted, 0);
-
     const handleAddClick = () => {
       setEditingItem(undefined);
       setIsModalOpen(true);
@@ -293,15 +272,11 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
 
     return (
       <div className="space-y-3">
-      <BudgetSummary
-        totals={totals}
-        totalBudgeted={overallTotals.budgeted}
-        budgetUtilizationTotals={budgetUtilizationTotals}
-        investments={investments}
-        income={income}
-        savings={savings}
-          essentialBudget={essentialBudget}
-          funsiesBudget={funsiesBudget}
+        <BudgetSummary
+          budgetEntries={budgetEntries}
+          totals={totals}
+          budgetUtilizationTotals={budgetUtilizationTotals}
+          income={income}
           isBudgetFiltered={isBudgetFiltered || selectedBudgetIds.size > 0}
           planningYear={planningYear}
           spendBasis={spendBasis}

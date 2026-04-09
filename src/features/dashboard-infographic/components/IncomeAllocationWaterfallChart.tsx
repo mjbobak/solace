@@ -4,6 +4,7 @@ export type IncomeAllocationBucketId =
   | 'essential'
   | 'funsies'
   | 'investments'
+  | 'wealth'
   | 'savings';
 
 export interface IncomeAllocationWaterfallStep {
@@ -25,6 +26,7 @@ interface IncomeAllocationWaterfallChartProps {
   steps: IncomeAllocationWaterfallStep[];
   totalLabel: string;
   totalAmount: number;
+  valueDisplayPeriod?: 'monthly' | 'annual';
   chartAriaLabel?: string;
   totalBarAriaLabel?: string;
   showOverAllocatedWarning?: boolean;
@@ -81,12 +83,28 @@ function buildSteps(
   });
 }
 
+function renderBarValueContent(
+  amount: number,
+  valueDisplayPeriod: 'monthly' | 'annual',
+): React.ReactNode {
+  return (
+    <div className="pointer-events-none absolute inset-y-0.5 flex items-center px-3 text-[11px] font-semibold text-slate-800/90">
+      <span className="truncate whitespace-nowrap">
+        {valueDisplayPeriod === 'annual'
+          ? `${formatAnnualAmount(amount)} / yr`
+          : `${formatWholeCurrency(amount)} / mo`}
+      </span>
+    </div>
+  );
+}
+
 export const IncomeAllocationWaterfallChart: React.FC<
   IncomeAllocationWaterfallChartProps
 > = ({
   steps,
   totalLabel,
   totalAmount,
+  valueDisplayPeriod = 'monthly',
   chartAriaLabel = 'Income allocation waterfall chart',
   totalBarAriaLabel,
   showOverAllocatedWarning = false,
@@ -114,8 +132,8 @@ export const IncomeAllocationWaterfallChart: React.FC<
   }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-3" role="group" aria-label={chartAriaLabel}>
+    <div className="space-y-3">
+      <div className="space-y-2.5" role="group" aria-label={chartAriaLabel}>
         {positionedSteps.map((step) => {
           const leftPercent = (step.offset / scaleMax) * 100;
           const widthPercent = (step.amount / scaleMax) * 100;
@@ -128,30 +146,32 @@ export const IncomeAllocationWaterfallChart: React.FC<
           return (
             <div
               key={step.key}
-              className="grid gap-3 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_minmax(0,7rem)] sm:items-center sm:gap-4"
+              className="grid gap-2 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] sm:items-center sm:gap-4"
             >
-              <div className="flex items-baseline justify-between gap-3 sm:block">
+              <div className="sm:pr-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                   {step.label}
                 </p>
-                <p className="text-xs text-muted sm:mt-1">
-                  {formatWholeCurrency(step.amount)} / mo
+                <p className="mt-1 text-xs text-muted">
+                  {formatIncomePercent(step.amount, safeTotalAmount)}
                 </p>
               </div>
 
-              <div className="relative h-12 overflow-hidden rounded-2xl border border-white/70 bg-slate-100/90">
+              <div className="relative h-10 overflow-hidden rounded-2xl border border-white/70 bg-slate-100/90">
                 <div
                   aria-label={`${step.label} waterfall segment`}
-                  className={`absolute inset-y-1 rounded-xl shadow-sm ${step.fillClassName}`}
+                  className={`absolute inset-y-0.5 rounded-xl shadow-sm ${step.fillClassName}`}
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
                   }}
-                />
+                >
+                  {renderBarValueContent(step.amount, valueDisplayPeriod)}
+                </div>
                 {isInteractive ? (
                   <button
                     type="button"
-                    className="absolute inset-y-1 rounded-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 focus-visible:ring-inset"
+                    className="absolute inset-y-0.5 rounded-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 focus-visible:ring-inset"
                     style={{
                       left: `${leftPercent}%`,
                       width: `${widthPercent}%`,
@@ -164,44 +184,28 @@ export const IncomeAllocationWaterfallChart: React.FC<
                   />
                 ) : null}
               </div>
-
-              <div className="flex items-baseline justify-between gap-3 sm:block sm:text-right">
-                <p className="text-sm font-semibold text-app">
-                  {formatAnnualAmount(step.amount)}
-                </p>
-                <p className="text-xs text-muted sm:mt-1">
-                  {formatIncomePercent(step.amount, safeTotalAmount)}
-                </p>
-              </div>
             </div>
           );
         })}
 
-        <div className="relative grid gap-3 pt-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_minmax(0,7rem)] sm:items-center sm:gap-4">
-          <div className="flex items-baseline justify-between gap-3 sm:block">
+        <div className="relative grid gap-2 pt-1 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] sm:items-center sm:gap-4">
+          <div className="sm:pr-2">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app">
               {totalLabel}
             </p>
-            <p className="text-xs text-muted sm:mt-1">
-              {formatWholeCurrency(safeTotalAmount)} / mo
-            </p>
+            <p className="mt-1 text-xs text-muted">100%</p>
           </div>
 
-          <div className="relative h-12 overflow-hidden rounded-2xl border border-white/70 bg-slate-100/90">
+          <div className="relative h-10 overflow-hidden rounded-2xl border border-white/70 bg-slate-100/90">
             <div
               aria-label={totalBarAriaLabel ?? `${totalLabel} waterfall segment`}
-              className={`absolute inset-y-1 left-0 rounded-xl shadow-sm ${TOTAL_BAR_CLASS}`}
+              className={`absolute inset-y-0.5 left-0 rounded-xl shadow-sm ${TOTAL_BAR_CLASS}`}
               style={{
                 width: `${(safeTotalAmount / scaleMax) * 100}%`,
               }}
-            />
-          </div>
-
-          <div className="flex items-baseline justify-between gap-3 sm:block sm:text-right">
-            <p className="text-sm font-semibold text-app">
-              {formatAnnualAmount(safeTotalAmount)}
-            </p>
-            <p className="text-xs text-muted sm:mt-1">100%</p>
+            >
+              {renderBarValueContent(safeTotalAmount, valueDisplayPeriod)}
+            </div>
           </div>
 
           {onTotalSelect != null ? (
