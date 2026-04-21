@@ -230,44 +230,36 @@ describe('IncomeView', () => {
       screen.queryByRole('columnheader', { name: 'Current Mix' }),
     ).not.toBeInTheDocument();
 
-    const committedHeader = screen.getByRole('columnheader', {
-      name: 'Committed',
-    });
     const plannedHeader = screen.getByRole('columnheader', {
-      name: 'Planned',
+      name: 'Gross',
+    });
+    const netHeader = screen.getByRole('columnheader', {
+      name: 'Net',
     });
 
+    expect(screen.getByText('$135,000')).toBeInTheDocument();
+    expect(screen.getByText('$105,000')).toBeInTheDocument();
+    expect(screen.getAllByText('Tax-Advantaged Buckets')).toHaveLength(2);
+    expect(screen.getByText('Income Overview')).toBeInTheDocument();
+    expect(screen.getByText('$8,750 / mo')).toBeInTheDocument();
+    expect(screen.getByText('$11,250 / mo')).toBeInTheDocument();
+    expect(screen.getByText('annual contributions')).toBeInTheDocument();
+    expect(screen.getByText('Spendable Restricted')).toBeInTheDocument();
+    expect(screen.getByText('$4,000')).toBeInTheDocument();
+    expect(screen.getByText('Employer 401k + HSA')).toBeInTheDocument();
+    expect(screen.getByText('$23,000')).toBeInTheDocument();
+    expect(screen.getByText('2 streams')).toBeInTheDocument();
+    expect(screen.getByText('Annual Adjustments')).toBeInTheDocument();
+    expect(screen.getByText('+$3,200')).toBeInTheDocument();
+    expect(screen.getByText('2 items')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Manage' })).toBeInTheDocument();
     expect(
-      committedHeader.compareDocumentPosition(plannedHeader) &
+      plannedHeader.compareDocumentPosition(netHeader) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-
-    expect(screen.getByText('$120,000')).toBeInTheDocument();
     expect(
-      screen.getByText((_, element) => element?.textContent === '$90,000 Net'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('$135,000')).toBeInTheDocument();
-    expect(
-      screen.getByText((_, element) => element?.textContent === '$105,000 Net'),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText('Tax-Advantaged Buckets')).toHaveLength(2);
-    expect(screen.getByText('$4,000 Spendable Restricted')).toBeInTheDocument();
-    expect(screen.getByText('Annual Adjustments')).toBeInTheDocument();
-    expect(screen.getByText('Federal tax refund')).toBeInTheDocument();
-    expect(screen.getByText('+$1,200.00')).toBeInTheDocument();
-    expect(screen.getByText('-$2,000.00')).toBeInTheDocument();
-    expect(
-      screen.getByText('Tax-Advantaged Contributions'),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('FSA Daycare')).not.toBeInTheDocument();
-
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Show tax-advantaged bucket details',
-      }),
-    );
-
-    expect(screen.getByText('FSA Daycare')).toBeInTheDocument();
+      screen.queryByRole('columnheader', { name: 'Committed' }),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Acme Corp').closest('button')!);
 
@@ -279,19 +271,19 @@ describe('IncomeView', () => {
     const expandedCell = recurringPayHeading.closest('td');
     expect(expandedCell).toHaveAttribute('colspan', '4');
 
-    const incomeStreamHeader = screen.getByRole('columnheader', {
-      name: 'Income Stream',
+    const sourceHeader = screen.getByRole('columnheader', {
+      name: 'Source',
     });
-    const sourceTable = incomeStreamHeader.closest('table');
+    const sourceTable = sourceHeader.closest('table');
     const sourceTableHeaders = Array.from(
       sourceTable?.tHead?.rows[0]?.cells ?? [],
     ).map((header) => header.textContent?.trim());
 
     expect(sourceTableHeaders).toEqual([
-      'Income Stream',
-      'Committed',
-      'Planned',
-      'Actions',
+      'Source',
+      'Gross',
+      'Net',
+      '',
     ]);
   });
 
@@ -337,14 +329,7 @@ describe('IncomeView', () => {
       expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
     );
 
-    const taxBucketsEditButton = screen
-      .getAllByRole('button', { name: 'Edit' })
-      .find((button) =>
-        button.closest('article')?.textContent?.includes('Tax-Advantaged Buckets'),
-      );
-
-    expect(taxBucketsEditButton).toBeDefined();
-    fireEvent.click(taxBucketsEditButton!);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Buckets' }));
 
     const input = await screen.findByLabelText(/401k annual amount/i);
     fireEvent.change(input, { target: { value: '25000' } });
@@ -378,9 +363,11 @@ describe('IncomeView', () => {
     render(<IncomeView planningYear={2025} />);
 
     await waitFor(() =>
-      expect(screen.getByText('Federal tax refund')).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: 'Manage' })).toBeInTheDocument(),
     );
 
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }));
+    await screen.findByRole('heading', { name: 'Manage Annual Adjustments' });
     fireEvent.click(screen.getByRole('button', { name: 'Add Adjustment' }));
 
     await screen.findByRole('heading', { name: 'Add Annual Adjustment' });
@@ -420,8 +407,11 @@ describe('IncomeView', () => {
     render(<IncomeView planningYear={2025} />);
 
     await waitFor(() =>
-      expect(screen.getByText('Federal tax refund')).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: 'Manage' })).toBeInTheDocument(),
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }));
+    await screen.findByRole('heading', { name: 'Manage Annual Adjustments' });
 
     const refundRow = screen.getByText('Federal tax refund').closest('tr');
     expect(refundRow).not.toBeNull();
@@ -448,8 +438,14 @@ describe('IncomeView', () => {
       }),
     );
 
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }));
+    await screen.findByRole('heading', { name: 'Manage Annual Adjustments' });
+
+    const updatedRefundRow = screen.getByText('Federal tax refund').closest('tr');
+    expect(updatedRefundRow).not.toBeNull();
+
     fireEvent.click(
-      refundRow!.querySelector('button.button-base.button-danger')!,
+      updatedRefundRow!.querySelector('button.button-base.button-danger')!,
     );
 
     await waitFor(() => expect(deleteAnnualAdjustment).toHaveBeenCalledWith(41));

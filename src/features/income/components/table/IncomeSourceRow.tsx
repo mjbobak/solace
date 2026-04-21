@@ -60,22 +60,22 @@ export function IncomeSourceRow({
 
   return (
     <React.Fragment>
-      <tr className="border-b section-divider align-top hover:bg-gray-50/60">
-        <td className="px-4 py-4">
+      <tr className="border-b section-divider align-top transition-colors hover:bg-gray-50/35">
+        <td className="px-6 py-5">
           <button
             type="button"
             className="flex items-start gap-3 text-left"
             onClick={() => onToggleExpansion(source.id)}
           >
-            <span className="mt-0.5 rounded-full border border-app p-1 text-muted">
+            <span className="mt-1 text-gray-300">
               {isExpanded ? (
-                <LuChevronDown className="h-4 w-4" />
+                <LuChevronDown className="h-5 w-5" />
               ) : (
-                <LuChevronRight className="h-4 w-4" />
+                <LuChevronRight className="h-5 w-5" />
               )}
             </span>
             <span>
-              <span className="block text-sm font-semibold text-app">
+              <span className="block text-base font-semibold text-app">
                 {source.name}
               </span>
               <span className="mt-1 block text-xs text-muted">
@@ -84,33 +84,33 @@ export function IncomeSourceRow({
             </span>
           </button>
         </td>
-        <td className="px-4 py-4 align-middle">
-          <IncomeAmountStack
-            primaryValue={source.totals.committedGross}
-            secondaryValue={source.totals.committedCashNet}
-            secondaryLabel="Cash Net"
-          />
-        </td>
-        <td className="px-4 py-4 align-middle">
+        <td className="px-6 py-5 align-middle">
           <IncomeAmountStack
             primaryValue={source.totals.plannedGross}
-            secondaryValue={source.totals.plannedCashNet}
-            secondaryLabel="Cash Net"
+            secondaryValue={source.totals.plannedGross / 12}
+            secondaryLabel="/ mo"
           />
         </td>
-        <td className="px-4 py-4">
-          <div className="flex justify-end gap-2">
+        <td className="px-6 py-5 align-middle">
+          <IncomeAmountStack
+            primaryValue={source.totals.plannedNet}
+            secondaryValue={source.totals.plannedNet / 12}
+            secondaryLabel="/ mo"
+          />
+        </td>
+        <td className="px-6 py-5">
+          <div className="flex justify-end">
             <div className="relative">
               <button
                 type="button"
-                className="icon-button rounded-full border border-app p-2"
+                className="icon-button p-1 text-gray-300 hover:bg-transparent hover:text-gray-400"
                 onClick={(event) => onToggleActionMenu(event.currentTarget)}
                 title={`More actions for ${source.name}`}
                 aria-label={`More actions for income source ${source.name}`}
                 aria-haspopup="menu"
                 aria-expanded={isActionMenuOpen}
               >
-                <LuEllipsis className="h-4 w-4" />
+                <LuEllipsis className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -119,7 +119,7 @@ export function IncomeSourceRow({
 
       {isExpanded && (
         <tr className="border-b section-divider bg-gray-50/40">
-          <td colSpan={4} className="px-4 py-4">
+          <td colSpan={4} className="px-6 py-5">
             <div className="space-y-5">
               <div>
                 <div className="mb-3 flex items-center justify-between pl-10">

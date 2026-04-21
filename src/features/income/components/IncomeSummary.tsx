@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { Button } from '@/shared/components/Button';
-
 import type {
   IncomeProjectionTotals,
   TaxAdvantagedInvestments,
@@ -10,26 +8,9 @@ import type {
 interface IncomeSummaryProps {
   totals: IncomeProjectionTotals;
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
-  onEditTaxAdvantagedInvestments: () => void;
 }
 
-interface AmountStackProps {
-  primaryValue: string;
-  secondaryValue: string;
-  secondaryLabel?: string;
-}
-
-interface SummaryCard {
-  label: string;
-  primaryValue: string;
-  secondaryValue: string;
-  secondaryLabel?: string;
-  hint: string;
-  actionLabel?: string;
-  onAction?: () => void;
-}
-
-function formatCurrency(value: number): string {
+function formatRoundedCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -37,101 +18,120 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function AmountStack({
-  primaryValue,
-  secondaryValue,
-  secondaryLabel = 'Net',
-}: AmountStackProps) {
+function formatMonthlyCurrency(value: number): string {
+  return formatRoundedCurrency(value / 12);
+}
+
+interface OverviewMetricProps {
+  label: string;
+  annualValue: number;
+  className?: string;
+}
+
+function OverviewMetric({
+  label,
+  annualValue,
+  className = '',
+}: OverviewMetricProps) {
   return (
-    <div className="flex flex-col leading-tight">
-      <span className="text-2xl font-semibold text-black">{primaryValue}</span>
-      <span className="mt-1 text-sm text-gray-500">
-        {secondaryValue} {secondaryLabel}
+    <div className={`flex flex-col gap-1 ${className}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+        {label}
+      </p>
+      <span className="text-2xl font-semibold leading-tight text-app md:text-3xl">
+        {formatRoundedCurrency(annualValue)}
+      </span>
+      <span className="text-sm font-semibold text-muted">
+        {formatMonthlyCurrency(annualValue)} / mo
       </span>
     </div>
   );
 }
 
-function buildSummaryCards(
-  totals: IncomeProjectionTotals,
-  taxAdvantagedInvestments: TaxAdvantagedInvestments,
-  onEditTaxAdvantagedInvestments: () => void,
-): SummaryCard[] {
-  const expectedGrossDelta = totals.plannedGross - totals.committedGross;
-  const expectedNetDelta = totals.plannedNet - totals.committedNet;
+interface TaxDetailProps {
+  label: string;
+  value: string;
+  className?: string;
+}
 
-  return [
-    {
-      label: 'Committed Income',
-      primaryValue: formatCurrency(totals.committedGross),
-      secondaryValue: formatCurrency(totals.committedNet),
-      hint: 'Recurring income plus actual bonuses',
-    },
-    {
-      label: 'Planned Income',
-      primaryValue: formatCurrency(totals.plannedGross),
-      secondaryValue: formatCurrency(totals.plannedNet),
-      hint: 'Includes expected bonuses',
-    },
-    {
-      label: 'Expected Upside',
-      primaryValue: formatCurrency(expectedGrossDelta),
-      secondaryValue: formatCurrency(expectedNetDelta),
-      hint: 'Planned minus committed',
-    },
-    {
-      label: 'Tax-Advantaged Buckets',
-      primaryValue: formatCurrency(taxAdvantagedInvestments.total),
-      secondaryValue: formatCurrency(taxAdvantagedInvestments.spendableTotal),
-      secondaryLabel: 'Spendable Restricted',
-      hint: 'Annual household payroll buckets tracked outside income streams',
-      actionLabel: 'Edit',
-      onAction: onEditTaxAdvantagedInvestments,
-    },
-  ];
+function TaxDetail({ label, value, className = '' }: TaxDetailProps) {
+  return (
+    <div className={`flex flex-col gap-1 ${className}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+        {label}
+      </p>
+      <p className="text-sm font-semibold leading-none text-app">{value}</p>
+    </div>
+  );
 }
 
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   totals,
   taxAdvantagedInvestments,
-  onEditTaxAdvantagedInvestments,
 }) => {
-  const cards = buildSummaryCards(
-    totals,
-    taxAdvantagedInvestments,
-    onEditTaxAdvantagedInvestments,
+  const employerBucketTotal = taxAdvantagedInvestments.entries.reduce(
+    (sum, entry) =>
+      entry.bucketType === '401k' || entry.bucketType === 'hsa'
+        ? sum + entry.annualAmount
+        : sum,
+    0,
   );
+  const restrictedBucketTotal = taxAdvantagedInvestments.spendableTotal;
+  const contributionSourceCount =
+    Number(restrictedBucketTotal > 0) + Number(employerBucketTotal > 0);
 
   return (
-    <section className="space-y-4" aria-label="Income summary">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => (
-          <article key={card.label} className="surface-card-soft">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-                {card.label}
-              </p>
-              {card.actionLabel && card.onAction ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="px-3 py-1 text-xs"
-                  onClick={card.onAction}
-                >
-                  {card.actionLabel}
-                </Button>
-              ) : null}
-            </div>
-            <div className="mt-3">
-              <AmountStack
-                primaryValue={card.primaryValue}
-                secondaryValue={card.secondaryValue}
-                secondaryLabel={card.secondaryLabel}
-              />
-            </div>
-            <p className="mt-2 text-sm text-muted">{card.hint}</p>
-          </article>
-        ))}
+    <section aria-label="Income summary">
+      <div className="grid gap-5 xl:grid-cols-2">
+        <article className="surface-card h-full p-5 md:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+            Income Overview
+          </p>
+          <div className="mt-3 grid gap-4 md:grid-cols-2 md:gap-0">
+            <OverviewMetric
+              label="Gross"
+              annualValue={totals.plannedGross}
+            />
+            <OverviewMetric
+              label="Net"
+              annualValue={totals.plannedNet}
+              className="border-t pt-4 md:border-t-0 md:border-l md:pl-7 md:pt-0 section-divider"
+            />
+          </div>
+        </article>
+
+        <article className="surface-card h-full p-5 text-left md:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+            Tax-Advantaged Buckets
+          </p>
+          <div className="mt-3 flex flex-col gap-1 md:flex-row md:items-end md:gap-2.5">
+            <span className="text-2xl font-semibold leading-tight text-app md:text-3xl">
+              {formatRoundedCurrency(taxAdvantagedInvestments.total)}
+            </span>
+            <span className="text-sm font-medium text-muted">
+              annual contributions
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3 md:gap-0">
+            <TaxDetail
+              label="Spendable Restricted"
+              value={formatRoundedCurrency(restrictedBucketTotal)}
+            />
+            <TaxDetail
+              label="Employer 401k + HSA"
+              value={formatRoundedCurrency(employerBucketTotal)}
+              className="border-t pt-3 section-divider md:border-t-0 md:border-l md:px-5 md:pt-0"
+            />
+            <TaxDetail
+              label="Sources"
+              value={`${contributionSourceCount} ${
+                contributionSourceCount === 1 ? 'stream' : 'streams'
+              }`}
+              className="border-t pt-3 section-divider md:border-t-0 md:border-l md:pl-5 md:pt-0"
+            />
+          </div>
+        </article>
       </div>
     </section>
   );

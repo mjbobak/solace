@@ -13,7 +13,7 @@ export function IncomeAmountStack({
 }: IncomeAmountStackProps) {
   return (
     <div className="flex flex-col leading-tight">
-      <span className="text-sm font-semibold text-app">
+      <span className="text-lg font-semibold text-app">
         {formatCurrency(primaryValue)}
       </span>
       <span className="mt-1 text-xs text-muted">

@@ -5,7 +5,7 @@ import { useIncomeActionMenu } from '../hooks/useIncomeActionMenu';
 import { useIncomeViewController } from '../hooks/useIncomeViewController';
 import { EMPTY_PROJECTION_TOTALS } from '../types/incomeView';
 
-import { AnnualAdjustmentsSection } from './AnnualAdjustmentsSection';
+import { IncomePageFooter } from './IncomePageFooter';
 import { IncomeSourceActionMenu } from './IncomeSourceActionMenu';
 import { IncomeSummary } from './IncomeSummary';
 import { AnnualAdjustmentModal } from './modals/AnnualAdjustmentModal';
@@ -15,7 +15,6 @@ import { RecurringVersionModal } from './modals/RecurringVersionModal';
 import { RenameSourceModal } from './modals/RenameSourceModal';
 import { TaxAdvantagedInvestmentsModal } from './modals/TaxAdvantagedInvestmentsModal';
 import { IncomeSourcesTable } from './table/IncomeSourcesTable';
-import { TaxAdvantagedBucketsSection } from './TaxAdvantagedBucketsSection';
 
 export interface IncomeViewHandle {
   openAddIncomeModal: () => void;
@@ -83,24 +82,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
             projection?.taxAdvantagedInvestments ??
             EMPTY_TAX_ADVANTAGED_INVESTMENTS
           }
-          onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
-        />
-
-        <AnnualAdjustmentsSection
-          adjustments={projection?.annualAdjustments ?? []}
-          onAdd={openAddAnnualAdjustmentModal}
-          onEdit={openEditAnnualAdjustmentModal}
-          onDelete={(adjustment) => {
-            void handleDeleteAnnualAdjustment(adjustment);
-          }}
-        />
-
-        <TaxAdvantagedBucketsSection
-          taxAdvantagedInvestments={
-            projection?.taxAdvantagedInvestments ??
-            EMPTY_TAX_ADVANTAGED_INVESTMENTS
-          }
-          onEdit={openTaxAdvantagedInvestmentsModal}
         />
 
         <IncomeSourcesTable
@@ -124,6 +105,21 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
           onDeleteBonus={(component, occurrence) => {
             void handleDeleteBonus(component, occurrence);
           }}
+        />
+
+        <IncomePageFooter
+          adjustments={projection?.annualAdjustments ?? []}
+          plannedAdjustmentTotal={projection?.annualAdjustmentTotals.planned ?? 0}
+          taxAdvantagedInvestments={
+            projection?.taxAdvantagedInvestments ??
+            EMPTY_TAX_ADVANTAGED_INVESTMENTS
+          }
+          onAddAdjustment={openAddAnnualAdjustmentModal}
+          onEditAdjustment={openEditAnnualAdjustmentModal}
+          onDeleteAdjustment={(adjustment) => {
+            void handleDeleteAnnualAdjustment(adjustment);
+          }}
+          onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
         />
 
         <AddSourceModal

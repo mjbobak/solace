@@ -84,24 +84,23 @@ export function IncomeSourcesTable({
       <div className="overflow-x-auto">
         <table className="w-full table-fixed border-collapse">
           <colgroup>
-            <col className="w-[34%]" />
-            <col className="w-[24%]" />
-            <col className="w-[24%]" />
-            <col className="w-[18%]" />
+            <col className="w-[52%]" />
+            <col className="w-[22%]" />
+            <col className="w-[22%]" />
+            <col className="w-[4%]" />
           </colgroup>
-          <thead className="border-b section-divider bg-gray-50/80 text-left">
+          <thead className="border-b section-divider bg-gray-50/50 text-left">
             <tr>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                Income Stream
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                Source
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                Committed
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                Gross
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                Planned
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                Net
               </th>
-              <th className="w-px whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                Actions
+              <th className="w-px whitespace-nowrap px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.16em] text-muted">
               </th>
             </tr>
           </thead>
