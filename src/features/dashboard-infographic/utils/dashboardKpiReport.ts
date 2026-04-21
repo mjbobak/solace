@@ -166,24 +166,10 @@ function isFunsiesLivingExpense(entry: BudgetEntry): boolean {
   return entry.expenseType === 'FUNSIES' && isLivingExpense(entry);
 }
 
-function normalizeRunwaySourceName(name: string | null | undefined): string {
-  return (name ?? '').trim().toUpperCase();
-}
-
-function isIgnoredRunwaySource(source: ProjectedIncomeSource): boolean {
-  const normalizedName = normalizeRunwaySourceName(source.name);
-  return (
-    normalizedName.includes('NON STANDARD') ||
-    normalizedName.includes('NON-STANDARD')
-  );
-}
-
 function getRelevantRunwaySources(
   projection: IncomeYearProjection | null,
 ): ProjectedIncomeSource[] {
-  return (projection?.sources ?? []).filter(
-    (source) => !isIgnoredRunwaySource(source),
-  );
+  return projection?.sources ?? [];
 }
 
 function compareRunwaySourcePriority(
@@ -389,34 +375,34 @@ export function buildEmergencyRunwaySummary({
   const scenarios: EmergencyRunwayScenario[] =
     RUNWAY_SCENARIO_DEFINITIONS.map((scenario) => {
       const source = scenarioSources[scenario.key];
-    const lostMonthlyIncome = source ? getSourceMonthlyCashNet(source) : null;
-    const remainingMonthlyIncome =
-      source && projection
-        ? Math.max(totalRelevantMonthlyIncome - lostMonthlyIncome, 0)
-        : null;
-    const monthlyShortfall =
-      monthlyEssentialExpenses === null || remainingMonthlyIncome === null
-        ? null
-        : Math.max(monthlyEssentialExpenses - remainingMonthlyIncome, 0);
-    const runwayMonths =
-      resolvedEmergencyFundBalance === null ||
-      monthlyShortfall === null ||
-      monthlyShortfall === 0
-        ? null
-        : resolvedEmergencyFundBalance / monthlyShortfall;
+      const lostMonthlyIncome = source ? getSourceMonthlyCashNet(source) : null;
+      const remainingMonthlyIncome =
+        lostMonthlyIncome === null
+          ? null
+          : Math.max(totalRelevantMonthlyIncome - lostMonthlyIncome, 0);
+      const monthlyShortfall =
+        monthlyEssentialExpenses === null || remainingMonthlyIncome === null
+          ? null
+          : Math.max(monthlyEssentialExpenses - remainingMonthlyIncome, 0);
+      const runwayMonths =
+        resolvedEmergencyFundBalance === null ||
+        monthlyShortfall === null ||
+        monthlyShortfall === 0
+          ? null
+          : resolvedEmergencyFundBalance / monthlyShortfall;
 
-    return {
-      key: scenario.key,
-      label: source
-        ? `If ${source.name} disappears`
-        : scenario.fallbackLabel,
-      sourceId: source?.id ?? null,
-      sourceName: source?.name ?? null,
-      lostMonthlyIncome,
-      remainingMonthlyIncome,
-      monthlyShortfall,
-      runwayMonths,
-    };
+      return {
+        key: scenario.key,
+        label: source
+          ? `If ${source.name} disappears`
+          : scenario.fallbackLabel,
+        sourceId: source?.id ?? null,
+        sourceName: source?.name ?? null,
+        lostMonthlyIncome,
+        remainingMonthlyIncome,
+        monthlyShortfall,
+        runwayMonths,
+      };
     });
 
   return {

@@ -9,6 +9,8 @@ import {
   matchesBudgetLabel,
 } from '@/features/dashboard-infographic/utils/dashboardKpiReport';
 import type {
+  AnnualAdjustment,
+  AnnualAdjustmentTotals,
   IncomeProjectionTotals,
   IncomeYearProjection,
   ProjectedIncomeSource,
@@ -64,6 +66,32 @@ function createProjectedSource(
   };
 }
 
+function createAnnualAdjustment(
+  overrides?: Partial<AnnualAdjustment>,
+): AnnualAdjustment {
+  return {
+    id: 1,
+    year: 2025,
+    label: 'Federal tax refund',
+    effectiveDate: '2025-02-01',
+    status: 'expected',
+    amount: 2500,
+    createdAt: '2025-01-01T00:00:00Z',
+    updatedAt: '2025-01-01T00:00:00Z',
+    ...overrides,
+  };
+}
+
+function createAnnualAdjustmentTotals(
+  overrides?: Partial<AnnualAdjustmentTotals>,
+): AnnualAdjustmentTotals {
+  return {
+    committed: 0,
+    planned: 2500,
+    ...overrides,
+  };
+}
+
 function createProjection(
   overrides?: Partial<IncomeYearProjection>,
 ): IncomeYearProjection {
@@ -74,10 +102,11 @@ function createProjection(
     primaryRunwaySourceId: null,
     secondaryRunwaySourceId: null,
     taxAdvantagedInvestments: createTaxAdvantagedInvestments(),
+    annualAdjustmentTotals: createAnnualAdjustmentTotals(),
+    annualAdjustments: [createAnnualAdjustment()],
     sources: [
       createProjectedSource('Striker', 36000, { id: 101 }),
       createProjectedSource('Serious', 24000, { id: 202 }),
-      createProjectedSource('Non-Standard', 12000, { id: 303 }),
     ],
     ...overrides,
   };
@@ -573,10 +602,21 @@ describe('buildEmergencyRunwaySummary', () => {
   it('builds loss-of-income scenarios from the top two standard income sources', () => {
     const summary = buildEmergencyRunwaySummary({
       projection: createProjection({
+        annualAdjustmentTotals: createAnnualAdjustmentTotals({
+          committed: 5000,
+          planned: 7000,
+        }),
+        annualAdjustments: [
+          createAnnualAdjustment({ status: 'actual', amount: 5000 }),
+          createAnnualAdjustment({
+            id: 2,
+            label: 'State balance due',
+            amount: -2000,
+          }),
+        ],
         sources: [
           createProjectedSource('Main Job', 36000, { id: 101 }),
           createProjectedSource('Consulting', 24000, { id: 202 }),
-          createProjectedSource('Non-Standard', 12000, { id: 303 }),
         ],
       }),
       budgetEntries: [

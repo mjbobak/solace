@@ -2,12 +2,13 @@ import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import {
   act,
+  cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
 } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   IncomeView,
@@ -15,9 +16,18 @@ import {
 } from '@/features/income/components/IncomeView';
 import type { IncomeYearProjection } from '@/features/income/types/income';
 
-const { getYearProjection, updateYearSettings } = vi.hoisted(() => ({
+const {
+  getYearProjection,
+  updateYearSettings,
+  createAnnualAdjustment,
+  updateAnnualAdjustment,
+  deleteAnnualAdjustment,
+} = vi.hoisted(() => ({
   getYearProjection: vi.fn(),
   updateYearSettings: vi.fn(),
+  createAnnualAdjustment: vi.fn(),
+  updateAnnualAdjustment: vi.fn(),
+  deleteAnnualAdjustment: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({
@@ -31,6 +41,9 @@ vi.mock('@/features/income/services/incomeApiService', () => ({
   incomeApiService: {
     getYearProjection,
     updateYearSettings,
+    createAnnualAdjustment,
+    updateAnnualAdjustment,
+    deleteAnnualAdjustment,
     createSource: vi.fn(),
     createComponent: vi.fn(),
     createRecurringVersion: vi.fn(),
@@ -69,6 +82,32 @@ const projection: IncomeYearProjection = {
     spendableTotal: 4000,
     total: 27000,
   },
+  annualAdjustmentTotals: {
+    committed: 1200,
+    planned: 3200,
+  },
+  annualAdjustments: [
+    {
+      id: 41,
+      year: 2025,
+      label: 'Federal tax refund',
+      effectiveDate: '2025-02-20',
+      status: 'actual',
+      amount: 1200,
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-01T00:00:00Z',
+    },
+    {
+      id: 42,
+      year: 2025,
+      label: 'State tax balance due',
+      effectiveDate: '2025-04-15',
+      status: 'expected',
+      amount: -2000,
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-01T00:00:00Z',
+    },
+  ],
   sources: [
     {
       id: 1,
@@ -166,10 +205,19 @@ const projection: IncomeYearProjection = {
 };
 
 describe('IncomeView', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
   it('shows tax-advantaged buckets above the source table', async () => {
     getYearProjection.mockResolvedValue(projection);
 
-    const { container } = render(<IncomeView planningYear={2025} />);
+    render(<IncomeView planningYear={2025} />);
 
     await waitFor(() =>
       expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
@@ -204,6 +252,10 @@ describe('IncomeView', () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText('Tax-Advantaged Buckets')).toHaveLength(2);
     expect(screen.getByText('$4,000 Spendable Restricted')).toBeInTheDocument();
+    expect(screen.getByText('Annual Adjustments')).toBeInTheDocument();
+    expect(screen.getByText('Federal tax refund')).toBeInTheDocument();
+    expect(screen.getByText('+$1,200.00')).toBeInTheDocument();
+    expect(screen.getByText('-$2,000.00')).toBeInTheDocument();
     expect(
       screen.getByText('Tax-Advantaged Contributions'),
     ).toBeInTheDocument();
@@ -227,10 +279,12 @@ describe('IncomeView', () => {
     const expandedCell = recurringPayHeading.closest('td');
     expect(expandedCell).toHaveAttribute('colspan', '4');
 
+    const incomeStreamHeader = screen.getByRole('columnheader', {
+      name: 'Income Stream',
+    });
+    const sourceTable = incomeStreamHeader.closest('table');
     const sourceTableHeaders = Array.from(
-      container.querySelectorAll(
-        '.surface-card > .overflow-x-auto > table > thead > tr > th',
-      ),
+      sourceTable?.tHead?.rows[0]?.cells ?? [],
     ).map((header) => header.textContent?.trim());
 
     expect(sourceTableHeaders).toEqual([
@@ -283,7 +337,14 @@ describe('IncomeView', () => {
       expect(screen.getByText('Acme Corp')).toBeInTheDocument(),
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const taxBucketsEditButton = screen
+      .getAllByRole('button', { name: 'Edit' })
+      .find((button) =>
+        button.closest('article')?.textContent?.includes('Tax-Advantaged Buckets'),
+      );
+
+    expect(taxBucketsEditButton).toBeDefined();
+    fireEvent.click(taxBucketsEditButton!);
 
     const input = await screen.findByLabelText(/401k annual amount/i);
     fireEvent.change(input, { target: { value: '25000' } });
@@ -299,5 +360,98 @@ describe('IncomeView', () => {
         ],
       }),
     );
+  });
+
+  it('creates a new annual adjustment from the income page section', async () => {
+    getYearProjection.mockResolvedValue(projection);
+    createAnnualAdjustment.mockResolvedValue({
+      id: 99,
+      year: 2025,
+      label: 'Estimated tax refund',
+      effectiveDate: '2025-03-01',
+      status: 'expected',
+      amount: 900,
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-01T00:00:00Z',
+    });
+
+    render(<IncomeView planningYear={2025} />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Federal tax refund')).toBeInTheDocument(),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Adjustment' }));
+
+    await screen.findByRole('heading', { name: 'Add Annual Adjustment' });
+
+    fireEvent.change(screen.getByLabelText(/Adjustment label/i), {
+      target: { value: 'Estimated tax refund' },
+    });
+    fireEvent.change(screen.getByLabelText(/Effective date/i), {
+      target: { value: '2025-03-01' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Amount/i), {
+      target: { value: '900' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }));
+
+    await waitFor(() =>
+      expect(createAnnualAdjustment).toHaveBeenCalledWith({
+        year: 2025,
+        label: 'Estimated tax refund',
+        effectiveDate: '2025-03-01',
+        status: 'expected',
+        amount: 900,
+      }),
+    );
+  });
+
+  it('updates and deletes annual adjustments', async () => {
+    getYearProjection.mockResolvedValue(projection);
+    updateAnnualAdjustment.mockResolvedValue({
+      ...projection.annualAdjustments[0],
+      label: 'Updated refund',
+      amount: 1500,
+    });
+    deleteAnnualAdjustment.mockResolvedValue(undefined);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(<IncomeView planningYear={2025} />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Federal tax refund')).toBeInTheDocument(),
+    );
+
+    const refundRow = screen.getByText('Federal tax refund').closest('tr');
+    expect(refundRow).not.toBeNull();
+
+    fireEvent.click(
+      refundRow!.querySelector('button.button-base.button-secondary')!,
+    );
+    await screen.findByRole('heading', { name: 'Edit Annual Adjustment' });
+
+    fireEvent.change(screen.getByLabelText(/Adjustment label/i), {
+      target: { value: 'Updated refund' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Amount/i), {
+      target: { value: '1500' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+
+    await waitFor(() =>
+      expect(updateAnnualAdjustment).toHaveBeenCalledWith(41, {
+        label: 'Updated refund',
+        effectiveDate: '2025-02-20',
+        status: 'actual',
+        amount: 1500,
+      }),
+    );
+
+    fireEvent.click(
+      refundRow!.querySelector('button.button-base.button-danger')!,
+    );
+
+    await waitFor(() => expect(deleteAnnualAdjustment).toHaveBeenCalledWith(41));
   });
 });

@@ -1,7 +1,10 @@
 import type {
+  AnnualAdjustment,
+  CreateAnnualAdjustmentInput,
   CreateIncomeOccurrenceInput,
   CreateRecurringIncomeVersionInput,
   IncomeOccurrence,
+  AnnualAdjustmentTotals,
   IncomeProjectionTotals,
   ProjectedIncomeComponent,
   ProjectedIncomeSource,
@@ -31,6 +34,8 @@ export interface EditBonusModalSubmit {
 export type IncomeViewModalState =
   | { type: 'add-source' }
   | { type: 'rename-source'; source: ProjectedIncomeSource }
+  | { type: 'add-annual-adjustment' }
+  | { type: 'edit-annual-adjustment'; adjustment: AnnualAdjustment }
   | { type: 'add-version'; component: ProjectedIncomeComponent }
   | {
       type: 'edit-version';
@@ -58,6 +63,11 @@ export const EMPTY_PROJECTION_TOTALS: IncomeProjectionTotals = {
   plannedNet: 0,
 };
 
+export const EMPTY_ANNUAL_ADJUSTMENT_TOTALS: AnnualAdjustmentTotals = {
+  committed: 0,
+  planned: 0,
+};
+
 export function isAddBonusModalSubmit(
   payload: AddBonusModalSubmit | EditBonusModalSubmit,
 ): payload is AddBonusModalSubmit {
@@ -78,4 +88,8 @@ export type RecurringVersionModalSubmit = (
 export type BonusOccurrenceModalSubmit = (
   targetId: number,
   payload: AddBonusModalSubmit | EditBonusModalSubmit,
+) => Promise<void>;
+
+export type AnnualAdjustmentModalSubmit = (
+  input: CreateAnnualAdjustmentInput,
 ) => Promise<void>;

@@ -1,6 +1,9 @@
 import { normalizeTaxAdvantagedBuckets } from '../constants/taxAdvantagedBuckets';
 import { DEFAULT_EMERGENCY_FUND_BALANCE } from '../constants/yearSettings';
 import type {
+  AnnualAdjustment,
+  AnnualAdjustmentTotals,
+  CreateAnnualAdjustmentInput,
   CreateIncomeComponentInput,
   CreateIncomeOccurrenceInput,
   CreateIncomeSourceInput,
@@ -16,6 +19,7 @@ import type {
   RecurringIncomeVersion,
   TaxAdvantagedBucketEntry,
   TaxAdvantagedInvestments,
+  UpdateAnnualAdjustmentInput,
   UpdateIncomeComponentInput,
   UpdateIncomeOccurrenceInput,
   UpdateRecurringIncomeVersionInput,
@@ -76,6 +80,30 @@ function transformTotals(
     plannedGross: Number(data.planned_gross ?? 0),
     plannedCashNet: Number(data.planned_cash_net ?? 0),
     plannedNet: Number(data.planned_net ?? 0),
+  };
+}
+
+function transformAnnualAdjustment(
+  data: Record<string, unknown>,
+): AnnualAdjustment {
+  return {
+    id: Number(data.id),
+    year: Number(data.year),
+    label: String(data.label),
+    effectiveDate: String(data.effective_date),
+    status: data.status as AnnualAdjustment['status'],
+    amount: Number(data.amount ?? 0),
+    createdAt: String(data.created_at),
+    updatedAt: String(data.updated_at),
+  };
+}
+
+function transformAnnualAdjustmentTotals(
+  data: Record<string, unknown> | null | undefined,
+): AnnualAdjustmentTotals {
+  return {
+    committed: Number(data?.committed ?? 0),
+    planned: Number(data?.planned ?? 0),
   };
 }
 
@@ -282,6 +310,30 @@ function serializeOccurrenceInput(input: UpdateIncomeOccurrenceInput) {
   return body;
 }
 
+function serializeAnnualAdjustmentInput(
+  input: CreateAnnualAdjustmentInput | UpdateAnnualAdjustmentInput,
+) {
+  const body: Record<string, unknown> = {};
+
+  if ('year' in input && input.year !== undefined) {
+    body.year = input.year;
+  }
+  if (input.label !== undefined) {
+    body.label = input.label;
+  }
+  if (input.effectiveDate !== undefined) {
+    body.effective_date = input.effectiveDate;
+  }
+  if (input.status !== undefined) {
+    body.status = input.status;
+  }
+  if (input.amount !== undefined) {
+    body.amount = input.amount;
+  }
+
+  return body;
+}
+
 export const incomeApiService = {
   async getYearProjection(year: number): Promise<IncomeYearProjection> {
     return request(`/projection?year=${year}`, undefined, (data) => ({
@@ -298,10 +350,52 @@ export const incomeApiService = {
         (data.tax_advantaged_investments as Record<string, unknown> | null) ??
           null,
       ),
+      annualAdjustmentTotals: transformAnnualAdjustmentTotals(
+        (data.annual_adjustment_totals as Record<string, unknown> | null) ??
+          null,
+      ),
+      annualAdjustments: (
+        (data.annual_adjustments as Array<Record<string, unknown>>) ?? []
+      ).map(transformAnnualAdjustment),
       sources: ((data.sources as Array<Record<string, unknown>>) ?? []).map(
         transformProjectedSource,
       ),
     }));
+  },
+
+  async createAnnualAdjustment(
+    input: CreateAnnualAdjustmentInput,
+  ): Promise<AnnualAdjustment> {
+    return request(
+      '/annual-adjustments',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(serializeAnnualAdjustmentInput(input)),
+      },
+      transformAnnualAdjustment,
+    );
+  },
+
+  async updateAnnualAdjustment(
+    adjustmentId: number,
+    input: UpdateAnnualAdjustmentInput,
+  ): Promise<AnnualAdjustment> {
+    return request(
+      `/annual-adjustments/${adjustmentId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(serializeAnnualAdjustmentInput(input)),
+      },
+      transformAnnualAdjustment,
+    );
+  },
+
+  async deleteAnnualAdjustment(adjustmentId: number): Promise<void> {
+    await request<void>(`/annual-adjustments/${adjustmentId}`, {
+      method: 'DELETE',
+    });
   },
 
   async listSources(): Promise<IncomeSource[]> {

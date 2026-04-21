@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 
 import { incomeApiService } from '../services/incomeApiService';
 import type {
+  AnnualAdjustment,
+  CreateAnnualAdjustmentInput,
   CreateRecurringIncomeVersionInput,
   IncomeOccurrence,
   TaxAdvantagedBucketEntry,
@@ -38,11 +40,18 @@ interface UseIncomeViewControllerResult {
     IncomeViewModalState,
     { type: 'add-bonus' } | { type: 'edit-bonus' }
   > | null;
+  annualAdjustmentModalState: Extract<
+    IncomeViewModalState,
+    | { type: 'add-annual-adjustment' }
+    | { type: 'edit-annual-adjustment' }
+  > | null;
   isTaxAdvantagedInvestmentsModalOpen: boolean;
   openAddIncomeModal: () => void;
+  openAddAnnualAdjustmentModal: () => void;
   openTaxAdvantagedInvestmentsModal: () => void;
   closeModal: () => void;
   toggleSourceExpansion: (sourceId: number) => void;
+  openEditAnnualAdjustmentModal: (adjustment: AnnualAdjustment) => void;
   openRenameSourceModal: (source: ProjectedIncomeSource) => void;
   openAddVersionModal: (component: ProjectedIncomeComponent) => void;
   openEditVersionModal: (
@@ -74,6 +83,12 @@ interface UseIncomeViewControllerResult {
     occurrence: IncomeOccurrence,
   ) => Promise<void>;
   handleDeleteSource: (source: ProjectedIncomeSource) => Promise<void>;
+  handleAnnualAdjustmentModalSubmit: (
+    input: CreateAnnualAdjustmentInput,
+  ) => Promise<void>;
+  handleDeleteAnnualAdjustment: (
+    adjustment: AnnualAdjustment,
+  ) => Promise<void>;
   handleTaxAdvantagedInvestmentsSubmit: (input: {
     taxAdvantagedBuckets: TaxAdvantagedBucketEntry[];
   }) => Promise<void>;
@@ -123,8 +138,16 @@ export function useIncomeViewController(
     setModalState({ type: 'add-source' });
   };
 
+  const openAddAnnualAdjustmentModal = () => {
+    setModalState({ type: 'add-annual-adjustment' });
+  };
+
   const openTaxAdvantagedInvestmentsModal = () => {
     setIsTaxAdvantagedInvestmentsModalOpen(true);
+  };
+
+  const openEditAnnualAdjustmentModal = (adjustment: AnnualAdjustment) => {
+    setModalState({ type: 'edit-annual-adjustment', adjustment });
   };
 
   const openRenameSourceModal = (source: ProjectedIncomeSource) => {
@@ -168,6 +191,20 @@ export function useIncomeViewController(
         : null,
     [modalState],
   );
+
+  const annualAdjustmentModalState = useMemo(
+    () =>
+      modalState?.type === 'add-annual-adjustment' ||
+      modalState?.type === 'edit-annual-adjustment'
+        ? modalState
+        : null,
+    [modalState],
+  );
+
+  const annualAdjustmentBeingEdited =
+    annualAdjustmentModalState?.type === 'edit-annual-adjustment'
+      ? annualAdjustmentModalState.adjustment
+      : null;
 
   const handleAddSource = async (payload: AddSourceModalSubmit) => {
     try {
@@ -365,6 +402,56 @@ export function useIncomeViewController(
     }
   };
 
+  const handleAnnualAdjustmentModalSubmit = async (
+    input: CreateAnnualAdjustmentInput,
+  ) => {
+    try {
+      if (annualAdjustmentBeingEdited) {
+        await incomeApiService.updateAnnualAdjustment(
+          annualAdjustmentBeingEdited.id,
+          {
+            label: input.label,
+            effectiveDate: input.effectiveDate,
+            status: input.status,
+            amount: input.amount,
+          },
+        );
+        toast.success('Annual adjustment updated');
+      } else {
+        await incomeApiService.createAnnualAdjustment(input);
+        toast.success('Annual adjustment saved');
+      }
+
+      closeModal();
+      await loadProjection();
+    } catch (error) {
+      console.error('Failed to save annual adjustment:', error);
+      toast.error('Failed to save annual adjustment');
+      throw error;
+    }
+  };
+
+  const handleDeleteAnnualAdjustment = async (adjustment: AnnualAdjustment) => {
+    if (
+      !window.confirm(
+        `Delete annual adjustment "${adjustment.label}" scheduled for ${formatDate(
+          adjustment.effectiveDate,
+        )}?`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await incomeApiService.deleteAnnualAdjustment(adjustment.id);
+      toast.success('Annual adjustment deleted');
+      await loadProjection();
+    } catch (error) {
+      console.error('Failed to delete annual adjustment:', error);
+      toast.error('Failed to delete annual adjustment');
+    }
+  };
+
   const handleTaxAdvantagedInvestmentsSubmit = async (input: {
     taxAdvantagedBuckets: TaxAdvantagedBucketEntry[];
   }) => {
@@ -428,11 +515,14 @@ export function useIncomeViewController(
     expandedSources,
     versionModalState,
     bonusModalState,
+    annualAdjustmentModalState,
     isTaxAdvantagedInvestmentsModalOpen,
     openAddIncomeModal,
+    openAddAnnualAdjustmentModal,
     openTaxAdvantagedInvestmentsModal,
     closeModal,
     toggleSourceExpansion,
+    openEditAnnualAdjustmentModal,
     openRenameSourceModal,
     openAddVersionModal,
     openEditVersionModal,
@@ -446,6 +536,8 @@ export function useIncomeViewController(
     handleDeleteVersion,
     handleDeleteBonus,
     handleDeleteSource,
+    handleAnnualAdjustmentModalSubmit,
+    handleDeleteAnnualAdjustment,
     handleTaxAdvantagedInvestmentsSubmit,
   };
 }

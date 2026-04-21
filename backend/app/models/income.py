@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 IncomeComponentType = Literal["base_pay", "bonus", "commission", "overtime", "other"]
 IncomeComponentMode = Literal["recurring", "occurrence"]
 IncomeOccurrenceStatus = Literal["expected", "actual"]
+AnnualAdjustmentStatus = Literal["expected", "actual"]
 TaxAdvantagedBucketType = Literal["401k", "hsa", "fsa_daycare", "fsa_medical"]
 
 
@@ -65,6 +66,47 @@ class IncomeProjectionTotalsResponse(BaseModel):
     planned_gross: float = 0
     planned_cash_net: float = 0
     planned_net: float = 0
+
+
+class AnnualAdjustmentBase(BaseModel):
+    """Base year-scoped annual adjustment fields."""
+
+    year: int = Field(..., ge=1900, le=3000)
+    label: str = Field(..., min_length=1, max_length=160)
+    effective_date: date
+    status: AnnualAdjustmentStatus
+    amount: float
+
+
+class AnnualAdjustmentCreate(AnnualAdjustmentBase):
+    """Create payload for annual adjustments."""
+
+
+class AnnualAdjustmentUpdate(BaseModel):
+    """Update payload for annual adjustments."""
+
+    label: Optional[str] = Field(None, min_length=1, max_length=160)
+    effective_date: Optional[date] = None
+    status: Optional[AnnualAdjustmentStatus] = None
+    amount: Optional[float] = None
+
+
+class AnnualAdjustmentResponse(AnnualAdjustmentBase):
+    """Resource response for a year-scoped annual adjustment."""
+
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AnnualAdjustmentTotalsResponse(BaseModel):
+    """Committed vs planned totals for annual adjustments."""
+
+    committed: float = 0
+    planned: float = 0
 
 
 class IncomeSourceBase(BaseModel):
@@ -229,4 +271,8 @@ class IncomeYearProjectionResponse(BaseModel):
     tax_advantaged_investments: TaxAdvantagedInvestmentsResponse = Field(
         default_factory=TaxAdvantagedInvestmentsResponse
     )
+    annual_adjustment_totals: AnnualAdjustmentTotalsResponse = Field(
+        default_factory=AnnualAdjustmentTotalsResponse
+    )
+    annual_adjustments: list[AnnualAdjustmentResponse] = Field(default_factory=list)
     sources: list[ProjectedIncomeSourceResponse] = Field(default_factory=list)

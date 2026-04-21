@@ -128,6 +128,42 @@ class IncomeOccurrence(Base):
         )
 
 
+class IncomeAnnualAdjustment(Base):
+    """Year-scoped household cash adjustment outside employer income streams."""
+
+    __tablename__ = "income_annual_adjustments"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    year = Column(Integer, nullable=False, index=True)
+    label = Column(String(160), nullable=False)
+    effective_date = Column(Date, nullable=False, index=True)
+    status = Column(String(20), nullable=False, index=True)
+    amount = Column(Float, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index(
+            "ix_income_annual_adjustments_year_status_date",
+            "year",
+            "status",
+            "effective_date",
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            "<IncomeAnnualAdjustment("
+            f"id={self.id}, "
+            f"year={self.year}, "
+            f"label='{self.label}', "
+            f"effective_date={self.effective_date}, "
+            f"status='{self.status}', "
+            f"amount={self.amount}"
+            ")>"
+        )
+
+
 class IncomeYearSettings(Base):
     """Year-scoped household investment settings used by the income dashboard."""
 

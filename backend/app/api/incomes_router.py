@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 
 from backend.app.db.database import get_db
 from backend.app.models.income import (
+    AnnualAdjustmentCreate,
+    AnnualAdjustmentResponse,
+    AnnualAdjustmentUpdate,
     IncomeComponentCreate,
     IncomeComponentResponse,
     IncomeComponentUpdate,
@@ -61,6 +64,57 @@ async def update_income_year_settings(
     """Create or update year-scoped investment settings for income views."""
     try:
         return service.serialize_year_settings(service.upsert_year_settings(year, settings_in))
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.post(
+    "/annual-adjustments",
+    response_model=AnnualAdjustmentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_annual_adjustment(
+    adjustment_in: AnnualAdjustmentCreate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Create a year-scoped annual adjustment."""
+    try:
+        return service.serialize_annual_adjustment(
+            service.create_annual_adjustment(adjustment_in)
+        )
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.put(
+    "/annual-adjustments/{adjustment_id}",
+    response_model=AnnualAdjustmentResponse,
+)
+async def update_annual_adjustment(
+    adjustment_id: int,
+    adjustment_in: AnnualAdjustmentUpdate,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Update a year-scoped annual adjustment."""
+    try:
+        return service.serialize_annual_adjustment(
+            service.update_annual_adjustment(adjustment_id, adjustment_in)
+        )
+    except ValueError as error:
+        raise _handle_value_error(error)
+
+
+@router.delete(
+    "/annual-adjustments/{adjustment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_annual_adjustment(
+    adjustment_id: int,
+    service: IncomeService = Depends(get_income_service),
+):
+    """Delete a year-scoped annual adjustment."""
+    try:
+        service.delete_annual_adjustment(adjustment_id)
     except ValueError as error:
         raise _handle_value_error(error)
 

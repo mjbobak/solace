@@ -10,6 +10,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from backend.app.db.models.income import (
+    IncomeAnnualAdjustment,
     IncomeComponent,
     IncomeComponentVersion,
     IncomeOccurrence,
@@ -18,6 +19,10 @@ from backend.app.db.models.income import (
     IncomeYearTaxAdvantagedBucket,
 )
 from backend.app.models.income import (
+    AnnualAdjustmentCreate,
+    AnnualAdjustmentResponse,
+    AnnualAdjustmentTotalsResponse,
+    AnnualAdjustmentUpdate,
     IncomeComponentCreate,
     IncomeComponentResponse,
     IncomeComponentUpdate,
@@ -76,6 +81,20 @@ def _normalize_optional_text(value: str | None) -> str | None:
 
     normalized_value = value.strip()
     return normalized_value or None
+
+
+def _normalize_required_text(value: str) -> str:
+    normalized_value = value.strip()
+    if not normalized_value:
+        raise ValueError("Label is required")
+    return normalized_value
+
+
+def _normalize_annual_adjustment_amount(value: float) -> float:
+    normalized_value = round(float(value), 2)
+    if normalized_value == 0:
+        raise ValueError("Annual adjustment amount must be non-zero")
+    return normalized_value
 
 
 def _blank_projection_totals() -> dict[str, object]:
@@ -314,6 +333,46 @@ class IncomeService:
         self.db.delete(occurrence)
         self.db.commit()
 
+    def create_annual_adjustment(
+        self,
+        adjustment_in: AnnualAdjustmentCreate,
+    ) -> IncomeAnnualAdjustment:
+        adjustment = IncomeAnnualAdjustment(
+            year=adjustment_in.year,
+            label=_normalize_required_text(adjustment_in.label),
+            effective_date=adjustment_in.effective_date,
+            status=adjustment_in.status,
+            amount=_normalize_annual_adjustment_amount(adjustment_in.amount),
+        )
+        self.db.add(adjustment)
+        return self._commit_and_refresh(adjustment)
+
+    def update_annual_adjustment(
+        self,
+        adjustment_id: int,
+        adjustment_in: AnnualAdjustmentUpdate,
+    ) -> IncomeAnnualAdjustment:
+        adjustment = self._get_annual_adjustment_or_raise(adjustment_id)
+        updates = adjustment_in.model_dump(exclude_unset=True)
+
+        if "label" in updates and updates["label"] is not None:
+            adjustment.label = _normalize_required_text(updates["label"])
+        if "effective_date" in updates and updates["effective_date"] is not None:
+            adjustment.effective_date = updates["effective_date"]
+        if "status" in updates and updates["status"] is not None:
+            adjustment.status = updates["status"]
+        if "amount" in updates and updates["amount"] is not None:
+            adjustment.amount = _normalize_annual_adjustment_amount(
+                updates["amount"]
+            )
+
+        return self._commit_and_refresh(adjustment)
+
+    def delete_annual_adjustment(self, adjustment_id: int) -> None:
+        adjustment = self._get_annual_adjustment_or_raise(adjustment_id)
+        self.db.delete(adjustment)
+        self.db.commit()
+
     def upsert_year_settings(
         self,
         year: int,
@@ -359,6 +418,8 @@ class IncomeService:
         sources = self._load_sources_with_income()
         year_settings = self._get_year_settings(year)
         tax_advantaged_investments = self._tax_advantaged_investments_response(year_settings)
+        annual_adjustments = self._load_annual_adjustments(year)
+        annual_adjustment_totals = self._annual_adjustment_totals(annual_adjustments)
         projected_sources: list[ProjectedIncomeSourceResponse] = []
         household_totals = _blank_projection_totals()
 
@@ -388,6 +449,10 @@ class IncomeService:
             projected_sources.append(source_response)
             _roll_up_projection_totals(household_totals, source_response.totals)
 
+        self._roll_up_annual_adjustment_totals(
+            household_totals,
+            annual_adjustment_totals,
+        )
         household_totals["committed_net"] = float(household_totals["committed_net"]) + float(
             sum(
                 entry.annual_amount
@@ -417,8 +482,19 @@ class IncomeService:
                 year_settings.secondary_runway_source_id if year_settings else None
             ),
             tax_advantaged_investments=tax_advantaged_investments,
+            annual_adjustment_totals=annual_adjustment_totals,
+            annual_adjustments=[
+                self._annual_adjustment_response(adjustment)
+                for adjustment in annual_adjustments
+            ],
             sources=projected_sources,
         )
+
+    def serialize_annual_adjustment(
+        self,
+        adjustment: IncomeAnnualAdjustment,
+    ) -> AnnualAdjustmentResponse:
+        return self._annual_adjustment_response(adjustment)
 
     def serialize_source(self, source: IncomeSource) -> IncomeSourceResponse:
         return IncomeSourceResponse(**self._source_payload(source))
@@ -522,6 +598,17 @@ class IncomeService:
             .all()
         )
 
+    def _load_annual_adjustments(self, year: int) -> list[IncomeAnnualAdjustment]:
+        return (
+            self.db.query(IncomeAnnualAdjustment)
+            .filter(IncomeAnnualAdjustment.year == year)
+            .order_by(
+                IncomeAnnualAdjustment.effective_date.desc(),
+                IncomeAnnualAdjustment.id.desc(),
+            )
+            .all()
+        )
+
     def _next_source_sort_order(self) -> int:
         current = self.db.query(func.max(IncomeSource.sort_order)).scalar()
         return 0 if current is None else int(current) + 1
@@ -557,6 +644,16 @@ class IncomeService:
         if occurrence is None:
             raise ValueError(f"Income occurrence {occurrence_id} not found")
         return occurrence
+
+    def _get_annual_adjustment_or_raise(self, adjustment_id: int) -> IncomeAnnualAdjustment:
+        adjustment = (
+            self.db.query(IncomeAnnualAdjustment)
+            .filter(IncomeAnnualAdjustment.id == adjustment_id)
+            .first()
+        )
+        if adjustment is None:
+            raise ValueError(f"Annual adjustment {adjustment_id} not found")
+        return adjustment
 
     def _ensure_component_mode(self, component: IncomeComponent, *, expected_mode: str) -> None:
         if component.component_mode != expected_mode:
@@ -620,6 +717,57 @@ class IncomeService:
             "created_at": source.created_at,
             "updated_at": source.updated_at,
         }
+
+    def _annual_adjustment_response(
+        self,
+        adjustment: IncomeAnnualAdjustment,
+    ) -> AnnualAdjustmentResponse:
+        return AnnualAdjustmentResponse(
+            id=adjustment.id,
+            year=adjustment.year,
+            label=adjustment.label,
+            effective_date=adjustment.effective_date,
+            status=adjustment.status,
+            amount=round(float(adjustment.amount), 2),
+            created_at=adjustment.created_at,
+            updated_at=adjustment.updated_at,
+        )
+
+    def _annual_adjustment_totals(
+        self,
+        adjustments: Iterable[IncomeAnnualAdjustment],
+    ) -> AnnualAdjustmentTotalsResponse:
+        committed_total = 0.0
+        planned_total = 0.0
+
+        for adjustment in adjustments:
+            amount = round(float(adjustment.amount), 2)
+            planned_total += amount
+            if adjustment.status == "actual":
+                committed_total += amount
+
+        return AnnualAdjustmentTotalsResponse(
+            committed=round(committed_total, 2),
+            planned=round(planned_total, 2),
+        )
+
+    def _roll_up_annual_adjustment_totals(
+        self,
+        household_totals: dict[str, object],
+        annual_adjustment_totals: AnnualAdjustmentTotalsResponse,
+    ) -> None:
+        household_totals["committed_cash_net"] = float(
+            household_totals["committed_cash_net"]
+        ) + float(annual_adjustment_totals.committed)
+        household_totals["committed_net"] = float(household_totals["committed_net"]) + float(
+            annual_adjustment_totals.committed
+        )
+        household_totals["planned_cash_net"] = float(
+            household_totals["planned_cash_net"]
+        ) + float(annual_adjustment_totals.planned)
+        household_totals["planned_net"] = float(household_totals["planned_net"]) + float(
+            annual_adjustment_totals.planned
+        )
 
     def _component_payload(self, component: IncomeComponent) -> dict[str, object]:
         return {

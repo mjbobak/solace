@@ -4,6 +4,7 @@ from backend.app.db.models.budget import Budget
 from backend.app.db.models.categorization_rule import CategorizationRule
 from backend.app.db.models.expense_category import ExpenseCategory
 from backend.app.db.models.income import (
+    IncomeAnnualAdjustment,
     IncomeComponent,
     IncomeComponentVersion,
     IncomeOccurrence,
@@ -18,6 +19,7 @@ __all__ = [
     "Budget",
     "CategorizationRule",
     "ExpenseCategory",
+    "IncomeAnnualAdjustment",
     "IncomeComponent",
     "IncomeComponentVersion",
     "IncomeOccurrence",

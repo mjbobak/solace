@@ -5,8 +5,10 @@ import { useIncomeActionMenu } from '../hooks/useIncomeActionMenu';
 import { useIncomeViewController } from '../hooks/useIncomeViewController';
 import { EMPTY_PROJECTION_TOTALS } from '../types/incomeView';
 
+import { AnnualAdjustmentsSection } from './AnnualAdjustmentsSection';
 import { IncomeSourceActionMenu } from './IncomeSourceActionMenu';
 import { IncomeSummary } from './IncomeSummary';
+import { AnnualAdjustmentModal } from './modals/AnnualAdjustmentModal';
 import { AddSourceModal } from './modals/AddSourceModal';
 import { BonusOccurrenceModal } from './modals/BonusOccurrenceModal';
 import { RecurringVersionModal } from './modals/RecurringVersionModal';
@@ -33,11 +35,14 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       expandedSources,
       versionModalState,
       bonusModalState,
+      annualAdjustmentModalState,
       isTaxAdvantagedInvestmentsModalOpen,
       openAddIncomeModal,
+      openAddAnnualAdjustmentModal,
       openTaxAdvantagedInvestmentsModal,
       closeModal,
       toggleSourceExpansion,
+      openEditAnnualAdjustmentModal,
       openRenameSourceModal,
       openAddVersionModal,
       openEditVersionModal,
@@ -51,6 +56,8 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       handleDeleteVersion,
       handleDeleteBonus,
       handleDeleteSource,
+      handleAnnualAdjustmentModalSubmit,
+      handleDeleteAnnualAdjustment,
       handleTaxAdvantagedInvestmentsSubmit,
     } = useIncomeViewController(planningYear);
     const {
@@ -77,6 +84,15 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
             EMPTY_TAX_ADVANTAGED_INVESTMENTS
           }
           onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
+        />
+
+        <AnnualAdjustmentsSection
+          adjustments={projection?.annualAdjustments ?? []}
+          onAdd={openAddAnnualAdjustmentModal}
+          onEdit={openEditAnnualAdjustmentModal}
+          onDelete={(adjustment) => {
+            void handleDeleteAnnualAdjustment(adjustment);
+          }}
         />
 
         <TaxAdvantagedBucketsSection
@@ -123,6 +139,18 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
           }
           onClose={closeModal}
           onSubmit={handleRenameSource}
+        />
+
+        <AnnualAdjustmentModal
+          isOpen={annualAdjustmentModalState !== null}
+          adjustment={
+            annualAdjustmentModalState?.type === 'edit-annual-adjustment'
+              ? annualAdjustmentModalState.adjustment
+              : null
+          }
+          year={planningYear}
+          onClose={closeModal}
+          onSubmit={handleAnnualAdjustmentModalSubmit}
         />
 
         <RecurringVersionModal

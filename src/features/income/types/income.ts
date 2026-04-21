@@ -7,6 +7,7 @@ export type IncomeComponentType =
 
 export type IncomeComponentMode = 'recurring' | 'occurrence';
 export type IncomeOccurrenceStatus = 'expected' | 'actual';
+export type AnnualAdjustmentStatus = 'expected' | 'actual';
 export type TaxAdvantagedBucketType =
   | '401k'
   | 'hsa'
@@ -32,6 +33,22 @@ export interface IncomeProjectionTotals {
   plannedGross: number;
   plannedCashNet: number;
   plannedNet: number;
+}
+
+export interface AnnualAdjustment {
+  id: number;
+  year: number;
+  label: string;
+  effectiveDate: string;
+  status: AnnualAdjustmentStatus;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AnnualAdjustmentTotals {
+  committed: number;
+  planned: number;
 }
 
 export interface IncomeSource {
@@ -96,6 +113,8 @@ export interface IncomeYearProjection {
   primaryRunwaySourceId: number | null;
   secondaryRunwaySourceId: number | null;
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
+  annualAdjustmentTotals: AnnualAdjustmentTotals;
+  annualAdjustments: AnnualAdjustment[];
   sources: ProjectedIncomeSource[];
 }
 
@@ -116,6 +135,18 @@ export interface CreateIncomeSourceInput {
 }
 
 export type UpdateIncomeSourceInput = Partial<CreateIncomeSourceInput>;
+
+export interface CreateAnnualAdjustmentInput {
+  year: number;
+  label: string;
+  effectiveDate: string;
+  status: AnnualAdjustmentStatus;
+  amount: number;
+}
+
+export type UpdateAnnualAdjustmentInput = Partial<
+  Omit<CreateAnnualAdjustmentInput, 'year'>
+>;
 
 export interface CreateIncomeComponentInput {
   componentType: IncomeComponentType;
@@ -171,6 +202,17 @@ export function getComponentDisplayName(
       return 'Overtime';
     default:
       return 'Other income';
+  }
+}
+
+export function getAnnualAdjustmentStatusLabel(
+  status: AnnualAdjustmentStatus,
+): string {
+  switch (status) {
+    case 'actual':
+      return 'Actual';
+    default:
+      return 'Expected';
   }
 }
 

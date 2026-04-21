@@ -78,7 +78,7 @@ export const EmergencyRunwaySection: React.FC<
     [budgetEntries, budgetError, projection],
   );
 
-  const narrative = `These runway scenarios reuse the report inputs: your emergency fund balance, your monthly essential budget, and only the standard income streams. Non-standard income is intentionally ignored here.`;
+  const narrative = `These runway scenarios reuse the report inputs: your emergency fund balance, your monthly essential budget, and the income streams shown in the source list. Year-level annual adjustments stay outside the runway model.`;
   const isLoading = isIncomeLoading || isBudgetLoading;
   const error = incomeError ?? budgetError;
 

@@ -3,6 +3,7 @@
 from datetime import date
 
 from backend.app.db.models.income import (
+    IncomeAnnualAdjustment,
     IncomeComponent,
     IncomeComponentVersion,
     IncomeOccurrence,
@@ -89,6 +90,29 @@ def create_occurrence(
 def get_projection(client, year: int) -> dict:
     response = client.get(f"/api/incomes/projection?year={year}")
     assert response.status_code == 200
+    return response.json()
+
+
+def create_annual_adjustment(
+    client,
+    *,
+    year: int,
+    label: str,
+    effective_date: str,
+    status: str,
+    amount: float,
+) -> dict:
+    response = client.post(
+        "/api/incomes/annual-adjustments",
+        json={
+            "year": year,
+            "label": label,
+            "effective_date": effective_date,
+            "status": status,
+            "amount": amount,
+        },
+    )
+    assert response.status_code == 201
     return response.json()
 
 
@@ -211,6 +235,11 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
         "spendable_total": 0,
         "total": 0,
     }
+    assert projection["annual_adjustment_totals"] == {
+        "committed": 0,
+        "planned": 0,
+    }
+    assert projection["annual_adjustments"] == []
     assert len(projection["sources"]) == 2
     assert projection["sources"][0]["name"] == "Acme Corp"
     assert len(projection["sources"][0]["components"]) == 2
@@ -255,6 +284,10 @@ def test_year_settings_can_be_created_updated_and_returned_in_projection(client,
     assert projection["emergency_fund_balance"] == 18000
     assert projection["primary_runway_source_id"] is None
     assert projection["secondary_runway_source_id"] is None
+    assert projection["annual_adjustment_totals"] == {
+        "committed": 0,
+        "planned": 0,
+    }
     assert projection["tax_advantaged_investments"] == {
         "entries": [
             {"bucket_type": "401k", "annual_amount": 19500},
@@ -335,6 +368,112 @@ def test_year_settings_can_store_runway_source_ids(client, db_session):
     projection = get_projection(client, 2026)
     assert projection["primary_runway_source_id"] == primary_source["id"]
     assert projection["secondary_runway_source_id"] == secondary_source["id"]
+
+
+def test_annual_adjustments_roll_into_cash_net_totals_without_affecting_gross(client):
+    """Annual adjustments should alter net totals only and stay out of gross income."""
+    source = create_source(client, "Acme Corp")
+    component = create_component(
+        client,
+        source["id"],
+        component_type="base_pay",
+        component_mode="recurring",
+        label="Base pay",
+    )
+    create_version(
+        client,
+        component["id"],
+        start_date="2026-01-01",
+        gross_amount=8000,
+        net_amount=6000,
+        periods_per_year=12,
+    )
+
+    create_annual_adjustment(
+        client,
+        year=2026,
+        label="Federal tax refund",
+        effective_date="2026-02-15",
+        status="expected",
+        amount=2500,
+    )
+    create_annual_adjustment(
+        client,
+        year=2026,
+        label="State tax balance due",
+        effective_date="2026-04-15",
+        status="actual",
+        amount=-800,
+    )
+
+    projection = get_projection(client, 2026)
+
+    assert projection["annual_adjustment_totals"] == {
+        "committed": -800,
+        "planned": 1700,
+    }
+    assert [adjustment["label"] for adjustment in projection["annual_adjustments"]] == [
+        "State tax balance due",
+        "Federal tax refund",
+    ]
+    assert projection["totals"]["committed_gross"] == 96000
+    assert projection["totals"]["planned_gross"] == 96000
+    assert projection["totals"]["committed_cash_net"] == 71200
+    assert projection["totals"]["committed_net"] == 71200
+    assert projection["totals"]["planned_cash_net"] == 73700
+    assert projection["totals"]["planned_net"] == 73700
+    assert projection["sources"][0]["totals"]["committed_cash_net"] == 72000
+    assert projection["sources"][0]["totals"]["planned_cash_net"] == 72000
+
+
+def test_annual_adjustments_support_crud_operations(client, db_session):
+    """Annual adjustment endpoints should create, update, and delete records."""
+    created = create_annual_adjustment(
+        client,
+        year=2026,
+        label="Tax refund",
+        effective_date="2026-03-01",
+        status="expected",
+        amount=1800,
+    )
+
+    assert created["year"] == 2026
+    assert created["label"] == "Tax refund"
+    assert created["status"] == "expected"
+    assert created["amount"] == 1800
+
+    update_response = client.put(
+        f"/api/incomes/annual-adjustments/{created['id']}",
+        json={
+            "label": "Federal tax refund",
+            "status": "actual",
+            "amount": 2100,
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["label"] == "Federal tax refund"
+    assert update_response.json()["status"] == "actual"
+    assert update_response.json()["amount"] == 2100
+
+    db_row = (
+        db_session.query(IncomeAnnualAdjustment)
+        .filter(IncomeAnnualAdjustment.id == created["id"])
+        .one()
+    )
+    assert db_row.label == "Federal tax refund"
+    assert db_row.status == "actual"
+    assert db_row.amount == 2100
+
+    delete_response = client.delete(
+        f"/api/incomes/annual-adjustments/{created['id']}"
+    )
+    assert delete_response.status_code == 204
+    assert (
+        db_session.query(IncomeAnnualAdjustment)
+        .filter(IncomeAnnualAdjustment.id == created["id"])
+        .count()
+        == 0
+    )
 
 
 def test_year_settings_partial_updates_preserve_existing_values(client, db_session):

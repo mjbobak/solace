@@ -8,6 +8,7 @@ import {
   getImpactForMonth,
   getSpreadPaymentConfig,
 } from '@/features/spending/utils/spreadPayments';
+import { Tooltip } from '@/shared/components/Tooltip';
 import { formatCurrency } from '@/shared/utils/currency';
 
 interface SpreadPaymentCellProps {
@@ -34,6 +35,9 @@ export const SpreadPaymentCell: React.FC<SpreadPaymentCellProps> = ({
     displayMonth && spreadConfig
       ? getImpactForMonth(transaction, displayMonth.year, displayMonth.month)
       : 0;
+  const spreadRangeLabel = spreadConfig
+    ? formatSpreadRangeLabel(spreadConfig)
+    : null;
 
   if (!spreadConfig) {
     return (
@@ -48,26 +52,26 @@ export const SpreadPaymentCell: React.FC<SpreadPaymentCellProps> = ({
     );
   }
 
+  const tooltipContent = [
+    spreadRangeLabel,
+    averageAmount !== null ? `${formatCurrency(averageAmount)}/mo avg` : null,
+    displayMonth && displayImpact !== 0
+      ? `${displayMonth.label}: ${formatCurrency(displayImpact)}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
   return (
-    <button
-      onClick={(event) => onEdit(transaction, event.currentTarget)}
-      className="inline-flex flex-col items-start gap-0.5 rounded-xl border border-purple-300 bg-purple-50 px-3 py-2 text-left text-xs text-purple-900 transition-all hover:bg-purple-100"
-      title="Edit payment spread"
-    >
-      <span className="inline-flex items-center gap-1.5 font-semibold">
-        <BiRepeat size={14} />
-        {formatSpreadRangeLabel(spreadConfig)}
-      </span>
-      {averageAmount !== null && (
-        <span className="text-purple-700">
-          {formatCurrency(averageAmount)}/mo avg
-        </span>
-      )}
-      {displayMonth && displayImpact !== 0 && (
-        <span className="text-[11px] text-purple-600">
-          {displayMonth.label}: {formatCurrency(displayImpact)}
-        </span>
-      )}
-    </button>
+    <Tooltip content={tooltipContent} stacked>
+      <button
+        onClick={(event) => onEdit(transaction, event.currentTarget)}
+        className="inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full bg-purple-50 px-2.5 py-1 text-left text-xs font-medium text-purple-900 ring-1 ring-inset ring-purple-300 transition-all hover:bg-purple-100"
+        title="Edit payment spread"
+      >
+        <BiRepeat size={14} className="shrink-0" />
+        <span className="truncate">{spreadRangeLabel}</span>
+      </button>
+    </Tooltip>
   );
 };

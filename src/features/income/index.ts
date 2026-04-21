@@ -3,6 +3,10 @@ export type { IncomeViewHandle } from './components/IncomeView';
 export { IncomeSummary } from './components/IncomeSummary';
 
 export type {
+  AnnualAdjustment,
+  AnnualAdjustmentStatus,
+  AnnualAdjustmentTotals,
+  CreateAnnualAdjustmentInput,
   CreateIncomeComponentInput,
   CreateIncomeOccurrenceInput,
   CreateIncomeSourceInput,
@@ -22,9 +26,14 @@ export type {
   ProjectedIncomeSource,
   RecurringIncomeVersion,
   TaxAdvantagedInvestments,
+  UpdateAnnualAdjustmentInput,
   UpdateIncomeYearSettingsInput,
   UpdateIncomeSourceInput,
 } from './types/income';
 
-export { getComponentDisplayName, getComponentTypeLabel } from './types/income';
+export {
+  getAnnualAdjustmentStatusLabel,
+  getComponentDisplayName,
+  getComponentTypeLabel,
+} from './types/income';
 export { incomeApiService } from './services/incomeApiService';
