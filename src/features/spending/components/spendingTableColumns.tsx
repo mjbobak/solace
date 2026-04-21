@@ -40,7 +40,7 @@ export function getSpendingTableColumns(
       accessor: (row) => <span>{row.account}</span>,
       sortValue: (row) => row.account,
       sortable: true,
-      width: '150px',
+      width: '210px',
     },
     {
       key: 'transactionDate',
@@ -48,38 +48,30 @@ export function getSpendingTableColumns(
       accessor: (row) => <span>{formatDateOnly(row.transactionDate)}</span>,
       sortValue: (row) => row.transactionDate,
       sortable: true,
-      width: '140px',
-    },
-    {
-      key: 'postDate',
-      header: 'Post Date',
-      accessor: (row) => <span>{formatDateOnly(row.postDate)}</span>,
-      sortValue: (row) => row.postDate,
-      sortable: true,
-      width: '120px',
+      width: '160px',
     },
     {
       key: 'description',
       header: 'Description',
       accessor: (row) => (
         <Tooltip content={row.description}>
-          <span className="block truncate max-w-[200px]">
+          <span className="block truncate max-w-[320px]">
             {row.description}
           </span>
         </Tooltip>
       ),
       sortValue: (row) => row.description,
       sortable: true,
-      width: '200px',
+      width: '320px',
     },
     {
       key: 'budgetLabel',
       header: 'Budget Item',
       accessor: (row) => (
-        <div>
+        <div className="max-w-[320px]">
           <div className="font-medium text-gray-900">{row.budgetLabel}</div>
           {row.budgetCategory && (
-            <div className="text-xs text-gray-500">
+            <div className="truncate text-xs text-gray-500">
               {row.budgetCategory} • {row.budgetType}
             </div>
           )}
@@ -87,7 +79,7 @@ export function getSpendingTableColumns(
       ),
       sortValue: (row) => row.budgetLabel,
       sortable: true,
-      width: '180px',
+      width: '320px',
     },
     {
       key: 'amount',
@@ -96,7 +88,7 @@ export function getSpendingTableColumns(
       sortValue: (row) => row.amount,
       sortable: true,
       align: 'right',
-      width: '75px',
+      width: '110px',
     },
     {
       key: 'accrual',
@@ -111,13 +103,14 @@ export function getSpendingTableColumns(
       sortValue: (row) =>
         hasSpreadPayment(row) ? 'Payment spread' : 'Not spread',
       sortable: true,
-      width: '210px',
+      width: '180px',
+      cellClassName: 'pr-2',
     },
     {
       key: 'actions',
       header: 'Actions',
       accessor: (row) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-end gap-1">
           <button
             onClick={() => handleEdit(row)}
             className="inline-flex items-center justify-center p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
@@ -137,8 +130,10 @@ export function getSpendingTableColumns(
         </div>
       ),
       sortable: false,
-      align: 'center',
-      width: '80px',
+      align: 'right',
+      width: '72px',
+      headerClassName: 'pr-4',
+      cellClassName: 'pr-4',
     },
   ];
 }

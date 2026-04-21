@@ -36,7 +36,6 @@ interface AddTransactionModalProps {
 interface TransactionFormData {
   account: string;
   transactionDate: string;
-  postDate: string;
   description: string;
   budgetId: number | null;
   budgetLabel: string;
@@ -51,7 +50,6 @@ function createDefaultFormData(): TransactionFormData {
   return {
     account: ACCOUNTS[0],
     transactionDate: today,
-    postDate: today,
     description: '',
     budgetId: null,
     budgetLabel: 'Uncategorized',
@@ -95,7 +93,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       setFormData({
         account: item.account,
         transactionDate: item.transactionDate,
-        postDate: item.postDate,
         description: item.description,
         budgetId: item.budgetId ?? null,
         budgetLabel: item.budgetLabel,
@@ -120,10 +117,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
-    const entry = {
+    const baseEntry = {
       account: formData.account,
       transactionDate: formData.transactionDate,
-      postDate: formData.postDate,
       description: formData.description,
       budgetLabel: formData.budgetLabel,
       budgetId: formData.budgetId,
@@ -133,9 +129,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     };
 
     if (isEditMode && item) {
-      onUpdateEntry?.(item.id, entry);
+      onUpdateEntry?.(item.id, baseEntry);
     } else {
-      onAddEntry(entry);
+      onAddEntry({
+        ...baseEntry,
+        postDate: formData.transactionDate,
+      });
     }
 
     handleClose();
@@ -293,7 +292,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </div>
 
           {/* Dates and Amount */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Transaction Date</label>
               <input
@@ -303,21 +302,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   setFormData((prev) => ({
                     ...prev,
                     transactionDate: e.target.value,
-                  }))
-                }
-                className={`${inputBaseClass} ${inputFocusClass}`}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Post Date</label>
-              <input
-                type="date"
-                value={formData.postDate}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    postDate: e.target.value,
                   }))
                 }
                 className={`${inputBaseClass} ${inputFocusClass}`}

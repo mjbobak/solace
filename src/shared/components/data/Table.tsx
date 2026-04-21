@@ -11,6 +11,8 @@ export interface Column<T> {
   sortValue?: (row: T) => string | number;
   align?: 'left' | 'center' | 'right';
   width?: string;
+  headerClassName?: string;
+  cellClassName?: string;
 }
 
 interface TableProps<T> {
@@ -174,7 +176,9 @@ export function Table<T>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="table-header-cell text-left"
+                  className={`table-header-cell text-left ${
+                    column.headerClassName ?? ''
+                  }`}
                   style={{ width: column.width }}
                 >
                   {column.header}
@@ -239,7 +243,7 @@ export function Table<T>({
                   column.sortable
                     ? 'table-sortable cursor-pointer select-none'
                     : ''
-                }`}
+                } ${column.headerClassName ?? ''}`}
                 style={{ width: column.width }}
                 onClick={() => handleSort(column)}
               >
@@ -309,7 +313,9 @@ export function Table<T>({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={`table-cell ${getAlignClass(column.align)}`}
+                    className={`table-cell ${getAlignClass(column.align)} ${
+                      column.cellClassName ?? ''
+                    }`}
                   >
                     {column.accessor(row)}
                   </td>
