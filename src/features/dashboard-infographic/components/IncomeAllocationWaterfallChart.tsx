@@ -36,6 +36,8 @@ interface IncomeAllocationWaterfallChartProps {
 }
 
 const TOTAL_BAR_CLASS = 'bg-[#cddafd]';
+const INSIDE_LABEL_MIN_WIDTH_PERCENT = 8;
+const OUTSIDE_LABEL_GAP_PX = 8;
 
 function sanitizeAmount(amount: number): number {
   if (!Number.isFinite(amount) || amount <= 0) {
@@ -86,20 +88,41 @@ function buildSteps(
 function renderBarValueContent(
   amount: number,
   valueDisplayPeriod: 'monthly' | 'annual',
+  placement: 'inside' | 'outside-left' | 'outside-right' = 'inside',
 ): React.ReactNode {
   const formattedAmount =
     valueDisplayPeriod === 'annual'
       ? formatAnnualAmount(amount)
       : formatWholeCurrency(amount);
   const periodLabel = valueDisplayPeriod === 'annual' ? 'ANNUAL' : 'MONTHLY';
+  const isInside = placement === 'inside';
+  const containerClassName = isInside
+    ? 'pointer-events-none absolute inset-y-0.5 flex items-center px-3'
+    : 'pointer-events-none absolute inset-y-1/2 z-10 flex -translate-y-1/2 items-center';
+  const labelClassName =
+    'inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg bg-white px-2.5 py-1 shadow-sm';
+  const amountClassName = 'text-[11px] font-semibold text-slate-800';
+  const periodClassName = isInside
+    ? 'text-[10px] font-medium text-slate-600'
+    : 'text-[10px] font-medium text-slate-500';
+  const placementStyle =
+    placement === 'outside-right'
+      ? { left: `calc(100% + ${OUTSIDE_LABEL_GAP_PX}px)` }
+      : placement === 'outside-left'
+        ? { right: `calc(100% + ${OUTSIDE_LABEL_GAP_PX}px)` }
+        : undefined;
 
   return (
-    <div className="pointer-events-none absolute inset-y-0.5 flex items-center px-3">
-      <span className="inline-flex items-baseline gap-1 truncate whitespace-nowrap">
-        <span className="text-[11px] font-semibold text-slate-800/90">
+    <div
+      className={containerClassName}
+      style={placementStyle}
+      data-label-placement={placement}
+    >
+      <span className={labelClassName}>
+        <span className={amountClassName}>
           {formattedAmount}
         </span>
-        <span className="text-[10px] font-medium text-slate-700/65">
+        <span className={periodClassName}>
           {periodLabel}
         </span>
       </span>
@@ -146,6 +169,12 @@ export const IncomeAllocationWaterfallChart: React.FC<
         {positionedSteps.map((step) => {
           const leftPercent = (step.offset / scaleMax) * 100;
           const widthPercent = (step.amount / scaleMax) * 100;
+          const labelPlacement: 'inside' | 'outside-left' | 'outside-right' =
+            widthPercent >= INSIDE_LABEL_MIN_WIDTH_PERCENT
+              ? 'inside'
+              : leftPercent + widthPercent > 82
+                ? 'outside-left'
+                : 'outside-right';
           const isInteractive =
             step.isInteractive === true &&
             step.bucketId != null &&
@@ -175,7 +204,11 @@ export const IncomeAllocationWaterfallChart: React.FC<
                     width: `${widthPercent}%`,
                   }}
                 >
-                  {renderBarValueContent(step.amount, valueDisplayPeriod)}
+                  {renderBarValueContent(
+                    step.amount,
+                    valueDisplayPeriod,
+                    labelPlacement,
+                  )}
                 </div>
                 {isInteractive ? (
                   <button

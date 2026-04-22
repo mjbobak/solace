@@ -97,4 +97,37 @@ describe('IncomeAllocationWaterfallChart', () => {
       screen.queryByRole('button', { name: /Show .* category breakdown/ }),
     ).not.toBeInTheDocument();
   });
+
+  it('moves narrow segment labels outside the bar when there is not enough room', () => {
+    const steps: IncomeAllocationWaterfallStep[] = [
+      {
+        key: 'large',
+        label: 'Large',
+        amount: 900,
+        fillClassName: 'bg-violet-200',
+      },
+      {
+        key: 'tiny',
+        label: 'Tiny',
+        amount: 25,
+        fillClassName: 'bg-violet-200',
+      },
+    ];
+
+    render(
+      <IncomeAllocationWaterfallChart
+        steps={steps}
+        totalLabel="Total Income"
+        totalAmount={1000}
+      />,
+    );
+
+    const tinySegment = screen.getByLabelText('Tiny waterfall segment');
+    const tinyAmountLabel = screen.getByText('$25');
+
+    expect(tinySegment).toContainElement(tinyAmountLabel);
+    expect(
+      tinyAmountLabel.closest('[data-label-placement="outside-left"]'),
+    ).toBeTruthy();
+  });
 });
