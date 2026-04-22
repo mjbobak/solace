@@ -214,6 +214,50 @@ body {
     color: var(--color-text);
   }
 
+  .table-action-button {
+    @apply inline-flex items-center justify-center rounded-lg p-1.5 transition-colors;
+  }
+
+  .table-action-button-edit {
+    color: var(--color-text-muted);
+  }
+
+  .table-action-button-edit:hover {
+    background: color-mix(in srgb, var(--color-border) 72%, transparent);
+    color: var(--color-text);
+  }
+
+  .table-action-button-delete {
+    color: var(--color-text-muted);
+  }
+
+  .table-action-button-delete:hover {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+
+  .menu-action-item {
+    @apply flex w-full items-center gap-2 px-4 py-3 text-sm transition-colors;
+  }
+
+  .menu-action-item-edit {
+    color: var(--color-text-muted);
+  }
+
+  .menu-action-item-edit:hover {
+    background: color-mix(in srgb, var(--color-border) 72%, transparent);
+    color: var(--color-text);
+  }
+
+  .menu-action-item-delete {
+    color: var(--color-text-muted);
+  }
+
+  .menu-action-item-delete:hover {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+
   .button-base {
     @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50;
     --button-scale: 1;

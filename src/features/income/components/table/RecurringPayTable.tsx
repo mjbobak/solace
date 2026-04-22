@@ -180,10 +180,10 @@ export function RecurringPayTable({
                         </div>
                       </td>
                       <td className="table-cell px-4 py-2">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1">
                           <button
                             type="button"
-                            className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-white"
+                            className="table-action-button table-action-button-edit"
                             onClick={() => onEditVersion(component, version)}
                             title={`Edit ${getComponentDisplayName(
                               component,
@@ -196,7 +196,7 @@ export function RecurringPayTable({
                           </button>
                           <button
                             type="button"
-                            className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-white"
+                            className="table-action-button table-action-button-delete"
                             onClick={() => onDeleteVersion(component, version)}
                             title={`Delete ${getComponentDisplayName(
                               component,

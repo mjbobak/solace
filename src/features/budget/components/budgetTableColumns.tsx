@@ -206,10 +206,10 @@ export function getBudgetTableColumns(
       key: 'actions',
       header: 'Actions',
       accessor: (row) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-end gap-1">
           <button
             onClick={() => handleEdit(row)}
-            className="inline-flex items-center justify-center p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+            className="table-action-button table-action-button-edit"
             title="Edit budget item"
             aria-label={`Edit ${row.expenseLabel}`}
           >
@@ -217,7 +217,7 @@ export function getBudgetTableColumns(
           </button>
           <button
             onClick={() => handleDelete(row.id)}
-            className="inline-flex items-center justify-center p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            className="table-action-button table-action-button-delete"
             title="Delete budget item"
             aria-label={`Delete ${row.expenseLabel}`}
           >
@@ -226,8 +226,10 @@ export function getBudgetTableColumns(
         </div>
       ),
       sortable: false,
-      align: 'center',
-      width: '100px',
+      align: 'right',
+      width: '72px',
+      headerClassName: 'pr-4',
+      cellClassName: 'pr-4',
     },
   ];
 }

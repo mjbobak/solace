@@ -71,10 +71,10 @@ export function BonusEventsTable({
                   {formatWholeCurrency(occurrence.netAmount)}
                 </td>
                 <td className="table-cell px-4 py-3">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-1">
                     <button
                       type="button"
-                      className="icon-button rounded-full border border-app p-2 text-app transition-colors hover:bg-gray-50"
+                      className="table-action-button table-action-button-edit"
                       onClick={() => onEditBonus(component, occurrence)}
                       title={`Edit ${getComponentDisplayName(component)} event`}
                       aria-label={`Edit ${getComponentDisplayName(
@@ -85,7 +85,7 @@ export function BonusEventsTable({
                     </button>
                     <button
                       type="button"
-                      className="icon-button rounded-full border border-app p-2 text-danger transition-colors hover:bg-red-50"
+                      className="table-action-button table-action-button-delete"
                       onClick={() => onDeleteBonus(component, occurrence)}
                       title={`Delete ${getComponentDisplayName(
                         component,

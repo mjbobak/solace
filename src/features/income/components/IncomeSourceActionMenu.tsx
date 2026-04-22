@@ -42,7 +42,7 @@ export function IncomeSourceActionMenu({
     >
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-4 py-3 text-sm text-app transition-colors hover:bg-gray-50"
+        className="menu-action-item menu-action-item-edit"
         onClick={() => {
           onClose();
           onRename(source);
@@ -54,7 +54,7 @@ export function IncomeSourceActionMenu({
       </button>
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-4 py-3 text-sm text-app transition-colors hover:bg-gray-50"
+        className="menu-action-item text-app hover:bg-gray-50"
         onClick={() => {
           onClose();
           onAddBonus(source);
@@ -66,7 +66,7 @@ export function IncomeSourceActionMenu({
       </button>
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-4 py-3 text-sm text-danger transition-colors hover:bg-red-50"
+        className="menu-action-item menu-action-item-delete"
         onClick={() => {
           onClose();
           onDelete(source);
