@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { budgetSummaryTheme } from '@/shared/theme';
 
 export type IncomeAllocationBucketId =
   | 'essential'
@@ -35,9 +37,14 @@ interface IncomeAllocationWaterfallChartProps {
   totalActionLabel?: string;
 }
 
-const TOTAL_BAR_CLASS = 'bg-[#cddafd]';
+const TOTAL_BAR_CLASS = budgetSummaryTheme.allocationBlue;
+const TRACK_CLASS_NAME = 'border border-slate-200/80 bg-slate-100';
+const VALUE_PILL_CLASS_NAME =
+  'inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg bg-white/95 px-2.5 py-1 shadow-md ring-1 ring-slate-200/80';
 const INSIDE_LABEL_MIN_WIDTH_PERCENT = 8;
 const OUTSIDE_LABEL_GAP_PX = 8;
+const MONTHLY_LABEL_MIN_WIDTH_PX = 148;
+const ANNUAL_LABEL_MIN_WIDTH_PX = 176;
 
 function sanitizeAmount(amount: number): number {
   if (!Number.isFinite(amount) || amount <= 0) {
@@ -85,6 +92,49 @@ function buildSteps(
   });
 }
 
+function getLabelPlacement({
+  leftPercent,
+  widthPercent,
+  trackWidth,
+  valueDisplayPeriod,
+}: {
+  leftPercent: number;
+  widthPercent: number;
+  trackWidth: number | null;
+  valueDisplayPeriod: 'monthly' | 'annual';
+}): 'inside' | 'outside-left' | 'outside-right' {
+  if (trackWidth == null || trackWidth <= 0) {
+    return widthPercent >= INSIDE_LABEL_MIN_WIDTH_PERCENT
+      ? 'inside'
+      : leftPercent + widthPercent > 82
+        ? 'outside-left'
+        : 'outside-right';
+  }
+
+  const minimumLabelWidth =
+    valueDisplayPeriod === 'annual'
+      ? ANNUAL_LABEL_MIN_WIDTH_PX
+      : MONTHLY_LABEL_MIN_WIDTH_PX;
+  const segmentWidth = (trackWidth * widthPercent) / 100;
+  const leftSpace = (trackWidth * leftPercent) / 100;
+  const rightSpace = trackWidth - leftSpace - segmentWidth;
+  const outsideRoomRequired = minimumLabelWidth + OUTSIDE_LABEL_GAP_PX;
+
+  if (segmentWidth >= minimumLabelWidth) {
+    return 'inside';
+  }
+
+  if (leftSpace >= outsideRoomRequired) {
+    return 'outside-left';
+  }
+
+  if (rightSpace >= outsideRoomRequired) {
+    return 'outside-left';
+  }
+
+  return segmentWidth >= minimumLabelWidth * 0.8 ? 'inside' : 'outside-left';
+}
+
 function renderBarValueContent(
   amount: number,
   valueDisplayPeriod: 'monthly' | 'annual',
@@ -99,12 +149,11 @@ function renderBarValueContent(
   const containerClassName = isInside
     ? 'pointer-events-none absolute inset-y-0.5 flex items-center px-3'
     : 'pointer-events-none absolute inset-y-1/2 z-10 flex -translate-y-1/2 items-center';
-  const labelClassName =
-    'inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg bg-white px-2.5 py-1 shadow-sm';
-  const amountClassName = 'text-[11px] font-semibold text-slate-800';
+  const labelClassName = VALUE_PILL_CLASS_NAME;
+  const amountClassName = 'text-[11px] font-semibold text-slate-900';
   const periodClassName = isInside
-    ? 'text-[10px] font-medium text-slate-600'
-    : 'text-[10px] font-medium text-slate-500';
+    ? 'text-[10px] font-semibold text-slate-600'
+    : 'text-[10px] font-semibold text-slate-500';
   const placementStyle =
     placement === 'outside-right'
       ? { left: `calc(100% + ${OUTSIDE_LABEL_GAP_PX}px)` }
@@ -144,6 +193,8 @@ export const IncomeAllocationWaterfallChart: React.FC<
   onTotalSelect,
   totalActionLabel,
 }) => {
+  const totalTrackRef = useRef<HTMLDivElement | null>(null);
+  const [trackWidth, setTrackWidth] = useState<number | null>(null);
   const safeTotalAmount = sanitizeAmount(totalAmount);
   const positionedSteps = buildSteps(steps);
   const stackedAllocation = positionedSteps.reduce(
@@ -152,6 +203,36 @@ export const IncomeAllocationWaterfallChart: React.FC<
   );
   const scaleMax = Math.max(safeTotalAmount, stackedAllocation, 1);
   const overAllocatedAmount = Math.max(stackedAllocation - safeTotalAmount, 0);
+
+  useEffect(() => {
+    const node = totalTrackRef.current;
+
+    if (node == null) {
+      return;
+    }
+
+    const updateTrackWidth = () => {
+      const nextWidth = node.getBoundingClientRect().width;
+      setTrackWidth((currentWidth) =>
+        currentWidth === nextWidth ? currentWidth : nextWidth,
+      );
+    };
+
+    updateTrackWidth();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      updateTrackWidth();
+    });
+
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   if (safeTotalAmount === 0 && stackedAllocation === 0) {
     return (
@@ -169,12 +250,12 @@ export const IncomeAllocationWaterfallChart: React.FC<
         {positionedSteps.map((step) => {
           const leftPercent = (step.offset / scaleMax) * 100;
           const widthPercent = (step.amount / scaleMax) * 100;
-          const labelPlacement: 'inside' | 'outside-left' | 'outside-right' =
-            widthPercent >= INSIDE_LABEL_MIN_WIDTH_PERCENT
-              ? 'inside'
-              : leftPercent + widthPercent > 82
-                ? 'outside-left'
-                : 'outside-right';
+          const labelPlacement = getLabelPlacement({
+            leftPercent,
+            widthPercent,
+            trackWidth,
+            valueDisplayPeriod,
+          });
           const isInteractive =
             step.isInteractive === true &&
             step.bucketId != null &&
@@ -195,10 +276,12 @@ export const IncomeAllocationWaterfallChart: React.FC<
                 </p>
               </div>
 
-              <div className="relative h-10 overflow-hidden rounded-2xl border border-white/70 bg-slate-100/90">
+              <div
+                className={`relative h-10 overflow-hidden rounded-2xl ${TRACK_CLASS_NAME}`}
+              >
                 <div
                   aria-label={`${step.label} waterfall segment`}
-                  className={`absolute inset-y-0.5 rounded-xl shadow-sm ${step.fillClassName}`}
+                  className={`absolute inset-y-0.5 rounded-xl shadow-md ${step.fillClassName}`}
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
@@ -238,10 +321,13 @@ export const IncomeAllocationWaterfallChart: React.FC<
             <p className="mt-1 text-xs text-muted">100%</p>
           </div>
 
-          <div className="relative h-10 overflow-hidden rounded-2xl border border-white/70 bg-slate-100/90">
+          <div
+            ref={totalTrackRef}
+            className={`relative h-10 overflow-hidden rounded-2xl ${TRACK_CLASS_NAME}`}
+          >
             <div
               aria-label={totalBarAriaLabel ?? `${totalLabel} waterfall segment`}
-              className={`absolute inset-y-0.5 left-0 rounded-xl shadow-sm ${TOTAL_BAR_CLASS}`}
+              className={`absolute inset-y-0.5 left-0 rounded-xl shadow-md ${TOTAL_BAR_CLASS}`}
               style={{
                 width: `${(safeTotalAmount / scaleMax) * 100}%`,
               }}

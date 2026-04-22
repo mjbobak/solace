@@ -53,12 +53,13 @@ export const chartTheme = {
 } as const;
 
 export const budgetSummaryTheme = {
-  allocationBlue: 'bg-[#7BB6EB]',
-  allocationGreen: 'bg-[#97DDAA]',
+  allocationBlue: 'bg-[#8EC8F4]',
+  allocationBlueStrong: 'bg-[#3B82D6]',
+  allocationGreen: 'bg-[#6FC8BE]',
   allocationOrange: 'bg-[#F2A36B]',
-  allocationPurple: 'bg-[#A890E6]',
-  allocationPurpleText: 'text-[#7B63C8]',
-  allocationPurpleTextMuted: 'text-[#7B63C8]/75',
+  allocationPurple: 'bg-[#8F74DD]',
+  allocationPurpleText: 'text-[#6F56C5]',
+  allocationPurpleTextMuted: 'text-[#6F56C5]/75',
   iconContainer:
     'rounded-lg bg-gradient-to-br from-sky-50 to-slate-100 p-2',
   icon: 'h-4 w-4 text-slate-500',

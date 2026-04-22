@@ -38,7 +38,8 @@ interface AllocationTotals {
   totalBudgeted: number;
 }
 
-const INVESTMENT_BAR_CLASS = 'bg-[#edafb8]';
+const ESSENTIAL_BAR_CLASS = 'bg-[#586FD1]';
+const INVESTMENT_BAR_CLASS = 'bg-[#E29AA8]';
 const DETAIL_GROUPING_OPTIONS: { value: DetailGrouping; label: string }[] = [
   { value: 'categories', label: 'Categories' },
   { value: 'labels', label: 'Labels' },
@@ -50,7 +51,7 @@ const BUCKET_CONFIG: Record<
 > = {
   essential: {
     label: 'Essential',
-    fillClassName: budgetSummaryTheme.allocationBlue,
+    fillClassName: ESSENTIAL_BAR_CLASS,
   },
   funsies: {
     label: 'Funsies',

@@ -3,11 +3,12 @@ import React from 'react';
 import { Tooltip } from '@/shared/components/Tooltip';
 
 import {
+  amountPillClassName,
   compactCardContentHeight,
   formatWholeCurrency,
   getBarTooltipContent,
   paletteBlue,
-  paletteGreen,
+  paletteBlueStrong,
   pillLabelTextClass,
   pillValueTextClass,
 } from './constants';
@@ -41,12 +42,14 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
   const remainingSummary = formatWholeCurrency(remainingBudgetForChart);
   const isOverBudget = remainingTotal < 0;
   const overBudgetSummary = formatWholeCurrency(Math.abs(remainingTotal));
+  const spentFillWidth =
+    spentWidth > 0 ? `max(0px, calc(${spentWidth}% - 4px))` : '0%';
   const remainingOverlay = isOverBudget ? (
     <span className="truncate text-[13px] font-semibold uppercase tracking-[0.14em] text-red-600">
       {`${overBudgetSummary} over`}
     </span>
   ) : (
-    <span className="flex min-w-0 items-baseline gap-2 truncate">
+    <span className={`${amountPillClassName} flex min-w-0 max-w-full truncate`}>
       <span
         className={`truncate text-[13px] font-semibold tracking-[0.02em] ${pillValueTextClass}`}
       >
@@ -79,14 +82,16 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
       </div>
 
       <div className="mt-2">
-        <div className="relative h-10 overflow-hidden rounded-full bg-slate-100">
-          <div className={`absolute inset-0 overflow-hidden rounded-full ${paletteBlue}`} />
+        <div className="relative h-10 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100">
+          <div className={`absolute inset-0 overflow-hidden rounded-2xl ${paletteBlue}`} />
           <div
-            className={`absolute inset-y-0 left-0 overflow-hidden rounded-full ${paletteGreen}`}
-            style={{ width: `${spentWidth}%` }}
+            className={`absolute inset-y-0.5 left-0.5 overflow-hidden rounded-xl shadow-md ${paletteBlueStrong}`}
+            style={{ width: spentFillWidth }}
           >
             <div className="pointer-events-none flex h-full items-center pl-3">
-              <span className="flex min-w-0 items-baseline gap-2 truncate">
+              <span
+                className={`${amountPillClassName} flex min-w-0 max-w-full truncate`}
+              >
                 <span
                   className={`truncate text-[13px] font-semibold tracking-[0.02em] ${pillValueTextClass}`}
                 >
@@ -116,7 +121,7 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
               followCursor
             >
               <div
-                className="absolute inset-y-0 left-0 cursor-pointer rounded-full"
+                className="absolute inset-y-0.5 left-0 cursor-pointer rounded-xl"
                 style={{ width: `${spentWidth}%` }}
                 aria-label="Spent portion"
               />
@@ -135,7 +140,7 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
               followCursor
             >
               <div
-                className="absolute inset-y-0 cursor-pointer"
+                className="absolute inset-y-0.5 cursor-pointer rounded-xl"
                 style={{ left: `${spentWidth}%`, width: `${remainingWidth}%` }}
                 aria-label="Remaining budget portion"
               />
