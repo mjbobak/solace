@@ -733,8 +733,25 @@ body {
   }
 
   .app-nav {
-    @apply fixed left-0 right-0 top-0 z-50 flex min-h-16 flex-wrap items-center gap-4 px-6 py-2 transition-all duration-200;
+    @apply fixed left-0 right-0 top-0 z-50 flex min-h-16 flex-wrap items-center gap-4 px-6 py-2;
     color: var(--color-text);
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      backdrop-filter 180ms ease;
+  }
+
+  .app-nav::after {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--color-border) 72%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
   }
 
   .app-nav-brand {
@@ -759,9 +776,13 @@ body {
       var(--color-surface-elevated) 86%,
       transparent
     );
-    border-bottom: 1px solid
-      color-mix(in srgb, var(--color-border) 72%, transparent);
     backdrop-filter: blur(18px);
+    box-shadow: 0 12px 32px -28px
+      color-mix(in srgb, var(--color-text) 48%, transparent);
+  }
+
+  .app-nav-scrolled::after {
+    opacity: 1;
   }
 
   .app-nav-link {

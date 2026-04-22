@@ -35,11 +35,19 @@ export const TopNav: React.FC<TopNavProps> = ({
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
+    const scrollThreshold = 8;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
+      const nextIsScrolled = window.scrollY > scrollThreshold;
+      setIsScrolled((currentIsScrolled) =>
+        currentIsScrolled === nextIsScrolled
+          ? currentIsScrolled
+          : nextIsScrolled
+      );
     };
 
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
