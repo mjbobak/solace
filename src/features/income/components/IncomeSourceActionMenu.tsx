@@ -54,7 +54,7 @@ export function IncomeSourceActionMenu({
       </button>
       <button
         type="button"
-        className="menu-action-item text-app hover:bg-gray-50"
+        className="menu-action-item menu-action-item-primary"
         onClick={() => {
           onClose();
           onAddBonus(source);

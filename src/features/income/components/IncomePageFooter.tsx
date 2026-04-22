@@ -129,11 +129,11 @@ export function IncomePageFooter({
 
           <Button
             type="button"
-            variant="secondary"
-            className="shrink-0 px-4 py-2 text-xs"
+            variant="primary"
+            className="button-primary-small shrink-0"
             onClick={(e) => togglePopover('adj', e)}
           >
-            <LuPencil className="h-4 w-4" />
+            <LuPencil className="h-3.5 w-3.5" />
             Manage
           </Button>
 
@@ -209,7 +209,7 @@ export function IncomePageFooter({
 
               <div className="border-t border-surface-border px-4 py-2.5">
                 <button
-                  className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 hover:text-teal-700 hover:underline"
+                  className="income-action-link"
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpenPopover(null);
@@ -247,11 +247,11 @@ export function IncomePageFooter({
 
           <Button
             type="button"
-            variant="secondary"
-            className="shrink-0 px-4 py-2 text-xs"
+            variant="primary"
+            className="button-primary-small shrink-0"
             onClick={(e) => togglePopover('tax', e)}
           >
-            <LuPencil className="h-4 w-4" />
+            <LuPencil className="h-3.5 w-3.5" />
             Edit Buckets
           </Button>
 
@@ -299,8 +299,8 @@ export function IncomePageFooter({
               <div className="flex justify-end border-t border-surface-border px-4 py-2.5">
                 <Button
                   type="button"
-                  variant="secondary"
-                  className="px-3 py-1.5 text-xs"
+                  variant="primary"
+                  className="income-action-button-compact"
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpenPopover(null);

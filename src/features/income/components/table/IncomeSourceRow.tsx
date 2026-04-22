@@ -164,8 +164,8 @@ export function IncomeSourceRow({
                     </button>
                   </div>
                   <Button
-                    variant="secondary"
-                    className="px-3 py-2 text-xs"
+                    variant="primary"
+                    className="income-action-button-compact"
                     onClick={handleAddEvent}
                     disabled={
                       activeTab === 'recurring' && !activeRecurringComponent

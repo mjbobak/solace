@@ -73,7 +73,11 @@ export function TaxAdvantagedBucketsSection({
               </p>
             </div>
           </div>
-          <Button variant="secondary" onClick={onEdit}>
+          <Button
+            variant="primary"
+            className="button-primary-small"
+            onClick={onEdit}
+          >
             Edit Buckets
           </Button>
         </div>
