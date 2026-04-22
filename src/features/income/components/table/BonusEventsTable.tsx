@@ -39,12 +39,18 @@ export function BonusEventsTable({
 
   return (
     <div className="table-shell">
-      <table className="table-base">
+      <table className="table-base w-full table-fixed">
+        <colgroup>
+          <col className="w-[20%]" />
+          <col className="w-[24%]" />
+          <col className="w-[42%]" />
+          <col className="w-[14%]" />
+        </colgroup>
         <thead className="table-head">
           <tr>
             <th className="table-header-cell text-left">Bonus</th>
             <th className="table-header-cell text-left">Event Date</th>
-            <th className="table-header-cell text-right">Cash Net</th>
+            <th className="table-header-cell text-left">Cash Net</th>
             <th className="table-header-cell text-right">Actions</th>
           </tr>
         </thead>
@@ -61,7 +67,7 @@ export function BonusEventsTable({
                 <td className="table-cell px-4 py-3 text-muted">
                   {formatDate(getOccurrenceEventDate(occurrence))}
                 </td>
-                <td className="table-cell px-4 py-3 text-right font-semibold text-app">
+                <td className="table-cell px-4 py-3 font-semibold text-app">
                   {formatWholeCurrency(occurrence.netAmount)}
                 </td>
                 <td className="table-cell px-4 py-3">

@@ -59,12 +59,18 @@ export function RecurringPayTable({
 
   return (
     <div className="table-shell">
-      <table className="table-base">
+      <table className="table-base w-full table-fixed">
+        <colgroup>
+          <col className="w-[20%]" />
+          <col className="w-[24%]" />
+          <col className="w-[42%]" />
+          <col className="w-[14%]" />
+        </colgroup>
         <thead className="table-head">
           <tr>
             <th className="table-header-cell text-left">Component</th>
             <th className="table-header-cell text-left">Active Range</th>
-            <th className="table-header-cell text-right">Paycheck Value</th>
+            <th className="table-header-cell text-left">Paycheck Value</th>
             <th className="table-header-cell text-right">Actions</th>
           </tr>
         </thead>
@@ -75,7 +81,11 @@ export function RecurringPayTable({
 
             return (
               <React.Fragment key={component.id}>
-                <tr className="table-row align-top">
+                <tr
+                  className={`table-row align-top ${
+                    hasHistory ? 'income-current-row-with-history' : ''
+                  }`}
+                >
                   <td className="table-cell px-4 py-3 font-medium text-app">
                     {getComponentDisplayName(component)}
                   </td>
@@ -86,8 +96,8 @@ export function RecurringPayTable({
                         )} to ${formatDate(component.currentVersion.endDate)}`
                       : 'No active version'}
                   </td>
-                  <td className="table-cell px-4 py-3 text-right text-app">
-                    <div className="flex flex-col items-end gap-1.5">
+                  <td className="table-cell px-4 py-3 text-app">
+                    <div className="flex flex-col gap-1.5">
                       <span className="flex items-baseline gap-1.5">
                         <span>
                           {component.currentVersion
@@ -120,13 +130,14 @@ export function RecurringPayTable({
                   <td className="table-cell px-4 py-3" />
                 </tr>
                 {hasHistory && (
-                  <tr className="table-row table-row-striped">
+                  <tr className="table-row income-history-toggle-row">
                     <td colSpan={4} className="table-cell px-4 py-2">
                       <div className="flex justify-center">
                         <button
                           type="button"
-                          className="text-xs font-medium text-muted transition-colors hover:text-app"
+                          className="income-history-toggle"
                           onClick={() => toggleHistory(component.id)}
+                          aria-expanded={isHistoryExpanded}
                         >
                           {isHistoryExpanded ? 'Hide History' : 'Show History'}
                         </button>
@@ -138,15 +149,17 @@ export function RecurringPayTable({
                   component.versions.map((version) => (
                     <tr
                       key={version.id}
-                      className="table-row table-row-striped text-xs text-gray-400/80"
+                      className="table-row income-history-row text-xs"
                     >
-                      <td className="table-cell px-4 py-2 pl-10">History</td>
-                      <td className="table-cell px-4 py-2">
+                      <td className="table-cell px-4 py-2 pl-10 text-muted">
+                        History
+                      </td>
+                      <td className="table-cell px-4 py-2 text-muted">
                         {formatDate(version.startDate)} to{' '}
                         {formatDate(version.endDate)}
                       </td>
-                      <td className="table-cell px-4 py-2 text-right">
-                        <div className="flex flex-col items-end gap-1">
+                      <td className="table-cell px-4 py-2 text-app">
+                        <div className="flex flex-col gap-1">
                           <span className="flex items-baseline gap-1.5">
                             <span>{formatWholeCurrency(version.grossAmount)}</span>
                             <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">

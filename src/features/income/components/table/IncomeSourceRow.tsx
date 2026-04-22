@@ -140,10 +140,10 @@ export function IncomeSourceRow({
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      className={`border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors ${
+                      className={`income-detail-tab ${
                         activeTab === 'recurring'
-                          ? 'border-teal-500 text-teal-600'
-                          : 'border-transparent text-muted hover:text-app'
+                          ? 'income-detail-tab-active'
+                          : 'income-detail-tab-inactive'
                       }`}
                       onClick={() => setActiveTab('recurring')}
                       aria-pressed={activeTab === 'recurring'}
@@ -152,10 +152,10 @@ export function IncomeSourceRow({
                     </button>
                     <button
                       type="button"
-                      className={`inline-flex items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors ${
+                      className={`inline-flex items-center gap-2 income-detail-tab ${
                         activeTab === 'bonus'
-                          ? 'border-teal-500 text-teal-600'
-                          : 'border-transparent text-muted hover:text-app'
+                          ? 'income-detail-tab-active'
+                          : 'income-detail-tab-inactive'
                       }`}
                       onClick={() => setActiveTab('bonus')}
                       aria-pressed={activeTab === 'bonus'}
