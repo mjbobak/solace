@@ -23,6 +23,7 @@ interface IncomeSourcesTableProps {
     component: ProjectedIncomeComponent,
     version: RecurringIncomeVersion,
   ) => void;
+  onAddBonus: (source: ProjectedIncomeSource) => void;
   onDeleteVersion: (
     component: ProjectedIncomeComponent,
     version: RecurringIncomeVersion,
@@ -49,6 +50,7 @@ export function IncomeSourcesTable({
   onToggleActionMenu,
   onAddVersion,
   onEditVersion,
+  onAddBonus,
   onDeleteVersion,
   onMarkActual,
   onEditBonus,
@@ -117,6 +119,7 @@ export function IncomeSourcesTable({
                 }
                 onAddVersion={onAddVersion}
                 onEditVersion={onEditVersion}
+                onAddBonus={onAddBonus}
                 onDeleteVersion={onDeleteVersion}
                 onMarkActual={onMarkActual}
                 onEditBonus={onEditBonus}

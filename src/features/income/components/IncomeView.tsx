@@ -95,6 +95,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
           onToggleActionMenu={toggleActionMenu}
           onAddVersion={openAddVersionModal}
           onEditVersion={openEditVersionModal}
+          onAddBonus={openAddBonusModal}
           onDeleteVersion={(component, version) => {
             void handleDeleteVersion(component, version);
           }}

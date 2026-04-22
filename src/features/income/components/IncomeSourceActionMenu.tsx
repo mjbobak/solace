@@ -62,7 +62,7 @@ export function IncomeSourceActionMenu({
         role="menuitem"
       >
         <LuPlus className="h-4 w-4" />
-        Add Bonus
+        Add Event
       </button>
       <button
         type="button"

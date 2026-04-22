@@ -267,6 +267,10 @@ describe('IncomeView', () => {
     expect(recurringPayHeading).toBeInTheDocument();
     expect(screen.getByText('Current Cash Pay')).toBeInTheDocument();
     expect(screen.getByText('Planned Cash Net')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Bonus Events 1' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add Event' })).toBeInTheDocument();
 
     const expandedCell = recurringPayHeading.closest('td');
     expect(expandedCell).toHaveAttribute('colspan', '4');
@@ -285,6 +289,11 @@ describe('IncomeView', () => {
       'Net',
       '',
     ]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bonus Events 1' }));
+
+    expect(await screen.findByText('Mark Actual')).toBeInTheDocument();
+    expect(screen.queryByText('Current Cash Pay')).not.toBeInTheDocument();
   });
 
   it('opens the add income modal through the imperative handle', async () => {

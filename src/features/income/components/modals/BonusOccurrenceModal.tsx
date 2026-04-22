@@ -116,7 +116,7 @@ export function BonusOccurrenceModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Edit Bonus Event' : 'Add Bonus'}
+      title={isEditing ? 'Edit Bonus Event' : 'Add Event'}
     >
       <div className="space-y-4">
         {!isEditing && (
@@ -227,7 +227,7 @@ export function BonusOccurrenceModal({
               !label.trim() || !grossAmount || !netAmount || !plannedDate
             }
           >
-            {isEditing ? 'Save Changes' : 'Save Bonus'}
+            {isEditing ? 'Save Changes' : 'Save Event'}
           </Button>
         </div>
       </div>

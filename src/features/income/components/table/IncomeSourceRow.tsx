@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LuChevronDown, LuChevronRight, LuEllipsis } from 'react-icons/lu';
 
+import { Button } from '@/shared/components/Button';
 import type {
   IncomeOccurrence,
   ProjectedIncomeComponent,
@@ -23,6 +24,7 @@ interface IncomeSourceRowProps {
     component: ProjectedIncomeComponent,
     version: RecurringIncomeVersion,
   ) => void;
+  onAddBonus: (source: ProjectedIncomeSource) => void;
   onDeleteVersion: (
     component: ProjectedIncomeComponent,
     version: RecurringIncomeVersion,
@@ -46,17 +48,37 @@ export function IncomeSourceRow({
   onToggleActionMenu,
   onAddVersion,
   onEditVersion,
+  onAddBonus,
   onDeleteVersion,
   onMarkActual,
   onEditBonus,
   onDeleteBonus,
 }: IncomeSourceRowProps) {
+  const [activeTab, setActiveTab] = useState<'recurring' | 'bonus'>(
+    'recurring',
+  );
   const recurringComponents = source.components.filter(
     (component) => component.componentMode === 'recurring',
   );
   const bonusComponents = source.components.filter(
     (component) => component.componentMode === 'occurrence',
   );
+  const activeRecurringComponent = recurringComponents[0] ?? null;
+  const bonusCount = bonusComponents.reduce(
+    (count, component) => count + component.occurrences.length,
+    0,
+  );
+
+  const handleAddEvent = () => {
+    if (activeTab === 'bonus') {
+      onAddBonus(source);
+      return;
+    }
+
+    if (activeRecurringComponent) {
+      onAddVersion(activeRecurringComponent);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -118,36 +140,67 @@ export function IncomeSourceRow({
       {isExpanded && (
         <tr className="border-b section-divider bg-gray-50/40">
           <td colSpan={4} className="px-6 py-5">
-            <div className="space-y-5">
-              <div>
-                <div className="mb-3 flex items-center justify-between pl-10">
-                  <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
-                    Recurring Pay
-                  </h4>
+            <div className="pl-10">
+              <div className="overflow-hidden rounded-2xl border border-app bg-white shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+                <div className="border-b section-divider bg-gray-50/70 px-5 py-4">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        className={`border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors ${
+                          activeTab === 'recurring'
+                            ? 'border-teal-500 text-teal-600'
+                            : 'border-transparent text-muted hover:text-app'
+                        }`}
+                        onClick={() => setActiveTab('recurring')}
+                        aria-pressed={activeTab === 'recurring'}
+                      >
+                        Recurring Pay
+                      </button>
+                      <button
+                        type="button"
+                        className={`inline-flex items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors ${
+                          activeTab === 'bonus'
+                            ? 'border-teal-500 text-teal-600'
+                            : 'border-transparent text-muted hover:text-app'
+                        }`}
+                        onClick={() => setActiveTab('bonus')}
+                        aria-pressed={activeTab === 'bonus'}
+                      >
+                        <span>Bonus Events</span>
+                        <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-muted">
+                          {bonusCount}
+                        </span>
+                      </button>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      className="px-3 py-2 text-xs"
+                      onClick={handleAddEvent}
+                      disabled={
+                        activeTab === 'recurring' && !activeRecurringComponent
+                      }
+                    >
+                      Add Event
+                    </Button>
+                  </div>
                 </div>
-                <div className="pl-10">
-                  <RecurringPayTable
-                    components={recurringComponents}
-                    onAddVersion={onAddVersion}
-                    onEditVersion={onEditVersion}
-                    onDeleteVersion={onDeleteVersion}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-3 flex items-center justify-between pl-10">
-                  <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
-                    Bonus Events
-                  </h4>
-                </div>
-                <div className="pl-10">
-                  <BonusEventsTable
-                    components={bonusComponents}
-                    onMarkActual={onMarkActual}
-                    onEditBonus={onEditBonus}
-                    onDeleteBonus={onDeleteBonus}
-                  />
+                <div className="p-5">
+                  {activeTab === 'recurring' ? (
+                    <RecurringPayTable
+                      components={recurringComponents}
+                      onAddVersion={onAddVersion}
+                      onEditVersion={onEditVersion}
+                      onDeleteVersion={onDeleteVersion}
+                    />
+                  ) : (
+                    <BonusEventsTable
+                      components={bonusComponents}
+                      onMarkActual={onMarkActual}
+                      onEditBonus={onEditBonus}
+                      onDeleteBonus={onDeleteBonus}
+                    />
+                  )}
                 </div>
               </div>
             </div>

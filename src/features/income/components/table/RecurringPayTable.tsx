@@ -80,7 +80,7 @@ export function RecurringPayTable({
                       className="px-3 py-2 text-xs"
                       onClick={() => onAddVersion(component)}
                     >
-                      Add Promotion
+                      Add Event
                     </Button>
                   </div>
                 </td>
