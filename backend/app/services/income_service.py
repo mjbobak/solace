@@ -291,15 +291,11 @@ class IncomeService:
         self._ensure_component_mode(component, expected_mode="occurrence")
         self._validate_amounts(occurrence_in.gross_amount, occurrence_in.net_amount)
 
-        paid_date = occurrence_in.paid_date
-        if occurrence_in.status == "expected":
-            paid_date = None
-        elif paid_date is None:
-            paid_date = occurrence_in.planned_date
+        paid_date = occurrence_in.paid_date or occurrence_in.planned_date
 
         occurrence = IncomeOccurrence(
             component_id=component_id,
-            status=occurrence_in.status,
+            status="actual",
             planned_date=occurrence_in.planned_date,
             paid_date=paid_date,
             gross_amount=occurrence_in.gross_amount,
@@ -320,9 +316,8 @@ class IncomeService:
         for field, value in updates.items():
             setattr(occurrence, field, value)
 
-        if occurrence.status == "expected":
-            occurrence.paid_date = None
-        elif occurrence.paid_date is None:
+        occurrence.status = "actual"
+        if occurrence.paid_date is None:
             occurrence.paid_date = occurrence.planned_date
 
         self.db.commit()
@@ -555,7 +550,7 @@ class IncomeService:
                 component_totals,
                 gross=occurrence.gross_amount,
                 net=occurrence.net_amount,
-                include_in_committed=occurrence.status == "actual",
+                include_in_committed=True,
             )
 
         return ProjectedIncomeComponentResponse(
@@ -797,7 +792,6 @@ class IncomeService:
         return IncomeOccurrenceResponse(
             id=occurrence.id,
             component_id=occurrence.component_id,
-            status=occurrence.status,
             planned_date=occurrence.planned_date,
             paid_date=occurrence.paid_date,
             gross_amount=occurrence.gross_amount,

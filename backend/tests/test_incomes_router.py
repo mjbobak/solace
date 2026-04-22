@@ -67,7 +67,6 @@ def create_occurrence(
     client,
     component_id: int,
     *,
-    status: str,
     planned_date: str,
     gross_amount: float,
     net_amount: float,
@@ -76,7 +75,6 @@ def create_occurrence(
     response = client.post(
         f"/api/incomes/components/{component_id}/occurrences",
         json={
-            "status": status,
             "planned_date": planned_date,
             "paid_date": paid_date,
             "gross_amount": gross_amount,
@@ -205,7 +203,6 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     create_occurrence(
         client,
         bonus_a["id"],
-        status="actual",
         planned_date="2026-03-15",
         paid_date="2026-03-20",
         gross_amount=10000,
@@ -214,7 +211,6 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     create_occurrence(
         client,
         bonus_a["id"],
-        status="expected",
         planned_date="2026-12-15",
         gross_amount=8000,
         net_amount=5600,
@@ -244,13 +240,15 @@ def test_income_projection_rolls_up_source_component_and_bonus_totals(client):
     assert projection["sources"][0]["name"] == "Acme Corp"
     assert len(projection["sources"][0]["components"]) == 2
 
-    expected_committed_net = (6000 * 12) + (4000 * 12) + 7000
-    expected_planned_net = expected_committed_net + 5600
+    expected_committed_net = (6000 * 12) + (4000 * 12) + 7000 + 5600
+    expected_planned_net = expected_committed_net
 
     assert projection["totals"]["committed_cash_net"] == expected_committed_net
     assert projection["totals"]["committed_net"] == expected_committed_net
     assert projection["totals"]["planned_cash_net"] == expected_planned_net
     assert projection["totals"]["planned_net"] == expected_planned_net
+    assert projection["sources"][0]["totals"]["committed_cash_net"] == (6000 * 12) + 7000 + 5600
+    assert projection["sources"][0]["totals"]["committed_net"] == (6000 * 12) + 7000 + 5600
     assert projection["sources"][0]["totals"]["planned_cash_net"] == (6000 * 12) + 7000 + 5600
     assert projection["sources"][0]["totals"]["planned_net"] == (6000 * 12) + 7000 + 5600
     assert projection["sources"][1]["totals"]["planned_cash_net"] == 4000 * 12
@@ -659,8 +657,8 @@ def test_recurring_version_allows_net_greater_than_gross_for_reimbursements(clie
     assert response.json()["net_amount"] == 250
 
 
-def test_expected_bonus_moves_from_planned_only_to_committed_when_marked_actual(client):
-    """Updating an expected bonus to actual moves its value into committed totals."""
+def test_bonus_occurrence_counts_in_committed_and_planned_totals(client):
+    """Bonus occurrences are always treated as actual income."""
     source = create_source(client, "Acme Corp")
     component = create_component(
         client,
@@ -673,26 +671,16 @@ def test_expected_bonus_moves_from_planned_only_to_committed_when_marked_actual(
     occurrence = create_occurrence(
         client,
         component["id"],
-        status="expected",
         planned_date="2026-12-15",
         gross_amount=5000,
         net_amount=3500,
     )
 
-    before_update = get_projection(client, 2026)
-    assert before_update["totals"]["committed_net"] == 0
-    assert before_update["totals"]["planned_net"] == 3500
+    assert occurrence["paid_date"] == "2026-12-15"
 
-    response = client.put(
-        f"/api/incomes/occurrences/{occurrence['id']}",
-        json={"status": "actual", "paid_date": "2026-12-20"},
-    )
-    assert response.status_code == 200
-    assert response.json()["status"] == "actual"
-
-    after_update = get_projection(client, 2026)
-    assert after_update["totals"]["committed_net"] == 3500
-    assert after_update["totals"]["planned_net"] == 3500
+    projection = get_projection(client, 2026)
+    assert projection["totals"]["committed_net"] == 3500
+    assert projection["totals"]["planned_net"] == 3500
 
 
 def test_zero_amount_bonus_occurrence_is_returned_in_projection_without_error(client):
@@ -709,7 +697,6 @@ def test_zero_amount_bonus_occurrence_is_returned_in_projection_without_error(cl
     response = client.post(
         f"/api/incomes/components/{component['id']}/occurrences",
         json={
-            "status": "expected",
             "planned_date": "2026-12-15",
             "gross_amount": 0,
             "net_amount": 0,
@@ -807,7 +794,6 @@ def test_bonus_occurrence_can_be_updated_and_projection_reflects_new_values(clie
     occurrence = create_occurrence(
         client,
         component["id"],
-        status="expected",
         planned_date="2026-12-15",
         gross_amount=5000,
         net_amount=3500,
@@ -816,7 +802,6 @@ def test_bonus_occurrence_can_be_updated_and_projection_reflects_new_values(clie
     response = client.put(
         f"/api/incomes/occurrences/{occurrence['id']}",
         json={
-            "status": "actual",
             "planned_date": "2026-11-15",
             "paid_date": "2026-11-20",
             "gross_amount": 7200,
@@ -824,7 +809,6 @@ def test_bonus_occurrence_can_be_updated_and_projection_reflects_new_values(clie
         },
     )
     assert response.status_code == 200
-    assert response.json()["status"] == "actual"
     assert response.json()["net_amount"] == 5100
 
     projection = get_projection(client, 2026)
@@ -846,7 +830,6 @@ def test_bonus_occurrence_can_be_deleted_and_removed_from_projection(client):
     occurrence = create_occurrence(
         client,
         component["id"],
-        status="actual",
         planned_date="2026-03-15",
         paid_date="2026-03-20",
         gross_amount=5000,
@@ -898,7 +881,6 @@ def test_deleting_source_cascades_components_versions_and_occurrences(client, db
     create_occurrence(
         client,
         bonus_component["id"],
-        status="actual",
         planned_date="2026-03-15",
         gross_amount=5000,
         net_amount=3500,

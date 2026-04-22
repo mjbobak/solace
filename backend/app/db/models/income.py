@@ -109,7 +109,8 @@ class IncomeOccurrence(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     component_id = Column(Integer, ForeignKey("income_components.id", ondelete="CASCADE"), nullable=False, index=True)
-    status = Column(String(20), nullable=False, index=True)
+    # Kept for compatibility with existing databases; occurrences are treated as actual.
+    status = Column(String(20), nullable=False, index=True, default="actual", server_default="actual")
     planned_date = Column(Date, nullable=False)
     paid_date = Column(Date, nullable=True)
     gross_amount = Column(Float, nullable=False)
@@ -124,7 +125,7 @@ class IncomeOccurrence(Base):
     def __repr__(self) -> str:
         return (
             f"<IncomeOccurrence(id={self.id}, component_id={self.component_id}, "
-            f"status='{self.status}', planned_date={self.planned_date})>"
+            f"planned_date={self.planned_date})>"
         )
 
 

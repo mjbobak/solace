@@ -15,7 +15,6 @@ export type {
   IncomeComponentMode,
   IncomeComponentType,
   IncomeOccurrence,
-  IncomeOccurrenceStatus,
   IncomeProjectionTotals,
   IncomeSource,
   TaxAdvantagedBucketEntry,

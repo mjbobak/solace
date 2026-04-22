@@ -189,9 +189,8 @@ const projection: IncomeYearProjection = {
             {
               id: 31,
               componentId: 12,
-              status: 'expected',
               plannedDate: '2025-12-15',
-              paidDate: null,
+              paidDate: '2025-12-15',
               grossAmount: 15000,
               netAmount: 11000,
               createdAt: '2025-01-01T00:00:00Z',
@@ -265,11 +264,8 @@ describe('IncomeView', () => {
 
     const recurringPayHeading = await screen.findByText('Recurring Pay');
     expect(recurringPayHeading).toBeInTheDocument();
-    expect(screen.getByText('Current Cash Pay')).toBeInTheDocument();
-    expect(screen.getByText('Planned Cash Net')).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Bonus Events 1' }),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Paycheck Value')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Bonus Events' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add Event' })).toBeInTheDocument();
 
     const expandedCell = recurringPayHeading.closest('td');
@@ -290,10 +286,10 @@ describe('IncomeView', () => {
       '',
     ]);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Bonus Events 1' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Bonus Events' }));
 
-    expect(await screen.findByText('Mark Actual')).toBeInTheDocument();
-    expect(screen.queryByText('Current Cash Pay')).not.toBeInTheDocument();
+    expect(await screen.findByText('Annual bonus')).toBeInTheDocument();
+    expect(screen.queryByText('Paycheck Value')).not.toBeInTheDocument();
   });
 
   it('opens the add income modal through the imperative handle', async () => {

@@ -150,7 +150,6 @@ function transformOccurrence(data: Record<string, unknown>): IncomeOccurrence {
   return {
     id: Number(data.id),
     componentId: Number(data.component_id),
-    status: data.status as IncomeOccurrence['status'],
     plannedDate: String(data.planned_date),
     paidDate: data.paid_date ? String(data.paid_date) : null,
     grossAmount: Number(data.gross_amount),
@@ -291,9 +290,6 @@ function serializeRecurringVersionInput(
 function serializeOccurrenceInput(input: UpdateIncomeOccurrenceInput) {
   const body: Record<string, unknown> = {};
 
-  if (input.status !== undefined) {
-    body.status = input.status;
-  }
   if (input.plannedDate !== undefined) {
     body.planned_date = input.plannedDate;
   }

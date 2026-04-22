@@ -40,9 +40,7 @@ export function BonusOccurrenceModal({
   const isEditing = Boolean(component && occurrence);
   const [componentChoice, setComponentChoice] = useState('new');
   const [label, setLabel] = useState('Annual bonus');
-  const [status, setStatus] = useState<IncomeOccurrence['status']>('expected');
   const [plannedDate, setPlannedDate] = useState(getTodayDateOnly());
-  const [paidDate, setPaidDate] = useState('');
   const [grossAmount, setGrossAmount] = useState('');
   const [netAmount, setNetAmount] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -51,9 +49,7 @@ export function BonusOccurrenceModal({
     if (component && occurrence) {
       setComponentChoice(String(component.id));
       setLabel(component.label ?? 'Bonus');
-      setStatus(occurrence.status);
-      setPlannedDate(occurrence.plannedDate);
-      setPaidDate(occurrence.paidDate ?? '');
+      setPlannedDate(occurrence.paidDate ?? occurrence.plannedDate);
       setGrossAmount(String(occurrence.grossAmount));
       setNetAmount(String(occurrence.netAmount));
       setIsSaving(false);
@@ -64,18 +60,15 @@ export function BonusOccurrenceModal({
       bonusComponents.length > 0 ? String(bonusComponents[0].id) : 'new';
     setComponentChoice(defaultChoice);
     setLabel(bonusComponents[0]?.label ?? 'Annual bonus');
-    setStatus('expected');
     setPlannedDate(getTodayDateOnly());
-    setPaidDate('');
     setGrossAmount('');
     setNetAmount('');
     setIsSaving(false);
   }, [bonusComponents, component, isOpen, occurrence]);
 
   const buildOccurrencePayload = () => ({
-    status,
     plannedDate,
-    paidDate: status === 'actual' ? paidDate || plannedDate : null,
+    paidDate: plannedDate,
     grossAmount: Number(grossAmount),
     netAmount: Number(netAmount),
   });
@@ -168,34 +161,13 @@ export function BonusOccurrenceModal({
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <label>
-            <span className="form-label">Status</span>
-            <select
-              className="form-input"
-              value={status}
-              onChange={(event) =>
-                setStatus(event.target.value as IncomeOccurrence['status'])
-              }
-            >
-              <option value="expected">Expected</option>
-              <option value="actual">Actual</option>
-            </select>
-          </label>
           <Input
-            label="Planned date"
+            label="Event date"
             type="date"
             value={plannedDate}
             onChange={(event) => setPlannedDate(event.target.value)}
             required
           />
-          {status === 'actual' && (
-            <Input
-              label="Paid date"
-              type="date"
-              value={paidDate}
-              onChange={(event) => setPaidDate(event.target.value)}
-            />
-          )}
           <Input
             label="Gross amount"
             type="number"

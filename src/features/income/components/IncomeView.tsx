@@ -51,7 +51,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       handleRenameSource,
       handleVersionModalSubmit,
       handleBonusModalSubmit,
-      handleMarkBonusActual,
       handleDeleteVersion,
       handleDeleteBonus,
       handleDeleteSource,
@@ -98,9 +97,6 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
           onAddBonus={openAddBonusModal}
           onDeleteVersion={(component, version) => {
             void handleDeleteVersion(component, version);
-          }}
-          onMarkActual={(occurrence) => {
-            void handleMarkBonusActual(occurrence);
           }}
           onEditBonus={openEditBonusModal}
           onDeleteBonus={(component, occurrence) => {

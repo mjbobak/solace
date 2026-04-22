@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 
 IncomeComponentType = Literal["base_pay", "bonus", "commission", "overtime", "other"]
 IncomeComponentMode = Literal["recurring", "occurrence"]
-IncomeOccurrenceStatus = Literal["expected", "actual"]
 AnnualAdjustmentStatus = Literal["expected", "actual"]
 TaxAdvantagedBucketType = Literal["401k", "hsa", "fsa_daycare", "fsa_medical"]
 
@@ -211,7 +210,6 @@ class IncomeComponentVersionResponse(IncomeComponentVersionBase):
 class IncomeOccurrenceBase(BaseModel):
     """Base occurrence fields."""
 
-    status: IncomeOccurrenceStatus
     planned_date: date
     paid_date: Optional[date] = None
     gross_amount: float = Field(..., ge=0)
@@ -225,7 +223,6 @@ class IncomeOccurrenceCreate(IncomeOccurrenceBase):
 class IncomeOccurrenceUpdate(BaseModel):
     """Update payload for one-time occurrences."""
 
-    status: Optional[IncomeOccurrenceStatus] = None
     planned_date: Optional[date] = None
     paid_date: Optional[date] = None
     gross_amount: Optional[float] = Field(None, ge=0)

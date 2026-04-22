@@ -6,7 +6,6 @@ export type IncomeComponentType =
   | 'other';
 
 export type IncomeComponentMode = 'recurring' | 'occurrence';
-export type IncomeOccurrenceStatus = 'expected' | 'actual';
 export type AnnualAdjustmentStatus = 'expected' | 'actual';
 export type TaxAdvantagedBucketType =
   | '401k'
@@ -85,7 +84,6 @@ export interface RecurringIncomeVersion {
 export interface IncomeOccurrence {
   id: number;
   componentId: number;
-  status: IncomeOccurrenceStatus;
   plannedDate: string;
   paidDate: string | null;
   grossAmount: number;
@@ -168,7 +166,6 @@ export type UpdateRecurringIncomeVersionInput =
   Partial<CreateRecurringIncomeVersionInput>;
 
 export interface CreateIncomeOccurrenceInput {
-  status: IncomeOccurrenceStatus;
   plannedDate: string;
   paidDate?: string | null;
   grossAmount: number;

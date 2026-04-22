@@ -15,11 +15,7 @@ import type {
   IncomeOccurrence,
   ProjectedIncomeComponent,
 } from '../types/income';
-
-export const OCCURRENCE_STATUS_BADGE_CLASSES: Record<
-  IncomeOccurrence['status'],
-  string
-> = {
+export const OCCURRENCE_STATUS_BADGE_CLASSES: Record<'actual' | 'expected', string> = {
   actual:
     'bg-green-100 text-green-800 border border-green-200 dark:bg-green-950/30 dark:text-green-200',
   expected:

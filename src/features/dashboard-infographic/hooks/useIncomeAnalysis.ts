@@ -85,9 +85,7 @@ function getMonthlyPlannedNet(
     if (effectiveDate.getFullYear() !== year) {
       return;
     }
-    if (occurrence.status === 'expected' || occurrence.status === 'actual') {
-      values[effectiveDate.getMonth()] += occurrence.netAmount;
-    }
+    values[effectiveDate.getMonth()] += occurrence.netAmount;
   });
 
   return values;

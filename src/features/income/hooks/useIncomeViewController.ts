@@ -73,7 +73,6 @@ interface UseIncomeViewControllerResult {
     targetId: number,
     payload: AddBonusModalSubmit | EditBonusModalSubmit,
   ) => Promise<void>;
-  handleMarkBonusActual: (occurrence: IncomeOccurrence) => Promise<void>;
   handleDeleteVersion: (
     component: ProjectedIncomeComponent,
     version: RecurringIncomeVersion,
@@ -323,20 +322,6 @@ export function useIncomeViewController(
     }
   };
 
-  const handleMarkBonusActual = async (occurrence: IncomeOccurrence) => {
-    try {
-      await incomeApiService.updateOccurrence(occurrence.id, {
-        status: 'actual',
-        paidDate: occurrence.paidDate ?? occurrence.plannedDate,
-      });
-      toast.success('Bonus marked as actual');
-      await loadProjection();
-    } catch (error) {
-      console.error('Failed to mark bonus as actual:', error);
-      toast.error('Failed to update bonus');
-    }
-  };
-
   const handleDeleteVersion = async (
     component: ProjectedIncomeComponent,
     version: RecurringIncomeVersion,
@@ -532,7 +517,6 @@ export function useIncomeViewController(
     handleRenameSource,
     handleVersionModalSubmit,
     handleBonusModalSubmit,
-    handleMarkBonusActual,
     handleDeleteVersion,
     handleDeleteBonus,
     handleDeleteSource,
