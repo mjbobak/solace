@@ -2,7 +2,7 @@ import { useId, useState } from 'react';
 import { LuChevronDown, LuChevronRight } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
-import { formatCurrency } from '@/shared/utils/currency';
+import { formatWholeCurrency } from '../utils/incomeViewFormatters';
 
 import { TAX_ADVANTAGED_BUCKET_DEFINITIONS } from '../constants/taxAdvantagedBuckets';
 import type { TaxAdvantagedInvestments } from '../types/income';
@@ -89,7 +89,7 @@ export function TaxAdvantagedBucketsSection({
                   {bucket.label}
                 </p>
                 <p className="mt-3 text-2xl font-semibold text-app">
-                  {formatCurrency(entryMap.get(bucket.type) ?? 0)}
+                  {formatWholeCurrency(entryMap.get(bucket.type) ?? 0)}
                 </p>
                 <p className="mt-2 text-sm text-muted">
                   {bucket.behaviorLabel}

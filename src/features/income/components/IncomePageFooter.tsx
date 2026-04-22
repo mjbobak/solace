@@ -1,15 +1,18 @@
-import React, { useMemo, useState } from 'react';
-import { LuPencil } from 'react-icons/lu';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { LuPencil, LuPlus } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
-import { Modal } from '@/shared/components/Modal';
 
+import { TAX_ADVANTAGED_BUCKET_DEFINITIONS } from '../constants/taxAdvantagedBuckets';
 import type {
   AnnualAdjustment,
   TaxAdvantagedInvestments,
 } from '../types/income';
 import { getAnnualAdjustmentStatusLabel } from '../types/income';
-import { OCCURRENCE_STATUS_BADGE_CLASSES, formatDate } from '../utils/incomeViewFormatters';
+import {
+  OCCURRENCE_STATUS_BADGE_CLASSES,
+  formatDate,
+} from '../utils/incomeViewFormatters';
 
 interface IncomePageFooterProps {
   adjustments: AnnualAdjustment[];
@@ -30,24 +33,28 @@ function formatRoundedCurrency(value: number): string {
 }
 
 function formatSignedRoundedCurrency(value: number): string {
-  if (value === 0) {
-    return formatRoundedCurrency(0);
-  }
-
+  if (value === 0) return formatRoundedCurrency(0);
   const prefix = value > 0 ? '+' : '-';
   return `${prefix}${formatRoundedCurrency(Math.abs(value))}`;
 }
 
 function getAmountToneClass(amount: number): string {
-  if (amount > 0) {
-    return 'text-emerald-600';
-  }
-
-  if (amount < 0) {
-    return 'text-danger';
-  }
-
+  if (amount > 0) return 'text-emerald-600';
+  if (amount < 0) return 'text-danger';
   return 'text-app';
+}
+
+type OpenPopover = 'adj' | 'tax' | null;
+
+function Popover({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="absolute top-[calc(100%+8px)] right-0 z-50 w-[420px] rounded-xl border border-surface-border bg-white shadow-lg"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function IncomePageFooter({
@@ -59,7 +66,8 @@ export function IncomePageFooter({
   onDeleteAdjustment,
   onEditTaxAdvantagedInvestments,
 }: IncomePageFooterProps) {
-  const [isManageAdjustmentsOpen, setIsManageAdjustmentsOpen] = useState(false);
+  const [openPopover, setOpenPopover] = useState<OpenPopover>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   const employerBucketTotal = useMemo(
     () =>
@@ -76,202 +84,238 @@ export function IncomePageFooter({
     Number(taxAdvantagedInvestments.spendableTotal > 0) +
     Number(employerBucketTotal > 0);
 
+  function togglePopover(id: OpenPopover, e: React.MouseEvent) {
+    e.stopPropagation();
+    setOpenPopover((prev) => (prev === id ? null : id));
+  }
+
+  useEffect(() => {
+    function handleOutsideClick() {
+      setOpenPopover(null);
+    }
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
+
   return (
-    <>
-      <section
-        className="surface-card overflow-hidden p-0"
-        aria-label="Income page footer summary"
-      >
-        <div className="grid md:grid-cols-2">
-          <div className="flex items-center justify-between gap-6 px-8 py-5">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                Annual Adjustments
-              </p>
-              <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span
-                  className={`text-xl font-semibold leading-none ${getAmountToneClass(
-                    plannedAdjustmentTotal,
-                  )}`}
-                >
-                  {formatSignedRoundedCurrency(plannedAdjustmentTotal)}
-                </span>
-                <span className="text-sm text-muted">
-                  {adjustments.length} {adjustments.length === 1 ? 'item' : 'items'}
-                </span>
-              </div>
-            </div>
+    <section
+      ref={barRef}
+      className="surface-card overflow-visible p-0"
+      aria-label="Income page footer summary"
+    >
+      <div className="grid md:grid-cols-2">
 
-            <Button
-              type="button"
-              variant="secondary"
-              className="shrink-0 px-5 py-2.5 text-sm"
-              onClick={() => setIsManageAdjustmentsOpen(true)}
-            >
-              <LuPencil className="h-4 w-4" />
-              Manage
-            </Button>
-          </div>
-
-          <div className="border-t section-divider md:border-t-0 md:border-l">
-            <div className="flex items-center justify-between gap-6 px-8 py-5">
-            <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                  Tax-Advantaged Buckets
-                </p>
-                <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="text-xl font-semibold leading-none text-app">
-                    {formatRoundedCurrency(taxAdvantagedInvestments.total)}
-                  </span>
-                  <span className="text-sm text-muted">
-                    {taxAdvantagedInvestments.entries.length} buckets ·{' '}
-                    {contributionSourceCount}{' '}
-                    {contributionSourceCount === 1 ? 'stream' : 'streams'}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="secondary"
-                className="shrink-0 px-5 py-2.5 text-sm"
-                onClick={onEditTaxAdvantagedInvestments}
-              >
-                <LuPencil className="h-4 w-4" />
-                Edit Buckets
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Modal
-        isOpen={isManageAdjustmentsOpen}
-        onClose={() => setIsManageAdjustmentsOpen(false)}
-        title="Manage Annual Adjustments"
-        maxWidth="5xl"
-        contentClassName="p-0"
-      >
-        <div className="flex items-center justify-between gap-4 border-b px-6 py-5 section-divider">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">
+        {/* ── Annual Adjustments segment ── */}
+        <div
+          className="relative flex cursor-pointer items-center justify-between gap-5 rounded-l-xl px-6 py-4 transition-colors hover:bg-gray-50/60"
+          onClick={(e) => togglePopover('adj', e)}
+        >
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
               Annual Adjustments
             </p>
-            <p className="mt-1 text-sm text-muted">
-              Tax refunds, balances due, and other year-level reconciliations
-              outside income streams.
-            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span
+                className={`text-base font-semibold leading-none ${getAmountToneClass(plannedAdjustmentTotal)}`}
+              >
+                {formatSignedRoundedCurrency(plannedAdjustmentTotal)}
+              </span>
+              <span className="text-xs text-muted">
+                {adjustments.length}{' '}
+                {adjustments.length === 1 ? 'item' : 'items'}
+              </span>
+            </div>
           </div>
+
           <Button
             type="button"
-            className="shrink-0"
-            onClick={() => {
-              setIsManageAdjustmentsOpen(false);
-              onAddAdjustment();
-            }}
+            variant="secondary"
+            className="shrink-0 px-4 py-2 text-xs"
+            onClick={(e) => togglePopover('adj', e)}
           >
-            Add Adjustment
+            <LuPencil className="h-4 w-4" />
+            Manage
           </Button>
-        </div>
 
-        {adjustments.length === 0 ? (
-          <div className="px-6 py-10 text-center">
-            <p className="text-lg font-semibold text-app">
-              No annual adjustments yet
-            </p>
-            <p className="mt-2 text-sm text-muted">
-              Add tax refunds, balances due, or other annual reconciliations.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed border-collapse">
-              <colgroup>
-                <col className="w-[34%]" />
-                <col className="w-[18%]" />
-                <col className="w-[16%]" />
-                <col className="w-[16%]" />
-                <col className="w-[16%]" />
-              </colgroup>
-              <thead className="border-b section-divider bg-gray-50/60 text-left">
-                <tr>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Adjustment
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Effective Date
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {adjustments.map((adjustment) => (
-                  <tr
-                    key={adjustment.id}
-                    className="border-b section-divider last:border-b-0"
-                  >
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-semibold text-app">
-                        {adjustment.label}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-app">
-                      {formatDate(adjustment.effectiveDate)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${OCCURRENCE_STATUS_BADGE_CLASSES[adjustment.status]}`}
-                      >
-                        {getAnnualAdjustmentStatusLabel(adjustment.status)}
+          {openPopover === 'adj' && (
+            <Popover>
+              <div className="flex items-center justify-between border-b border-surface-border px-4 py-3">
+                <span className="text-sm font-bold text-app">
+                  Annual Adjustments
+                </span>
+                <button
+                  className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-sm text-muted hover:bg-gray-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenPopover(null);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {adjustments.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-sm text-muted">No annual adjustments yet.</p>
+                </div>
+              ) : (
+                <div>
+                  {adjustments.map((adj) => (
+                    <div
+                      key={adj.id}
+                      className="flex items-center gap-3 border-b border-gray-50 px-4 py-2.5 last:border-b-0"
+                    >
+                      <span className="min-w-0 flex-1 text-sm font-medium text-app">
+                        {adj.label}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-sm font-semibold ${getAmountToneClass(
-                          adjustment.amount,
-                        )}`}
-                      >
-                        {formatSignedRoundedCurrency(adjustment.amount)}
+                      <span className="min-w-[80px] text-xs text-muted">
+                        {formatDate(adj.effectiveDate)}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="px-3 py-1 text-xs"
-                          onClick={() => {
-                            setIsManageAdjustmentsOpen(false);
-                            onEditAdjustment(adjustment);
+                      <span
+                        className={`min-w-[52px] rounded px-1.5 py-0.5 text-center text-[10.5px] font-semibold ${OCCURRENCE_STATUS_BADGE_CLASSES[adj.status]}`}
+                      >
+                        {getAnnualAdjustmentStatusLabel(adj.status)}
+                      </span>
+                      <span
+                        className={`min-w-[76px] text-right text-sm font-semibold ${getAmountToneClass(adj.amount)}`}
+                      >
+                        {formatSignedRoundedCurrency(adj.amount)}
+                      </span>
+                      <div className="flex gap-1.5">
+                        <button
+                          className="rounded border border-surface-border px-2 py-0.5 text-xs text-muted hover:bg-gray-50 hover:text-app"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenPopover(null);
+                            onEditAdjustment(adj);
                           }}
                         >
                           Edit
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="danger"
-                          className="px-3 py-1 text-xs"
-                          onClick={() => onDeleteAdjustment(adjustment)}
+                        </button>
+                        <button
+                          className="rounded border border-red-100 px-2 py-0.5 text-xs text-red-400 hover:bg-red-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteAdjustment(adj);
+                          }}
                         >
                           Delete
-                        </Button>
+                        </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="border-t border-surface-border px-4 py-2.5">
+                <button
+                  className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 hover:text-teal-700 hover:underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenPopover(null);
+                    onAddAdjustment();
+                  }}
+                >
+                  <LuPlus className="h-3 w-3" />
+                  Add Adjustment
+                </button>
+              </div>
+            </Popover>
+          )}
+        </div>
+
+        {/* ── Tax-Advantaged Buckets segment ── */}
+        <div
+          className="relative flex cursor-pointer items-center justify-between gap-5 border-t px-6 py-4 transition-colors section-divider hover:bg-gray-50/60 md:rounded-r-xl md:border-t-0 md:border-l"
+          onClick={(e) => togglePopover('tax', e)}
+        >
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              Tax-Advantaged Buckets
+            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-base font-semibold leading-none text-app">
+                {formatRoundedCurrency(taxAdvantagedInvestments.total)}
+              </span>
+              <span className="text-xs text-muted">
+                {taxAdvantagedInvestments.entries.length} buckets ·{' '}
+                {contributionSourceCount}{' '}
+                {contributionSourceCount === 1 ? 'stream' : 'streams'}
+              </span>
+            </div>
           </div>
-        )}
-      </Modal>
-    </>
+
+          <Button
+            type="button"
+            variant="secondary"
+            className="shrink-0 px-4 py-2 text-xs"
+            onClick={(e) => togglePopover('tax', e)}
+          >
+            <LuPencil className="h-4 w-4" />
+            Edit Buckets
+          </Button>
+
+          {openPopover === 'tax' && (
+            <Popover>
+              <div className="flex items-center justify-between border-b border-surface-border px-4 py-3">
+                <span className="text-sm font-bold text-app">
+                  Tax-Advantaged Contributions
+                </span>
+                <button
+                  className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-sm text-muted hover:bg-gray-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenPopover(null);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 p-4">
+                {TAX_ADVANTAGED_BUCKET_DEFINITIONS.map((def) => {
+                  const entry = taxAdvantagedInvestments.entries.find(
+                    (e) => e.bucketType === def.type,
+                  );
+                  return (
+                    <div
+                      key={def.type}
+                      className="rounded-lg border border-surface-border bg-gray-50/60 p-3"
+                    >
+                      <p className="text-[10.5px] font-medium text-muted">
+                        {def.label}
+                      </p>
+                      <p className="mt-0.5 text-[15px] font-bold text-app">
+                        {formatRoundedCurrency(entry?.annualAmount ?? 0)}
+                      </p>
+                      <p className="mt-0.5 text-[10.5px] text-muted">
+                        {def.behaviorLabel}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-end border-t border-surface-border px-4 py-2.5">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="px-3 py-1.5 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenPopover(null);
+                    onEditTaxAdvantagedInvestments();
+                  }}
+                >
+                  <LuPencil className="h-3 w-3" />
+                  Edit All Buckets
+                </Button>
+              </div>
+            </Popover>
+          )}
+        </div>
+
+      </div>
+    </section>
   );
 }

@@ -1,23 +1,31 @@
-import { formatCurrency } from '@/shared/utils/currency';
+import { formatWholeCurrency } from '../utils/incomeViewFormatters';
 
 interface IncomeAmountStackProps {
   primaryValue: number;
   secondaryValue: number;
-  secondaryLabel?: string;
 }
 
 export function IncomeAmountStack({
   primaryValue,
   secondaryValue,
-  secondaryLabel = 'Net',
 }: IncomeAmountStackProps) {
   return (
     <div className="flex flex-col leading-tight">
-      <span className="text-lg font-semibold text-app">
-        {formatCurrency(primaryValue)}
+      <span className="flex items-baseline gap-1.5">
+        <span className="text-sm font-semibold text-app">
+          {formatWholeCurrency(primaryValue)}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          Annual
+        </span>
       </span>
-      <span className="mt-1 text-xs text-muted">
-        {formatCurrency(secondaryValue)} {secondaryLabel}
+      <span className="mt-0.5 flex items-baseline gap-1.5">
+        <span className="text-xs text-muted">
+          {formatWholeCurrency(secondaryValue)}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          Month
+        </span>
       </span>
     </div>
   );

@@ -1,4 +1,10 @@
-import { formatCurrency } from '@/shared/utils/currency';
+export function formatWholeCurrency(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
 import {
   formatDateOnly,
   parseDateOnly,
@@ -36,10 +42,10 @@ export function formatNetRangeSummary(
   component: ProjectedIncomeComponent,
 ): string {
   if (!component.currentVersion) {
-    return formatCurrency(component.totals.plannedCashNet);
+    return formatWholeCurrency(component.totals.plannedCashNet);
   }
 
-  return `${formatCurrency(component.currentVersion.netAmount)} cash net x ${
+  return `${formatWholeCurrency(component.currentVersion.netAmount)} cash net x ${
     component.currentVersion.periodsPerYear
   }`;
 }

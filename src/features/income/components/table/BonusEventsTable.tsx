@@ -1,7 +1,7 @@
 import { LuPencil, LuTrash2 } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
-import { formatCurrency } from '@/shared/utils/currency';
+import { formatWholeCurrency } from '../../utils/incomeViewFormatters';
 
 import type {
   IncomeOccurrence,
@@ -76,7 +76,7 @@ export function BonusEventsTable({
                   {formatDate(getOccurrenceEventDate(occurrence))}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-app">
-                  {formatCurrency(occurrence.netAmount)}
+                  {formatWholeCurrency(occurrence.netAmount)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">

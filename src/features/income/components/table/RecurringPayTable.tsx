@@ -2,7 +2,7 @@ import React from 'react';
 import { LuPencil, LuTrash2 } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
-import { formatCurrency } from '@/shared/utils/currency';
+import { formatWholeCurrency } from '../../utils/incomeViewFormatters';
 
 import type {
   ProjectedIncomeComponent,
@@ -71,7 +71,7 @@ export function RecurringPayTable({
                   {formatNetRangeSummary(component)}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-app">
-                  {formatCurrency(component.totals.plannedCashNet)}
+                  {formatWholeCurrency(component.totals.plannedCashNet)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end">
@@ -96,11 +96,11 @@ export function RecurringPayTable({
                     {formatDate(version.endDate)}
                   </td>
                   <td className="px-4 py-2">
-                    {formatCurrency(version.netAmount)} cash net x{' '}
+                    {formatWholeCurrency(version.netAmount)} cash net x{' '}
                     {version.periodsPerYear}
                   </td>
                   <td className="px-4 py-2 text-right">
-                    {formatCurrency(version.grossAmount)} gross
+                    {formatWholeCurrency(version.grossAmount)} gross
                   </td>
                   <td className="px-4 py-2">
                     <div className="flex justify-end gap-2">

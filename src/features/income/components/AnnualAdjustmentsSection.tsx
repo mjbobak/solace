@@ -1,5 +1,5 @@
 import { Button } from '@/shared/components/Button';
-import { formatCurrency } from '@/shared/utils/currency';
+import { formatWholeCurrency } from '../utils/incomeViewFormatters';
 
 import type { AnnualAdjustment } from '../types/income';
 import {
@@ -19,11 +19,11 @@ interface AnnualAdjustmentsSectionProps {
 
 function formatSignedCurrency(amount: number): string {
   if (amount === 0) {
-    return formatCurrency(0);
+    return formatWholeCurrency(0);
   }
 
   const prefix = amount > 0 ? '+' : '-';
-  return `${prefix}${formatCurrency(Math.abs(amount))}`;
+  return `${prefix}${formatWholeCurrency(Math.abs(amount))}`;
 }
 
 function getAmountToneClass(amount: number): string {

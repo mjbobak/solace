@@ -91,13 +91,13 @@ export function IncomeSourcesTable({
           </colgroup>
           <thead className="border-b section-divider bg-gray-50/50 text-left">
             <tr>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                 Source
               </th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                 Gross
               </th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                 Net
               </th>
               <th className="w-px whitespace-nowrap px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.16em] text-muted">

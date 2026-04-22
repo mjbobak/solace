@@ -61,7 +61,7 @@ export function IncomeSourceRow({
   return (
     <React.Fragment>
       <tr className="border-b section-divider align-top transition-colors hover:bg-gray-50/35">
-        <td className="px-6 py-5">
+        <td className="px-5 py-3.5">
           <button
             type="button"
             className="flex items-start gap-3 text-left"
@@ -69,13 +69,13 @@ export function IncomeSourceRow({
           >
             <span className="mt-1 text-gray-300">
               {isExpanded ? (
-                <LuChevronDown className="h-5 w-5" />
+                <LuChevronDown className="h-4 w-4" />
               ) : (
-                <LuChevronRight className="h-5 w-5" />
+                <LuChevronRight className="h-4 w-4" />
               )}
             </span>
             <span>
-              <span className="block text-base font-semibold text-app">
+              <span className="block text-sm font-semibold text-app">
                 {source.name}
               </span>
               <span className="mt-1 block text-xs text-muted">
@@ -88,17 +88,15 @@ export function IncomeSourceRow({
           <IncomeAmountStack
             primaryValue={source.totals.plannedGross}
             secondaryValue={source.totals.plannedGross / 12}
-            secondaryLabel="/ mo"
           />
         </td>
         <td className="px-6 py-5 align-middle">
           <IncomeAmountStack
             primaryValue={source.totals.plannedNet}
             secondaryValue={source.totals.plannedNet / 12}
-            secondaryLabel="/ mo"
           />
         </td>
-        <td className="px-6 py-5">
+        <td className="px-5 py-3.5">
           <div className="flex justify-end">
             <div className="relative">
               <button
@@ -110,7 +108,7 @@ export function IncomeSourceRow({
                 aria-haspopup="menu"
                 aria-expanded={isActionMenuOpen}
               >
-                <LuEllipsis className="h-5 w-5" />
+                <LuEllipsis className="h-4 w-4" />
               </button>
             </div>
           </div>

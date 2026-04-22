@@ -38,11 +38,21 @@ function OverviewMetric({
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
         {label}
       </p>
-      <span className="text-2xl font-semibold leading-tight text-app md:text-3xl">
-        {formatRoundedCurrency(annualValue)}
+      <span className="flex items-baseline gap-1.5">
+        <span className="text-xl font-semibold leading-tight text-app md:text-2xl">
+          {formatRoundedCurrency(annualValue)}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          Annual
+        </span>
       </span>
-      <span className="text-sm font-semibold text-muted">
-        {formatMonthlyCurrency(annualValue)} / mo
+      <span className="flex items-baseline gap-1.5">
+        <span className="text-xs font-semibold text-muted">
+          {formatMonthlyCurrency(annualValue)}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          Month
+        </span>
       </span>
     </div>
   );
@@ -60,7 +70,7 @@ function TaxDetail({ label, value, className = '' }: TaxDetailProps) {
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
         {label}
       </p>
-      <p className="text-sm font-semibold leading-none text-app">{value}</p>
+      <p className="text-xs font-semibold leading-none text-app">{value}</p>
     </div>
   );
 }
@@ -83,11 +93,11 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   return (
     <section aria-label="Income summary">
       <div className="grid gap-5 xl:grid-cols-2">
-        <article className="surface-card h-full p-5 md:p-6">
+        <article className="surface-card h-full p-4 md:p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
             Income Overview
           </p>
-          <div className="mt-3 grid gap-4 md:grid-cols-2 md:gap-0">
+          <div className="mt-2.5 grid gap-4 md:grid-cols-2 md:gap-0">
             <OverviewMetric
               label="Gross"
               annualValue={totals.plannedGross}
@@ -95,25 +105,25 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
             <OverviewMetric
               label="Net"
               annualValue={totals.plannedNet}
-              className="border-t pt-4 md:border-t-0 md:border-l md:pl-7 md:pt-0 section-divider"
+              className="border-t pt-3 md:border-t-0 md:border-l md:pl-6 md:pt-0 section-divider"
             />
           </div>
         </article>
 
-        <article className="surface-card h-full p-5 text-left md:p-6">
+        <article className="surface-card h-full p-4 text-left md:p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
             Tax-Advantaged Buckets
           </p>
-          <div className="mt-3 flex flex-col gap-1 md:flex-row md:items-end md:gap-2.5">
-            <span className="text-2xl font-semibold leading-tight text-app md:text-3xl">
+          <div className="mt-2.5 flex flex-col gap-1 md:flex-row md:items-end md:gap-2">
+            <span className="text-xl font-semibold leading-tight text-app md:text-2xl">
               {formatRoundedCurrency(taxAdvantagedInvestments.total)}
             </span>
-            <span className="text-sm font-medium text-muted">
+            <span className="text-xs font-medium text-muted">
               annual contributions
             </span>
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-3 md:gap-0">
+          <div className="mt-3 grid gap-3 md:grid-cols-3 md:gap-0">
             <TaxDetail
               label="Spendable Restricted"
               value={formatRoundedCurrency(restrictedBucketTotal)}
