@@ -87,12 +87,21 @@ function renderBarValueContent(
   amount: number,
   valueDisplayPeriod: 'monthly' | 'annual',
 ): React.ReactNode {
+  const formattedAmount =
+    valueDisplayPeriod === 'annual'
+      ? formatAnnualAmount(amount)
+      : formatWholeCurrency(amount);
+  const periodLabel = valueDisplayPeriod === 'annual' ? 'ANNUAL' : 'MONTHLY';
+
   return (
-    <div className="pointer-events-none absolute inset-y-0.5 flex items-center px-3 text-[11px] font-semibold text-slate-800/90">
-      <span className="truncate whitespace-nowrap">
-        {valueDisplayPeriod === 'annual'
-          ? `${formatAnnualAmount(amount)} / yr`
-          : `${formatWholeCurrency(amount)} / mo`}
+    <div className="pointer-events-none absolute inset-y-0.5 flex items-center px-3">
+      <span className="inline-flex items-baseline gap-1 truncate whitespace-nowrap">
+        <span className="text-[11px] font-semibold text-slate-800/90">
+          {formattedAmount}
+        </span>
+        <span className="text-[10px] font-medium text-slate-700/65">
+          {periodLabel}
+        </span>
       </span>
     </div>
   );
