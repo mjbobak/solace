@@ -138,7 +138,8 @@ describe('ThemeProvider', () => {
       </ThemeProvider>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Dark theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open theme menu' }));
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Dark mode' }));
 
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
@@ -160,7 +161,7 @@ describe('ThemeProvider', () => {
 
     expect(screen.getByText('Planning filters')).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', { name: 'Dark theme' }),
+      screen.queryByRole('button', { name: 'Open theme menu' }),
     ).not.toBeInTheDocument();
   });
 });

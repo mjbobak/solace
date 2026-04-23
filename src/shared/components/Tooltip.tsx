@@ -158,7 +158,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         createPortal(
           <div
             ref={tooltipRef}
-            className={`pointer-events-none fixed z-50 rounded px-3 py-2 text-xs shadow-lg transition-opacity duration-150 ${
+            className={`pointer-events-none fixed z-50 rounded-xl border px-3 py-2 text-xs shadow-lg transition-opacity duration-150 ${
               stacked ? 'whitespace-pre-line' : 'whitespace-nowrap'
             } ${position ? 'opacity-100' : 'opacity-0'}`}
             style={
@@ -166,8 +166,12 @@ export const Tooltip: React.FC<TooltipProps> = ({
                 ? {
                     top: `${position.top}px`,
                     left: `${position.left}px`,
-                    backgroundColor: 'var(--color-overlay-strong)',
-                    color: 'var(--color-inverse)',
+                    backgroundColor: 'var(--color-tooltip-bg)',
+                    borderColor: 'var(--color-tooltip-border)',
+                    color: 'var(--color-tooltip-text)',
+                    boxShadow:
+                      '0 18px 40px -24px var(--color-tooltip-shadow)',
+                    backdropFilter: 'blur(14px)',
                   }
                 : { top: '-9999px', left: '-9999px' }
             }
@@ -178,7 +182,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
               style={{
                 left: `${position?.arrowLeft ?? 0}px`,
                 transform: 'translateX(-50%)',
-                borderTopColor: 'var(--color-overlay-strong)',
+                borderTopColor: 'var(--color-tooltip-bg)',
               }}
             />
           </div>,

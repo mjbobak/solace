@@ -69,9 +69,9 @@ export function getSpendingTableColumns(
       header: 'Budget Item',
       accessor: (row) => (
         <div className="max-w-[320px]">
-          <div className="font-medium text-gray-900">{row.budgetLabel}</div>
+          <div className="font-medium text-app">{row.budgetLabel}</div>
           {row.budgetCategory && (
-            <div className="truncate text-xs text-gray-500">
+            <div className="truncate text-xs text-muted">
               {row.budgetCategory} • {row.budgetType}
             </div>
           )}

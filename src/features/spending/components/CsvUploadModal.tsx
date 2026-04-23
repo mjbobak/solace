@@ -74,17 +74,15 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   if (!previewData) {
     return (
       <div className="space-y-5">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50">
-          <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+        <div className="import-panel">
+          <div className="import-panel-header">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Bulk Import
-                </p>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <p className="import-kicker">Bulk Import</p>
+                <h3 className="import-title">
                   Upload CSV exports and review them before import
                 </h3>
-                <p className="max-w-2xl text-sm text-slate-600">
+                <p className="import-description max-w-2xl">
                   Use this flow for larger batches. You can edit rows, exclude
                   anything you do not want, and confirm only the cleaned data.
                 </p>
@@ -93,15 +91,13 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 {accountHints.map((hint) => (
                   <div
                     key={hint.value}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+                    className="import-card"
                   >
-                    <div className="text-xs font-medium text-slate-500">
-                      Expected file
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-slate-900">
+                    <div className="import-card-label">Expected file</div>
+                    <div className="import-card-value">
                       {hint.label}
                     </div>
-                    <div className="text-xs text-slate-500">
+                    <div className="import-card-label">
                       Filename should contain {hint.value}
                     </div>
                   </div>
@@ -114,12 +110,12 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 transition-colors hover:border-slate-400"
+              className="import-dropzone"
             >
               <div className="flex flex-col items-center justify-center gap-4 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                <div className="import-dropzone-icon">
                   <svg
-                    className="h-6 w-6 text-slate-700"
+                    className="h-6 w-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -133,10 +129,10 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-slate-900">
+                  <h4 className="import-title text-base">
                     Drop CSV files here
                   </h4>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="import-description mt-1">
                     Or browse from your computer. Up to 2 files per import.
                   </p>
                 </div>
@@ -150,7 +146,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:border-slate-400 hover:bg-slate-50"
+                  className="import-secondary-action"
                 >
                   Select Files
                 </button>
@@ -161,12 +157,10 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
 
         {/* Selected Files */}
         {uploadedFiles.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white">
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3 sm:px-6">
-              <p className="text-sm font-semibold text-slate-900">
-                Selected Files
-              </p>
-              <span className="text-xs font-medium text-slate-500">
+          <div className="import-list">
+            <div className="import-panel-header flex items-center justify-between py-3">
+              <p className="text-app text-sm font-semibold">Selected Files</p>
+              <span className="text-muted text-xs font-medium">
                 {uploadedFiles.length} of 2
               </span>
             </div>
@@ -178,9 +172,9 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 return (
                   <div
                     key={file.name}
-                    className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center"
+                    className="import-list-row"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm">
+                    <div className="import-list-icon">
                       <svg
                         className="h-5 w-5"
                         fill="currentColor"
@@ -191,18 +185,18 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                       </svg>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-slate-900">
+                      <p className="text-app truncate text-sm font-medium">
                         {file.name}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-muted text-xs">
                         {(file.size / 1024).toFixed(1)} KB
                       </p>
                     </div>
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                      className={`import-status-pill ${
                         hasAccount
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-amber-50 text-amber-700'
+                          ? 'import-status-pill-success'
+                          : 'import-status-pill-warning'
                       }`}
                     >
                       {hasAccount ? 'Account detected' : 'Check filename'}
@@ -215,7 +209,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
         )}
 
         {/* Actions */}
-        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+        <div className="import-actions sm:justify-end">
           <Button
             onClick={handleCancel}
             variant="secondary"
@@ -256,13 +250,13 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
 
       {/* Parse Errors */}
       {previewData.parse_errors.length > 0 && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 sm:px-6">
-          <h3 className="mb-2 text-sm font-semibold text-rose-900">
+        <div className="rounded-2xl border px-5 py-4 sm:px-6 import-status-pill-danger">
+          <h3 className="mb-2 text-sm font-semibold">
             Parsing Errors
           </h3>
           <ul className="space-y-1">
             {previewData.parse_errors.map((error, i) => (
-              <li key={i} className="text-xs text-rose-700">
+              <li key={i} className="text-xs">
                 • {error}
               </li>
             ))}
@@ -271,8 +265,8 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
       )}
 
       {/* Actions */}
-      <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">
+      <div className="import-actions sm:items-center sm:justify-between">
+        <p className="text-muted text-sm">
           Review the rows you want to keep, then confirm the import.
         </p>
         <div className="flex flex-col-reverse gap-3 sm:flex-row">

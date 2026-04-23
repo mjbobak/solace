@@ -140,11 +140,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     handleClose();
   };
 
-  const inputBaseClass =
-    'w-full px-4 py-3 text-base border border-gray-200 rounded-lg bg-gray-50 text-gray-900 transition-colors';
-  const inputFocusClass =
-    'focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10';
-  const labelClass = 'block text-xs font-medium text-gray-600 mb-2';
+  const inputBaseClass = 'form-input';
+  const labelClass = 'form-label';
 
   const amount = parseFloat(formData.amount) || 0;
   const isUploadMode = !isEditMode && activeTab === 'upload';
@@ -165,23 +162,23 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     >
       {/* Tab Navigation - Only show for add mode */}
       {!isEditMode && (
-        <div className="mb-6 flex gap-4 border-b border-gray-200">
+        <div className="form-tabs-row">
           <button
             onClick={() => setActiveTab('manual')}
-            className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${
+            className={`form-tab ${
               activeTab === 'manual'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'form-tab-active'
+                : 'form-tab-inactive'
             }`}
           >
             Manual Entry
           </button>
           <button
             onClick={() => setActiveTab('upload')}
-            className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${
+            className={`form-tab ${
               activeTab === 'upload'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'form-tab-active'
+                : 'form-tab-inactive'
             }`}
           >
             Upload File
@@ -201,7 +198,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, account: e.target.value }))
                 }
-                className={`${inputBaseClass} ${inputFocusClass}`}
+                className={`${inputBaseClass} rounded-full px-4 py-3 text-base`}
               >
                 {ACCOUNTS.map((acc) => (
                   <option key={acc} value={acc}>
@@ -241,7 +238,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   }
                 }}
                 disabled={isLoadingBudgets}
-                className={`${inputBaseClass} ${inputFocusClass}`}
+                className={`${inputBaseClass} rounded-full px-4 py-3 text-base`}
               >
                 <option value="">
                   {isLoadingBudgets
@@ -287,7 +284,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 }))
               }
               placeholder="e.g., Whole Foods Market"
-              className={`${inputBaseClass} ${inputFocusClass}`}
+              className={`${inputBaseClass} px-4 py-3 text-base`}
             />
           </div>
 
@@ -304,7 +301,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                     transactionDate: e.target.value,
                   }))
                 }
-                className={`${inputBaseClass} ${inputFocusClass}`}
+                className={`${inputBaseClass} px-4 py-3 text-base`}
               />
             </div>
 
@@ -320,16 +317,16 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   setFormData((prev) => ({ ...prev, amount: e.target.value }))
                 }
                 placeholder="0.00"
-                className={`${inputBaseClass} ${inputFocusClass}`}
+                className={`${inputBaseClass} px-4 py-3 text-base`}
               />
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <div className="form-callout">
             {item && getSpreadPaymentConfig(item) ? (
               <>
                 Spread payment is configured for{' '}
-                <span className="font-semibold text-slate-900">
+                <span className="form-callout-emphasis font-semibold">
                   {formatSpreadRangeLabel(getSpreadPaymentConfig(item)!)}
                 </span>
                 . Edit it from the table&apos;s Spread Payment column.
@@ -341,18 +338,16 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
           {/* Amount Preview */}
           {amount > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="form-preview">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Amount:</span>
-                <span className="text-lg font-bold text-blue-600">
-                  {formatCurrency(amount)}
-                </span>
+                <span className="form-preview-label">Amount:</span>
+                <span className="form-preview-value">{formatCurrency(amount)}</span>
               </div>
             </div>
           )}
 
           {/* Form Actions */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className="section-divider flex gap-3 border-t pt-4">
             <Button
               onClick={handleClose}
               variant="secondary"

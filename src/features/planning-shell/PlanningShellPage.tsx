@@ -166,7 +166,6 @@ const PlanningShellPage: React.FC = () => {
       <TopNav
         activeTab={activeTab}
         rightContent={headerControls}
-        showThemeToggle={false}
         onTabChange={(tab) => {
           if (tab !== activeTab) {
             navigate({

@@ -20,6 +20,18 @@
   --color-overlay: oklch(18% 0.02 255 / 0.36);
   --color-overlay-strong: oklch(30% 0.02 255 / 0.94);
   --color-inverse: oklch(99% 0 0);
+  --color-tooltip-bg: color-mix(
+    in srgb,
+    var(--color-surface-elevated) 96%,
+    white 4%
+  );
+  --color-tooltip-border: color-mix(
+    in srgb,
+    var(--color-border) 88%,
+    transparent
+  );
+  --color-tooltip-text: var(--color-text);
+  --color-tooltip-shadow: color-mix(in srgb, var(--color-text) 28%, transparent);
   --color-chart-1: oklch(67% 0.14 249);
   --color-chart-2: oklch(66% 0.17 155);
   --color-chart-3: oklch(79% 0.14 86);
@@ -48,6 +60,18 @@
   --color-overlay: oklch(3% 0.01 255 / 0.56);
   --color-overlay-strong: oklch(16% 0.02 255 / 0.96);
   --color-inverse: oklch(16% 0.02 255);
+  --color-tooltip-bg: color-mix(
+    in srgb,
+    var(--color-surface-elevated) 94%,
+    white 6%
+  );
+  --color-tooltip-border: color-mix(
+    in srgb,
+    var(--color-border) 92%,
+    transparent
+  );
+  --color-tooltip-text: var(--color-text);
+  --color-tooltip-shadow: color-mix(in srgb, black 46%, transparent);
   --color-chart-1: oklch(74% 0.13 249);
   --color-chart-2: oklch(73% 0.15 154);
   --color-chart-3: oklch(81% 0.12 88);
@@ -440,6 +464,197 @@ body {
     color: var(--color-danger);
   }
 
+  .form-tabs-row {
+    @apply mb-6 flex gap-4 border-b;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .form-tab {
+    @apply border-b-2 px-4 py-3 text-sm font-medium transition-colors;
+  }
+
+  .form-tab-active {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+
+  .form-tab-inactive {
+    border-color: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .form-tab-inactive:hover {
+    color: var(--color-text);
+  }
+
+  .form-callout {
+    @apply rounded-lg border p-4 text-sm;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 88%,
+      var(--color-surface-elevated) 12%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+    color: var(--color-text-muted);
+  }
+
+  .form-callout-emphasis {
+    color: var(--color-text);
+  }
+
+  .form-preview {
+    @apply rounded-lg border p-4;
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 48%,
+      var(--color-surface-elevated) 52%
+    );
+    border-color: color-mix(in srgb, var(--color-brand) 18%, var(--color-border));
+  }
+
+  .form-preview-label {
+    @apply text-sm;
+    color: var(--color-text-muted);
+  }
+
+  .form-preview-value {
+    @apply text-lg font-bold;
+    color: var(--color-brand);
+  }
+
+  .import-panel {
+    @apply rounded-2xl border;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 88%,
+      var(--color-surface-elevated) 12%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-panel-header {
+    @apply border-b px-5 py-4 sm:px-6;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .import-kicker {
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em];
+    color: var(--color-text-muted);
+  }
+
+  .import-title {
+    @apply text-lg font-semibold;
+    color: var(--color-text);
+  }
+
+  .import-description {
+    @apply text-sm;
+    color: var(--color-text-muted);
+  }
+
+  .import-card {
+    @apply rounded-xl border px-3 py-2.5;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+  }
+
+  .import-card-label {
+    @apply text-xs font-medium;
+    color: var(--color-text-muted);
+  }
+
+  .import-card-value {
+    @apply mt-1 text-sm font-semibold;
+    color: var(--color-text);
+  }
+
+  .import-dropzone {
+    @apply rounded-2xl border border-dashed p-8 transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 92%, transparent);
+  }
+
+  .import-dropzone:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 24%, var(--color-border));
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 18%,
+      var(--color-surface-elevated) 82%
+    );
+  }
+
+  .import-dropzone-icon {
+    @apply flex h-12 w-12 items-center justify-center rounded-full;
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 54%,
+      var(--color-surface-subtle) 46%
+    );
+    color: var(--color-brand);
+  }
+
+  .import-secondary-action {
+    @apply rounded-full border px-4 py-2 text-sm font-medium transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 92%, transparent);
+    color: var(--color-text);
+  }
+
+  .import-secondary-action:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 26%,
+      var(--color-surface-elevated) 74%
+    );
+    border-color: color-mix(in srgb, var(--color-brand) 18%, var(--color-border));
+  }
+
+  .import-list {
+    @apply rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-list-row {
+    @apply flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 86%,
+      var(--color-surface-elevated) 14%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .import-list-icon {
+    @apply flex h-10 w-10 items-center justify-center rounded-full shadow-sm;
+    background: var(--color-surface-elevated);
+    color: var(--color-text-muted);
+  }
+
+  .import-status-pill {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  .import-status-pill-success {
+    background: color-mix(in srgb, var(--color-success) 16%, transparent);
+    color: color-mix(in srgb, var(--color-success) 84%, var(--color-text) 16%);
+  }
+
+  .import-status-pill-warning {
+    background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+    color: color-mix(in srgb, var(--color-warning) 84%, var(--color-text) 16%);
+  }
+
+  .import-status-pill-danger {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 84%, var(--color-text) 16%);
+  }
+
+  .import-actions {
+    @apply flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
   .checkbox-input {
     @apply h-4 w-4 cursor-pointer rounded-md border transition-colors;
     background: var(--color-surface-elevated);
@@ -755,7 +970,7 @@ body {
   }
 
   .app-nav-brand {
-    @apply flex items-center gap-2;
+    @apply relative flex items-center gap-2;
   }
 
   .app-nav-links {
@@ -827,14 +1042,44 @@ body {
     transform: scaleX(1);
   }
 
-  .theme-toggle-group {
-    @apply inline-flex items-center rounded-full border p-1;
+  .theme-menu {
+    @apply relative;
+  }
+
+  .theme-menu-trigger {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-2 transition-all duration-200;
     background: color-mix(
       in srgb,
       var(--color-surface-elevated) 88%,
       transparent
     );
     border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+    color: var(--color-text);
+    box-shadow: 0 12px 24px -24px
+      color-mix(in srgb, var(--color-text) 50%, transparent);
+  }
+
+  .theme-menu-trigger:hover,
+  .theme-menu-trigger-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 52%,
+      var(--color-surface-elevated) 48%
+    );
+    border-color: color-mix(in srgb, var(--color-brand) 22%, var(--color-border));
+  }
+
+  .theme-menu-popover {
+    @apply absolute left-0 top-full mt-2 min-w-44 rounded-2xl border p-1.5;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 96%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    box-shadow: 0 24px 56px -32px
+      color-mix(in srgb, var(--color-text) 42%, transparent);
+    backdrop-filter: blur(16px);
   }
 
   @media (max-width: 1100px) {
@@ -855,21 +1100,27 @@ body {
     }
   }
 
-  .theme-toggle-button {
-    @apply inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150;
+  .theme-menu-item {
+    @apply flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150;
     color: var(--color-text-muted);
   }
 
-  .theme-toggle-button:hover {
+  .theme-menu-item:hover {
     background: color-mix(in srgb, var(--color-brand-muted) 44%, transparent);
     color: var(--color-text);
   }
 
-  .theme-toggle-button-active {
-    background: var(--color-surface-elevated);
+  .theme-menu-item-label {
+    @apply flex items-center gap-2;
+  }
+
+  .theme-menu-item-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 50%,
+      var(--color-surface-elevated) 50%
+    );
     color: var(--color-brand);
-    box-shadow: 0 10px 22px -18px
-      color-mix(in srgb, var(--color-brand) 68%, transparent);
   }
 
   .income-detail-tab {
