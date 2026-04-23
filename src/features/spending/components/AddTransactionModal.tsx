@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { budgetService } from '@/features/budget/services/budgetService';
 import type { BudgetApiResponse } from '@/features/budget/types/budgetApi';
 import { Button } from '@/shared/components/Button';
+import { CustomDropdown } from '@/shared/components/CustomDropdown';
+import type { DropdownOption } from '@/shared/components/CustomDropdown';
 import { Modal } from '@/shared/components/Modal';
 import { formatCurrency } from '@/shared/utils/currency';
 import { getTodayDateOnly } from '@/shared/utils/dateOnly';
@@ -22,6 +24,11 @@ const ACCOUNTS = [
   'Capital One',
   'Bank of America',
 ];
+
+const ACCOUNT_OPTIONS: DropdownOption[] = ACCOUNTS.map((account) => ({
+  value: account,
+  label: account,
+}));
 
 type TabType = 'manual' | 'upload';
 
@@ -145,6 +152,18 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const amount = parseFloat(formData.amount) || 0;
   const isUploadMode = !isEditMode && activeTab === 'upload';
+  const budgetOptions: DropdownOption[] = isLoadingBudgets
+    ? [{ value: '', label: 'Loading budgets...' }]
+    : [
+        {
+          value: '',
+          label: 'Select budget item (or leave uncategorized)',
+        },
+        ...budgets.map((budget) => ({
+          value: String(budget.id),
+          label: `${budget.expense_category} • ${budget.expense_label} (${budget.expense_type})`,
+        })),
+      ];
   const modalTitle = isEditMode
     ? 'Edit Transaction'
     : isUploadMode
@@ -193,27 +212,26 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Account</label>
-              <select
+              <CustomDropdown
                 value={formData.account}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, account: e.target.value }))
+                options={ACCOUNT_OPTIONS}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, account: value }))
                 }
-                className={`${inputBaseClass} rounded-full px-4 py-3 text-base`}
-              >
-                {ACCOUNTS.map((acc) => (
-                  <option key={acc} value={acc}>
-                    {acc}
-                  </option>
-                ))}
-              </select>
+                triggerClassName="px-4 py-3 text-base"
+              />
             </div>
 
             <div>
               <label className={labelClass}>Budget Item</label>
-              <select
-                value={formData.budgetId ?? ''}
-                onChange={(e) => {
-                  const value = e.target.value;
+              <CustomDropdown
+                value={formData.budgetId == null ? '' : String(formData.budgetId)}
+                options={budgetOptions}
+                onChange={(value) => {
+                  if (isLoadingBudgets) {
+                    return;
+                  }
+
                   if (!value) {
                     setFormData((prev) => ({
                       ...prev,
@@ -224,7 +242,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                     }));
                   } else {
                     const selectedBudget = budgets.find(
-                      (b) => b.id === parseInt(value, 10),
+                      (budget) => budget.id === parseInt(value, 10),
                     );
                     if (selectedBudget) {
                       setFormData((prev) => ({
@@ -237,35 +255,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                     }
                   }
                 }}
-                disabled={isLoadingBudgets}
-                className={`${inputBaseClass} rounded-full px-4 py-3 text-base`}
-              >
-                <option value="">
-                  {isLoadingBudgets
-                    ? 'Loading budgets...'
-                    : 'Select budget item (or leave uncategorized)'}
-                </option>
-
-                {/* Group budgets by category */}
-                {Array.from(
-                  budgets.reduce((acc, budget) => {
-                    const category = budget.expense_category;
-                    if (!acc.has(category)) {
-                      acc.set(category, []);
-                    }
-                    acc.get(category)!.push(budget);
-                    return acc;
-                  }, new Map<string, BudgetApiResponse[]>()),
-                ).map(([category, categoryBudgets]) => (
-                  <optgroup key={category} label={category}>
-                    {categoryBudgets.map((budget) => (
-                      <option key={budget.id} value={budget.id}>
-                        {budget.expense_label} ({budget.expense_type})
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+                triggerClassName="px-4 py-3 text-base"
+              />
             </div>
           </div>
 
