@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BiRepeat } from 'react-icons/bi';
+import { budgetModalTheme } from '@/shared/theme';
 
 interface AccrualToggleButtonProps {
   onToggle: (isAccrual: boolean) => void;
@@ -22,10 +23,10 @@ export const AccrualToggleButton: React.FC<AccrualToggleButtonProps> = ({
     <button
       onClick={handleClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+      className={`${budgetModalTheme.toggleButton} disabled:opacity-50 ${
         isActive
-          ? 'bg-purple-100 text-purple-700 hover:bg-purple-200 ring-1 ring-purple-300 disabled:opacity-50'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50'
+          ? `${budgetModalTheme.toggleButtonActive} ${budgetModalTheme.reserveToggleActive}`
+          : budgetModalTheme.toggleButtonInactive
       }`}
       title={
         isActive

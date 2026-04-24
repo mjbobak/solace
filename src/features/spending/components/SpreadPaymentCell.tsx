@@ -9,6 +9,7 @@ import {
   getSpreadPaymentConfig,
 } from '@/features/spending/utils/spreadPayments';
 import { Tooltip } from '@/shared/components/Tooltip';
+import { budgetModalTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 
 interface SpreadPaymentCellProps {
@@ -43,7 +44,7 @@ export const SpreadPaymentCell: React.FC<SpreadPaymentCellProps> = ({
     return (
       <button
         onClick={(event) => onEdit(transaction, event.currentTarget)}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer bg-gray-100 text-gray-600 hover:bg-gray-200"
+        className={`${budgetModalTheme.toggleButton} ${budgetModalTheme.toggleButtonInactive}`}
         title="Spread this payment over multiple months"
       >
         <BiRepeat size={14} />
@@ -66,7 +67,7 @@ export const SpreadPaymentCell: React.FC<SpreadPaymentCellProps> = ({
     <Tooltip content={tooltipContent} stacked>
       <button
         onClick={(event) => onEdit(transaction, event.currentTarget)}
-        className="inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full bg-purple-50 px-2.5 py-1 text-left text-xs font-medium text-purple-900 ring-1 ring-inset ring-purple-300 transition-all hover:bg-purple-100"
+        className={`${budgetModalTheme.toggleButton} ${budgetModalTheme.toggleButtonActive} ${budgetModalTheme.reserveToggleActive} max-w-full overflow-hidden text-left`}
         title="Edit payment spread"
       >
         <BiRepeat size={14} className="shrink-0" />

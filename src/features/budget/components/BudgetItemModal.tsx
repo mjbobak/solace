@@ -7,6 +7,7 @@ import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import { Button } from '@/shared/components/Button';
 import { CustomDropdown } from '@/shared/components/CustomDropdown';
 import type { DropdownOption } from '@/shared/components/CustomDropdown';
+import { Input, Textarea } from '@/shared/components/Input';
 import { Modal } from '@/shared/components/Modal';
 import { budgetModalTheme } from '@/shared/theme';
 import type { ExpenseCategory } from '@/shared/types/category';
@@ -188,9 +189,7 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Expense Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Expense Type
-          </label>
+          <label className="form-label">Expense Type</label>
           <CustomDropdown
             value={formData.expenseType}
             options={expenseTypes.map((type) => ({ value: type, label: type }))}
@@ -202,9 +201,7 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
 
         {/* Expense Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Expense Category
-          </label>
+          <label className="form-label">Expense Category</label>
           <CustomDropdown
             value={formData.expenseCategory}
             options={
@@ -232,35 +229,29 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
 
         {/* Expense Label */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Expense Label
-          </label>
-          <input
+          <Input
             type="text"
             value={formData.expenseLabel}
             onChange={(e) => handleChange('expenseLabel', e.target.value)}
             placeholder="e.g., Mortgage, Groceries"
-            className="w-full px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            label="Expense Label"
+            error={errors.expenseLabel}
+            className="rounded-full text-sm"
           />
-          {errors.expenseLabel && (
-            <p className="text-xs text-red-600 mt-1">{errors.expenseLabel}</p>
-          )}
         </div>
 
         {/* Expense Label Note */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Expense Label Note (Optional)
-          </label>
-          <textarea
+          <Textarea
             value={formData.expenseLabelNote}
             onChange={(e) => handleChange('expenseLabelNote', e.target.value)}
             placeholder="e.g., Diapers, Creams, Wipes, etc."
             rows={2}
             maxLength={500}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            label="Expense Label Note (Optional)"
+            className="text-sm"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="mt-1 text-sm text-muted">
             This note will appear as a tooltip when hovering over the expense
             label
           </p>
@@ -268,45 +259,41 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
 
         {/* Budget Amount Inputs */}
         <div className="space-y-3">
-          <p className="text-xs text-gray-600">
+          <p className="text-sm text-muted">
             Enter either monthly or annual amount - the other will
             auto-calculate
           </p>
 
           {/* Monthly Amount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Monthly Amount
-            </label>
-            <input
+            <Input
               type="number"
               value={formData.monthlyInput}
               onChange={(e) => handleMonthlyChange(e.target.value)}
               placeholder="0.00"
               min="0"
               step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              label="Monthly Amount"
+              className="rounded-full text-sm"
             />
           </div>
 
           {/* Annual Amount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Annual Amount
-            </label>
-            <input
+            <Input
               type="number"
               value={formData.annualInput}
               onChange={(e) => handleAnnualChange(e.target.value)}
               placeholder="0.00"
               min="0"
               step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              label="Annual Amount"
+              className="rounded-full text-sm"
             />
           </div>
 
           {errors.budgeted && (
-            <p className="text-xs text-red-600 mt-1">{errors.budgeted}</p>
+            <p className="form-error">{errors.budgeted}</p>
           )}
         </div>
 
@@ -314,12 +301,10 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
         <div className="space-y-3 pt-2">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <label className="text-sm font-medium text-gray-700">
-                Investment
-              </label>
+              <label className="text-sm font-medium text-muted">Investment</label>
               <BsInfoCircle
                 size={14}
-                className="text-gray-400 hover:text-gray-600 cursor-help"
+                className="cursor-help text-muted transition-colors hover:text-app"
                 title="Investment items flow into wealth and investment reporting even if they live under another expense category"
               />
             </div>
@@ -344,12 +329,12 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-muted">
                 Reserve Monthly
               </label>
               <BsInfoCircle
                 size={14}
-                className="text-gray-400 hover:text-gray-600 cursor-help"
+                className="cursor-help text-muted transition-colors hover:text-app"
                 title="Use for bills paid less often than monthly so you can reserve a monthly amount (e.g., taxes, insurance, annual subscriptions)"
               />
             </div>
@@ -375,28 +360,28 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
 
         {/* Edit Mode: Show read-only metrics */}
         {isEditMode && item && (
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2 border border-gray-200">
+          <div className="surface-subtle space-y-2 p-4">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Spent:</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-muted">Spent:</span>
+              <span className="font-semibold text-app">
                 {formatCurrency(item.spent, '$')}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Remaining:</span>
+              <span className="text-muted">Remaining:</span>
               <span
                 className={`font-semibold ${
-                  item.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'
+                  item.remaining < 0 ? 'text-danger' : 'text-success'
                 }`}
               >
                 {formatCurrency(item.remaining, '$')}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">% Used:</span>
+              <span className="text-muted">% Used:</span>
               <span
                 className={`font-semibold ${
-                  item.percentage > 100 ? 'text-rose-600' : 'text-gray-900'
+                  item.percentage > 100 ? 'text-danger' : 'text-app'
                 }`}
               >
                 {item.percentage.toFixed(1)}%
