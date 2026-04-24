@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { LuChevronDown, LuChevronRight, LuEllipsis } from 'react-icons/lu';
+import { LuEllipsis } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
+
 import type {
   IncomeOccurrence,
   ProjectedIncomeComponent,
@@ -74,39 +75,47 @@ export function IncomeSourceRow({
     }
   };
 
+  const toggleExpansion = () => {
+    onToggleExpansion(source.id);
+  };
+
+  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLTableRowElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    toggleExpansion();
+  };
+
   return (
     <React.Fragment>
-      <tr className="border-b section-divider table-row-hover align-top transition-colors">
+      <tr
+        className="border-b section-divider table-row-hover align-top transition-colors cursor-pointer"
+        onClick={toggleExpansion}
+        onKeyDown={handleRowKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-expanded={isExpanded}
+        aria-label={`${isExpanded ? 'Collapse' : 'Expand'} income source ${source.name}`}
+      >
         <td className="px-5 py-3.5">
-          <button
-            type="button"
-            className="flex items-start gap-3 text-left"
-            onClick={() => onToggleExpansion(source.id)}
-          >
-            <span className="mt-1 text-muted">
-              {isExpanded ? (
-                <LuChevronDown className="h-4 w-4" />
-              ) : (
-                <LuChevronRight className="h-4 w-4" />
-              )}
+          <span>
+            <span className="block text-sm font-semibold text-app">
+              {source.name}
             </span>
-            <span>
-              <span className="block text-sm font-semibold text-app">
-                {source.name}
-              </span>
-              <span className="mt-1 block text-xs text-muted">
-                Expand to review pay history and bonus events
-              </span>
+            <span className="mt-1 block text-xs text-muted">
+              Expand to review pay history and bonus events
             </span>
-          </button>
+          </span>
         </td>
-        <td className="px-6 py-5 align-middle">
+        <td className="px-4 py-5 align-middle">
           <IncomeAmountStack
             primaryValue={source.totals.plannedGross}
             secondaryValue={source.totals.plannedGross / 12}
           />
         </td>
-        <td className="px-6 py-5 align-middle">
+        <td className="px-4 py-5 align-middle">
           <IncomeAmountStack
             primaryValue={source.totals.plannedNet}
             secondaryValue={source.totals.plannedNet / 12}
@@ -118,7 +127,10 @@ export function IncomeSourceRow({
               <button
                 type="button"
                 className="icon-button p-1 hover:bg-transparent"
-                onClick={(event) => onToggleActionMenu(event.currentTarget)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onToggleActionMenu(event.currentTarget);
+                }}
                 title={`More actions for ${source.name}`}
                 aria-label={`More actions for income source ${source.name}`}
                 aria-haspopup="menu"
