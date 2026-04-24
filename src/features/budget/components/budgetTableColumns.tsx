@@ -35,10 +35,10 @@ export function getBudgetTableColumns(
       header: 'Type',
       accessor: (row) => (
         <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+          className={`${budgetTableTheme.typeBadge} ${
             row.expenseType === 'ESSENTIAL'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-purple-100 text-purple-700'
+              ? budgetTableTheme.typeBadgeEssential
+              : budgetTableTheme.typeBadgeFunsies
           }`}
         >
           {row.expenseType}

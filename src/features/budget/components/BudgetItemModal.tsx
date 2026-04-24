@@ -8,6 +8,7 @@ import { Button } from '@/shared/components/Button';
 import { CustomDropdown } from '@/shared/components/CustomDropdown';
 import type { DropdownOption } from '@/shared/components/CustomDropdown';
 import { Modal } from '@/shared/components/Modal';
+import { budgetModalTheme } from '@/shared/theme';
 import type { ExpenseCategory } from '@/shared/types/category';
 import { formatCurrency } from '@/shared/utils/currency';
 
@@ -325,10 +326,10 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
             <button
               type="button"
               onClick={() => handleChange('isInvestment', !formData.isInvestment)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`${budgetModalTheme.toggleButton} ${
                 formData.isInvestment
-                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 ring-1 ring-emerald-300'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? `${budgetModalTheme.toggleButtonActive} ${budgetModalTheme.investmentToggleActive}`
+                  : budgetModalTheme.toggleButtonInactive
               }`}
               title={
                 formData.isInvestment
@@ -355,10 +356,10 @@ export const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
             <button
               type="button"
               onClick={() => handleChange('isAccrual', !formData.isAccrual)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`${budgetModalTheme.toggleButton} ${
                 formData.isAccrual
-                  ? 'bg-slate-200 text-slate-900 hover:bg-slate-300 ring-1 ring-slate-400'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? `${budgetModalTheme.toggleButtonActive} ${budgetModalTheme.reserveToggleActive}`
+                  : budgetModalTheme.toggleButtonInactive
               }`}
               title={
                 formData.isAccrual

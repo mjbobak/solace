@@ -86,10 +86,21 @@ export const budgetTableTheme = {
   amount: 'budget-table-amount',
   muted: 'budget-table-muted',
   divider: 'budget-table-divider',
+  typeBadge: 'budget-table-type-badge',
+  typeBadgeEssential: 'budget-table-type-badge-essential',
+  typeBadgeFunsies: 'budget-table-type-badge-funsies',
   reserveButton: 'budget-table-reserve-button',
   reserveButtonActive: 'budget-table-reserve-button-active',
   reserveButtonInactive: 'budget-table-reserve-button-inactive',
   spentLink: 'budget-table-spent-link',
   danger: 'budget-table-danger',
   investment: 'budget-table-investment',
+} as const;
+
+export const budgetModalTheme = {
+  toggleButton: 'budget-modal-toggle-button',
+  toggleButtonActive: 'budget-modal-toggle-button-active',
+  toggleButtonInactive: 'budget-modal-toggle-button-inactive',
+  investmentToggleActive: 'budget-modal-investment-toggle-active',
+  reserveToggleActive: 'budget-modal-reserve-toggle-active',
 } as const;
