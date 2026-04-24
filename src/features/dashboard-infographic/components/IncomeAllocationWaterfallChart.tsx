@@ -38,9 +38,8 @@ interface IncomeAllocationWaterfallChartProps {
 }
 
 const TOTAL_BAR_CLASS = budgetSummaryTheme.allocationBlue;
-const TRACK_CLASS_NAME = 'border border-slate-200/80 bg-slate-100';
-const VALUE_PILL_CLASS_NAME =
-  'inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg bg-white/95 px-2.5 py-1 shadow-md ring-1 ring-slate-200/80';
+const TRACK_CLASS_NAME = budgetSummaryTheme.waterfallTrack;
+const VALUE_PILL_CLASS_NAME = budgetSummaryTheme.waterfallValuePill;
 const INSIDE_LABEL_MIN_WIDTH_PERCENT = 8;
 const OUTSIDE_LABEL_GAP_PX = 8;
 const MONTHLY_LABEL_MIN_WIDTH_PX = 148;
@@ -150,10 +149,10 @@ function renderBarValueContent(
     ? 'pointer-events-none absolute inset-y-0.5 flex items-center px-3'
     : 'pointer-events-none absolute inset-y-1/2 z-10 flex -translate-y-1/2 items-center';
   const labelClassName = VALUE_PILL_CLASS_NAME;
-  const amountClassName = 'text-[11px] font-semibold text-slate-900';
+  const amountClassName = budgetSummaryTheme.waterfallValueAmount;
   const periodClassName = isInside
-    ? 'text-[10px] font-semibold text-slate-600'
-    : 'text-[10px] font-semibold text-slate-500';
+    ? budgetSummaryTheme.waterfallValuePeriodInside
+    : budgetSummaryTheme.waterfallValuePeriodOutside;
   const placementStyle =
     placement === 'outside-right'
       ? { left: `calc(100% + ${OUTSIDE_LABEL_GAP_PX}px)` }
@@ -296,7 +295,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
                 {isInteractive ? (
                   <button
                     type="button"
-                    className="absolute inset-y-0.5 rounded-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 focus-visible:ring-inset"
+                    className={`absolute inset-y-0.5 rounded-xl focus:outline-none ${budgetSummaryTheme.waterfallInteractiveOverlay}`}
                     style={{
                       left: `${leftPercent}%`,
                       width: `${widthPercent}%`,
@@ -339,7 +338,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
           {onTotalSelect != null ? (
             <button
               type="button"
-              className="absolute inset-0 rounded-2xl transition hover:bg-slate-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 focus-visible:ring-inset"
+              className={`absolute inset-0 rounded-2xl focus:outline-none ${budgetSummaryTheme.waterfallTotalOverlay}`}
               aria-label={totalActionLabel ?? totalLabel}
               onClick={onTotalSelect}
             />

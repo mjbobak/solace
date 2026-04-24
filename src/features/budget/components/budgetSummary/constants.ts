@@ -6,6 +6,7 @@ export type SummaryView = 'chart' | 'numbers';
 
 export const paletteBlue = budgetSummaryTheme.allocationBlue;
 export const paletteBlueStrong = budgetSummaryTheme.allocationBlueStrong;
+export const paletteGreen = budgetSummaryTheme.allocationGreen;
 export const paletteOrange = budgetSummaryTheme.allocationOrange;
 export const palettePurple = budgetSummaryTheme.allocationPurple;
 export const palettePurpleText = budgetSummaryTheme.allocationPurpleText;
@@ -13,13 +14,12 @@ export const palettePurpleTextMuted =
   budgetSummaryTheme.allocationPurpleTextMuted;
 export const compactCardContentHeight = 'min-h-[4rem]';
 export const compactSummaryLabelClass =
-  'mb-1 text-[11px] uppercase tracking-[0.12em] text-gray-500';
+  `mb-1 text-[11px] uppercase tracking-[0.12em] ${budgetSummaryTheme.summaryTextMuted}`;
 export const compactSummaryMetaClass =
-  'text-[11px] uppercase tracking-[0.12em] text-gray-500';
-export const pillValueTextClass = 'text-slate-800';
-export const pillLabelTextClass = 'text-slate-600';
-export const amountPillClassName =
-  'inline-flex items-baseline gap-2 whitespace-nowrap rounded-lg bg-white/95 px-2.5 py-1 shadow-md ring-1 ring-slate-200/80';
+  `text-[11px] uppercase tracking-[0.12em] ${budgetSummaryTheme.summaryTextMuted}`;
+export const pillValueTextClass = budgetSummaryTheme.waterfallValueAmount;
+export const pillLabelTextClass = budgetSummaryTheme.waterfallValuePeriodInside;
+export const amountPillClassName = budgetSummaryTheme.waterfallValuePill;
 export const cardIconContainerClass = budgetSummaryTheme.iconContainer;
 export const cardIconClass = budgetSummaryTheme.icon;
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { LuWallet } from 'react-icons/lu';
 
+import { budgetSummaryTheme } from '@/shared/theme';
+
 import { BudgetUtilizationChart } from './BudgetUtilizationChart';
 import { BudgetUtilizationNumbers } from './BudgetUtilizationNumbers';
 import { cardIconClass, getCardVariants, type SummaryView } from './constants';
@@ -50,7 +52,7 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
     variants={getCardVariants(1)}
     role="region"
     aria-label="Budget Utilization"
-    className="h-full rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-lg"
+    className={budgetSummaryTheme.summaryCard}
   >
     <SummaryCardHeader
       icon={<LuWallet className={cardIconClass} />}

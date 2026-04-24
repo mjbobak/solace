@@ -6,7 +6,7 @@ import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import { isInvestmentBudgetEntry } from '@/features/budget/utils/investmentCategories';
 import type { Column } from '@/shared/components/data/Table';
 import { Tooltip } from '@/shared/components/Tooltip';
-import { formatCurrency } from '@/shared/utils/currency';
+import { budgetTableTheme } from '@/shared/theme';
 
 interface GetColumnsParams {
   handleEdit: (item: BudgetEntry) => void;
@@ -54,10 +54,10 @@ export function getBudgetTableColumns(
       accessor: (row) => (
         <button
           onClick={() => handleToggleAccrual(row.id)}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+          className={`${budgetTableTheme.reserveButton} ${
             row.isAccrual
-              ? 'bg-slate-200 text-slate-900'
-              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              ? budgetTableTheme.reserveButtonActive
+              : budgetTableTheme.reserveButtonInactive
           }`}
           title={
             row.isAccrual
@@ -122,9 +122,13 @@ export function getBudgetTableColumns(
         <div className="flex flex-col items-end leading-tight">
           <span className="font-semibold">
             {formatRoundedCurrency(row.budgeted * 12)}
-            <span className="ml-1 text-xs font-normal text-gray-500">/yr</span>
+            <span
+              className={`ml-1 text-xs font-normal ${budgetTableTheme.muted}`}
+            >
+              /yr
+            </span>
           </span>
-          <span className="text-xs text-gray-500">
+          <span className={`text-xs ${budgetTableTheme.muted}`}>
             {formatRoundedCurrency(row.budgeted)}
             <span className="ml-1">/mo</span>
           </span>
@@ -139,11 +143,11 @@ export function getBudgetTableColumns(
       key: 'spent',
       header: 'Spent',
       accessor: (row) => (
-        <div className="border-l border-gray-300 pl-3">
+        <div className={`${budgetTableTheme.divider} pl-3`}>
           <button
             type="button"
             onClick={() => handleViewSpending(row)}
-            className="font-medium text-blue-700 transition-colors hover:text-blue-900 hover:underline"
+            className={`font-medium transition-colors hover:underline ${budgetTableTheme.spentLink}`}
             aria-label={`View transactions for ${row.expenseLabel}`}
             title={`View transactions for ${row.expenseLabel}`}
           >
@@ -164,9 +168,9 @@ export function getBudgetTableColumns(
         const isInvestment = isInvestmentBudgetEntry(row);
         const colorClass = isNegative
           ? isInvestment
-            ? 'text-emerald-600'
-            : 'text-red-600'
-          : 'text-gray-900';
+            ? budgetTableTheme.investment
+            : budgetTableTheme.danger
+          : budgetTableTheme.amount;
 
         return (
           <span className={`font-semibold ${colorClass}`}>
@@ -187,9 +191,9 @@ export function getBudgetTableColumns(
         const isInvestment = isInvestmentBudgetEntry(row);
         const colorClass = isOverBudget
           ? isInvestment
-            ? 'text-emerald-600'
-            : 'text-red-600'
-          : 'text-gray-900';
+            ? budgetTableTheme.investment
+            : budgetTableTheme.danger
+          : budgetTableTheme.amount;
 
         return (
           <span className={`font-semibold ${colorClass}`}>

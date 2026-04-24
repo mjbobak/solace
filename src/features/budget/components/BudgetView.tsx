@@ -155,7 +155,6 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
     const isBudgetFiltered =
       expenseTypeFilter !== 'ALL' || expenseCategoryFilter.length > 0;
     const totals = useBudgetCalculations(budgetData);
-    const overallTotals = useBudgetCalculations(budgetEntries);
     const selectedBudgetData =
       selectedBudgetIds.size > 0
         ? budgetData.filter((entry) => selectedBudgetIds.has(entry.id))

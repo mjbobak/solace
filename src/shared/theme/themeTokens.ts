@@ -53,17 +53,43 @@ export const chartTheme = {
 } as const;
 
 export const budgetSummaryTheme = {
-  allocationBlue: 'bg-[#8EC8F4]',
-  allocationBlueStrong: 'bg-[#3B82D6]',
-  allocationGreen: 'bg-[#6FC8BE]',
-  allocationOrange: 'bg-[#F2A36B]',
-  allocationPurple: 'bg-[#8F74DD]',
-  allocationPurpleText: 'text-[#6F56C5]',
-  allocationPurpleTextMuted: 'text-[#6F56C5]/75',
-  iconContainer:
-    'rounded-lg bg-gradient-to-br from-sky-50 to-slate-100 p-2',
-  icon: 'h-4 w-4 text-slate-500',
+  allocationBlue: 'bg-allocation-blue',
+  allocationBlueStrong: 'bg-allocation-blue-strong',
+  allocationGreen: 'bg-allocation-green',
+  allocationOrange: 'bg-allocation-orange',
+  allocationPurple: 'bg-allocation-purple',
+  allocationPurpleText: 'text-allocation-purple',
+  allocationPurpleTextMuted: 'text-allocation-purple-muted',
+  summaryCard: 'budget-summary-card',
+  summaryTitle: 'budget-summary-title',
+  summaryText: 'budget-summary-text',
+  summaryTextMuted: 'budget-summary-text-muted',
+  summaryValue: 'budget-summary-value',
+  summaryDanger: 'budget-summary-danger',
+  summaryDangerMuted: 'budget-summary-danger-muted',
+  iconContainer: 'budget-summary-icon-tile',
+  icon: 'budget-summary-icon',
+  controlButton: 'budget-summary-control-button',
+  waterfallTrack: 'allocation-waterfall-track',
+  waterfallValuePill: 'allocation-waterfall-value-pill',
+  waterfallValueAmount: 'allocation-waterfall-value-amount',
+  waterfallValuePeriodInside: 'allocation-waterfall-value-period-inside',
+  waterfallValuePeriodOutside: 'allocation-waterfall-value-period-outside',
+  waterfallInteractiveOverlay: 'allocation-waterfall-step-overlay',
+  waterfallTotalOverlay: 'allocation-waterfall-total-overlay',
   filteredBadge:
     'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-violet-600 shadow-sm backdrop-blur',
   filteredBadgeIcon: 'h-3 w-3 text-sky-400',
+} as const;
+
+export const budgetTableTheme = {
+  amount: 'budget-table-amount',
+  muted: 'budget-table-muted',
+  divider: 'budget-table-divider',
+  reserveButton: 'budget-table-reserve-button',
+  reserveButtonActive: 'budget-table-reserve-button-active',
+  reserveButtonInactive: 'budget-table-reserve-button-inactive',
+  spentLink: 'budget-table-spent-link',
+  danger: 'budget-table-danger',
+  investment: 'budget-table-investment',
 } as const;

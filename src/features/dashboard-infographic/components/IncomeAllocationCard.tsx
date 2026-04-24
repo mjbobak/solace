@@ -310,7 +310,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
 
         <button
           type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+          className={budgetSummaryTheme.controlButton}
           onClick={() => setValueDisplayPeriod(nextValueDisplayPeriod)}
           aria-label={valueToggleLabel}
           title={valueToggleLabel}

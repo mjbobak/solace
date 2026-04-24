@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Tooltip } from '@/shared/components/Tooltip';
+import { budgetSummaryTheme } from '@/shared/theme';
 
 import {
   amountPillClassName,
@@ -45,7 +46,9 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
   const spentFillWidth =
     spentWidth > 0 ? `max(0px, calc(${spentWidth}% - 4px))` : '0%';
   const remainingOverlay = isOverBudget ? (
-    <span className="truncate text-[13px] font-semibold uppercase tracking-[0.14em] text-red-600">
+    <span
+      className={`truncate text-[13px] font-semibold uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryDanger}`}
+    >
       {`${overBudgetSummary} over`}
     </span>
   ) : (
@@ -68,21 +71,37 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
       className={`flex flex-1 flex-col justify-start pt-0 ${compactCardContentHeight}`}
     >
       <div className="space-y-1">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.14em] text-gray-400">
+        <div
+          className={`flex flex-wrap items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryTextMuted}`}
+        >
           <span>
-            <span className="text-gray-500">{spendBasisLabel}:</span>{' '}
-            <span className="text-gray-600">{incomeSummary}</span> income /{' '}
-            <span className="text-gray-600">{budgetedSummary}</span> budget /{' '}
-            <span className="text-gray-600">{spentSummary}</span> spent
+            <span>{spendBasisLabel}:</span>{' '}
+            <span className={budgetSummaryTheme.summaryText}>
+              {incomeSummary}
+            </span>{' '}
+            income /{' '}
+            <span className={budgetSummaryTheme.summaryText}>
+              {budgetedSummary}
+            </span>{' '}
+            budget /{' '}
+            <span className={budgetSummaryTheme.summaryText}>
+              {spentSummary}
+            </span>{' '}
+            spent
           </span>
           <span>
-            <span className="text-gray-600">{usedPercent.toFixed(0)}%</span> used
+            <span className={budgetSummaryTheme.summaryText}>
+              {usedPercent.toFixed(0)}%
+            </span>{' '}
+            used
           </span>
         </div>
       </div>
 
       <div className="mt-2">
-        <div className="relative h-10 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100">
+        <div
+          className={`relative h-10 overflow-hidden rounded-2xl ${budgetSummaryTheme.waterfallTrack}`}
+        >
           <div className={`absolute inset-0 overflow-hidden rounded-2xl ${paletteBlue}`} />
           <div
             className={`absolute inset-y-0.5 left-0.5 overflow-hidden rounded-xl shadow-md ${paletteBlueStrong}`}

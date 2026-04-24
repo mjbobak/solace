@@ -19,8 +19,8 @@ interface CurrencyStackProps {
 
 export const CurrencyStack: React.FC<CurrencyStackProps> = ({
   monthlyAmount,
-  annualClassName = 'text-gray-900',
-  monthlyClassName = 'text-gray-500',
+  annualClassName = budgetSummaryTheme.summaryValue,
+  monthlyClassName = budgetSummaryTheme.summaryTextMuted,
   annualOperator,
   compact = false,
 }) => (
@@ -32,12 +32,14 @@ export const CurrencyStack: React.FC<CurrencyStackProps> = ({
         {formatWholeCurrency(monthlyAmount * 12)}
       </span>
       <span
-        className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-wide text-gray-400`}
+        className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-wide ${budgetSummaryTheme.summaryTextMuted}`}
       >
         annual
       </span>
       {annualOperator ? (
-        <span className="ml-auto hidden h-5 w-5 items-center justify-center rounded-full bg-sky-50 text-slate-400 sm:inline-flex">
+        <span
+          className={`ml-auto hidden h-5 w-5 items-center justify-center rounded-full sm:inline-flex ${budgetSummaryTheme.waterfallValuePill}`}
+        >
           {annualOperator}
         </span>
       ) : null}
@@ -49,7 +51,7 @@ export const CurrencyStack: React.FC<CurrencyStackProps> = ({
         {formatWholeCurrency(monthlyAmount)}
       </span>
       <span
-        className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-wide text-gray-400`}
+        className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-wide ${budgetSummaryTheme.summaryTextMuted}`}
       >
         monthly
       </span>
@@ -80,7 +82,9 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
       <div className="flex items-center gap-2">
         <div className={cardIconContainerClass}>{icon}</div>
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-700">
+          <h3
+            className={`text-sm font-semibold uppercase tracking-wider ${budgetSummaryTheme.summaryTitle}`}
+          >
             {title}
           </h3>
           {showFilteredBadge ? (
@@ -94,7 +98,7 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
 
       <button
         type="button"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+        className={budgetSummaryTheme.controlButton}
         onClick={onToggle}
         aria-label={nextLabel}
         title={nextLabel}

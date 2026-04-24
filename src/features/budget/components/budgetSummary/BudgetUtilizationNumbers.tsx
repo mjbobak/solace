@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { budgetSummaryTheme } from '@/shared/theme';
+
 import {
   compactCardContentHeight,
   compactSummaryLabelClass,
@@ -30,21 +32,21 @@ export const BudgetUtilizationNumbers: React.FC<BudgetUtilizationNumbersProps> =
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       <div>
         <p className={compactSummaryLabelClass}>Income</p>
-        <p className="text-base font-bold text-gray-900">
+        <p className={`text-base font-bold ${budgetSummaryTheme.summaryValue}`}>
           {formatWholeCurrency(income)}
         </p>
         <p className={compactSummaryMetaClass}>{amountContextLabel}</p>
       </div>
       <div>
         <p className={compactSummaryLabelClass}>Budgeted</p>
-        <p className="text-base font-bold text-gray-900">
+        <p className={`text-base font-bold ${budgetSummaryTheme.summaryValue}`}>
           {formatWholeCurrency(budgetedForChart)}
         </p>
         <p className={compactSummaryMetaClass}>{amountContextLabel}</p>
       </div>
       <div>
         <p className={compactSummaryLabelClass}>Spent</p>
-        <p className="text-base font-bold text-gray-900">
+        <p className={`text-base font-bold ${budgetSummaryTheme.summaryValue}`}>
           {formatWholeCurrency(spentForChart)}
         </p>
         <p className={compactSummaryMetaClass}>{amountContextLabel}</p>
@@ -53,14 +55,16 @@ export const BudgetUtilizationNumbers: React.FC<BudgetUtilizationNumbersProps> =
         <p className={compactSummaryLabelClass}>Remaining</p>
         <p
           className={`text-base font-bold ${
-            remainingTotal < 0 ? 'text-red-600' : 'text-gray-900'
+            remainingTotal < 0
+              ? budgetSummaryTheme.summaryDanger
+              : budgetSummaryTheme.summaryValue
           }`}
         >
           {formatWholeCurrency(remainingForChart)}
         </p>
         <p
           className={`${compactSummaryMetaClass} ${
-            remainingTotal < 0 ? 'text-red-600/75' : 'text-gray-500'
+            remainingTotal < 0 ? budgetSummaryTheme.summaryDangerMuted : ''
           }`}
         >
           {amountContextLabel}
@@ -70,7 +74,9 @@ export const BudgetUtilizationNumbers: React.FC<BudgetUtilizationNumbersProps> =
         <p className={compactSummaryLabelClass}>Percent Used</p>
         <p
           className={`text-base font-bold ${
-            usedPercent > 100 ? 'text-red-600' : 'text-gray-900'
+            usedPercent > 100
+              ? budgetSummaryTheme.summaryDanger
+              : budgetSummaryTheme.summaryValue
           }`}
         >
           {usedPercent.toFixed(0)}%
