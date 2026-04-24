@@ -216,6 +216,28 @@ body {
     border-color: color-mix(in srgb, var(--color-border) 84%, transparent);
   }
 
+  .surface-subtle-header {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 88%,
+      var(--color-surface-elevated) 12%
+    );
+  }
+
+  .surface-hover-subtle {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .surface-hover-subtle:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 34%,
+      var(--color-surface-elevated) 66%
+    );
+  }
+
   .login-card {
     @apply w-full max-w-md rounded-2xl border p-8;
     background: color-mix(

@@ -667,6 +667,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
           columns={columns}
           data={paginatedData}
           rowKey={(row) => row.id}
+          hoverRows
           emptyMessage="No transactions found"
           selectable={true}
           selectedIds={selection.selectedIds}

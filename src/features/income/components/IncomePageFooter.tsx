@@ -107,7 +107,7 @@ export function IncomePageFooter({
 
         {/* ── Annual Adjustments segment ── */}
         <div
-          className="relative flex cursor-pointer items-center justify-between gap-5 rounded-l-xl px-6 py-4 transition-colors hover:bg-gray-50/60"
+          className="surface-hover-subtle relative flex cursor-pointer items-center justify-between gap-5 rounded-l-xl px-6 py-4"
           onClick={(e) => togglePopover('adj', e)}
         >
           <div className="min-w-0">
@@ -144,7 +144,7 @@ export function IncomePageFooter({
                   Annual Adjustments
                 </span>
                 <button
-                  className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-sm text-muted hover:bg-gray-200"
+                  className="icon-button flex h-6 w-6 items-center justify-center rounded"
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpenPopover(null);
@@ -183,7 +183,7 @@ export function IncomePageFooter({
                       </span>
                       <div className="flex gap-1.5">
                         <button
-                          className="rounded border border-surface-border px-2 py-0.5 text-xs text-muted hover:bg-gray-50 hover:text-app"
+                          className="surface-hover-subtle rounded border border-surface-border px-2 py-0.5 text-xs text-muted hover:text-app"
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenPopover(null);
@@ -226,7 +226,7 @@ export function IncomePageFooter({
 
         {/* ── Tax-Advantaged Buckets segment ── */}
         <div
-          className="relative flex cursor-pointer items-center justify-between gap-5 border-t px-6 py-4 transition-colors section-divider hover:bg-gray-50/60 md:rounded-r-xl md:border-t-0 md:border-l"
+          className="surface-hover-subtle relative flex cursor-pointer items-center justify-between gap-5 border-t px-6 py-4 section-divider md:rounded-r-xl md:border-t-0 md:border-l"
           onClick={(e) => togglePopover('tax', e)}
         >
           <div className="min-w-0">
@@ -262,7 +262,7 @@ export function IncomePageFooter({
                   Tax-Advantaged Contributions
                 </span>
                 <button
-                  className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-sm text-muted hover:bg-gray-200"
+                  className="icon-button flex h-6 w-6 items-center justify-center rounded"
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpenPopover(null);
@@ -280,7 +280,7 @@ export function IncomePageFooter({
                   return (
                     <div
                       key={def.type}
-                      className="rounded-lg border border-surface-border bg-gray-50/60 p-3"
+                      className="surface-subtle rounded-lg border border-surface-border p-3"
                     >
                       <p className="text-[10.5px] font-medium text-muted">
                         {def.label}

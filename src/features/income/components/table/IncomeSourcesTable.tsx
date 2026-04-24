@@ -89,7 +89,7 @@ export function IncomeSourcesTable({
             <col className="w-[22%]" />
             <col className="w-[4%]" />
           </colgroup>
-          <thead className="border-b section-divider bg-gray-50/50 text-left">
+          <thead className="table-head text-left">
             <tr>
               <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                 Source

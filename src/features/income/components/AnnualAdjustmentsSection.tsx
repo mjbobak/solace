@@ -81,7 +81,7 @@ export function AnnualAdjustmentsSection({
       className="surface-card overflow-hidden p-0"
       aria-label="Annual adjustments"
     >
-      <div className="border-b section-divider bg-gray-50/80 px-4 py-4">
+      <div className="surface-subtle-header border-b section-divider px-4 py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <AnnualAdjustmentsSectionIntro
             title="Year-level cash reconciliations outside employer income"
@@ -100,7 +100,7 @@ export function AnnualAdjustmentsSection({
             <col className="w-[18%]" />
             <col className="w-[16%]" />
           </colgroup>
-          <thead className="border-b section-divider bg-white text-left">
+          <thead className="table-head text-left">
             <tr>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                 Adjustment

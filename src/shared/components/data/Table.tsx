@@ -19,6 +19,7 @@ interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
   onRowClick?: (row: T) => void;
+  hoverRows?: boolean;
   isLoading?: boolean;
   emptyMessage?: string;
   rowKey: (row: T) => string;
@@ -86,6 +87,7 @@ export function Table<T>({
   columns,
   data,
   onRowClick,
+  hoverRows = false,
   isLoading = false,
   emptyMessage = 'No data available',
   rowKey,
@@ -288,9 +290,11 @@ export function Table<T>({
                 } ${
                   onRowClick
                     ? 'table-row-hover cursor-pointer'
-                    : rowIndex % 2 === 0
-                      ? ''
-                      : 'table-row-striped'
+                    : hoverRows
+                      ? 'table-row-hover'
+                      : rowIndex % 2 === 0
+                        ? ''
+                        : 'table-row-striped'
                 }`}
                 onClick={() => onRowClick?.(row)}
               >

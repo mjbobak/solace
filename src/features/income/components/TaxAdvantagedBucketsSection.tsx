@@ -30,7 +30,7 @@ export function TaxAdvantagedBucketsSection({
       className="surface-card overflow-hidden p-0"
       aria-label="Tax-advantaged buckets"
     >
-      <div className="border-b section-divider bg-gray-50/80 px-4 py-3">
+      <div className="surface-subtle-header border-b section-divider px-4 py-3">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           Tax-Advantaged Buckets
         </p>

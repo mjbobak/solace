@@ -76,14 +76,14 @@ export function IncomeSourceRow({
 
   return (
     <React.Fragment>
-      <tr className="border-b section-divider align-top transition-colors hover:bg-gray-50/35">
+      <tr className="border-b section-divider table-row-hover align-top transition-colors">
         <td className="px-5 py-3.5">
           <button
             type="button"
             className="flex items-start gap-3 text-left"
             onClick={() => onToggleExpansion(source.id)}
           >
-            <span className="mt-1 text-gray-300">
+            <span className="mt-1 text-muted">
               {isExpanded ? (
                 <LuChevronDown className="h-4 w-4" />
               ) : (
@@ -117,7 +117,7 @@ export function IncomeSourceRow({
             <div className="relative">
               <button
                 type="button"
-                className="icon-button p-1 text-gray-300 hover:bg-transparent hover:text-gray-400"
+                className="icon-button p-1 hover:bg-transparent"
                 onClick={(event) => onToggleActionMenu(event.currentTarget)}
                 title={`More actions for ${source.name}`}
                 aria-label={`More actions for income source ${source.name}`}
@@ -132,7 +132,7 @@ export function IncomeSourceRow({
       </tr>
 
       {isExpanded && (
-        <tr className="border-b section-divider bg-white">
+        <tr className="border-b section-divider income-history-toggle-row">
           <td colSpan={4} className="px-5 pb-5 pt-2">
             <div>
               <div className="px-1">
