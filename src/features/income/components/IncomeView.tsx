@@ -8,8 +8,9 @@ import { EMPTY_PROJECTION_TOTALS } from '../types/incomeView';
 import { IncomePageFooter } from './IncomePageFooter';
 import { IncomeSourceActionMenu } from './IncomeSourceActionMenu';
 import { IncomeSummary } from './IncomeSummary';
-import { AnnualAdjustmentModal } from './modals/AnnualAdjustmentModal';
 import { AddSourceModal } from './modals/AddSourceModal';
+import { AnnualAdjustmentModal } from './modals/AnnualAdjustmentModal';
+import { AnnualAdjustmentsManagerModal } from './modals/AnnualAdjustmentsManagerModal';
 import { BonusOccurrenceModal } from './modals/BonusOccurrenceModal';
 import { RecurringVersionModal } from './modals/RecurringVersionModal';
 import { RenameSourceModal } from './modals/RenameSourceModal';
@@ -35,8 +36,10 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       versionModalState,
       bonusModalState,
       annualAdjustmentModalState,
+      isAnnualAdjustmentsManagerOpen,
       isTaxAdvantagedInvestmentsModalOpen,
       openAddIncomeModal,
+      openAnnualAdjustmentsManager,
       openAddAnnualAdjustmentModal,
       openTaxAdvantagedInvestmentsModal,
       closeModal,
@@ -111,12 +114,20 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
             projection?.taxAdvantagedInvestments ??
             EMPTY_TAX_ADVANTAGED_INVESTMENTS
           }
-          onAddAdjustment={openAddAnnualAdjustmentModal}
-          onEditAdjustment={openEditAnnualAdjustmentModal}
-          onDeleteAdjustment={(adjustment) => {
+          onManageAdjustments={openAnnualAdjustmentsManager}
+          onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
+        />
+
+        <AnnualAdjustmentsManagerModal
+          isOpen={isAnnualAdjustmentsManagerOpen}
+          adjustments={projection?.annualAdjustments ?? []}
+          plannedAdjustmentTotal={projection?.annualAdjustmentTotals.planned ?? 0}
+          onClose={closeModal}
+          onAdd={openAddAnnualAdjustmentModal}
+          onEdit={openEditAnnualAdjustmentModal}
+          onDelete={(adjustment) => {
             void handleDeleteAnnualAdjustment(adjustment);
           }}
-          onEditTaxAdvantagedInvestments={openTaxAdvantagedInvestmentsModal}
         />
 
         <AddSourceModal

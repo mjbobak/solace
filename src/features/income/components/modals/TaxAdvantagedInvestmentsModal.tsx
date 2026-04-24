@@ -115,7 +115,7 @@ export function TaxAdvantagedInvestmentsModal({
           {TAX_ADVANTAGED_BUCKET_DEFINITIONS.map((bucket) => (
             <div
               key={bucket.type}
-              className="grid gap-3 rounded-xl border border-app bg-white p-4 md:grid-cols-[1.3fr_1fr]"
+              className="surface-card-soft grid gap-3 p-4 md:grid-cols-[1.3fr_1fr]"
             >
               <div>
                 <p className="text-sm font-semibold text-app">{bucket.label}</p>

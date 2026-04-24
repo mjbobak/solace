@@ -34,6 +34,7 @@ export interface EditBonusModalSubmit {
 export type IncomeViewModalState =
   | { type: 'add-source' }
   | { type: 'rename-source'; source: ProjectedIncomeSource }
+  | { type: 'manage-annual-adjustments' }
   | { type: 'add-annual-adjustment' }
   | { type: 'edit-annual-adjustment'; adjustment: AnnualAdjustment }
   | { type: 'add-version'; component: ProjectedIncomeComponent }

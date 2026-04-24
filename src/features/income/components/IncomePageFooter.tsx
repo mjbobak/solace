@@ -1,26 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LuPencil, LuPlus } from 'react-icons/lu';
+import React, { useMemo } from 'react';
+import { LuPencil } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
 
-import { TAX_ADVANTAGED_BUCKET_DEFINITIONS } from '../constants/taxAdvantagedBuckets';
 import type {
   AnnualAdjustment,
   TaxAdvantagedInvestments,
 } from '../types/income';
-import { getAnnualAdjustmentStatusLabel } from '../types/income';
-import {
-  OCCURRENCE_STATUS_BADGE_CLASSES,
-  formatDate,
-} from '../utils/incomeViewFormatters';
 
 interface IncomePageFooterProps {
   adjustments: AnnualAdjustment[];
   plannedAdjustmentTotal: number;
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
-  onAddAdjustment: () => void;
-  onEditAdjustment: (adjustment: AnnualAdjustment) => void;
-  onDeleteAdjustment: (adjustment: AnnualAdjustment) => void;
+  onManageAdjustments: () => void;
   onEditTaxAdvantagedInvestments: () => void;
 }
 
@@ -44,31 +36,13 @@ function getAmountToneClass(amount: number): string {
   return 'text-app';
 }
 
-type OpenPopover = 'adj' | 'tax' | null;
-
-function Popover({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="absolute top-[calc(100%+8px)] right-0 z-50 w-[420px] rounded-xl border border-surface-border bg-white shadow-lg"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {children}
-    </div>
-  );
-}
-
 export function IncomePageFooter({
   adjustments,
   plannedAdjustmentTotal,
   taxAdvantagedInvestments,
-  onAddAdjustment,
-  onEditAdjustment,
-  onDeleteAdjustment,
+  onManageAdjustments,
   onEditTaxAdvantagedInvestments,
 }: IncomePageFooterProps) {
-  const [openPopover, setOpenPopover] = useState<OpenPopover>(null);
-  const barRef = useRef<HTMLDivElement>(null);
-
   const employerBucketTotal = useMemo(
     () =>
       taxAdvantagedInvestments.entries.reduce(
@@ -84,31 +58,23 @@ export function IncomePageFooter({
     Number(taxAdvantagedInvestments.spendableTotal > 0) +
     Number(employerBucketTotal > 0);
 
-  function togglePopover(id: OpenPopover, e: React.MouseEvent) {
-    e.stopPropagation();
-    setOpenPopover((prev) => (prev === id ? null : id));
-  }
-
-  useEffect(() => {
-    function handleOutsideClick() {
-      setOpenPopover(null);
-    }
-    document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
-  }, []);
+  const activateOnKeyDown =
+    (handler: () => void) => (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handler();
+      }
+    };
 
   return (
-    <section
-      ref={barRef}
-      className="surface-card overflow-visible p-0"
-      aria-label="Income page footer summary"
-    >
+    <section className="surface-card overflow-visible p-0" aria-label="Income page footer summary">
       <div className="grid md:grid-cols-2">
-
-        {/* ── Annual Adjustments segment ── */}
         <div
           className="surface-hover-subtle relative flex cursor-pointer items-center justify-between gap-5 rounded-l-xl px-6 py-4"
-          onClick={(e) => togglePopover('adj', e)}
+          onClick={onManageAdjustments}
+          onKeyDown={activateOnKeyDown(onManageAdjustments)}
+          role="button"
+          tabIndex={0}
         >
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
@@ -131,103 +97,22 @@ export function IncomePageFooter({
             type="button"
             variant="primary"
             className="button-primary-small shrink-0"
-            onClick={(e) => togglePopover('adj', e)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onManageAdjustments();
+            }}
           >
             <LuPencil className="h-3.5 w-3.5" />
             Manage
           </Button>
-
-          {openPopover === 'adj' && (
-            <Popover>
-              <div className="flex items-center justify-between border-b border-surface-border px-4 py-3">
-                <span className="text-sm font-bold text-app">
-                  Annual Adjustments
-                </span>
-                <button
-                  className="icon-button flex h-6 w-6 items-center justify-center rounded"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenPopover(null);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {adjustments.length === 0 ? (
-                <div className="px-4 py-8 text-center">
-                  <p className="text-sm text-muted">No annual adjustments yet.</p>
-                </div>
-              ) : (
-                <div>
-                  {adjustments.map((adj) => (
-                    <div
-                      key={adj.id}
-                      className="flex items-center gap-3 border-b border-gray-50 px-4 py-2.5 last:border-b-0"
-                    >
-                      <span className="min-w-0 flex-1 text-sm font-medium text-app">
-                        {adj.label}
-                      </span>
-                      <span className="min-w-[80px] text-xs text-muted">
-                        {formatDate(adj.effectiveDate)}
-                      </span>
-                      <span
-                        className={`min-w-[52px] rounded px-1.5 py-0.5 text-center text-[10.5px] font-semibold ${OCCURRENCE_STATUS_BADGE_CLASSES[adj.status]}`}
-                      >
-                        {getAnnualAdjustmentStatusLabel(adj.status)}
-                      </span>
-                      <span
-                        className={`min-w-[76px] text-right text-sm font-semibold ${getAmountToneClass(adj.amount)}`}
-                      >
-                        {formatSignedRoundedCurrency(adj.amount)}
-                      </span>
-                      <div className="flex gap-1.5">
-                        <button
-                          className="surface-hover-subtle rounded border border-surface-border px-2 py-0.5 text-xs text-muted hover:text-app"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenPopover(null);
-                            onEditAdjustment(adj);
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="rounded border border-red-100 px-2 py-0.5 text-xs text-red-400 hover:bg-red-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteAdjustment(adj);
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="border-t border-surface-border px-4 py-2.5">
-                <button
-                  className="income-action-link"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenPopover(null);
-                    onAddAdjustment();
-                  }}
-                >
-                  <LuPlus className="h-3 w-3" />
-                  Add Adjustment
-                </button>
-              </div>
-            </Popover>
-          )}
         </div>
 
-        {/* ── Tax-Advantaged Buckets segment ── */}
         <div
           className="surface-hover-subtle relative flex cursor-pointer items-center justify-between gap-5 border-t px-6 py-4 section-divider md:rounded-r-xl md:border-t-0 md:border-l"
-          onClick={(e) => togglePopover('tax', e)}
+          onClick={onEditTaxAdvantagedInvestments}
+          onKeyDown={activateOnKeyDown(onEditTaxAdvantagedInvestments)}
+          role="button"
+          tabIndex={0}
         >
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
@@ -249,72 +134,15 @@ export function IncomePageFooter({
             type="button"
             variant="primary"
             className="button-primary-small shrink-0"
-            onClick={(e) => togglePopover('tax', e)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onEditTaxAdvantagedInvestments();
+            }}
           >
             <LuPencil className="h-3.5 w-3.5" />
             Edit Buckets
           </Button>
-
-          {openPopover === 'tax' && (
-            <Popover>
-              <div className="flex items-center justify-between border-b border-surface-border px-4 py-3">
-                <span className="text-sm font-bold text-app">
-                  Tax-Advantaged Contributions
-                </span>
-                <button
-                  className="icon-button flex h-6 w-6 items-center justify-center rounded"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenPopover(null);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 p-4">
-                {TAX_ADVANTAGED_BUCKET_DEFINITIONS.map((def) => {
-                  const entry = taxAdvantagedInvestments.entries.find(
-                    (e) => e.bucketType === def.type,
-                  );
-                  return (
-                    <div
-                      key={def.type}
-                      className="surface-subtle rounded-lg border border-surface-border p-3"
-                    >
-                      <p className="text-[10.5px] font-medium text-muted">
-                        {def.label}
-                      </p>
-                      <p className="mt-0.5 text-[15px] font-bold text-app">
-                        {formatRoundedCurrency(entry?.annualAmount ?? 0)}
-                      </p>
-                      <p className="mt-0.5 text-[10.5px] text-muted">
-                        {def.behaviorLabel}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex justify-end border-t border-surface-border px-4 py-2.5">
-                <Button
-                  type="button"
-                  variant="primary"
-                  className="income-action-button-compact"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenPopover(null);
-                    onEditTaxAdvantagedInvestments();
-                  }}
-                >
-                  <LuPencil className="h-3 w-3" />
-                  Edit All Buckets
-                </Button>
-              </div>
-            </Popover>
-          )}
         </div>
-
       </div>
     </section>
   );

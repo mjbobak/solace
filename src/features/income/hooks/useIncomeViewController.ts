@@ -45,8 +45,10 @@ interface UseIncomeViewControllerResult {
     | { type: 'add-annual-adjustment' }
     | { type: 'edit-annual-adjustment' }
   > | null;
+  isAnnualAdjustmentsManagerOpen: boolean;
   isTaxAdvantagedInvestmentsModalOpen: boolean;
   openAddIncomeModal: () => void;
+  openAnnualAdjustmentsManager: () => void;
   openAddAnnualAdjustmentModal: () => void;
   openTaxAdvantagedInvestmentsModal: () => void;
   closeModal: () => void;
@@ -135,6 +137,10 @@ export function useIncomeViewController(
 
   const openAddIncomeModal = () => {
     setModalState({ type: 'add-source' });
+  };
+
+  const openAnnualAdjustmentsManager = () => {
+    setModalState({ type: 'manage-annual-adjustments' });
   };
 
   const openAddAnnualAdjustmentModal = () => {
@@ -501,8 +507,11 @@ export function useIncomeViewController(
     versionModalState,
     bonusModalState,
     annualAdjustmentModalState,
+    isAnnualAdjustmentsManagerOpen:
+      modalState?.type === 'manage-annual-adjustments',
     isTaxAdvantagedInvestmentsModalOpen,
     openAddIncomeModal,
+    openAnnualAdjustmentsManager,
     openAddAnnualAdjustmentModal,
     openTaxAdvantagedInvestmentsModal,
     closeModal,

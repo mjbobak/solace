@@ -77,9 +77,8 @@ export const budgetSummaryTheme = {
   waterfallValuePeriodOutside: 'allocation-waterfall-value-period-outside',
   waterfallInteractiveOverlay: 'allocation-waterfall-step-overlay',
   waterfallTotalOverlay: 'allocation-waterfall-total-overlay',
-  filteredBadge:
-    'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-violet-600 shadow-sm backdrop-blur',
-  filteredBadgeIcon: 'h-3 w-3 text-sky-400',
+  filteredBadge: 'budget-summary-filtered-badge',
+  filteredBadgeIcon: 'budget-summary-filtered-badge-icon',
 } as const;
 
 export const budgetTableTheme = {

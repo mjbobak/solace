@@ -236,12 +236,12 @@ describe('IncomeView', () => {
       name: 'Net',
     });
 
-    expect(screen.getByText('$135,000')).toBeInTheDocument();
-    expect(screen.getByText('$105,000')).toBeInTheDocument();
+    expect(screen.getAllByText('$135,000').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('$105,000').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Tax-Advantaged Buckets')).toHaveLength(2);
     expect(screen.getByText('Income Overview')).toBeInTheDocument();
-    expect(screen.getByText('$8,750 / mo')).toBeInTheDocument();
-    expect(screen.getByText('$11,250 / mo')).toBeInTheDocument();
+    expect(screen.getAllByText('$8,750').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('$11,250').length).toBeGreaterThan(0);
     expect(screen.getByText('annual contributions')).toBeInTheDocument();
     expect(screen.getByText('Spendable Restricted')).toBeInTheDocument();
     expect(screen.getByText('$4,000')).toBeInTheDocument();
@@ -260,7 +260,9 @@ describe('IncomeView', () => {
       screen.queryByRole('columnheader', { name: 'Committed' }),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Acme Corp').closest('button')!);
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Expand income source Acme Corp' }),
+    );
 
     const recurringPayHeading = await screen.findByText('Recurring Pay');
     expect(recurringPayHeading).toBeInTheDocument();
@@ -422,7 +424,7 @@ describe('IncomeView', () => {
     expect(refundRow).not.toBeNull();
 
     fireEvent.click(
-      refundRow!.querySelector('button.button-base.button-secondary')!,
+      refundRow!.querySelector('button.table-action-button-edit')!,
     );
     await screen.findByRole('heading', { name: 'Edit Annual Adjustment' });
 
@@ -450,7 +452,7 @@ describe('IncomeView', () => {
     expect(updatedRefundRow).not.toBeNull();
 
     fireEvent.click(
-      updatedRefundRow!.querySelector('button.button-base.button-danger')!,
+      updatedRefundRow!.querySelector('button.table-action-button-delete')!,
     );
 
     await waitFor(() => expect(deleteAnnualAdjustment).toHaveBeenCalledWith(41));

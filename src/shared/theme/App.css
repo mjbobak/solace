@@ -1034,6 +1034,26 @@ body {
     box-shadow: 0 0 0 4px var(--color-focus);
   }
 
+  .budget-summary-filtered-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em];
+    border-color: color-mix(in srgb, var(--color-brand) 22%, var(--color-border));
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 78%,
+      var(--color-surface-elevated) 22%
+    );
+    color: color-mix(in srgb, var(--color-brand) 78%, var(--color-text) 22%);
+    box-shadow:
+      0 10px 24px -20px color-mix(in srgb, var(--color-text) 38%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .budget-summary-filtered-badge-icon {
+    @apply h-3 w-3;
+    color: color-mix(in srgb, var(--color-brand) 60%, var(--color-focus) 40%);
+  }
+
   .allocation-waterfall-track {
     border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     background: color-mix(
