@@ -267,7 +267,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
               className="grid gap-2 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] sm:items-center sm:gap-4"
             >
               <div className="sm:pr-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app">
                   {step.label}
                 </p>
                 <p className="mt-1 text-xs text-muted">

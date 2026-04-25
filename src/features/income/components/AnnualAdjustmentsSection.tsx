@@ -102,19 +102,19 @@ export function AnnualAdjustmentsSection({
           </colgroup>
           <thead className="table-head text-left">
             <tr>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-app">
                 Adjustment
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-app">
                 Effective Date
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-app">
                 Status
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-app">
                 Amount
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-app">
                 Actions
               </th>
             </tr>

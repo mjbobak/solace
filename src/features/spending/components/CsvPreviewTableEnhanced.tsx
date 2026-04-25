@@ -248,31 +248,31 @@ export const CsvPreviewTableEnhanced: React.FC<
           <table className="w-full min-w-[1180px] table-fixed">
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="w-14 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-14 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   #
                 </th>
-                <th className="w-24 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-24 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   Account
                 </th>
-                <th className="w-28 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-28 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   Txn Date
                 </th>
-                <th className="w-28 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-28 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   Post Date
                 </th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   Description
                 </th>
-                <th className="w-32 px-4 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-32 px-4 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-app">
                   Amount
                 </th>
-                <th className="w-72 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-72 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   Budget Item
                 </th>
-                <th className="w-56 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-56 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   Status
                 </th>
-                <th className="w-28 px-4 py-3.5 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                <th className="w-28 px-4 py-3.5 text-center text-[11px] font-semibold uppercase tracking-wide text-app">
                   Review
                 </th>
               </tr>
