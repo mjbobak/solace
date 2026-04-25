@@ -300,10 +300,12 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="icon-tile icon-tile-brand p-2">
-            <LuWallet className="h-5 w-5" />
+          <div className={budgetSummaryTheme.iconContainer}>
+            <LuWallet className={budgetSummaryTheme.icon} />
           </div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
+          <h3
+            className={`text-sm font-semibold uppercase tracking-wider ${budgetSummaryTheme.summaryTitle}`}
+          >
             Income Allocation
           </h3>
         </div>

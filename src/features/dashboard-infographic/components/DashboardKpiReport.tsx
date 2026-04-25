@@ -250,7 +250,7 @@ export const DashboardKpiReport: React.FC<DashboardKpiReportProps> = ({
   return (
     <section
       aria-label="Wealth management KPI report"
-      className="surface-card overflow-hidden"
+      className="dashboard-report-card"
     >
       <div className="border-b border-black/5 px-6 py-4">
         <h2 className="text-xl font-semibold text-app">

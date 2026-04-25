@@ -33,7 +33,7 @@ export const DashboardInfographic: React.FC<DashboardInfographicProps> = ({
 }) => {
   return (
     <div>
-      <main className="surface-card mx-auto max-w-6xl px-6">
+      <main className="dashboard-frame">
         <div className="py-8">
           <ToggleButtonGroup
             value={mode}
