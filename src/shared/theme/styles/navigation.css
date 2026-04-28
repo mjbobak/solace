@@ -1,0 +1,181 @@
+@layer components {
+  .app-nav {
+    @apply fixed left-0 right-0 top-0 z-50 flex min-h-16 flex-wrap items-center gap-4 px-6 py-2;
+    color: var(--color-text);
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      backdrop-filter 180ms ease;
+  }
+
+  .app-nav::after {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--color-border) 72%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  .app-nav-brand {
+    @apply relative flex items-center gap-2;
+  }
+
+  .app-nav-links {
+    @apply flex items-center gap-1;
+  }
+
+  .app-nav-actions {
+    @apply ml-auto flex items-center justify-end gap-3;
+  }
+
+  .app-nav-right-content {
+    @apply flex items-center justify-end;
+  }
+
+  .app-nav-scrolled {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 86%,
+      transparent
+    );
+    backdrop-filter: blur(18px);
+    box-shadow: 0 12px 32px -28px
+      color-mix(in srgb, var(--color-text) 48%, transparent);
+  }
+
+  .app-nav-scrolled::after {
+    opacity: 1;
+  }
+
+  .app-nav-link {
+    @apply relative flex h-10 items-center px-2 text-sm font-medium transition-all duration-200;
+    color: var(--color-text-muted);
+  }
+
+  .app-nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.1rem;
+    height: 0.3rem;
+    border-radius: 9999px;
+    background: transparent;
+    opacity: 0;
+    transform: scaleX(0.72);
+    transform-origin: center;
+    transition:
+      background-color 0.2s ease,
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .app-nav-link:hover {
+    color: var(--color-text);
+  }
+
+  .app-nav-link:hover::after {
+    background: color-mix(in srgb, var(--color-brand) 28%, transparent);
+    opacity: 1;
+  }
+
+  .app-nav-link-active {
+    color: var(--color-text);
+  }
+
+  .app-nav-link-active::after {
+    background: var(--color-brand-strong);
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .theme-menu {
+    @apply relative;
+  }
+
+  .theme-menu-trigger {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-2 transition-all duration-200;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 88%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+    color: var(--color-text);
+    box-shadow: 0 12px 24px -24px
+      color-mix(in srgb, var(--color-text) 50%, transparent);
+  }
+
+  .theme-menu-trigger:hover,
+  .theme-menu-trigger-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 52%,
+      var(--color-surface-elevated) 48%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 22%,
+      var(--color-border)
+    );
+  }
+
+  .theme-menu-popover {
+    @apply absolute left-0 top-full mt-2 min-w-44 rounded-2xl border p-1.5;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 96%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    box-shadow: 0 24px 56px -32px
+      color-mix(in srgb, var(--color-text) 42%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  @media (max-width: 1100px) {
+    .app-shell {
+      @apply pt-24;
+    }
+
+    .app-nav {
+      @apply gap-3;
+    }
+
+    .app-nav-actions {
+      @apply w-full;
+    }
+
+    .app-nav-right-content {
+      @apply w-full;
+    }
+  }
+
+  .theme-menu-item {
+    @apply flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150;
+    color: var(--color-text-muted);
+  }
+
+  .theme-menu-item:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 44%, transparent);
+    color: var(--color-text);
+  }
+
+  .theme-menu-item-label {
+    @apply flex items-center gap-2;
+  }
+
+  .theme-menu-item-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 50%,
+      var(--color-surface-elevated) 50%
+    );
+    color: var(--color-brand);
+  }
+}

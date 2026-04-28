@@ -1,0 +1,127 @@
+@layer components {
+  .budget-table-amount {
+    color: var(--color-text);
+  }
+
+  .budget-table-muted {
+    color: var(--color-text-muted);
+  }
+
+  .budget-table-divider {
+    border-left: 1px solid
+      color-mix(in srgb, var(--color-border) 86%, transparent);
+  }
+
+  .budget-table-type-badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold;
+    border: 1px solid transparent;
+  }
+
+  .budget-table-type-badge-essential {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 38%,
+      var(--color-surface-elevated) 62%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 18%,
+      var(--color-border)
+    );
+    color: color-mix(in srgb, var(--color-brand) 74%, var(--color-text) 26%);
+  }
+
+  .budget-table-type-badge-funsies {
+    background: color-mix(
+      in srgb,
+      var(--color-allocation-purple) 16%,
+      var(--color-surface-elevated) 84%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-allocation-purple) 22%,
+      var(--color-border)
+    );
+    color: color-mix(
+      in srgb,
+      var(--color-allocation-purple-text) 72%,
+      var(--color-text) 28%
+    );
+  }
+
+  .budget-table-reserve-button {
+    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all;
+    border: 1px solid transparent;
+  }
+
+  .budget-table-reserve-button-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 34%,
+      var(--color-surface-elevated) 66%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 18%,
+      var(--color-border)
+    );
+    color: color-mix(in srgb, var(--color-text) 88%, var(--color-brand) 12%);
+  }
+
+  .budget-table-reserve-button-active:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 44%,
+      var(--color-surface-elevated) 56%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 26%,
+      var(--color-border)
+    );
+  }
+
+  .budget-table-reserve-button-inactive {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 58%,
+      var(--color-surface-elevated) 42%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 72%, transparent);
+    color: color-mix(
+      in srgb,
+      var(--color-text-muted) 88%,
+      var(--color-text) 12%
+    );
+  }
+
+  .budget-table-reserve-button-inactive:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 24%,
+      var(--color-surface-elevated) 76%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 16%,
+      var(--color-border)
+    );
+    color: var(--color-text);
+  }
+
+  .budget-table-spent-link {
+    color: var(--color-brand);
+  }
+
+  .budget-table-spent-link:hover {
+    color: var(--color-brand-strong);
+  }
+
+  .budget-table-danger {
+    color: var(--color-danger);
+  }
+
+  .budget-table-investment {
+    color: var(--color-success);
+  }
+}

@@ -1,0 +1,117 @@
+@layer components {
+  .form-label {
+    @apply mb-1 block text-sm font-medium;
+    color: var(--color-text-muted);
+  }
+
+  .form-input {
+    @apply w-full rounded-lg border px-3 py-2 transition-colors duration-150 focus:outline-none;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .form-input::placeholder {
+    color: color-mix(in srgb, var(--color-text-muted) 82%, transparent);
+  }
+
+  .form-input:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 20%,
+      var(--color-border)
+    );
+  }
+
+  .form-input:focus {
+    border-color: color-mix(in srgb, var(--color-brand) 72%, white 28%);
+    box-shadow: 0 0 0 4px var(--color-focus);
+  }
+
+  .form-input-error {
+    border-color: color-mix(in srgb, var(--color-danger) 72%, white 28%);
+  }
+
+  .form-error {
+    @apply mt-1 text-sm;
+    color: var(--color-danger);
+  }
+
+  .input-required {
+    color: var(--color-danger);
+  }
+
+  .form-tabs-row {
+    @apply mb-6 flex gap-4 border-b;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .form-tab {
+    @apply border-b-2 px-4 py-3 text-sm font-medium transition-colors;
+  }
+
+  .form-tab-active {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+
+  .form-tab-inactive {
+    border-color: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .form-tab-inactive:hover {
+    color: var(--color-text);
+  }
+
+  .form-callout {
+    @apply rounded-lg border p-4 text-sm;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 88%,
+      var(--color-surface-elevated) 12%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+    color: var(--color-text-muted);
+  }
+
+  .form-callout-emphasis {
+    color: var(--color-text);
+  }
+
+  .form-preview {
+    @apply rounded-lg border p-4;
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 48%,
+      var(--color-surface-elevated) 52%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 18%,
+      var(--color-border)
+    );
+  }
+
+  .form-preview-label {
+    @apply text-sm;
+    color: var(--color-text-muted);
+  }
+
+  .form-preview-value {
+    @apply text-lg font-bold;
+    color: var(--color-brand);
+  }
+
+  .checkbox-input {
+    @apply h-4 w-4 cursor-pointer rounded-md border transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    accent-color: var(--color-brand);
+  }
+
+  .checkbox-input:focus {
+    box-shadow: 0 0 0 3px var(--color-focus);
+    outline: none;
+  }
+}

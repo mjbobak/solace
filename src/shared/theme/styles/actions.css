@@ -1,0 +1,153 @@
+@layer components {
+  .icon-button {
+    @apply rounded-lg p-1 transition-colors;
+    color: var(--color-text-muted);
+  }
+
+  .icon-button:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 44%, transparent);
+    color: var(--color-text);
+  }
+
+  .table-action-button {
+    @apply inline-flex items-center justify-center rounded-lg p-1.5 transition-colors;
+  }
+
+  .table-action-button-edit {
+    color: var(--color-text-muted);
+  }
+
+  .table-action-button-edit:hover {
+    background: color-mix(in srgb, var(--color-border) 72%, transparent);
+    color: var(--color-text);
+  }
+
+  .table-action-button-delete {
+    color: var(--color-text-muted);
+  }
+
+  .table-action-button-delete:hover {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+
+  .menu-action-item {
+    @apply flex w-full items-center gap-2 px-4 py-3 text-sm transition-colors;
+  }
+
+  .menu-action-item-edit {
+    color: var(--color-text-muted);
+  }
+
+  .menu-action-item-edit:hover {
+    background: color-mix(in srgb, var(--color-border) 72%, transparent);
+    color: var(--color-text);
+  }
+
+  .menu-action-item-delete {
+    color: var(--color-text-muted);
+  }
+
+  .menu-action-item-delete:hover {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+
+  .menu-action-item-primary {
+    color: var(--color-brand);
+  }
+
+  .menu-action-item-primary:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 44%, transparent);
+    color: var(--color-brand-strong);
+  }
+
+  .income-action-button {
+    @apply px-4 py-2 text-xs;
+  }
+
+  .income-action-button-compact {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .button-base.button-primary-small {
+    padding: 0.5rem 0.625rem;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .button-base {
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50;
+    --button-scale: 1;
+    --button-translate-y: 0px;
+    transform: translateY(var(--button-translate-y)) scale(var(--button-scale));
+    will-change: transform;
+  }
+
+  .button-base:hover:not(:disabled) {
+    --button-scale: 1.03;
+  }
+
+  .button-base:active:not(:disabled) {
+    --button-scale: 0.97;
+  }
+
+  .button-primary {
+    color: var(--color-inverse);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand-strong) 94%, white 6%),
+      color-mix(in srgb, var(--color-brand-strong) 86%, black 14%)
+    );
+    box-shadow:
+      0 14px 30px -22px
+        color-mix(in srgb, var(--color-brand-strong) 60%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 40%, transparent);
+  }
+
+  .button-primary:hover:not(:disabled) {
+    --button-translate-y: -1px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand-strong) 96%, white 4%),
+      color-mix(in srgb, var(--color-brand-strong) 88%, black 12%)
+    );
+    box-shadow:
+      0 18px 34px -20px
+        color-mix(in srgb, var(--color-brand-strong) 64%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 48%, transparent);
+  }
+
+  .button-secondary {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 24px -20px
+      color-mix(in srgb, var(--color-text) 20%, transparent);
+  }
+
+  .button-secondary:hover:not(:disabled) {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 40%,
+      var(--color-surface) 60%
+    );
+  }
+
+  .button-danger {
+    color: var(--color-inverse);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-danger) 90%, white 10%),
+      color-mix(in srgb, var(--color-danger) 72%, black 28%)
+    );
+    box-shadow: 0 18px 38px -24px
+      color-mix(in srgb, var(--color-danger) 68%, transparent);
+  }
+
+  .button-danger:hover:not(:disabled) {
+    --button-translate-y: -1px;
+    box-shadow: 0 22px 42px -22px
+      color-mix(in srgb, var(--color-danger) 66%, transparent);
+  }
+}

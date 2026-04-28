@@ -1,0 +1,51 @@
+@layer components {
+  .app-shell {
+    @apply min-h-screen pt-16 transition-colors duration-200;
+    background:
+      radial-gradient(
+        circle at top right,
+        color-mix(in srgb, var(--color-page-accent) 14%, transparent),
+        transparent 30%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-page-accent) 9%, transparent),
+        transparent 42%
+      ),
+      var(--color-page);
+  }
+
+  .app-page-center {
+    @apply flex min-h-screen items-center justify-center px-4;
+    background:
+      radial-gradient(
+        circle at top left,
+        color-mix(in srgb, var(--color-page-accent) 16%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-brand) 10%, transparent),
+        transparent 50%
+      ),
+      var(--color-page);
+  }
+
+  .page-content {
+    @apply px-8 py-6;
+  }
+
+  .page-header {
+    @apply mb-6 flex items-center justify-between gap-4;
+  }
+
+  .page-title {
+    @apply text-3xl font-bold;
+    color: var(--color-heading);
+  }
+
+  .page-section-title {
+    @apply mb-4 text-lg font-semibold;
+    color: var(--color-heading);
+  }
+}

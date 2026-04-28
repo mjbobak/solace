@@ -1,0 +1,103 @@
+@layer components {
+  .surface-card {
+    @apply rounded-2xl border p-6 transition-all duration-200;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: 0 20px 48px -38px color-mix(in srgb, black 44%, transparent);
+  }
+
+  .surface-card-hover:hover {
+    box-shadow: 0 22px 52px -36px
+      color-mix(in srgb, var(--color-brand) 14%, transparent);
+  }
+
+  .surface-card-soft {
+    @apply rounded-2xl border p-5;
+    background: var(--color-surface);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    box-shadow: 0 16px 38px -30px
+      color-mix(in srgb, var(--color-text) 22%, transparent);
+  }
+
+  .dashboard-frame {
+    @apply mx-auto max-w-6xl rounded-[2rem] border px-6 pb-6;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 68%,
+      var(--color-page) 32%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 6%, transparent),
+      0 30px 70px -50px color-mix(in srgb, black 56%, transparent);
+  }
+
+  .dashboard-report-card {
+    @apply overflow-hidden rounded-[1.75rem] border;
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, white 6%);
+    border-color: color-mix(in srgb, var(--color-border) 92%, transparent);
+    box-shadow:
+      0 24px 60px -40px color-mix(in srgb, black 58%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+  }
+
+  .surface-subtle {
+    @apply rounded-xl border;
+    background: var(--color-surface-subtle);
+    border-color: color-mix(in srgb, var(--color-border) 84%, transparent);
+  }
+
+  .surface-subtle-header {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 88%,
+      var(--color-surface-elevated) 12%
+    );
+    color: var(--color-heading);
+  }
+
+  .surface-hover-subtle {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .surface-hover-subtle:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 34%,
+      var(--color-surface-elevated) 66%
+    );
+  }
+
+  .login-card {
+    @apply w-full max-w-md rounded-2xl border p-8;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 94%,
+      transparent
+    );
+    border-color: var(--color-border);
+    box-shadow: 0 28px 80px -48px
+      color-mix(in srgb, var(--color-text) 34%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  .modal-backdrop {
+    background: var(--color-overlay);
+    backdrop-filter: blur(6px);
+  }
+
+  .modal-panel {
+    @apply relative flex w-full flex-col overflow-hidden rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: 0 28px 70px -34px
+      color-mix(in srgb, var(--color-text) 38%, transparent);
+  }
+
+  .modal-header {
+    @apply flex items-center justify-between border-b px-6 py-5;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+}

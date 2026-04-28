@@ -1,0 +1,55 @@
+@layer components {
+  .text-app {
+    color: var(--color-text);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .text-brand {
+    color: var(--color-brand);
+  }
+
+  .text-success {
+    color: var(--color-success);
+  }
+
+  .text-danger {
+    color: var(--color-danger);
+  }
+
+  .border-app {
+    border-color: var(--color-border);
+  }
+
+  .section-divider {
+    border-color: var(--color-border);
+  }
+
+  .app-loader {
+    @apply flex min-h-screen items-center justify-center;
+  }
+
+  .spinner-ring {
+    @apply h-12 w-12 animate-spin rounded-full border-2;
+    border-color: color-mix(in srgb, var(--color-brand) 18%, transparent);
+    border-top-color: var(--color-brand);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}

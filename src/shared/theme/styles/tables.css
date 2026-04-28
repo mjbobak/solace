@@ -1,0 +1,69 @@
+@layer components {
+  .table-shell {
+    @apply w-full overflow-x-auto rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .table-base {
+    @apply w-full border-collapse;
+  }
+
+  .table-head {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 90%,
+      transparent
+    );
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .table-header-cell {
+    @apply px-3 py-1 text-[11px] font-medium uppercase tracking-wider;
+    color: var(--color-text);
+  }
+
+  .table-sortable:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 38%, transparent);
+  }
+
+  .table-row {
+    @apply h-10 align-middle transition-colors;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-border) 74%, transparent);
+  }
+
+  .table-row-striped {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 65%,
+      transparent
+    );
+  }
+
+  .table-row-hover:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 46%, transparent);
+  }
+
+  .table-row-selected {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 78%,
+      var(--color-surface-elevated) 22%
+    );
+  }
+
+  .table-cell {
+    @apply px-3 py-1 text-[11px];
+    color: var(--color-text);
+  }
+
+  .table-skeleton {
+    background: color-mix(in srgb, var(--color-border) 78%, transparent);
+  }
+
+  .table-highlight-dot {
+    background: var(--color-success);
+  }
+}

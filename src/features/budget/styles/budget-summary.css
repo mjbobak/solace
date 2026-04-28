@@ -1,0 +1,234 @@
+@layer components {
+  .bg-allocation-blue {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-allocation-blue) 90%, white 10%),
+      color-mix(in srgb, var(--color-allocation-blue) 78%, black 22%)
+    );
+  }
+
+  .bg-allocation-blue-strong {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-allocation-blue-strong) 90%, white 10%),
+      color-mix(in srgb, var(--color-allocation-blue-strong) 76%, black 24%)
+    );
+  }
+
+  .bg-allocation-green {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-allocation-green) 90%, white 10%),
+      color-mix(in srgb, var(--color-allocation-green) 78%, black 22%)
+    );
+  }
+
+  .bg-allocation-orange {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-allocation-orange) 90%, white 10%),
+      color-mix(in srgb, var(--color-allocation-orange) 80%, black 20%)
+    );
+  }
+
+  .bg-allocation-purple {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-allocation-purple) 90%, white 10%),
+      color-mix(in srgb, var(--color-allocation-purple) 76%, black 24%)
+    );
+  }
+
+  .text-allocation-purple {
+    color: var(--color-allocation-purple-text);
+  }
+
+  .text-allocation-purple-muted {
+    color: color-mix(
+      in srgb,
+      var(--color-allocation-purple-text) 76%,
+      transparent
+    );
+  }
+
+  .budget-summary-card {
+    @apply h-full rounded-2xl border px-6 py-4;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: 0 24px 60px -36px
+      color-mix(in srgb, var(--color-text) 28%, transparent);
+  }
+
+  .budget-summary-title {
+    color: color-mix(
+      in srgb,
+      var(--color-heading) 94%,
+      var(--color-text-muted) 6%
+    );
+  }
+
+  .budget-summary-text {
+    color: var(--color-text);
+  }
+
+  .budget-summary-text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .budget-summary-value {
+    color: var(--color-text);
+  }
+
+  .budget-summary-danger {
+    color: var(--color-danger);
+  }
+
+  .budget-summary-danger-muted {
+    color: color-mix(in srgb, var(--color-danger) 78%, transparent);
+  }
+
+  .budget-summary-icon-tile {
+    @apply rounded-lg p-2;
+    background: linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--color-brand) 14%,
+        var(--color-surface-subtle) 86%
+      ),
+      color-mix(
+        in srgb,
+        var(--color-surface-elevated) 76%,
+        var(--color-brand-muted) 24%
+      )
+    );
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
+  }
+
+  .budget-summary-icon {
+    @apply h-4 w-4;
+    color: color-mix(in srgb, var(--color-brand) 78%, var(--color-text) 22%);
+  }
+
+  .budget-summary-control-button {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors focus:outline-none;
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 82%,
+      var(--color-surface-elevated) 18%
+    );
+    color: var(--color-text-muted);
+    box-shadow: 0 10px 24px -22px
+      color-mix(in srgb, var(--color-text) 38%, transparent);
+  }
+
+  .budget-summary-control-button:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 22%,
+      var(--color-border)
+    );
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 42%,
+      var(--color-surface-elevated) 58%
+    );
+    color: var(--color-text);
+  }
+
+  .budget-summary-control-button:focus-visible {
+    box-shadow: 0 0 0 4px var(--color-focus);
+  }
+
+  .budget-summary-filtered-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em];
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 22%,
+      var(--color-border)
+    );
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 78%,
+      var(--color-surface-elevated) 22%
+    );
+    color: color-mix(in srgb, var(--color-brand) 78%, var(--color-text) 22%);
+    box-shadow:
+      0 10px 24px -20px color-mix(in srgb, var(--color-text) 38%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .budget-summary-filtered-badge-icon {
+    @apply h-3 w-3;
+    color: color-mix(in srgb, var(--color-brand) 60%, var(--color-focus) 40%);
+  }
+
+  .allocation-waterfall-track {
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 90%,
+      var(--color-surface-elevated) 10%
+    );
+  }
+
+  .allocation-waterfall-value-pill {
+    @apply inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg px-2.5 py-1;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 94%,
+      rgba(255, 255, 255, 0.12) 6%
+    );
+    box-shadow:
+      0 10px 22px -18px color-mix(in srgb, var(--color-text) 42%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--color-border) 72%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  .allocation-waterfall-value-amount {
+    @apply text-[11px] font-semibold;
+    color: var(--color-text);
+  }
+
+  .allocation-waterfall-value-period-inside {
+    @apply text-[10px] font-semibold;
+    color: color-mix(in srgb, var(--color-text-muted) 88%, transparent);
+  }
+
+  .allocation-waterfall-value-period-outside {
+    @apply text-[10px] font-semibold;
+    color: color-mix(in srgb, var(--color-text-muted) 80%, transparent);
+  }
+
+  .allocation-waterfall-step-overlay {
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .allocation-waterfall-step-overlay:hover {
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+  }
+
+  .allocation-waterfall-step-overlay:focus-visible {
+    box-shadow: inset 0 0 0 2px
+      color-mix(in srgb, var(--color-warning) 78%, white 22%);
+  }
+
+  .allocation-waterfall-total-overlay {
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .allocation-waterfall-total-overlay:hover {
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+  }
+
+  .allocation-waterfall-total-overlay:focus-visible {
+    box-shadow: inset 0 0 0 2px
+      color-mix(in srgb, var(--color-warning) 78%, white 22%);
+  }
+}

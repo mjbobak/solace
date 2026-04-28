@@ -1,0 +1,88 @@
+@layer components {
+  .budget-modal-toggle-button {
+    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all focus:outline-none;
+    border: 1px solid transparent;
+  }
+
+  .budget-modal-toggle-button:focus-visible {
+    box-shadow: 0 0 0 4px var(--color-focus);
+  }
+
+  .budget-modal-toggle-button-inactive {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 62%,
+      var(--color-surface-elevated) 38%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 72%, transparent);
+    color: color-mix(
+      in srgb,
+      var(--color-text-muted) 88%,
+      var(--color-text) 12%
+    );
+  }
+
+  .budget-modal-toggle-button-inactive:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 22%,
+      var(--color-surface-elevated) 78%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 16%,
+      var(--color-border)
+    );
+    color: var(--color-text);
+  }
+
+  .budget-modal-toggle-button-active {
+    box-shadow:
+      0 10px 24px -22px color-mix(in srgb, var(--color-text) 42%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 14%, transparent);
+  }
+
+  .budget-modal-investment-toggle-active {
+    background: color-mix(
+      in srgb,
+      var(--color-success) 20%,
+      var(--color-surface-elevated) 80%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-success) 30%,
+      var(--color-border)
+    );
+    color: color-mix(in srgb, var(--color-success) 74%, var(--color-text) 26%);
+  }
+
+  .budget-modal-investment-toggle-active:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-success) 26%,
+      var(--color-surface-elevated) 74%
+    );
+  }
+
+  .budget-modal-reserve-toggle-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 40%,
+      var(--color-surface-elevated) 60%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 24%,
+      var(--color-border)
+    );
+    color: color-mix(in srgb, var(--color-text) 88%, var(--color-brand) 12%);
+  }
+
+  .budget-modal-reserve-toggle-active:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 50%,
+      var(--color-surface-elevated) 50%
+    );
+  }
+}

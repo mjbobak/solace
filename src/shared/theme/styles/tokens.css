@@ -1,0 +1,97 @@
+:root {
+  color-scheme: light;
+  --color-page: oklch(98% 0.01 250);
+  --color-page-accent: oklch(73% 0.17 255);
+  --color-surface: oklch(100% 0 0 / 0.72);
+  --color-surface-elevated: oklch(100% 0 0 / 0.9);
+  --color-surface-subtle: oklch(96% 0.01 250);
+  --color-text: oklch(23% 0.02 250);
+  --color-text-muted: oklch(49% 0.02 250);
+  --color-heading: color-mix(in srgb, var(--color-text) 96%, white 4%);
+  --color-border: oklch(89% 0.01 250 / 0.95);
+  --color-brand: oklch(67% 0.14 249);
+  --color-brand-strong: oklch(61% 0.16 249);
+  --color-brand-muted: oklch(95% 0.03 244);
+  --color-success: oklch(66% 0.17 155);
+  --color-warning: oklch(79% 0.14 86);
+  --color-danger: oklch(62% 0.23 28);
+  --color-focus: oklch(67% 0.14 249 / 0.22);
+  --color-overlay: oklch(18% 0.02 255 / 0.36);
+  --color-overlay-strong: oklch(30% 0.02 255 / 0.94);
+  --color-inverse: oklch(99% 0 0);
+  --color-tooltip-bg: color-mix(
+    in srgb,
+    var(--color-surface-elevated) 96%,
+    white 4%
+  );
+  --color-tooltip-border: color-mix(
+    in srgb,
+    var(--color-border) 88%,
+    transparent
+  );
+  --color-tooltip-text: var(--color-text);
+  --color-tooltip-shadow: color-mix(
+    in srgb,
+    var(--color-text) 28%,
+    transparent
+  );
+  --color-chart-1: oklch(67% 0.14 249);
+  --color-chart-2: oklch(66% 0.17 155);
+  --color-chart-3: oklch(79% 0.14 86);
+  --color-chart-4: oklch(62% 0.23 28);
+  --color-chart-5: oklch(68% 0.18 315);
+  --color-chart-6: oklch(71% 0.14 205);
+  --color-allocation-blue: oklch(81% 0.09 236);
+  --color-allocation-blue-strong: oklch(61% 0.15 249);
+  --color-allocation-green: oklch(79% 0.1 188);
+  --color-allocation-orange: oklch(78% 0.13 53);
+  --color-allocation-purple: oklch(69% 0.15 302);
+  --color-allocation-purple-text: oklch(52% 0.16 301);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-page: #1a1a1a;
+  --color-page-accent: #4a4a4a;
+  --color-surface: rgb(29 29 29 / 0.88);
+  --color-surface-elevated: rgb(50 48 47 / 0.96);
+  --color-surface-subtle: #292a2a;
+  --color-text: #f2f2f2;
+  --color-text-muted: #c4c4c4;
+  --color-heading: #ffffff;
+  --color-border: rgb(74 74 74 / 0.94);
+  --color-brand: oklch(74% 0.13 249);
+  --color-brand-strong: oklch(68% 0.15 249);
+  --color-brand-muted: rgb(74 74 74 / 0.38);
+  --color-success: oklch(73% 0.15 154);
+  --color-warning: oklch(81% 0.12 88);
+  --color-danger: oklch(69% 0.19 28);
+  --color-focus: rgb(110 110 110 / 0.3);
+  --color-overlay: rgb(9 9 9 / 0.56);
+  --color-overlay-strong: rgb(18 18 18 / 0.96);
+  --color-inverse: #121212;
+  --color-tooltip-bg: color-mix(
+    in srgb,
+    var(--color-surface-elevated) 96%,
+    white 4%
+  );
+  --color-tooltip-border: color-mix(
+    in srgb,
+    var(--color-border) 88%,
+    transparent
+  );
+  --color-tooltip-text: var(--color-text);
+  --color-tooltip-shadow: color-mix(in srgb, black 58%, transparent);
+  --color-chart-1: oklch(74% 0.13 249);
+  --color-chart-2: oklch(73% 0.15 154);
+  --color-chart-3: oklch(81% 0.12 88);
+  --color-chart-4: oklch(69% 0.19 28);
+  --color-chart-5: oklch(77% 0.15 314);
+  --color-chart-6: oklch(76% 0.12 204);
+  --color-allocation-blue: oklch(73% 0.11 236);
+  --color-allocation-blue-strong: oklch(69% 0.14 249);
+  --color-allocation-green: oklch(74% 0.1 188);
+  --color-allocation-orange: oklch(78% 0.13 53);
+  --color-allocation-purple: oklch(73% 0.13 302);
+  --color-allocation-purple-text: oklch(82% 0.09 302);
+}

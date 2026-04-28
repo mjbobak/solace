@@ -1,0 +1,77 @@
+@layer components {
+  .bulk-toolbar {
+    @apply rounded-2xl border px-4 py-4;
+    background: color-mix(
+      in srgb,
+      var(--color-overlay-strong) 92%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-border) 28%, transparent);
+    box-shadow: 0 18px 40px -24px color-mix(in srgb, black 70%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .bulk-toolbar-control {
+    @apply inline-flex items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-control:hover {
+    background: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+  }
+
+  .bulk-toolbar-chip {
+    @apply inline-flex items-center gap-2 rounded-xl border px-3 text-xs font-semibold;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-menu {
+    @apply rounded-2xl border;
+    background: color-mix(
+      in srgb,
+      var(--color-overlay-strong) 96%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    box-shadow: 0 18px 40px -24px color-mix(in srgb, black 70%, transparent);
+  }
+
+  .bulk-toolbar-menu-item {
+    @apply w-full px-4 py-3 text-left text-sm transition-colors;
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-menu-item:hover {
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+  }
+
+  .bulk-toolbar-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors;
+    background: var(--color-inverse);
+    color: var(--color-brand);
+  }
+
+  .bulk-toolbar-primary:hover {
+    background: color-mix(in srgb, var(--color-inverse) 88%, transparent);
+  }
+
+  .bulk-toolbar-input {
+    @apply w-full rounded-xl border px-3 py-2 text-sm focus:outline-none;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-input::placeholder {
+    color: color-mix(in srgb, var(--color-inverse) 46%, transparent);
+  }
+
+  .bulk-toolbar-input:focus {
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--color-inverse) 14%, transparent);
+  }
+}

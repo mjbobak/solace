@@ -1,0 +1,94 @@
+@layer components {
+  .toggle-group {
+    @apply inline-flex rounded-full border p-[2px];
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--color-surface-elevated) 88%,
+      transparent
+    );
+    box-shadow: 0 12px 28px -24px
+      color-mix(in srgb, var(--color-text) 28%, transparent);
+  }
+
+  .toggle-group-inner {
+    @apply inline-flex rounded-full p-[2px];
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 72%,
+      transparent
+    );
+  }
+
+  .toggle-group-contrast {
+    background: color-mix(
+      in srgb,
+      var(--color-brand) 22%,
+      var(--color-surface-elevated) 78%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 20%,
+      var(--color-border)
+    );
+  }
+
+  .toggle-group-contrast .toggle-group-inner {
+    background: color-mix(in srgb, var(--color-brand-muted) 46%, transparent);
+  }
+
+  .toggle-group-pill {
+    background: color-mix(
+      in srgb,
+      var(--color-overlay-strong) 80%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-inverse) 8%, transparent);
+  }
+
+  .toggle-group-pill .toggle-group-inner {
+    background: color-mix(in srgb, var(--color-inverse) 4%, transparent);
+  }
+
+  .toggle-option {
+    @apply rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-150 focus-visible:outline-none;
+    color: var(--color-text-muted);
+  }
+
+  .toggle-option:hover {
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-brand-muted) 34%, transparent);
+  }
+
+  .toggle-option:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-focus);
+  }
+
+  .toggle-option-active {
+    background: var(--color-surface-elevated);
+    color: var(--color-text);
+    box-shadow: 0 10px 20px -18px
+      color-mix(in srgb, var(--color-text) 30%, transparent);
+  }
+
+  .toggle-group-contrast .toggle-option-active {
+    background: var(--color-brand);
+    color: var(--color-inverse);
+    box-shadow: 0 14px 28px -20px
+      color-mix(in srgb, var(--color-brand) 62%, transparent);
+  }
+
+  .toggle-group-pill .toggle-option {
+    color: color-mix(in srgb, var(--color-inverse) 78%, transparent);
+  }
+
+  .toggle-group-pill .toggle-option:hover {
+    color: var(--color-inverse);
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+  }
+
+  .toggle-group-pill .toggle-option-active {
+    background: color-mix(in srgb, var(--color-chart-6) 82%, white 18%);
+    color: var(--color-inverse);
+  }
+}

@@ -1,0 +1,38 @@
+@layer components {
+  .filter-chip {
+    @apply inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium;
+    background: color-mix(in srgb, var(--color-brand-muted) 82%, transparent);
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 18%,
+      var(--color-border)
+    );
+    color: var(--color-text);
+  }
+
+  .filter-chip-dismiss {
+    @apply rounded p-0.5 transition-colors;
+  }
+
+  .filter-chip-dismiss:hover {
+    background: color-mix(in srgb, var(--color-brand) 10%, transparent);
+  }
+
+  .status-chip {
+    @apply inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium;
+  }
+
+  .status-chip-brand {
+    background: color-mix(in srgb, var(--color-brand-muted) 82%, transparent);
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 20%,
+      var(--color-border)
+    );
+    color: var(--color-brand);
+  }
+
+  .icon-tile {
+    @apply flex items-center justify-center rounded-xl p-3;
+  }
+}

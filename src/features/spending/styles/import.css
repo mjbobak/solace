@@ -1,0 +1,142 @@
+@layer components {
+  .import-panel {
+    @apply rounded-2xl border;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 88%,
+      var(--color-surface-elevated) 12%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-panel-header {
+    @apply border-b px-5 py-4 sm:px-6;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .import-kicker {
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em];
+    color: var(--color-text-muted);
+  }
+
+  .import-title {
+    @apply text-lg font-semibold;
+    color: var(--color-heading);
+  }
+
+  .import-description {
+    @apply text-sm;
+    color: var(--color-text-muted);
+  }
+
+  .import-card {
+    @apply rounded-xl border px-3 py-2.5;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+  }
+
+  .import-card-label {
+    @apply text-xs font-medium;
+    color: var(--color-text-muted);
+  }
+
+  .import-card-value {
+    @apply mt-1 text-sm font-semibold;
+    color: var(--color-text);
+  }
+
+  .import-dropzone {
+    @apply rounded-2xl border border-dashed p-8 transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 92%, transparent);
+  }
+
+  .import-dropzone:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 24%,
+      var(--color-border)
+    );
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 18%,
+      var(--color-surface-elevated) 82%
+    );
+  }
+
+  .import-dropzone-icon {
+    @apply flex h-12 w-12 items-center justify-center rounded-full;
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 54%,
+      var(--color-surface-subtle) 46%
+    );
+    color: var(--color-brand);
+  }
+
+  .import-secondary-action {
+    @apply rounded-full border px-4 py-2 text-sm font-medium transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 92%, transparent);
+    color: var(--color-text);
+  }
+
+  .import-secondary-action:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 26%,
+      var(--color-surface-elevated) 74%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 18%,
+      var(--color-border)
+    );
+  }
+
+  .import-list {
+    @apply rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-list-row {
+    @apply flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center;
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 86%,
+      var(--color-surface-elevated) 14%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .import-list-icon {
+    @apply flex h-10 w-10 items-center justify-center rounded-full shadow-sm;
+    background: var(--color-surface-elevated);
+    color: var(--color-text-muted);
+  }
+
+  .import-status-pill {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  .import-status-pill-success {
+    background: color-mix(in srgb, var(--color-success) 16%, transparent);
+    color: color-mix(in srgb, var(--color-success) 84%, var(--color-text) 16%);
+  }
+
+  .import-status-pill-warning {
+    background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+    color: color-mix(in srgb, var(--color-warning) 84%, var(--color-text) 16%);
+  }
+
+  .import-status-pill-danger {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 84%, var(--color-text) 16%);
+  }
+
+  .import-actions {
+    @apply flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+}
