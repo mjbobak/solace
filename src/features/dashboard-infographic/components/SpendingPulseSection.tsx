@@ -39,7 +39,19 @@ const SPENDING_PULSE_COLORS = {
   selectedShadow:
     '0 12px 30px -20px color-mix(in srgb, var(--color-brand) 42%, transparent)',
   drilldownBar:
-    'linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 42%, white 58%), color-mix(in srgb, var(--color-danger) 56%, white 44%))',
+    'linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 70%, var(--color-surface-elevated) 30%), color-mix(in srgb, var(--color-danger) 84%, var(--color-surface-subtle) 16%))',
+  drilldownPanelBackground:
+    'linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 96%, var(--color-surface-subtle) 4%), color-mix(in srgb, var(--color-surface) 82%, var(--color-page) 18%))',
+  drilldownPanelBorder:
+    'color-mix(in srgb, var(--color-border) 86%, transparent)',
+  drilldownPanelShadow:
+    '0 18px 40px -32px color-mix(in srgb, var(--color-text) 42%, transparent)',
+  drilldownTrack:
+    'color-mix(in srgb, var(--color-surface-subtle) 74%, var(--color-page) 26%)',
+  drilldownEmptyBackground:
+    'color-mix(in srgb, var(--color-surface-subtle) 80%, var(--color-page) 20%)',
+  drilldownEmptyBorder:
+    'color-mix(in srgb, var(--color-border) 76%, transparent)',
 } as const;
 
 function getAbsoluteVariance(amount: number): number {
@@ -160,6 +172,14 @@ function formatMonthVarianceLabel(
   return `${prefix} $${amount}`;
 }
 
+function getMonthVarianceTextStyle(
+  row: Pick<SpendingPulseRow, 'isRelevant' | 'variance'>,
+): React.CSSProperties {
+  return {
+    color: getMonthBarTextColor(row),
+  };
+}
+
 export const SpendingPulseSection: React.FC<SpendingPulseSectionProps> = ({
   year,
 }) => {
@@ -225,7 +245,13 @@ export const SpendingPulseSection: React.FC<SpendingPulseSectionProps> = ({
         {selectedRow ? (
           <MonthlyOverBudgetBreakdown row={selectedRow} />
         ) : !hasRelevantMonths ? (
-          <div className="mx-6 rounded-2xl border border-dashed border-black/10 bg-black/[0.02] px-5 py-4 text-sm text-muted">
+          <div
+            className="mx-6 rounded-2xl border border-dashed px-5 py-4 text-sm text-muted"
+            style={{
+              backgroundColor: SPENDING_PULSE_COLORS.drilldownEmptyBackground,
+              borderColor: SPENDING_PULSE_COLORS.drilldownEmptyBorder,
+            }}
+          >
             No completed months are in scope for this year yet.
           </div>
         ) : null}
@@ -285,7 +311,6 @@ function MonthVarianceBar({
   onClick: () => void;
 }) {
   const fillColor = getMonthBarFillColor(row);
-  const textColor = getMonthBarTextColor(row);
   const buttonClassName = getMonthButtonClassName(row, isSelected);
   const buttonStyle = getMonthButtonStyle(row, isSelected);
   const button = (
@@ -326,7 +351,7 @@ function MonthVarianceBar({
       <span className="text-sm font-medium text-app">{row.month}</span>
       <span
         className="text-xs font-semibold"
-        style={{ color: textColor }}
+        style={getMonthVarianceTextStyle(row)}
       >
         {formatMonthVarianceLabel(row)}
       </span>
@@ -345,7 +370,14 @@ function MonthlyOverBudgetBreakdown({
   const maxOverage = getMaxVariance(row.overBudgetLabels);
 
   return (
-    <div className="mx-6 rounded-[1.5rem] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,242,239,0.94))] p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]">
+    <div
+      className="mx-6 rounded-[1.5rem] border p-5"
+      style={{
+        background: SPENDING_PULSE_COLORS.drilldownPanelBackground,
+        borderColor: SPENDING_PULSE_COLORS.drilldownPanelBorder,
+        boxShadow: SPENDING_PULSE_COLORS.drilldownPanelShadow,
+      }}
+    >
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">
@@ -382,7 +414,10 @@ function MonthlyOverBudgetBreakdown({
                     {formatWholeCurrency(detail.budget)} planned
                   </p>
                 </div>
-                <div className="relative h-5 overflow-hidden rounded-full bg-black/[0.06]">
+                <div
+                  className="relative h-5 overflow-hidden rounded-full"
+                  style={{ backgroundColor: SPENDING_PULSE_COLORS.drilldownTrack }}
+                >
                   <div
                     className="absolute inset-y-0 left-0 rounded-full"
                     style={{
@@ -401,7 +436,13 @@ function MonthlyOverBudgetBreakdown({
           })}
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border border-dashed border-black/10 bg-black/[0.02] px-5 py-4 text-sm text-muted">
+        <div
+          className="mt-6 rounded-2xl border border-dashed px-5 py-4 text-sm text-muted"
+          style={{
+            backgroundColor: SPENDING_PULSE_COLORS.drilldownEmptyBackground,
+            borderColor: SPENDING_PULSE_COLORS.drilldownEmptyBorder,
+          }}
+        >
           {row.month} stayed within budget across all tracked expense labels.
         </div>
       )}

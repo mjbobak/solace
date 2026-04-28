@@ -1,0 +1,20 @@
+- generic [ref=e2]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "Welcome Back" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Sign in to access your finance dashboard
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Username*
+        - textbox "Username*" [active] [ref=e12]:
+          - /placeholder: Enter your username
+      - generic [ref=e13]:
+        - generic [ref=e14]: Password*
+        - textbox "Password*" [ref=e15]:
+          - /placeholder: Enter your password
+    - button "Sign In" [disabled] [ref=e16]:
+      - generic [ref=e17]: Sign In
+    - generic [ref=e18]:
+      - paragraph [ref=e19]: "Development credentials:"
+      - paragraph [ref=e20]: admin / admin123
+  - region "Notifications alt+T"
