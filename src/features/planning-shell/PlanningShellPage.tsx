@@ -1,16 +1,10 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import {
-  BudgetView,
-  type BudgetViewHandle,
-} from '@/features/budget/components/BudgetView';
-import {
-  DashboardInfographic,
-  type DashboardMode,
-} from '@/features/dashboard-infographic';
-import { IncomeView, type IncomeViewHandle } from '@/features/income';
-import { SpendingView, type SpendingViewHandle } from '@/features/spending';
+import type { BudgetViewHandle } from '@/features/budget/components/BudgetView';
+import type { DashboardMode } from '@/features/dashboard-infographic';
+import type { IncomeViewHandle } from '@/features/income';
+import type { SpendingViewHandle } from '@/features/spending';
 import { Button } from '@/shared/components/Button';
 import { PlanningFiltersBar } from '@/shared/components/PlanningFiltersBar';
 import { TopNav, type TabType } from '@/shared/components/TopNav';
@@ -18,6 +12,28 @@ import { useSharedPlanningFilters } from '@/shared/hooks/useSharedPlanningFilter
 import { setNumberParam, setStringParam } from '@/shared/utils/searchParams';
 
 import { MainContent } from './components/MainContent';
+
+const BudgetView = lazy(
+  () => import('@/features/budget/components/BudgetView.lazy'),
+);
+const DashboardInfographic = lazy(
+  () =>
+    import(
+      '@/features/dashboard-infographic/components/DashboardInfographic.lazy'
+    ),
+);
+const IncomeView = lazy(
+  () => import('@/features/income/components/IncomeView.lazy'),
+);
+const SpendingView = lazy(
+  () => import('@/features/spending/components/SpendingView.lazy'),
+);
+
+const ContentLoader = () => (
+  <div className="app-loader">
+    <div className="spinner-ring" />
+  </div>
+);
 
 function buildSharedPlanningSearch(params: {
   planningYear: number;
@@ -179,7 +195,7 @@ const PlanningShellPage: React.FC = () => {
         }}
       />
       <MainContent title={pageTitle} headerAction={headerAction}>
-        {content}
+        <Suspense fallback={<ContentLoader />}>{content}</Suspense>
       </MainContent>
     </div>
   );
