@@ -1,10 +1,7 @@
 import { useMemo } from 'react';
 
 import type { SpendingEntry, SpendingFilters } from '../types/spendingView';
-import {
-  getMonthlyTransactionImpacts,
-  hasSpreadPayment,
-} from '../utils/spreadPayments';
+import { hasSpreadPayment } from '../utils/spreadPayments';
 
 export function useSpendingFiltering(
   transactions: SpendingEntry[],
@@ -25,18 +22,17 @@ export function useSpendingFiltering(
 
     if (filters.year.length > 0 || filters.month.length > 0) {
       filtered = filtered.filter((transaction) => {
-        const impacts = getMonthlyTransactionImpacts(transaction);
+        const [yearStr, monthStr] = transaction.transactionDate.split('-');
+        const year = parseInt(yearStr, 10);
+        const month = parseInt(monthStr, 10);
 
-        return impacts.some((impact) => {
-          const matchesYear =
-            filters.year.length === 0 ||
-            filters.year.includes(impact.year.toString());
-          const matchesMonth =
-            filters.month.length === 0 ||
-            filters.month.includes(impact.month.toString());
+        const matchesYear =
+          filters.year.length === 0 || filters.year.includes(year.toString());
+        const matchesMonth =
+          filters.month.length === 0 ||
+          filters.month.includes(month.toString());
 
-          return matchesYear && matchesMonth;
-        });
+        return matchesYear && matchesMonth;
       });
     }
 

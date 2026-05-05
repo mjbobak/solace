@@ -274,7 +274,7 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
   return createPortal(
     <div
       ref={popoverRef}
-      className={`fixed z-50 w-[min(26rem,calc(100vw-1.5rem))] rounded-2xl border border-slate-200 bg-white shadow-[0_20px_60px_-20px_rgba(15,23,42,0.45)] transition-opacity ${
+      className={`spread-payment-popover fixed z-50 w-[min(26rem,calc(100vw-1.5rem))] transition-opacity ${
         position ? 'opacity-100' : 'opacity-0'
       }`}
       style={
@@ -291,19 +291,19 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
       }
     >
       <div className="flex max-h-[inherit] flex-col overflow-hidden">
-        <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4">
+        <div className="spread-payment-popover-header flex items-start justify-between px-5 py-4">
           <div>
-            <div className="text-sm font-semibold text-slate-900">
+            <div className="spread-payment-title text-sm font-semibold">
               Spread Payment
             </div>
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="spread-payment-description mt-1 text-xs">
               Adjust the coverage window without leaving the table.
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="spread-payment-close rounded-lg p-1 transition-colors"
             aria-label="Close spread payment editor"
           >
             ×
@@ -311,21 +311,21 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
         </div>
 
         <div className="space-y-5 overflow-y-auto px-5 py-4">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div className="text-sm font-semibold text-slate-900">
+          <div className="spread-payment-card rounded-xl border p-4">
+            <div className="spread-payment-title text-sm font-semibold">
               {transaction.description}
             </div>
-            <div className="mt-1 text-sm text-slate-600">
+            <div className="spread-payment-description mt-1 text-sm">
               Charged {transaction.transactionDate}
             </div>
-            <div className="mt-3 text-lg font-semibold text-slate-900">
+            <div className="spread-payment-title mt-3 text-lg font-semibold">
               {formatCurrency(transaction.amount)}
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xs font-medium text-slate-600">
+              <label className="spread-payment-label mb-2 block text-xs font-medium">
                 Start Month
               </label>
               <input
@@ -341,11 +341,11 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
                     setEndMonth(nextStartMonth);
                   }
                 }}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 focus:border-slate-400 focus:outline-none"
+                className="spread-payment-input w-full rounded-lg border px-4 py-3 text-base focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-xs font-medium text-slate-600">
+              <label className="spread-payment-label mb-2 block text-xs font-medium">
                 End Month
               </label>
               <input
@@ -353,13 +353,13 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
                 value={endMonth}
                 min={startMonth || undefined}
                 onChange={(event) => setEndMonth(event.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 focus:border-slate-400 focus:outline-none"
+                className="spread-payment-input w-full rounded-lg border px-4 py-3 text-base focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <div className="mb-2 block text-xs font-medium text-slate-600">
+            <div className="spread-payment-label mb-2 block text-xs font-medium">
               Quick Presets
             </div>
             <div className="flex flex-wrap gap-2">
@@ -373,10 +373,10 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
                     }
                     setEndMonth(addMonths(startMonth, months - 1));
                   }}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`spread-payment-preset rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     monthCount === months
-                      ? 'border-purple-400 bg-purple-50 text-purple-700'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      ? 'spread-payment-preset-active'
+                      : 'spread-payment-preset-inactive'
                   }`}
                 >
                   {months} months
@@ -389,11 +389,11 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
                     setStartMonth(fiscalYearRange.startMonth);
                     setEndMonth(fiscalYearRange.endMonth);
                   }}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`spread-payment-preset rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     startMonth === fiscalYearRange.startMonth &&
                     endMonth === fiscalYearRange.endMonth
-                      ? 'border-purple-400 bg-purple-50 text-purple-700'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      ? 'spread-payment-preset-active'
+                      : 'spread-payment-preset-inactive'
                   }`}
                 >
                   12 months fiscal year
@@ -402,32 +402,32 @@ export const SpreadPaymentModal: React.FC<SpreadPaymentModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <div className="spread-payment-preview rounded-xl border p-4">
+            <div className="spread-payment-kicker text-xs font-medium uppercase tracking-wide">
               Preview
             </div>
             {spreadConfig ? (
               <div className="mt-2 space-y-1">
-                <div className="text-sm font-semibold text-slate-900">
+                <div className="spread-payment-title text-sm font-semibold">
                   {formatSpreadRangeLabel(spreadConfig)}
                 </div>
-                <div className="text-sm text-slate-600">
+                <div className="spread-payment-description text-sm">
                   {monthCount} months total
                 </div>
-                <div className="text-sm text-slate-600">
+                <div className="spread-payment-description text-sm">
                   Average monthly impact:{' '}
                   {formatCurrency(transaction.amount / monthCount)}
                 </div>
               </div>
             ) : (
-              <div className="mt-2 text-sm text-slate-600">
+              <div className="spread-payment-description mt-2 text-sm">
                 Choose a start and end month. Spread payments must cover at
                 least two months.
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+          <div className="spread-payment-actions flex items-center justify-between pt-4">
             <div>
               {getSpreadPaymentConfig(transaction) && (
                 <Button

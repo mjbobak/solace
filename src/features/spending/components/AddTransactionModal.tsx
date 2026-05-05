@@ -161,7 +161,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         },
         ...budgets.map((budget) => ({
           value: String(budget.id),
-          label: `${budget.expense_category} • ${budget.expense_label} (${budget.expense_type})`,
+          label: budget.expense_label,
+          sublabel: `${budget.expense_category} • ${budget.expense_type}`,
         })),
       ];
   const modalTitle = isEditMode
@@ -227,6 +228,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <CustomDropdown
                 value={formData.budgetId == null ? '' : String(formData.budgetId)}
                 options={budgetOptions}
+                searchable
+                searchPlaceholder="Search budget items..."
                 onChange={(value) => {
                   if (isLoadingBudgets) {
                     return;

@@ -139,4 +139,103 @@
     @apply flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row;
     border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
   }
+
+  .spread-payment-popover {
+    @apply rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border);
+    box-shadow:
+      0 24px 64px -30px color-mix(in srgb, black 58%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+  }
+
+  .spread-payment-popover-header {
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .spread-payment-title {
+    color: var(--color-heading);
+  }
+
+  .spread-payment-description,
+  .spread-payment-label,
+  .spread-payment-kicker {
+    color: var(--color-text-muted);
+  }
+
+  .spread-payment-close {
+    color: color-mix(in srgb, var(--color-text-muted) 78%, transparent);
+  }
+
+  .spread-payment-close:hover {
+    background: color-mix(in srgb, var(--color-brand-muted) 42%, transparent);
+    color: var(--color-text);
+  }
+
+  .spread-payment-card,
+  .spread-payment-preview {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 78%,
+      var(--color-surface-elevated) 22%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+  }
+
+  .spread-payment-input {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-subtle) 76%,
+      var(--color-surface-elevated) 24%
+    );
+    border-color: color-mix(in srgb, var(--color-border) 92%, transparent);
+    color: var(--color-text);
+  }
+
+  .spread-payment-input:focus {
+    border-color: color-mix(in srgb, var(--color-brand) 64%, var(--color-border));
+    box-shadow: 0 0 0 4px var(--color-focus);
+  }
+
+  .spread-payment-preset {
+    color: var(--color-text);
+  }
+
+  .spread-payment-preset-inactive {
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .spread-payment-preset-inactive:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 34%,
+      var(--color-surface-elevated) 66%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 20%,
+      var(--color-border)
+    );
+  }
+
+  .spread-payment-preset-active {
+    background: color-mix(
+      in srgb,
+      var(--color-brand-muted) 72%,
+      var(--color-surface-elevated) 28%
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 46%,
+      var(--color-border)
+    );
+    color: color-mix(in srgb, var(--color-brand) 74%, var(--color-text) 26%);
+  }
+
+  .spread-payment-actions {
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
 }
