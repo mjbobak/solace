@@ -44,7 +44,6 @@ export const CsvPreviewTableEnhanced: React.FC<
   } | null>(null);
   const [editHistory, setEditHistory] = useState<Set<string>>(new Set());
 
-  // Filter transactions based on view mode
   const displayTransactions = useMemo(() => {
     if (viewMode === 'import') {
       return transactions.filter(
@@ -54,15 +53,15 @@ export const CsvPreviewTableEnhanced: React.FC<
     if (viewMode === 'filtered') {
       return transactions.filter((t) => t.is_filtered);
     }
-    return transactions; // all
+    return transactions;
   }, [transactions, viewMode]);
+
   const budgetsById = useMemo(
     () => new Map(budgets.map((budget) => [budget.id, budget])),
     [budgets],
   );
   const groupedBudgets = useMemo(() => {
     const groups = new Map<string, BudgetApiResponse[]>();
-
     budgets.forEach((budget) => {
       const category = budget.expense_category;
       if (!groups.has(category)) {
@@ -70,7 +69,6 @@ export const CsvPreviewTableEnhanced: React.FC<
       }
       groups.get(category)?.push(budget);
     });
-
     return Array.from(groups.entries());
   }, [budgets]);
 
@@ -79,7 +77,6 @@ export const CsvPreviewTableEnhanced: React.FC<
     field: string,
     value: string | number,
   ) => {
-    // Track edited rows
     setEditHistory((prev) => new Set(prev).add(previewId));
 
     if (field === 'description') {
@@ -112,78 +109,55 @@ export const CsvPreviewTableEnhanced: React.FC<
 
   const viewModeCopy: Record<
     ViewMode,
-    { title: string; description: string; accent: string }
+    { title: string; description: string; accentClass: string }
   > = {
     import: {
       title: 'Ready to import',
       description: 'Editable rows that will be imported when you confirm.',
-      accent: 'text-emerald-700',
+      accentClass: 'import-accent-import',
     },
     filtered: {
       title: 'Filtered out',
       description:
         'Rows excluded from import. Include any that should come back.',
-      accent: 'text-slate-700',
+      accentClass: 'import-accent-filtered',
     },
     all: {
       title: 'All uploaded rows',
       description:
         'Complete file review, including importable, filtered, and error rows.',
-      accent: 'text-blue-700',
+      accentClass: 'import-accent-all',
     },
   };
 
   const activeView = viewModeCopy[viewMode];
   const summaryItems = [
-    {
-      label: 'Total rows',
-      value: stats.total,
-      tone: 'text-slate-900',
-    },
-    {
-      label: 'Importing',
-      value: stats.importing,
-      tone: 'text-emerald-700',
-    },
-    {
-      label: 'Filtered',
-      value: stats.filtered,
-      tone: 'text-slate-700',
-    },
-    {
-      label: 'Errors',
-      value: stats.errors,
-      tone: 'text-rose-700',
-    },
+    { label: 'Total rows', value: stats.total, toneClass: 'text-app' },
+    { label: 'Importing', value: stats.importing, toneClass: 'text-success' },
+    { label: 'Filtered', value: stats.filtered, toneClass: 'text-muted' },
+    { label: 'Errors', value: stats.errors, toneClass: 'text-danger' },
   ];
 
   return (
     <div className="space-y-4">
-      <section className="rounded-2xl border border-slate-200 bg-slate-50">
-        <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+      <section className="import-review-panel">
+        <div className="import-review-header">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Review Workspace
-              </p>
-              <h3 className="text-lg font-semibold text-slate-900">
-                {activeView.title}
-              </h3>
-              <p className="max-w-2xl text-sm text-slate-600">
+              <p className="import-kicker">Review Workspace</p>
+              <h3 className="import-title">{activeView.title}</h3>
+              <p className="import-description max-w-2xl">
                 {activeView.description}
               </p>
             </div>
             <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {summaryItems.map((item) => (
-                <div
-                  key={item.label}
-                  className="min-w-[110px] rounded-xl border border-slate-200 bg-white px-3 py-2.5"
-                >
-                  <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                <div key={item.label} className="import-stat-card">
+                  <dt className="import-card-label uppercase tracking-wide">
                     {item.label}
                   </dt>
                   <dd
-                    className={`mt-1 text-lg font-semibold tabular-nums ${item.tone}`}
+                    className={`mt-1 text-lg font-semibold tabular-nums ${item.toneClass}`}
                   >
                     {item.value}
                   </dd>
@@ -195,44 +169,32 @@ export const CsvPreviewTableEnhanced: React.FC<
 
         <div className="space-y-3 px-5 py-4 sm:px-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="inline-flex w-full flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-1.5 lg:w-auto">
+            <div className="import-tab-bar">
               <button
                 onClick={() => setViewMode('import')}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  viewMode === 'import'
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                className={`import-tab ${viewMode === 'import' ? 'import-tab-active-import' : ''}`}
               >
                 To Import ({stats.importing})
               </button>
               <button
                 onClick={() => setViewMode('filtered')}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  viewMode === 'filtered'
-                    ? 'bg-slate-100 text-slate-900'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                className={`import-tab ${viewMode === 'filtered' ? 'import-tab-active-filtered' : ''}`}
               >
                 Filtered ({stats.filtered})
               </button>
               <button
                 onClick={() => setViewMode('all')}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  viewMode === 'all'
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                className={`import-tab ${viewMode === 'all' ? 'import-tab-active-all' : ''}`}
               >
                 All Rows ({stats.total})
               </button>
             </div>
-            <p className={`text-sm font-medium ${activeView.accent}`}>
+            <p className={`text-sm font-medium ${activeView.accentClass}`}>
               {displayTransactions.length} row(s) in this view
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+          <div className="import-hint-box">
             {viewMode === 'import'
               ? 'Click a date, description, amount, or budget cell to edit it. Use Filter to exclude a row from this import.'
               : viewMode === 'filtered'
@@ -243,11 +205,11 @@ export const CsvPreviewTableEnhanced: React.FC<
       </section>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="import-table-container">
         <div className="max-h-[58vh] overflow-auto">
           <table className="w-full min-w-[1180px] table-fixed">
             <thead className="sticky top-0 z-10">
-              <tr className="border-b border-slate-200 bg-slate-50">
+              <tr className="import-table-head-row">
                 <th className="w-14 px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-app">
                   #
                 </th>
@@ -282,7 +244,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                 <tr>
                   <td
                     colSpan={9}
-                    className="px-4 py-12 text-center text-sm text-slate-500"
+                    className="px-4 py-12 text-center text-sm text-muted"
                   >
                     No transactions to display in this view
                   </td>
@@ -306,29 +268,29 @@ export const CsvPreviewTableEnhanced: React.FC<
                       ? `Bank category: ${txn.chase_category}`
                       : 'No budget selected';
 
+                  const rowClass = hasError
+                    ? 'import-table-row-error'
+                    : isFiltered
+                      ? 'import-table-row-filtered'
+                      : '';
+
                   return (
                     <tr
                       key={txn.preview_id}
-                      className={`border-b border-slate-100 transition-colors ${
-                        hasError
-                          ? 'bg-rose-50/60 hover:bg-rose-50'
-                          : isFiltered
-                            ? 'bg-slate-50 hover:bg-slate-100/70'
-                            : 'hover:bg-slate-50'
-                      } ${isEdited ? 'ring-1 ring-inset ring-amber-200' : ''}`}
+                      className={`import-table-row ${rowClass} ${isEdited ? 'import-table-row-edited' : ''}`}
                     >
                       {/* Row Number */}
-                      <td className="px-4 py-3.5 align-top text-xs font-mono tabular-nums text-slate-500">
+                      <td className="px-4 py-3.5 align-top text-xs font-mono tabular-nums text-muted">
                         {txn.row_number}
                       </td>
 
                       {/* Account */}
-                      <td className="px-4 py-3.5 align-top text-xs font-semibold text-slate-900">
+                      <td className="px-4 py-3.5 align-top text-xs font-semibold text-app">
                         {txn.account}
                       </td>
 
                       {/* Transaction Date */}
-                      <td className="px-4 py-3.5 align-top text-xs text-slate-700">
+                      <td className="px-4 py-3.5 align-top text-xs text-app">
                         {editingCell?.row === txn.preview_id &&
                         editingCell?.field === 'transaction_date' ? (
                           <input
@@ -343,7 +305,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                             }
                             onBlur={() => setEditingCell(null)}
                             autoFocus
-                            className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="import-cell-input"
                           />
                         ) : (
                           <span
@@ -354,11 +316,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                                 field: 'transaction_date',
                               })
                             }
-                            className={`${
-                              !isFiltered
-                                ? 'cursor-pointer hover:bg-slate-100'
-                                : ''
-                            } inline-block rounded-md px-2 py-1 tabular-nums transition-colors`}
+                            className={`${!isFiltered ? 'cursor-pointer import-cell-editable' : ''} inline-block rounded-md px-2 py-1 tabular-nums transition-colors`}
                             title={!isFiltered ? 'Click to edit' : undefined}
                           >
                             {txn.transaction_date || '-'}
@@ -367,7 +325,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                       </td>
 
                       {/* Post Date */}
-                      <td className="px-4 py-3.5 align-top text-xs text-slate-700">
+                      <td className="px-4 py-3.5 align-top text-xs text-app">
                         {editingCell?.row === txn.preview_id &&
                         editingCell?.field === 'post_date' ? (
                           <input
@@ -382,7 +340,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                             }
                             onBlur={() => setEditingCell(null)}
                             autoFocus
-                            className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="import-cell-input"
                           />
                         ) : (
                           <span
@@ -393,11 +351,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                                 field: 'post_date',
                               })
                             }
-                            className={`${
-                              !isFiltered
-                                ? 'cursor-pointer hover:bg-slate-100'
-                                : ''
-                            } inline-block rounded-md px-2 py-1 tabular-nums transition-colors`}
+                            className={`${!isFiltered ? 'cursor-pointer import-cell-editable' : ''} inline-block rounded-md px-2 py-1 tabular-nums transition-colors`}
                             title={!isFiltered ? 'Click to edit' : undefined}
                           >
                             {txn.post_date}
@@ -406,7 +360,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                       </td>
 
                       {/* Description */}
-                      <td className="px-4 py-3.5 align-top text-xs text-slate-900">
+                      <td className="px-4 py-3.5 align-top text-xs text-app">
                         {editingCell?.row === txn.preview_id &&
                         editingCell?.field === 'description' ? (
                           <input
@@ -421,7 +375,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                             }
                             onBlur={() => setEditingCell(null)}
                             autoFocus
-                            className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="import-cell-input"
                           />
                         ) : (
                           <span
@@ -432,11 +386,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                                 field: 'description',
                               })
                             }
-                            className={`${
-                              !isFiltered
-                                ? 'cursor-pointer hover:bg-slate-100'
-                                : ''
-                            } inline-block max-w-full truncate rounded-md px-2 py-1 pr-3 leading-5 transition-colors`}
+                            className={`${!isFiltered ? 'cursor-pointer import-cell-editable' : ''} inline-block max-w-full truncate rounded-md px-2 py-1 pr-3 leading-5 transition-colors`}
                             title={txn.description}
                           >
                             {txn.description}
@@ -445,7 +395,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                       </td>
 
                       {/* Amount */}
-                      <td className="px-4 py-3.5 align-top text-right text-xs font-semibold text-slate-900">
+                      <td className="px-4 py-3.5 align-top text-right text-xs font-semibold text-app">
                         {editingCell?.row === txn.preview_id &&
                         editingCell?.field === 'amount' ? (
                           <input
@@ -461,7 +411,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                             }
                             onBlur={() => setEditingCell(null)}
                             autoFocus
-                            className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs text-right bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 tabular-nums"
+                            className="import-cell-input text-right tabular-nums"
                           />
                         ) : (
                           <span
@@ -472,11 +422,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                                 field: 'amount',
                               })
                             }
-                            className={`${
-                              !isFiltered
-                                ? 'cursor-pointer hover:bg-slate-100'
-                                : ''
-                            } inline-block rounded-md px-2 py-1 tabular-nums transition-colors`}
+                            className={`${!isFiltered ? 'cursor-pointer import-cell-editable' : ''} inline-block rounded-md px-2 py-1 tabular-nums transition-colors`}
                             title={!isFiltered ? 'Click to edit' : undefined}
                           >
                             ${txn.amount.toFixed(2)}
@@ -485,7 +431,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                       </td>
 
                       {/* Budget Item */}
-                      <td className="px-4 py-3.5 align-top text-xs text-slate-700">
+                      <td className="px-4 py-3.5 align-top text-xs text-app">
                         {editingCell?.row === txn.preview_id &&
                         editingCell?.field === 'budget_id' ? (
                           <select
@@ -499,7 +445,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                             }
                             onBlur={() => setEditingCell(null)}
                             autoFocus
-                            className="w-full rounded-md border border-blue-300 bg-white px-2 py-1 text-xs shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            className="import-cell-input"
                           >
                             <option value="">
                               {isLoadingBudgets
@@ -530,11 +476,7 @@ export const CsvPreviewTableEnhanced: React.FC<
                                 field: 'budget_id',
                               })
                             }
-                            className={`space-y-1 rounded-md px-2 py-1.5 transition-colors ${
-                              !isFiltered && !hasError
-                                ? 'cursor-pointer hover:bg-slate-100'
-                                : ''
-                            }`}
+                            className={`space-y-1 rounded-md px-2 py-1.5 transition-colors ${!isFiltered && !hasError ? 'cursor-pointer import-cell-editable' : ''}`}
                             title={
                               !isFiltered && !hasError
                                 ? 'Click to change budget'
@@ -542,21 +484,19 @@ export const CsvPreviewTableEnhanced: React.FC<
                             }
                           >
                             <div className="flex items-start gap-2">
-                              <span className="leading-5 font-semibold text-slate-900">
+                              <span className="leading-5 font-semibold text-app">
                                 {budgetLabel}
                               </span>
                               {txn.auto_categorized && (
-                                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">
-                                  Auto
-                                </span>
+                                <span className="import-badge-auto">Auto</span>
                               )}
                               {!txn.auto_categorized && txn.budget_id && (
-                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                                <span className="import-badge-manual">
                                   Manual
                                 </span>
                               )}
                             </div>
-                            <p className="line-clamp-2 text-[11px] leading-5 text-slate-500">
+                            <p className="line-clamp-2 text-[11px] leading-5 text-muted">
                               {budgetMeta}
                             </p>
                           </div>
@@ -564,31 +504,29 @@ export const CsvPreviewTableEnhanced: React.FC<
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-3.5 align-top text-xs text-slate-700">
+                      <td className="px-4 py-3.5 align-top text-xs">
                         {hasError ? (
                           <div className="space-y-1">
-                            <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 font-medium text-rose-700">
-                              Error
-                            </span>
-                            <p className="line-clamp-2 text-[11px] leading-5 text-rose-700">
+                            <span className="import-status-error">Error</span>
+                            <p className="line-clamp-2 text-[11px] leading-5 text-danger">
                               {txn.validation_errors[0]}
                             </p>
                           </div>
                         ) : isFiltered ? (
                           <div className="space-y-1">
-                            <span className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-700">
+                            <span className="import-status-excluded">
                               Excluded
                             </span>
-                            <p className="line-clamp-2 text-[11px] leading-5 text-slate-700">
+                            <p className="line-clamp-2 text-[11px] leading-5 text-muted">
                               {txn.filter_reason || 'Excluded from import'}
                             </p>
                           </div>
                         ) : (
                           <div className="space-y-1">
-                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700">
+                            <span className="import-status-included">
                               Included
                             </span>
-                            <p className="line-clamp-2 text-[11px] leading-5 text-emerald-700">
+                            <p className="line-clamp-2 text-[11px] leading-5 text-success">
                               Ready to import
                             </p>
                           </div>
@@ -599,15 +537,13 @@ export const CsvPreviewTableEnhanced: React.FC<
                       <td className="px-4 py-3.5 align-top text-xs">
                         <div className="flex items-start justify-center gap-2 pt-0.5">
                           {hasError ? (
-                            <span
-                              className="rounded-full bg-rose-100 px-2.5 py-1 font-medium text-rose-700"
-                            >
+                            <span className="import-action-error-badge">
                               Error
                             </span>
                           ) : isFiltered ? (
                             <button
                               onClick={() => onToggleFiltered(txn.preview_id)}
-                              className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-medium text-emerald-700 transition-colors hover:bg-emerald-100 hover:text-emerald-900"
+                              className="import-action-include"
                             >
                               Include
                             </button>
@@ -615,13 +551,13 @@ export const CsvPreviewTableEnhanced: React.FC<
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleReFilter(txn.preview_id)}
-                                className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                                className="import-action-filter"
                                 title="Mark as filtered (exclude from import)"
                               >
                                 Filter
                               </button>
                               {isEdited && (
-                                <span className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-700">
+                                <span className="import-badge-edited">
                                   Edited
                                 </span>
                               )}
@@ -639,16 +575,16 @@ export const CsvPreviewTableEnhanced: React.FC<
       </div>
 
       {/* Bottom Info */}
-      <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+      <div className="import-bottom-bar">
         <span>
           Showing{' '}
-          <span className="font-semibold text-slate-900">
+          <span className="font-semibold text-app">
             {displayTransactions.length}
           </span>{' '}
           transaction(s)
         </span>
         {viewMode === 'import' && stats.importing > 0 && (
-          <span className="font-medium text-emerald-700">
+          <span className="font-medium text-success">
             Ready to import {stats.importing} transaction(s)
           </span>
         )}

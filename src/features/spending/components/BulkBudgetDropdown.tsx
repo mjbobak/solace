@@ -17,34 +17,24 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const triggerClassName = 'bulk-toolbar-control inline-flex h-11 gap-2 px-4';
-  const menuClassName =
-    'bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden';
-  const menuItemClassName = 'bulk-toolbar-menu-item';
 
-  // Auto-focus search input when dropdown opens
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isOpen]);
 
-  // Group and filter budgets by category based on search query
   const filteredGroupedBudgets = useMemo(() => {
     const groups = new Map<string, BudgetApiResponse[]>();
     const query = searchQuery.toLowerCase().trim();
 
     budgets.forEach((budget) => {
-      // Skip if search query doesn't match label or category
       if (query !== '') {
         const labelMatch = budget.expense_label.toLowerCase().includes(query);
         const categoryMatch = budget.expense_category
           .toLowerCase()
           .includes(query);
-
-        if (!labelMatch && !categoryMatch) {
-          return;
-        }
+        if (!labelMatch && !categoryMatch) return;
       }
 
       const category = budget.expense_category;
@@ -73,7 +63,7 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className={triggerClassName}
+        className="bulk-toolbar-control inline-flex h-11 gap-2 px-4"
       >
         <span>Change Budget</span>
         <LuChevronDown size={16} />
@@ -89,8 +79,8 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
             }}
             aria-hidden="true"
           />
-          <div className={menuClassName}>
-            <div className="sticky top-0 z-30 border-b border-white/10 bg-transparent p-3">
+          <div className="bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden">
+            <div className="bulk-toolbar-search-header">
               <div className="relative">
                 <input
                   ref={searchInputRef}
@@ -103,7 +93,7 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
                 {searchQuery && (
                   <button
                     onClick={handleClearSearch}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white"
+                    className="bulk-toolbar-search-clear"
                     aria-label="Clear search"
                   >
                     <LuX size={14} />
@@ -112,17 +102,16 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
               </div>
             </div>
 
-            {/* Scrollable content area */}
             <div className="overflow-y-auto py-2">
               {filteredGroupedBudgets.size === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-white/60">
-                  No budgets found matching "{searchQuery}"
+                <div className="bulk-toolbar-empty">
+                  No budgets found matching &ldquo;{searchQuery}&rdquo;
                 </div>
               ) : (
                 Array.from(filteredGroupedBudgets.entries()).map(
                   ([category, categoryBudgets]) => (
                     <div key={category}>
-                      <div className="sticky top-0 bg-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/55">
+                      <div className="bulk-toolbar-category-header">
                         {category}
                       </div>
                       {categoryBudgets.map((budget) => (
@@ -135,12 +124,12 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
                               category,
                             )
                           }
-                          className={menuItemClassName}
+                          className="bulk-toolbar-menu-item"
                         >
                           <div className="font-medium">
                             {budget.expense_label}
                           </div>
-                          <div className="text-xs text-white/55">
+                          <div className="bulk-toolbar-muted text-xs">
                             {budget.expense_type}
                           </div>
                         </button>

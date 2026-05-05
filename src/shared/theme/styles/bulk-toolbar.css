@@ -74,4 +74,197 @@
     box-shadow: 0 0 0 3px
       color-mix(in srgb, var(--color-inverse) 14%, transparent);
   }
+
+  /* Component-level classes using --color-inverse so they flip correctly */
+
+  .bulk-toolbar-close {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200;
+    color: color-mix(in srgb, var(--color-inverse) 90%, transparent);
+  }
+  .bulk-toolbar-close:hover {
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-count {
+    @apply flex h-11 items-center gap-3 border-r pr-5 text-sm font-semibold;
+    border-color: color-mix(in srgb, var(--color-inverse) 20%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-count-badge {
+    @apply inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs;
+    background: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-icon-button {
+    @apply inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors;
+    color: color-mix(in srgb, var(--color-inverse) 80%, transparent);
+  }
+  .bulk-toolbar-icon-button:hover {
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-delete {
+    @apply inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl border px-5 text-sm font-semibold transition-all duration-200;
+    border-color: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+    background: color-mix(in srgb, var(--color-inverse) 6%, transparent);
+    color: var(--color-danger);
+  }
+  .bulk-toolbar-delete:hover {
+    background: color-mix(in srgb, var(--color-inverse) 12%, transparent);
+  }
+
+  .bulk-toolbar-muted {
+    color: color-mix(in srgb, var(--color-inverse) 55%, transparent);
+  }
+
+  .bulk-toolbar-category-header {
+    @apply sticky top-0 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em];
+    background: color-mix(in srgb, black 10%, transparent);
+    color: color-mix(in srgb, var(--color-inverse) 55%, transparent);
+  }
+
+  .bulk-toolbar-search-header {
+    @apply sticky top-0 z-30 border-b p-3;
+    border-color: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+  }
+
+  .bulk-toolbar-search-clear {
+    @apply absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 transition-colors;
+    color: color-mix(in srgb, var(--color-inverse) 45%, transparent);
+  }
+  .bulk-toolbar-search-clear:hover {
+    background: color-mix(in srgb, var(--color-inverse) 10%, transparent);
+    color: var(--color-inverse);
+  }
+
+  .bulk-toolbar-empty {
+    @apply px-4 py-8 text-center text-sm;
+    color: color-mix(in srgb, var(--color-inverse) 60%, transparent);
+  }
+}
+
+/* Dark mode: switch from dark-overlay style to elevated-surface style */
+[data-theme='dark'] .bulk-toolbar {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  backdrop-filter: none;
+}
+
+[data-theme='dark'] .bulk-toolbar-control {
+  border-color: var(--color-border);
+  background: color-mix(in srgb, var(--color-surface-subtle) 80%, transparent);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-control:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-border) 30%,
+    var(--color-surface-elevated) 70%
+  );
+}
+
+[data-theme='dark'] .bulk-toolbar-chip {
+  border-color: var(--color-border);
+  background: color-mix(in srgb, var(--color-surface-subtle) 80%, transparent);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-menu {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .bulk-toolbar-menu-item {
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-menu-item:hover {
+  background: color-mix(in srgb, var(--color-border) 30%, transparent);
+}
+
+[data-theme='dark'] .bulk-toolbar-primary {
+  background: var(--color-brand);
+  color: white;
+}
+
+[data-theme='dark'] .bulk-toolbar-primary:hover {
+  background: var(--color-brand-strong);
+}
+
+[data-theme='dark'] .bulk-toolbar-input {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .bulk-toolbar-input:focus {
+  box-shadow: 0 0 0 3px var(--color-focus);
+}
+
+[data-theme='dark'] .bulk-toolbar-close {
+  color: var(--color-text-muted);
+}
+[data-theme='dark'] .bulk-toolbar-close:hover {
+  background: color-mix(in srgb, var(--color-border) 40%, transparent);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-count {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-count-badge {
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-icon-button {
+  color: var(--color-text-muted);
+}
+[data-theme='dark'] .bulk-toolbar-icon-button:hover {
+  background: color-mix(in srgb, var(--color-border) 40%, transparent);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-delete {
+  border-color: var(--color-border);
+  background: transparent;
+}
+[data-theme='dark'] .bulk-toolbar-delete:hover {
+  background: color-mix(in srgb, var(--color-border) 30%, transparent);
+}
+
+[data-theme='dark'] .bulk-toolbar-muted {
+  color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .bulk-toolbar-category-header {
+  background: color-mix(in srgb, var(--color-border) 20%, transparent);
+  color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .bulk-toolbar-search-header {
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .bulk-toolbar-search-clear {
+  color: var(--color-text-muted);
+}
+[data-theme='dark'] .bulk-toolbar-search-clear:hover {
+  background: color-mix(in srgb, var(--color-border) 40%, transparent);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bulk-toolbar-empty {
+  color: var(--color-text-muted);
 }

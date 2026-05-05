@@ -8,12 +8,6 @@ interface BulkSpreadDropdownProps {
   disabled?: boolean;
 }
 
-const triggerClassName = 'bulk-toolbar-control inline-flex h-11 gap-2 px-4';
-const menuClassName =
-  'bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 min-w-[260px] overflow-hidden py-2';
-const menuItemClassName =
-  'bulk-toolbar-menu-item flex flex-col items-start gap-1 text-left';
-
 export const BulkSpreadDropdown: React.FC<BulkSpreadDropdownProps> = ({
   onSelectSpread,
   disabled = false,
@@ -30,7 +24,7 @@ export const BulkSpreadDropdown: React.FC<BulkSpreadDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className={triggerClassName}
+        className="bulk-toolbar-control inline-flex h-11 gap-2 px-4"
       >
         <span>Payment Spread</span>
         <LuChevronDown size={16} />
@@ -43,22 +37,22 @@ export const BulkSpreadDropdown: React.FC<BulkSpreadDropdownProps> = ({
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
-          <div className={menuClassName}>
+          <div className="bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 min-w-[260px] overflow-hidden py-2">
             <button
               onClick={() => handleSelect('fiscalYear')}
-              className={menuItemClassName}
+              className="bulk-toolbar-menu-item flex flex-col items-start gap-1 text-left"
             >
               <span className="font-medium">12 months fiscal year</span>
-              <span className="text-xs text-white/55">
+              <span className="bulk-toolbar-muted text-xs">
                 Spread each transaction across Jan-Dec of its own year
               </span>
             </button>
             <button
               onClick={() => handleSelect('remove')}
-              className={menuItemClassName}
+              className="bulk-toolbar-menu-item flex flex-col items-start gap-1 text-left"
             >
               <span className="font-medium">Remove spread</span>
-              <span className="text-xs text-white/55">
+              <span className="bulk-toolbar-muted text-xs">
                 Clear payment spread details for the selected transactions
               </span>
             </button>

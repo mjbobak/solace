@@ -238,4 +238,200 @@
     border-top: 1px solid
       color-mix(in srgb, var(--color-border) 82%, transparent);
   }
+
+  /* === CSV Review Table (page 2 of import flow) === */
+
+  .import-review-panel {
+    @apply rounded-2xl border;
+    background: var(--color-surface-subtle);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-review-header {
+    @apply border-b px-5 py-4 sm:px-6;
+    border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  }
+
+  .import-stat-card {
+    @apply min-w-[110px] rounded-xl border px-3 py-2.5;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+  }
+
+  .import-tab-bar {
+    @apply inline-flex w-full flex-wrap gap-2 rounded-xl border p-1.5 lg:w-auto;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-tab {
+    @apply rounded-lg px-3 py-2 text-sm font-medium transition-colors;
+    color: var(--color-text-muted);
+  }
+  .import-tab:hover {
+    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+    color: var(--color-text);
+  }
+  .import-tab-active-import {
+    background: color-mix(in srgb, var(--color-success) 14%, transparent);
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text) 20%);
+  }
+  .import-tab-active-filtered {
+    background: color-mix(in srgb, var(--color-border) 50%, transparent);
+    color: var(--color-text);
+  }
+  .import-tab-active-all {
+    background: color-mix(in srgb, var(--color-brand) 14%, transparent);
+    color: color-mix(in srgb, var(--color-brand) 80%, var(--color-text) 20%);
+  }
+
+  .import-hint-box {
+    @apply rounded-xl border px-4 py-3 text-sm;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    color: var(--color-text-muted);
+  }
+
+  .import-table-container {
+    @apply overflow-hidden rounded-2xl border;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .import-table-head-row {
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-border) 88%, transparent);
+    background: var(--color-surface-subtle);
+  }
+
+  .import-table-row {
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-border) 50%, transparent);
+    transition: background-color 150ms;
+  }
+  .import-table-row:hover {
+    background: color-mix(in srgb, var(--color-border) 18%, transparent);
+  }
+  .import-table-row-error {
+    background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  }
+  .import-table-row-error:hover {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  }
+  .import-table-row-filtered {
+    background: color-mix(
+      in srgb,
+      var(--color-border) 22%,
+      var(--color-surface-subtle) 78%
+    );
+  }
+  .import-table-row-filtered:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-border) 36%,
+      var(--color-surface-subtle) 64%
+    );
+  }
+  .import-table-row-edited {
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--color-warning) 50%, transparent);
+  }
+
+  .import-cell-editable:hover {
+    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+  }
+
+  .import-cell-input {
+    @apply w-full rounded-md border px-2 py-1 text-xs shadow-sm;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 60%,
+      var(--color-border)
+    );
+    color: var(--color-text);
+  }
+  .import-cell-input:focus {
+    border-color: color-mix(in srgb, var(--color-brand) 80%, transparent);
+    box-shadow: 0 0 0 2px var(--color-focus);
+    outline: none;
+  }
+
+  .import-badge-auto {
+    @apply rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+    background: color-mix(in srgb, var(--color-brand) 14%, transparent);
+    color: color-mix(in srgb, var(--color-brand) 90%, var(--color-text) 10%);
+  }
+  .import-badge-manual {
+    @apply rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+    background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+    color: color-mix(in srgb, var(--color-warning) 80%, var(--color-text) 20%);
+  }
+  .import-badge-edited {
+    @apply rounded-full px-2.5 py-1 font-medium;
+    background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    color: color-mix(in srgb, var(--color-warning) 80%, var(--color-text) 20%);
+  }
+
+  .import-status-included {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 font-medium;
+    background: color-mix(in srgb, var(--color-success) 14%, transparent);
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text) 20%);
+  }
+  .import-status-excluded {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 font-medium;
+    background: color-mix(in srgb, var(--color-border) 50%, transparent);
+    color: var(--color-text-muted);
+  }
+  .import-status-error {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 font-medium;
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text) 20%);
+  }
+
+  .import-action-include {
+    @apply rounded-full border px-3 py-1 font-medium transition-colors;
+    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+    background: color-mix(in srgb, var(--color-success) 10%, transparent);
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text) 20%);
+  }
+  .import-action-include:hover {
+    background: color-mix(in srgb, var(--color-success) 20%, transparent);
+  }
+  .import-action-filter {
+    @apply rounded-full border px-3 py-1 font-medium transition-colors;
+    background: var(--color-surface-elevated);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    color: var(--color-text-muted);
+  }
+  .import-action-filter:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-border) 30%,
+      var(--color-surface-elevated) 70%
+    );
+    color: var(--color-text);
+  }
+  .import-action-error-badge {
+    @apply rounded-full px-2.5 py-1 font-medium;
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text) 20%);
+  }
+
+  .import-bottom-bar {
+    @apply flex flex-col gap-2 rounded-xl border px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between;
+    background: var(--color-surface-subtle);
+    border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+    color: var(--color-text-muted);
+  }
+
+  .import-accent-import {
+    color: color-mix(in srgb, var(--color-success) 80%, var(--color-text) 20%);
+  }
+  .import-accent-filtered {
+    color: var(--color-text-muted);
+  }
+  .import-accent-all {
+    color: color-mix(in srgb, var(--color-brand) 80%, var(--color-text) 20%);
+  }
 }
