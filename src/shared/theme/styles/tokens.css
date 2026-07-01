@@ -46,8 +46,7 @@
   --color-allocation-green: oklch(79% 0.1 188);
   --color-allocation-orange: oklch(78% 0.13 53);
   --color-allocation-purple: oklch(69% 0.15 302);
-  --color-allocation-purple-text: oklch(52% 0.16 301);
-}
+  --color-allocation-purple-text: oklch(52% 0.16 301);}
 
 [data-theme='dark'] {
   color-scheme: dark;
@@ -93,5 +92,4 @@
   --color-allocation-green: oklch(74% 0.1 188);
   --color-allocation-orange: oklch(78% 0.13 53);
   --color-allocation-purple: oklch(73% 0.13 302);
-  --color-allocation-purple-text: oklch(82% 0.09 302);
-}
+  --color-allocation-purple-text: oklch(82% 0.09 302);}

@@ -1,5 +1,11 @@
 import React from 'react';
-import { LuAlignLeft, LuChartColumn, LuFilter } from 'react-icons/lu';
+import {
+  LuAlignLeft,
+  LuChartColumn,
+  LuChevronDown,
+  LuChevronRight,
+  LuFilter,
+} from 'react-icons/lu';
 
 import { budgetSummaryTheme } from '@/shared/theme';
 
@@ -65,6 +71,8 @@ interface SummaryCardHeaderProps {
   currentView: SummaryView;
   onToggle: () => void;
   showFilteredBadge?: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapsed?: () => void;
 }
 
 export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
@@ -73,12 +81,21 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
   currentView,
   onToggle,
   showFilteredBadge = false,
+  isCollapsed = false,
+  onToggleCollapsed,
 }) => {
   const nextLabel =
     currentView === 'chart' ? 'Show numbers view' : 'Show chart view';
+  const collapseLabel = isCollapsed
+    ? `Show ${title.toLowerCase()} details`
+    : `Hide ${title.toLowerCase()} details`;
 
   return (
-    <div className="mb-3 flex items-start justify-between gap-3">
+    <div
+      className={`flex items-start justify-between gap-3 ${
+        isCollapsed ? '' : 'mb-3'
+      }`}
+    >
       <div className="flex items-center gap-2">
         <div className={cardIconContainerClass}>{icon}</div>
         <div className="flex items-center gap-2">
@@ -96,19 +113,39 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
         </div>
       </div>
 
-      <button
-        type="button"
-        className={budgetSummaryTheme.controlButton}
-        onClick={onToggle}
-        aria-label={nextLabel}
-        title={nextLabel}
-      >
-        {currentView === 'chart' ? (
-          <LuAlignLeft className="h-4 w-4" />
-        ) : (
-          <LuChartColumn className="h-4 w-4" />
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        {!isCollapsed ? (
+          <button
+            type="button"
+            className={budgetSummaryTheme.controlButton}
+            onClick={onToggle}
+            aria-label={nextLabel}
+            title={nextLabel}
+          >
+            {currentView === 'chart' ? (
+              <LuAlignLeft className="h-4 w-4" />
+            ) : (
+              <LuChartColumn className="h-4 w-4" />
+            )}
+          </button>
+        ) : null}
+        {onToggleCollapsed ? (
+          <button
+            type="button"
+            className={budgetSummaryTheme.controlButton}
+            onClick={onToggleCollapsed}
+            aria-expanded={!isCollapsed}
+            aria-label={collapseLabel}
+            title={collapseLabel}
+          >
+            {isCollapsed ? (
+              <LuChevronRight className="h-4 w-4" />
+            ) : (
+              <LuChevronDown className="h-4 w-4" />
+            )}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 };

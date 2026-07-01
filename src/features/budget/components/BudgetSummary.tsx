@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 
 import { BudgetUtilizationCard } from '@/features/budget/components/budgetSummary/BudgetUtilizationCard';
 import { formatWholeCurrency, type SummaryView } from '@/features/budget/components/budgetSummary/constants';
-import { IncomeAllocationCard } from '@/features/dashboard-infographic/components/IncomeAllocationCard';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 import type { BudgetEntry, SpendBasis } from '@/features/budget/types/budgetView';
+import { IncomeAllocationCard } from '@/features/dashboard-infographic/components/IncomeAllocationCard';
 import {
   getCompletedMonthsForYear,
   getSpendBasisLabel,
@@ -34,6 +34,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
 
   const [budgetUtilizationView, setBudgetUtilizationView] =
     useState<SummaryView>('chart');
+  const [isAllocationCollapsed, setIsAllocationCollapsed] = useState(true);
+  const [isUtilizationCollapsed, setIsUtilizationCollapsed] = useState(true);
 
   const completedMonths = getCompletedMonthsForYear(planningYear);
   const comparisonIncome = scaleAnnualAmountForSpendBasis({
@@ -58,6 +60,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           className="h-full lg:col-span-2"
           monthlyIncome={income}
           budgetEntries={budgetEntries}
+          isCollapsed={isAllocationCollapsed}
+          onToggleCollapsed={() => setIsAllocationCollapsed(!isAllocationCollapsed)}
         />
       </div>
 
@@ -82,6 +86,8 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
         budgetedForChart={budgetedForChart}
         remainingForChart={remainingForChart}
         remainingTotal={budgetUtilizationTotals.remaining}
+        isCollapsed={isUtilizationCollapsed}
+        onToggleCollapsed={() => setIsUtilizationCollapsed(!isUtilizationCollapsed)}
       />
     </div>
   );

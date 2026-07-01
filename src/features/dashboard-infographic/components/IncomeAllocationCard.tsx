@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { LuCalendar, LuWallet } from 'react-icons/lu';
+import {
+  LuCalendar,
+  LuChevronDown,
+  LuChevronRight,
+  LuWallet,
+} from 'react-icons/lu';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
@@ -15,6 +20,8 @@ interface IncomeAllocationCardProps {
   monthlyIncome: number;
   budgetEntries: BudgetEntry[];
   className?: string;
+  isCollapsed?: boolean;
+  onToggleCollapsed?: () => void;
 }
 
 type AllocationBucketId = Extract<
@@ -197,6 +204,8 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   monthlyIncome,
   budgetEntries,
   className = '',
+  isCollapsed = false,
+  onToggleCollapsed,
 }) => {
   const [selectedBucket, setSelectedBucket] = useState<DrilldownBucketId | null>(
     null,
@@ -298,7 +307,11 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
       aria-label="Income Allocation"
       className={`surface-card p-5 ${className}`}
     >
-      <div className="mb-4 flex items-start justify-between gap-3">
+      <div
+        className={`flex items-start justify-between gap-3 ${
+          isCollapsed ? '' : 'mb-4'
+        }`}
+      >
         <div className="flex items-center gap-3">
           <div className={budgetSummaryTheme.iconContainer}>
             <LuWallet className={budgetSummaryTheme.icon} />
@@ -310,17 +323,46 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
           </h3>
         </div>
 
-        <button
-          type="button"
-          className={budgetSummaryTheme.controlButton}
-          onClick={() => setValueDisplayPeriod(nextValueDisplayPeriod)}
-          aria-label={valueToggleLabel}
-          title={valueToggleLabel}
-        >
-          <LuCalendar className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          {!isCollapsed ? (
+            <button
+              type="button"
+              className={budgetSummaryTheme.controlButton}
+              onClick={() => setValueDisplayPeriod(nextValueDisplayPeriod)}
+              aria-label={valueToggleLabel}
+              title={valueToggleLabel}
+            >
+              <LuCalendar className="h-4 w-4" />
+            </button>
+          ) : null}
+          {onToggleCollapsed ? (
+            <button
+              type="button"
+              className={budgetSummaryTheme.controlButton}
+              onClick={onToggleCollapsed}
+              aria-expanded={!isCollapsed}
+              aria-label={
+                isCollapsed
+                  ? 'Show income allocation details'
+                  : 'Hide income allocation details'
+              }
+              title={
+                isCollapsed
+                  ? 'Show income allocation details'
+                  : 'Hide income allocation details'
+              }
+            >
+              {isCollapsed ? (
+                <LuChevronRight className="h-4 w-4" />
+              ) : (
+                <LuChevronDown className="h-4 w-4" />
+              )}
+            </button>
+          ) : null}
+        </div>
       </div>
 
+      {isCollapsed ? null : (
       <div className="space-y-4">
         {isDetailView && selectedBucketLabel ? (
           <div className="flex flex-col gap-4 border-b pb-4 section-divider lg:flex-row lg:items-start lg:justify-between">
@@ -386,6 +428,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
           totalActionLabel={isDetailView ? 'Back to allocation' : undefined}
         />
       </div>
+      )}
     </div>
   );
 };

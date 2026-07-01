@@ -26,6 +26,8 @@ interface BudgetUtilizationCardProps {
   budgetedForChart: number;
   remainingForChart: number;
   remainingTotal: number;
+  isCollapsed?: boolean;
+  onToggleCollapsed?: () => void;
 }
 
 export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
@@ -45,6 +47,8 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   budgetedForChart,
   remainingForChart,
   remainingTotal,
+  isCollapsed = false,
+  onToggleCollapsed,
 }) => (
   <motion.div
     initial="hidden"
@@ -60,9 +64,11 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
       currentView={view}
       onToggle={onToggle}
       showFilteredBadge={showFilteredBadge}
+      isCollapsed={isCollapsed}
+      onToggleCollapsed={onToggleCollapsed}
     />
 
-    {view === 'chart' ? (
+    {isCollapsed ? null : view === 'chart' ? (
       <BudgetUtilizationChart
         spendBasisLabel={spendBasisLabel}
         incomeSummary={incomeSummary}
