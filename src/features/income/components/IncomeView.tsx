@@ -80,6 +80,7 @@ export const IncomeView = React.forwardRef<IncomeViewHandle, IncomeViewProps>(
       <section className="space-y-6" aria-label="Income management">
         <IncomeSummary
           totals={projection?.totals ?? EMPTY_PROJECTION_TOTALS}
+          sources={sources}
           taxAdvantagedInvestments={
             projection?.taxAdvantagedInvestments ??
             EMPTY_TAX_ADVANTAGED_INVESTMENTS

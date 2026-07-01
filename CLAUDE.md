@@ -374,3 +374,5 @@ export { EXPENSE_TYPES } from './constants/expenseConfig';
 11. **No over-engineering**: Don't add features or abstraction you're not using right now
 
 THIS IS A GREEN FIELD PROJECT. WE ARE STILL DEVELOPING SO WE DONT EVER NEED BACKWARDS COMPATIBILITY!
+
+Do note test anything unless asked by the user.

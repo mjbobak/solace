@@ -2,11 +2,15 @@ import React from 'react';
 
 import type {
   IncomeProjectionTotals,
+  ProjectedIncomeSource,
   TaxAdvantagedInvestments,
 } from '../types/income';
 
+import { IncomeOverviewCard } from './IncomeOverviewCard';
+
 interface IncomeSummaryProps {
   totals: IncomeProjectionTotals;
+  sources: ProjectedIncomeSource[];
   taxAdvantagedInvestments: TaxAdvantagedInvestments;
 }
 
@@ -16,46 +20,6 @@ function formatRoundedCurrency(value: number): string {
     currency: 'USD',
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function formatMonthlyCurrency(value: number): string {
-  return formatRoundedCurrency(value / 12);
-}
-
-interface OverviewMetricProps {
-  label: string;
-  annualValue: number;
-  className?: string;
-}
-
-function OverviewMetric({
-  label,
-  annualValue,
-  className = '',
-}: OverviewMetricProps) {
-  return (
-    <div className={`flex flex-col gap-1 ${className}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-        {label}
-      </p>
-      <span className="flex items-baseline gap-1.5">
-        <span className="text-xl font-semibold leading-tight text-app md:text-2xl">
-          {formatRoundedCurrency(annualValue)}
-        </span>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-          Annual
-        </span>
-      </span>
-      <span className="flex items-baseline gap-1.5">
-        <span className="text-xs font-semibold text-muted">
-          {formatMonthlyCurrency(annualValue)}
-        </span>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-          Month
-        </span>
-      </span>
-    </div>
-  );
 }
 
 interface TaxDetailProps {
@@ -77,6 +41,7 @@ function TaxDetail({ label, value, className = '' }: TaxDetailProps) {
 
 export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   totals,
+  sources,
   taxAdvantagedInvestments,
 }) => {
   const employerBucketTotal = taxAdvantagedInvestments.entries.reduce(
@@ -93,22 +58,7 @@ export const IncomeSummary: React.FC<IncomeSummaryProps> = ({
   return (
     <section aria-label="Income summary">
       <div className="grid gap-5 xl:grid-cols-2">
-        <article className="surface-card h-full p-4 md:p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-            Income Overview
-          </p>
-          <div className="mt-2.5 grid gap-4 md:grid-cols-2 md:gap-0">
-            <OverviewMetric
-              label="Gross"
-              annualValue={totals.plannedGross}
-            />
-            <OverviewMetric
-              label="Net"
-              annualValue={totals.plannedNet}
-              className="border-t pt-3 md:border-t-0 md:border-l md:pl-6 md:pt-0 section-divider"
-            />
-          </div>
-        </article>
+        <IncomeOverviewCard totals={totals} sources={sources} />
 
         <article className="surface-card h-full p-4 text-left md:p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
