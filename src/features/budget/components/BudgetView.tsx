@@ -270,7 +270,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
     }
 
     return (
-      <div className="space-y-3">
+      <div className="flex h-full min-h-0 flex-col space-y-3">
         <BudgetSummary
           budgetEntries={budgetEntries}
           totals={totals}
@@ -281,7 +281,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
           spendBasis={spendBasis}
         />
 
-        <div className="surface-card">
+        <div className="surface-card flex min-h-0 flex-1 flex-col">
           <div className="mb-3 flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <ExpenseTypeFilters
@@ -311,6 +311,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
             onSelectionChange={handleSelectionChange}
             onSelectAll={handleSelectAll}
             emptyMessage="No budget entries found"
+            fillHeight
           />
         </div>
 

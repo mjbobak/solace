@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { BudgetInsightsCard } from '@/features/budget/components/budgetSummary/BudgetInsightsCard';
 import { BudgetUtilizationCard } from '@/features/budget/components/budgetSummary/BudgetUtilizationCard';
 import { formatWholeCurrency, type SummaryView } from '@/features/budget/components/budgetSummary/constants';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
@@ -34,8 +35,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
 
   const [budgetUtilizationView, setBudgetUtilizationView] =
     useState<SummaryView>('chart');
-  const [isAllocationCollapsed, setIsAllocationCollapsed] = useState(true);
-  const [isUtilizationCollapsed, setIsUtilizationCollapsed] = useState(true);
+  const [isInsightsCollapsed, setIsInsightsCollapsed] = useState(true);
 
   const completedMonths = getCompletedMonthsForYear(planningYear);
   const comparisonIncome = scaleAnnualAmountForSpendBasis({
@@ -54,41 +54,41 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const spentWidth = Math.min(usedPercent, 100);
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
-        <IncomeAllocationCard
-          className="h-full lg:col-span-2"
-          monthlyIncome={income}
-          budgetEntries={budgetEntries}
-          isCollapsed={isAllocationCollapsed}
-          onToggleCollapsed={() => setIsAllocationCollapsed(!isAllocationCollapsed)}
+    <BudgetInsightsCard
+      isCollapsed={isInsightsCollapsed}
+      onToggleCollapsed={() => setIsInsightsCollapsed(!isInsightsCollapsed)}
+    >
+      <IncomeAllocationCard
+        embedded
+        monthlyIncome={income}
+        budgetEntries={budgetEntries}
+      />
+
+      <div className="section-divider border-t pt-6">
+        <BudgetUtilizationCard
+          embedded
+          view={budgetUtilizationView}
+          onToggle={() =>
+            setBudgetUtilizationView((current) =>
+              current === 'chart' ? 'numbers' : 'chart',
+            )
+          }
+          showFilteredBadge={isBudgetFiltered}
+          spendBasisLabel={spendBasisLabel}
+          incomeSummary={formatWholeCurrency(comparisonIncome)}
+          budgetedSummary={formatWholeCurrency(budgetedForChart)}
+          spentSummary={formatWholeCurrency(spentForChart)}
+          usedPercent={usedPercent}
+          spentWidth={spentWidth}
+          spentForChart={spentForChart}
+          remainingBudgetForChart={remainingBudgetForChart}
+          amountContextLabel={spendBasisLabel}
+          income={comparisonIncome}
+          budgetedForChart={budgetedForChart}
+          remainingForChart={remainingForChart}
+          remainingTotal={budgetUtilizationTotals.remaining}
         />
       </div>
-
-      <BudgetUtilizationCard
-        view={budgetUtilizationView}
-        onToggle={() =>
-          setBudgetUtilizationView((current) =>
-            current === 'chart' ? 'numbers' : 'chart',
-          )
-        }
-        showFilteredBadge={isBudgetFiltered}
-        spendBasisLabel={spendBasisLabel}
-        incomeSummary={formatWholeCurrency(comparisonIncome)}
-        budgetedSummary={formatWholeCurrency(budgetedForChart)}
-        spentSummary={formatWholeCurrency(spentForChart)}
-        usedPercent={usedPercent}
-        spentWidth={spentWidth}
-        spentForChart={spentForChart}
-        remainingBudgetForChart={remainingBudgetForChart}
-        amountContextLabel={spendBasisLabel}
-        income={comparisonIncome}
-        budgetedForChart={budgetedForChart}
-        remainingForChart={remainingForChart}
-        remainingTotal={budgetUtilizationTotals.remaining}
-        isCollapsed={isUtilizationCollapsed}
-        onToggleCollapsed={() => setIsUtilizationCollapsed(!isUtilizationCollapsed)}
-      />
-    </div>
+    </BudgetInsightsCard>
   );
 };

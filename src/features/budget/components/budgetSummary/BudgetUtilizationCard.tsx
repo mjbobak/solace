@@ -28,6 +28,8 @@ interface BudgetUtilizationCardProps {
   remainingTotal: number;
   isCollapsed?: boolean;
   onToggleCollapsed?: () => void;
+  /** Renders as a bare section (no card chrome) for embedding in another card. */
+  embedded?: boolean;
 }
 
 export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
@@ -49,48 +51,61 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   remainingTotal,
   isCollapsed = false,
   onToggleCollapsed,
-}) => (
-  <motion.div
-    initial="hidden"
-    animate="visible"
-    variants={getCardVariants(1)}
-    role="region"
-    aria-label="Budget Utilization"
-    className={budgetSummaryTheme.summaryCard}
-  >
-    <SummaryCardHeader
-      icon={<LuWallet className={cardIconClass} />}
-      title="Budget Utilization"
-      currentView={view}
-      onToggle={onToggle}
-      showFilteredBadge={showFilteredBadge}
-      isCollapsed={isCollapsed}
-      onToggleCollapsed={onToggleCollapsed}
-    />
+  embedded = false,
+}) => {
+  const body = (
+    <>
+      <SummaryCardHeader
+        icon={<LuWallet className={cardIconClass} />}
+        title="Budget Utilization"
+        currentView={view}
+        onToggle={onToggle}
+        showFilteredBadge={showFilteredBadge}
+        isCollapsed={isCollapsed}
+        onToggleCollapsed={onToggleCollapsed}
+      />
 
-    {isCollapsed ? null : view === 'chart' ? (
-      <BudgetUtilizationChart
-        spendBasisLabel={spendBasisLabel}
-        incomeSummary={incomeSummary}
-        budgetedSummary={budgetedSummary}
-        spentSummary={spentSummary}
-        usedPercent={usedPercent}
-        spentWidth={spentWidth}
-        spentForChart={spentForChart}
-        remainingBudgetForChart={remainingBudgetForChart}
-        remainingTotal={remainingTotal}
-        amountContextLabel={amountContextLabel}
-      />
-    ) : (
-      <BudgetUtilizationNumbers
-        income={income}
-        budgetedForChart={budgetedForChart}
-        spentForChart={spentForChart}
-        remainingForChart={remainingForChart}
-        remainingTotal={remainingTotal}
-        usedPercent={usedPercent}
-        amountContextLabel={amountContextLabel}
-      />
-    )}
-  </motion.div>
-);
+      {isCollapsed ? null : view === 'chart' ? (
+        <BudgetUtilizationChart
+          spendBasisLabel={spendBasisLabel}
+          incomeSummary={incomeSummary}
+          budgetedSummary={budgetedSummary}
+          spentSummary={spentSummary}
+          usedPercent={usedPercent}
+          spentWidth={spentWidth}
+          spentForChart={spentForChart}
+          remainingBudgetForChart={remainingBudgetForChart}
+          remainingTotal={remainingTotal}
+          amountContextLabel={amountContextLabel}
+        />
+      ) : (
+        <BudgetUtilizationNumbers
+          income={income}
+          budgetedForChart={budgetedForChart}
+          spentForChart={spentForChart}
+          remainingForChart={remainingForChart}
+          remainingTotal={remainingTotal}
+          usedPercent={usedPercent}
+          amountContextLabel={amountContextLabel}
+        />
+      )}
+    </>
+  );
+
+  if (embedded) {
+    return <div>{body}</div>;
+  }
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={getCardVariants(1)}
+      role="region"
+      aria-label="Budget Utilization"
+      className={budgetSummaryTheme.summaryCard}
+    >
+      {body}
+    </motion.div>
+  );
+};

@@ -22,6 +22,8 @@ interface IncomeAllocationCardProps {
   className?: string;
   isCollapsed?: boolean;
   onToggleCollapsed?: () => void;
+  /** Renders as a bare section (no card chrome) for embedding in another card. */
+  embedded?: boolean;
 }
 
 type AllocationBucketId = Extract<
@@ -206,6 +208,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   className = '',
   isCollapsed = false,
   onToggleCollapsed,
+  embedded = false,
 }) => {
   const [selectedBucket, setSelectedBucket] = useState<DrilldownBucketId | null>(
     null,
@@ -305,7 +308,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
     <div
       role="region"
       aria-label="Income Allocation"
-      className={`surface-card p-5 ${className}`}
+      className={embedded ? className : `surface-card p-5 ${className}`}
     >
       <div
         className={`flex items-start justify-between gap-3 ${
