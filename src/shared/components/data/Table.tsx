@@ -30,6 +30,8 @@ interface TableProps<T> {
   highlightedIds?: Set<string>;
   sortState?: SortState;
   onSortChange?: (sortState: SortState) => void;
+  /** Fills the parent flex column; the body scrolls under the sticky header. */
+  fillHeight?: boolean;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -98,6 +100,7 @@ export function Table<T>({
   highlightedIds = new Set(),
   sortState: controlledSortState,
   onSortChange,
+  fillHeight = false,
 }: TableProps<T>) {
   const checkboxClassName = 'checkbox-input';
   const hasHighlightedColumn = highlightedIds.size > 0;
@@ -218,9 +221,11 @@ export function Table<T>({
   }
 
   return (
-    <div className="table-shell">
+    <div
+      className={`table-shell ${fillHeight ? 'min-h-0 flex-1 overflow-y-auto' : ''}`}
+    >
       <table className="table-base">
-        <thead className="table-head sticky top-0">
+        <thead className="table-head sticky top-0 z-10">
           <tr className="h-10">
             {selectable && (
               <th className="px-3 py-1 w-10">

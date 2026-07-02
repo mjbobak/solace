@@ -63,10 +63,10 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="bulk-toolbar-control inline-flex h-11 gap-2 px-4"
+        className="bulk-toolbar-control h-9"
       >
         <span>Change Budget</span>
-        <LuChevronDown size={16} />
+        <LuChevronDown size={14} />
       </button>
 
       {isOpen && (
@@ -79,7 +79,7 @@ export const BulkBudgetDropdown: React.FC<BulkBudgetDropdownProps> = ({
             }}
             aria-hidden="true"
           />
-          <div className="bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden">
+          <div className="bulk-toolbar-menu absolute top-full left-0 z-20 mt-2 flex max-h-[400px] min-w-[280px] flex-col overflow-hidden">
             <div className="bulk-toolbar-search-header">
               <div className="relative">
                 <input

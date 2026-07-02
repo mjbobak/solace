@@ -13,9 +13,9 @@ export const BulkAccountDropdown: React.FC<BulkAccountDropdownProps> = ({
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const triggerClassName = 'bulk-toolbar-control inline-flex h-11 gap-2 px-4';
+  const triggerClassName = 'bulk-toolbar-control h-9';
   const menuClassName =
-    'bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 max-h-[300px] min-w-[220px] overflow-y-auto py-2';
+    'bulk-toolbar-menu absolute top-full left-0 z-20 mt-2 max-h-[300px] min-w-[220px] overflow-y-auto py-2';
   const menuItemClassName = 'bulk-toolbar-menu-item font-medium';
 
   const handleSelect = (account: string) => {
@@ -31,7 +31,7 @@ export const BulkAccountDropdown: React.FC<BulkAccountDropdownProps> = ({
         className={triggerClassName}
       >
         <span>Change Account</span>
-        <LuChevronDown size={16} />
+        <LuChevronDown size={14} />
       </button>
 
       {isOpen && (

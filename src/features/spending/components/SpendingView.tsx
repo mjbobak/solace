@@ -635,8 +635,29 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="surface-card">
+    <div className="flex h-full min-h-0 flex-col space-y-4">
+      <BulkActionBar
+        selectedCount={selection.selectedCount}
+        itemLabel="transactions"
+        onClearSelection={selection.clearSelection}
+        actions={[]}
+        pendingOperations={getPendingOperationsDisplay()}
+        onSave={handleSave}
+        saveDisabled={bulkOps.isLoading}
+        onDelete={handleBulkDelete}
+      >
+        <BulkBudgetDropdown
+          budgets={allBudgets}
+          onSelectBudget={handleBulkBudgetSelect}
+        />
+        <BulkAccountDropdown
+          accounts={availableAccounts}
+          onSelectAccount={handleBulkAccountSelect}
+        />
+        <BulkSpreadDropdown onSelectSpread={handleBulkSpreadSelect} />
+      </BulkActionBar>
+
+      <div className="surface-card flex min-h-0 flex-1 flex-col">
         <div className="mb-4">
           <SpendingFilters
             filters={filters}
@@ -647,26 +668,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
             drillThroughBudgetLabel={drillThroughBudgetLabel}
           />
         </div>
-
-        <BulkActionBar
-          selectedCount={selection.selectedCount}
-          onClearSelection={selection.clearSelection}
-          actions={[]}
-          pendingOperations={getPendingOperationsDisplay()}
-          onSave={handleSave}
-          saveDisabled={bulkOps.isLoading}
-          onDelete={handleBulkDelete}
-        >
-          <BulkBudgetDropdown
-            budgets={allBudgets}
-            onSelectBudget={handleBulkBudgetSelect}
-          />
-          <BulkAccountDropdown
-            accounts={availableAccounts}
-            onSelectAccount={handleBulkAccountSelect}
-          />
-          <BulkSpreadDropdown onSelectSpread={handleBulkSpreadSelect} />
-        </BulkActionBar>
 
         <Table
           columns={columns}
@@ -684,6 +685,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
           highlightedIds={highlightedIds}
           sortState={sortState}
           onSortChange={handleSortChange}
+          fillHeight
         />
 
         <Pagination

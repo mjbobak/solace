@@ -1,5 +1,4 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import { LuTrash2, LuX } from 'react-icons/lu';
 
 import { Button } from '@/shared/components/Button';
@@ -14,6 +13,7 @@ export interface BulkAction {
 
 interface BulkActionBarProps {
   selectedCount: number;
+  itemLabel?: string;
   onClearSelection: () => void;
   actions: BulkAction[];
   children?: React.ReactNode;
@@ -29,6 +29,7 @@ interface BulkActionBarProps {
 
 export const BulkActionBar: React.FC<BulkActionBarProps> = ({
   selectedCount,
+  itemLabel = 'items',
   onClearSelection,
   actions,
   children,
@@ -39,9 +40,8 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
 }) => {
   if (selectedCount === 0) return null;
 
-  return createPortal(
-    <div className="fixed bottom-6 left-6 right-6 z-50 max-w-7xl mx-auto">
-      <div className="bulk-toolbar">
+  return (
+    <div className="bulk-toolbar">
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={onClearSelection}
@@ -49,12 +49,12 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
             title="Clear selection"
             aria-label="Clear selection"
           >
-            <LuX size={18} />
+            <LuX size={16} />
           </button>
 
           <div className="bulk-toolbar-count">
             <span className="bulk-toolbar-count-badge">{selectedCount}</span>
-            <span>work items selected</span>
+            <span>{itemLabel} selected</span>
           </div>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
@@ -64,7 +64,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
                 key={action.key}
                 variant={action.variant || 'secondary'}
                 onClick={action.onClick}
-                className="bulk-toolbar-control h-11 shrink-0 rounded-xl px-4 py-0 text-sm"
+                className="bulk-toolbar-control h-9 shrink-0 px-3 py-0"
               >
                 {action.icon && <span>{action.icon}</span>}
                 {action.label}
@@ -75,7 +75,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
           {pendingOperations.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
               {pendingOperations.map((op) => (
-                <div key={op.type} className="bulk-toolbar-chip h-9 px-3">
+                <div key={op.type} className="bulk-toolbar-chip h-8">
                   <span className="whitespace-nowrap">{op.label}</span>
                   <button
                     onClick={op.onClear}
@@ -107,15 +107,13 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
                 variant="primary"
                 onClick={onSave}
                 disabled={saveDisabled || pendingOperations.length === 0}
-                className="bulk-toolbar-primary h-11 shrink-0 px-5 py-0"
+                className="bulk-toolbar-primary h-9 shrink-0 py-0"
               >
                 Save changes
               </Button>
             )}
           </div>
         </div>
-      </div>
-    </div>,
-    document.body,
+    </div>
   );
 };

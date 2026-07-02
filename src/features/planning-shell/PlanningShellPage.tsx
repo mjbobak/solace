@@ -194,7 +194,11 @@ const PlanningShellPage: React.FC = () => {
           }
         }}
       />
-      <MainContent title={pageTitle} headerAction={headerAction}>
+      <MainContent
+        title={pageTitle}
+        headerAction={headerAction}
+        fillViewport={activeTab === 'spending'}
+      >
         <Suspense fallback={<ContentLoader />}>{content}</Suspense>
       </MainContent>
     </div>

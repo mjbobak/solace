@@ -5,6 +5,8 @@ interface MainContentProps {
   children: React.ReactNode;
   headerAction?: React.ReactNode;
   headerControls?: React.ReactNode;
+  /** Locks the page to the viewport height; children handle their own scrolling. */
+  fillViewport?: boolean;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
@@ -12,10 +14,15 @@ export const MainContent: React.FC<MainContentProps> = ({
   children,
   headerAction,
   headerControls,
+  fillViewport = false,
 }) => {
   return (
-    <div className="app-shell">
-      <div className="page-content">
+    <div
+      className={`app-shell ${fillViewport ? 'flex h-screen flex-col overflow-hidden' : ''}`}
+    >
+      <div
+        className={`page-content ${fillViewport ? 'flex min-h-0 flex-1 flex-col' : ''}`}
+      >
         <header className="page-header">
           <h2 className="page-title">{title}</h2>
           {headerControls || headerAction ? (
@@ -26,7 +33,9 @@ export const MainContent: React.FC<MainContentProps> = ({
           ) : null}
         </header>
 
-        <div className="animate-fadeIn">{children}</div>
+        <div className={`animate-fadeIn ${fillViewport ? 'min-h-0 flex-1' : ''}`}>
+          {children}
+        </div>
       </div>
     </div>
   );

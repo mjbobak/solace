@@ -24,10 +24,10 @@ export const BulkSpreadDropdown: React.FC<BulkSpreadDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="bulk-toolbar-control inline-flex h-11 gap-2 px-4"
+        className="bulk-toolbar-control h-9"
       >
         <span>Payment Spread</span>
-        <LuChevronDown size={16} />
+        <LuChevronDown size={14} />
       </button>
 
       {isOpen && (
@@ -37,7 +37,7 @@ export const BulkSpreadDropdown: React.FC<BulkSpreadDropdownProps> = ({
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
-          <div className="bulk-toolbar-menu absolute bottom-full right-0 z-20 mb-2 min-w-[260px] overflow-hidden py-2">
+          <div className="bulk-toolbar-menu absolute top-full left-0 z-20 mt-2 min-w-[260px] overflow-hidden py-2">
             <button
               onClick={() => handleSelect('fiscalYear')}
               className="bulk-toolbar-menu-item flex flex-col items-start gap-1 text-left"
