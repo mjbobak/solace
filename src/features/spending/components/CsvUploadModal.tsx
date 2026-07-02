@@ -13,6 +13,7 @@ import { CsvPreviewTableEnhanced } from './CsvPreviewTableEnhanced';
 
 interface CsvUploadModalProps {
   onSuccess: () => void;
+  onCancel: () => void;
   budgets: BudgetApiResponse[];
   isLoadingBudgets?: boolean;
   onPreviewStateChange?: (showing: boolean) => void;
@@ -20,6 +21,7 @@ interface CsvUploadModalProps {
 
 export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   onSuccess,
+  onCancel,
   budgets,
   isLoadingBudgets = false,
   onPreviewStateChange,
@@ -59,58 +61,26 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
     e.stopPropagation();
   };
 
-  const accountHints = [
-    {
-      label: 'Chase credit card',
-      value: '1466',
-    },
-    {
-      label: 'Chase checking',
-      value: '2939',
-    },
-  ];
-
   // No preview - show file upload area
   if (!previewData) {
     return (
       <div className="space-y-5">
         <div className="import-panel">
-          <div className="import-panel-header">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-1">
-                <p className="import-kicker">Bulk Import</p>
-                <h3 className="import-title">
-                  Upload CSV exports and review them before import
-                </h3>
-                <p className="import-description max-w-2xl">
-                  Use this flow for larger batches. You can edit rows, exclude
-                  anything you do not want, and confirm only the cleaned data.
-                </p>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {accountHints.map((hint) => (
-                  <div
-                    key={hint.value}
-                    className="import-card"
-                  >
-                    <div className="import-card-label">Expected file</div>
-                    <div className="import-card-value">
-                      {hint.label}
-                    </div>
-                    <div className="import-card-label">
-                      Filename should contain {hint.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
           <div className="px-5 py-5 sm:px-6">
-            <div
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.CSV"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              className="import-dropzone"
+              className="import-dropzone w-full cursor-pointer"
             >
               <div className="flex flex-col items-center justify-center gap-4 text-center">
                 <div className="import-dropzone-icon">
@@ -130,28 +100,14 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 </div>
                 <div>
                   <h4 className="import-title text-base">
-                    Drop CSV files here
+                    Drop CSV files here or click to browse
                   </h4>
                   <p className="import-description mt-1">
-                    Or browse from your computer. Up to 2 files per import.
+                    Up to 2 files per import.
                   </p>
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv,.CSV"
-                  multiple
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="import-secondary-action"
-                >
-                  Select Files
-                </button>
               </div>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -211,7 +167,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
         {/* Actions */}
         <div className="import-actions sm:justify-end">
           <Button
-            onClick={handleCancel}
+            onClick={onCancel}
             variant="secondary"
             className="sm:min-w-32"
           >

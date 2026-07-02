@@ -704,6 +704,8 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
 
       <AddTransactionModal
         isOpen={isModalOpen}
+        budgets={allBudgets}
+        accounts={availableAccounts}
         onClose={handleModalClose}
         onAddEntry={handleAddTransaction}
       />
