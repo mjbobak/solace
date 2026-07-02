@@ -296,7 +296,11 @@ export function Table<T>({
                         ? ''
                         : 'table-row-striped'
                 }`}
-                onClick={() => onRowClick?.(row)}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button, a, input, label')) return;
+                  onRowClick?.(row);
+                }}
               >
                 {selectable && (
                   <td
