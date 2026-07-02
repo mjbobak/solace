@@ -12,9 +12,9 @@ Priority: higher number = checked first (default 0).
 First matching rule wins per transaction.
 
 The hardcoded RULES list below was rebuilt from the live development database on
-April 3, 2026 using manually budgeted transactions as the source of truth.
+July 2, 2026 using manually budgeted transactions as the source of truth.
 The seed is intentionally conservative:
-  - Only patterns with at least 3 historical matches are considered
+  - Only patterns with at least 2 historical matches are considered
   - Only patterns with fully consistent historical outcomes are seeded
   - Prefer durable contains/startswith patterns over exact strings
   - Exclude ambiguous families the current matcher cannot safely disambiguate
@@ -44,7 +44,7 @@ from backend.app.db.models.transaction import Transaction, TransactionStatus  # 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
-MIN_HISTORY_COUNT = 3
+MIN_HISTORY_COUNT = 2
 STARTSWITH_PRIORITY = 50
 CONTAINS_PRIORITY = 10
 
@@ -84,32 +84,58 @@ PREFIX_RULES = [
 
 CONTAINS_RULES = [
     {"pattern": "AAFCU", "expense_label": "Car Loan"},
+    {"pattern": "ALDI", "expense_label": "Groceries"},
     {"pattern": "AMOCO", "expense_label": "Gas"},
+    {"pattern": "ANTONINOS RISTORANTE", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "APPLE.COM/BILL", "expense_label": "SUB - Apple Care iPhone"},
-    {"pattern": "CASEYS", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "BROTHERS MEXICAN GRI", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "CASEYS", "expense_label": "Groceries"},
+    {"pattern": "CHICK-FIL-A", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "CHIPOTLE", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "COMCAST", "expense_label": "UTILS - Internet"},
     {"pattern": "COMED", "expense_label": "UTILS - Electricity"},
+    {"pattern": "COSTCO *ANNUAL RENEWAL", "expense_label": "Costco Membership"},
     {"pattern": "COSTCO WHSE", "expense_label": "Groceries"},
     {"pattern": "CRUMBL", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "ENTERPRISE RENT-A-CAR", "expense_label": "Travel"},
     {"pattern": "FLOOD BROS", "expense_label": "UTILS - Trash"},
+    {"pattern": "HINSDALE NURSERIES", "expense_label": "Home Shopping"},
+    {"pattern": "HOMEDEPOT.COM", "expense_label": "Home Shopping"},
+    {"pattern": "HORTON'S HOME FINISHIN", "expense_label": "Home Shopping"},
+    {"pattern": "HULU", "expense_label": "TV Subscriptions"},
+    {"pattern": "IL MIO", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "IL TOLLWAY-AUTOREPLENISH", "expense_label": "Travel"},
+    {"pattern": "IMPERIAL OAK BREWING", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "JEWEL OSCO", "expense_label": "Groceries"},
     {"pattern": "JEWEL-OSCO.COM", "expense_label": "Groceries"},
     {"pattern": "JIMMY JOHNS", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "LOU MALNATI", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "MARIANOS", "expense_label": "Groceries"},
+    {"pattern": "MAX AQUATICS", "expense_label": "Daisy Activities"},
     {"pattern": "MENARDS", "expense_label": "Home Shopping"},
+    {"pattern": "METRA MOBILE", "expense_label": "Work Transportation"},
     {"pattern": "NETFLIX", "expense_label": "TV Subscriptions"},
     {"pattern": "NICOR", "expense_label": "UTILS - Gas"},
     {"pattern": "PARK CHICAGO MOBILE", "expense_label": "Travel"},
     {"pattern": "PARK DISTRICT OF LA GRAN", "expense_label": "Health & Wellness"},
-    {"pattern": "HULU", "expense_label": "TV Subscriptions"},
+    {"pattern": "PORTILLOS", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "PRASINO", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "PURCHASE INTEREST CHARGE", "expense_label": "Fees"},
     {"pattern": "SAWYER + M* MINI MUSIC", "expense_label": "Daisy Activities"},
+    {"pattern": "SHELL OIL", "expense_label": "Gas"},
     {"pattern": "SPOTHERO", "expense_label": "Travel"},
+    {"pattern": "STAN S DONUTS", "expense_label": "Food & Drink & Date Nights"},
+    {"pattern": "TESLA SUBSCRIPTION", "expense_label": "Tesla Navigation"},
+    {"pattern": "TESLA SUPERCHARGER", "expense_label": "Travel"},
+    {"pattern": "THE ELM", "expense_label": "Food & Drink & Date Nights"},
     {"pattern": "THE HOME DEPOT", "expense_label": "Home Shopping"},
-    {"pattern": "TJMAXX", "expense_label": "Home Shopping"},
     {"pattern": "TRADER JOE", "expense_label": "Groceries"},
+    {"pattern": "TURBOTAX", "expense_label": "Home Shopping"},
+    {"pattern": "VINTAGE CHARM-LA GRANGE", "expense_label": "Gifts"},
     {"pattern": "WALGREENS", "expense_label": "Groceries"},
+    {"pattern": "WHOLE FOODS", "expense_label": "Groceries"},
+    {"pattern": "WHOLEFDS", "expense_label": "Groceries"},
+    {"pattern": "WONDERFUL MATCHA", "expense_label": "Groceries"},
     {"pattern": "YOGA BY DEGREES", "expense_label": "Health & Wellness"},
 ]
 for rule in CONTAINS_RULES:
