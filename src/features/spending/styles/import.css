@@ -149,6 +149,15 @@
       inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
   }
 
+  .edit-transaction-popover {
+    @apply rounded-2xl border;
+    background: var(--color-surface-solid);
+    border-color: var(--color-border);
+    box-shadow:
+      0 24px 64px -30px color-mix(in srgb, black 58%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+  }
+
   .spread-payment-popover-header {
     border-bottom: 1px solid
       color-mix(in srgb, var(--color-border) 82%, transparent);

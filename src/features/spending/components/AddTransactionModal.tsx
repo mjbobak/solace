@@ -10,10 +10,6 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { getTodayDateOnly } from '@/shared/utils/dateOnly';
 
 import type { SpendingEntry } from '../types/spendingView';
-import {
-  formatSpreadRangeLabel,
-  getSpreadPaymentConfig,
-} from '../utils/spreadPayments';
 
 import { CsvUploadModal } from './CsvUploadModal';
 
@@ -36,8 +32,6 @@ interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddEntry: (entry: Omit<SpendingEntry, 'id'>) => void;
-  onUpdateEntry?: (id: string, updates: Partial<SpendingEntry>) => void;
-  item?: SpendingEntry;
 }
 
 interface TransactionFormData {
@@ -70,10 +64,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isOpen,
   onClose,
   onAddEntry,
-  onUpdateEntry,
-  item,
 }) => {
-  const isEditMode = !!item;
   const [activeTab, setActiveTab] = useState<TabType>('manual');
   const [budgets, setBudgets] = useState<BudgetApiResponse[]>([]);
   const [isLoadingBudgets, setIsLoadingBudgets] = useState(true);
@@ -94,24 +85,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     fetchBudgets();
   }, []);
 
-  // Initialize form with existing data when editing
+  // Reset form each time the modal opens
   useEffect(() => {
-    if (isEditMode && item) {
-      setFormData({
-        account: item.account,
-        transactionDate: item.transactionDate,
-        description: item.description,
-        budgetId: item.budgetId ?? null,
-        budgetLabel: item.budgetLabel,
-        budgetCategory: item.budgetCategory,
-        budgetType: item.budgetType,
-        amount: item.amount.toString(),
-      });
-    } else if (isOpen) {
-      // Reset form for add mode
+    if (isOpen) {
       setFormData(createDefaultFormData());
     }
-  }, [isOpen, isEditMode, item]);
+  }, [isOpen]);
 
   const handleClose = () => {
     setFormData(createDefaultFormData());
@@ -124,25 +103,17 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
-    const baseEntry = {
+    onAddEntry({
       account: formData.account,
       transactionDate: formData.transactionDate,
+      postDate: formData.transactionDate,
       description: formData.description,
       budgetLabel: formData.budgetLabel,
       budgetId: formData.budgetId,
       budgetCategory: formData.budgetCategory,
       budgetType: formData.budgetType,
       amount: parseFloat(formData.amount),
-    };
-
-    if (isEditMode && item) {
-      onUpdateEntry?.(item.id, baseEntry);
-    } else {
-      onAddEntry({
-        ...baseEntry,
-        postDate: formData.transactionDate,
-      });
-    }
+    });
 
     handleClose();
   };
@@ -151,7 +122,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const labelClass = 'form-label';
 
   const amount = parseFloat(formData.amount) || 0;
-  const isUploadMode = !isEditMode && activeTab === 'upload';
+  const isUploadMode = activeTab === 'upload';
   const budgetOptions: DropdownOption[] = isLoadingBudgets
     ? [{ value: '', label: 'Loading budgets...' }]
     : [
@@ -165,11 +136,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           sublabel: `${budget.expense_category} • ${budget.expense_type}`,
         })),
       ];
-  const modalTitle = isEditMode
-    ? 'Edit Transaction'
-    : isUploadMode
-      ? 'Import Spending Data'
-      : 'Add Transaction';
+  const modalTitle = isUploadMode ? 'Import Spending Data' : 'Add Transaction';
 
   return (
     <Modal
@@ -180,9 +147,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       panelClassName={isUploadMode ? 'w-[min(96vw,1800px)]' : ''}
       contentClassName={isUploadMode ? 'px-4 py-5 sm:px-5 sm:py-6' : ''}
     >
-      {/* Tab Navigation - Only show for add mode */}
-      {!isEditMode && (
-        <div className="form-tabs-row">
+      {/* Tab Navigation */}
+      <div className="form-tabs-row">
           <button
             onClick={() => setActiveTab('manual')}
             className={`form-tab ${
@@ -204,10 +170,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             Upload File
           </button>
         </div>
-      )}
 
-      {/* Manual Entry Tab - Show in both add and edit modes */}
-      {(activeTab === 'manual' || isEditMode) && (
+      {/* Manual Entry Tab */}
+      {activeTab === 'manual' && (
         <div className="space-y-6">
           {/* Account and Description */}
           <div className="grid grid-cols-2 gap-4">
@@ -317,17 +282,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </div>
 
           <div className="form-callout">
-            {item && getSpreadPaymentConfig(item) ? (
-              <>
-                Spread payment is configured for{' '}
-                <span className="form-callout-emphasis font-semibold">
-                  {formatSpreadRangeLabel(getSpreadPaymentConfig(item)!)}
-                </span>
-                . Edit it from the table&apos;s Spread Payment column.
-              </>
-            ) : (
-              "Spread payment is managed from the table's Spread Payment column after you save the transaction."
-            )}
+            Spread payment is managed from the table&apos;s Spread Payment
+            column after you save the transaction.
           </div>
 
           {/* Amount Preview */}
@@ -355,7 +311,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               className="flex-1"
               disabled={!formData.description || !formData.amount}
             >
-              {isEditMode ? 'Update Transaction' : 'Add Transaction'}
+              Add Transaction
             </Button>
           </div>
         </div>

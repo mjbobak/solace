@@ -14,7 +14,10 @@ interface GetColumnsParams {
     transaction: SpendingEntry,
     anchorElement: HTMLButtonElement,
   ) => void;
-  handleEdit: (transaction: SpendingEntry) => void;
+  handleEdit: (
+    transaction: SpendingEntry,
+    anchorElement: HTMLButtonElement,
+  ) => void;
   handleDelete: (id: string) => void;
   displayMonth?: {
     year: number;
@@ -112,7 +115,7 @@ export function getSpendingTableColumns(
       accessor: (row) => (
         <div className="flex items-center justify-end gap-1">
           <button
-            onClick={() => handleEdit(row)}
+            onClick={(e) => handleEdit(row, e.currentTarget)}
             className="table-action-button table-action-button-edit"
             title="Edit transaction"
             aria-label={`Edit ${row.description}`}

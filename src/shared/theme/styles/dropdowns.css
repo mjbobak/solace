@@ -1,7 +1,7 @@
 @layer components {
   .dropdown-trigger {
     @apply flex w-full items-center justify-between rounded-full border px-4 py-2.5 text-left text-sm font-medium transition-all duration-150 focus:outline-none;
-    background: var(--color-surface-elevated);
+    background: var(--color-surface-solid);
     border-color: var(--color-border);
     color: var(--color-text);
   }
@@ -10,7 +10,7 @@
     background: color-mix(
       in srgb,
       var(--color-brand-muted) 32%,
-      var(--color-surface-elevated) 68%
+      var(--color-surface-solid) 68%
     );
     border-color: color-mix(
       in srgb,
@@ -21,7 +21,7 @@
 
   .dropdown-panel {
     @apply overflow-hidden rounded-xl border;
-    background: var(--color-surface-elevated);
+    background: var(--color-surface-solid);
     border-color: var(--color-border);
     box-shadow: 0 20px 52px -30px
       color-mix(in srgb, var(--color-text) 34%, transparent);

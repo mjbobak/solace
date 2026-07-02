@@ -49,7 +49,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
   // Get the label for the current value
   const selectedOption = options.find((opt) => opt.value === value);
-  const displayValue = selectedOption?.label || placeholder;
+  const displayValue = selectedOption?.label || value || placeholder;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -92,6 +92,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     ? options.filter((opt) => {
         const q = searchQuery.toLowerCase();
         return (
+          opt.isAddNew ||
           opt.label.toLowerCase().includes(q) ||
           opt.sublabel?.toLowerCase().includes(q)
         );
@@ -139,7 +140,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
-        <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex w-full items-center justify-between gap-2 min-w-0">
           {labelPrefix ? (
             <span className="flex min-w-0 items-center gap-2.5">
               <span className="truncate">{labelPrefix}:</span>

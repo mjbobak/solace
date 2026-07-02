@@ -58,6 +58,15 @@ export function monthInputToIsoDate(monthInput: string): string {
   return `${monthInput}-01`;
 }
 
+export function addMonthsToMonthInput(
+  monthInput: string,
+  monthsToAdd: number,
+): string {
+  const [year, month] = monthInput.split('-').map(Number);
+  const result = new Date(year, month - 1 + monthsToAdd, 1);
+  return `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export function getFiscalYearMonthRange(
   transactionDate: string,
 ): SpreadMonthRange {

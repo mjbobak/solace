@@ -37,6 +37,7 @@ import {
   BulkSpreadDropdown,
   type BulkSpreadOption,
 } from './BulkSpreadDropdown';
+import { EditTransactionPopover } from './EditTransactionPopover';
 import { SpendingFilters } from './SpendingFilters';
 import { getSpendingTableColumns } from './spendingTableColumns';
 import { SpreadPaymentModal } from './SpreadPaymentModal';
@@ -56,6 +57,11 @@ type PendingBulkOperation =
     };
 
 interface SpreadEditorState {
+  transaction: SpendingEntry;
+  anchorElement: HTMLButtonElement;
+}
+
+interface TransactionEditorState {
   transaction: SpendingEntry;
   anchorElement: HTMLButtonElement;
 }
@@ -141,9 +147,8 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   const [transactions, setTransactions] = useState<SpendingEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<
-    SpendingEntry | undefined
-  >(undefined);
+  const [transactionEditorState, setTransactionEditorState] =
+    useState<TransactionEditorState | null>(null);
   const [spreadEditorState, setSpreadEditorState] =
     useState<SpreadEditorState | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -323,10 +328,12 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   };
 
   // Modal handlers
-  const handleEditClick = (transaction: SpendingEntry) => {
-    setEditingTransaction(transaction);
-    setIsModalOpen(true);
-  };
+  const handleEditClick = useCallback(
+    (transaction: SpendingEntry, anchorElement: HTMLButtonElement) => {
+      setTransactionEditorState({ transaction, anchorElement });
+    },
+    [],
+  );
 
   const handleSpreadEditClick = useCallback(
     (transaction: SpendingEntry, anchorElement: HTMLButtonElement) => {
@@ -337,7 +344,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setEditingTransaction(undefined);
   };
 
   const handleUpdateTransaction = async (
@@ -351,7 +357,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       }
 
       await refreshTransactionsAndHighlight(id);
-      handleModalClose();
+      setTransactionEditorState(null);
     } catch {
       // Error already toasted by operations hook
     }
@@ -391,7 +397,6 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   );
 
   const handleAddTransactionClick = useCallback(() => {
-    setEditingTransaction(undefined);
     setIsModalOpen(true);
   }, []);
 
@@ -408,7 +413,7 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
       handleDelete: handleDeleteClick,
       displayMonth: getDisplayMonthContext(filters),
     });
-  }, [filters, handleSpreadEditClick]);
+  }, [filters, handleEditClick, handleSpreadEditClick]);
 
   const sortState = useMemo<SortState>(() => {
     const sortColumn = getStringParam(searchParams, 'sort');
@@ -699,8 +704,16 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onAddEntry={handleAddTransaction}
-        onUpdateEntry={handleUpdateTransaction}
-        item={editingTransaction}
+      />
+
+      <EditTransactionPopover
+        isOpen={transactionEditorState !== null}
+        transaction={transactionEditorState?.transaction ?? null}
+        anchorElement={transactionEditorState?.anchorElement ?? null}
+        budgets={allBudgets}
+        accounts={availableAccounts}
+        onClose={() => setTransactionEditorState(null)}
+        onSave={handleUpdateTransaction}
       />
 
       <SpreadPaymentModal
