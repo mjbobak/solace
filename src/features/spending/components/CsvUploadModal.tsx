@@ -49,14 +49,14 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
     handleFilesSelected(files);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     const files = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
     handleFilesSelected(files);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
