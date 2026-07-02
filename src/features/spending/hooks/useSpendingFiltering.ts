@@ -76,11 +76,16 @@ export function useSpendingFiltering(
       );
     }
 
-    // Filter by description search (case-insensitive partial match)
+    // Free-text search across description, account, budget item, and amount
     if (filters.searchQuery.trim()) {
-      const searchLower = filters.searchQuery.toLowerCase();
-      filtered = filtered.filter((t) =>
-        t.description.toLowerCase().includes(searchLower),
+      const searchLower = filters.searchQuery.trim().toLowerCase();
+      const amountQuery = searchLower.replace(/[$,]/g, '');
+      filtered = filtered.filter(
+        (t) =>
+          [t.description, t.account, t.budgetLabel, t.budgetCategory ?? ''].some(
+            (field) => field.toLowerCase().includes(searchLower),
+          ) ||
+          (amountQuery !== '' && t.amount.toFixed(2).includes(amountQuery)),
       );
     }
 
