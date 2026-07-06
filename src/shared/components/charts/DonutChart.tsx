@@ -31,6 +31,12 @@ interface DonutChartProps extends BaseChartProps {
   outerRadius?: number;
   showLegend?: boolean;
   showPercentage?: boolean;
+  /** Formats raw values in the tooltip (e.g. currency). Defaults to String(). */
+  valueFormatter?: (value: number) => string;
+  /** Big value shown in the donut hole (pre-formatted). Pairs with showLegend={false}. */
+  centerValue?: string;
+  /** Caption under centerValue. */
+  centerLabel?: string;
 }
 
 const DEFAULT_COLORS = [
@@ -49,9 +55,13 @@ export const DonutChart: React.FC<DonutChartProps> = ({
   height = 300,
   showLegend = true,
   showPercentage = true,
+  valueFormatter,
+  centerValue,
+  centerLabel,
   isLoading = false,
   error,
 }) => {
+  const formatValue = valueFormatter ?? ((value: number) => String(value));
   if (isLoading) {
     return (
       <div className="chart-empty-state" style={{ height }}>
@@ -94,7 +104,8 @@ export const DonutChart: React.FC<DonutChartProps> = ({
 
   return (
     <div className="chart-shell">
-      <ResponsiveContainer width="100%" height={height}>
+      <div style={{ position: 'relative', width: '100%', height }}>
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
@@ -117,7 +128,7 @@ export const DonutChart: React.FC<DonutChartProps> = ({
           <Tooltip
             formatter={(value: number) => {
               const percent = ((value / total) * 100).toFixed(1);
-              return [`${value} (${percent}%)`, ''];
+              return [`${formatValue(value)} (${percent}%)`, ''];
             }}
             contentStyle={{
               backgroundColor: chartTheme.tooltipBackground,
@@ -137,6 +148,43 @@ export const DonutChart: React.FC<DonutChartProps> = ({
           )}
         </PieChart>
       </ResponsiveContainer>
+      {centerValue !== undefined ? (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            textAlign: 'center',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              lineHeight: 1.1,
+              color: 'var(--color-text)',
+            }}
+          >
+            {centerValue}
+          </span>
+          {centerLabel ? (
+            <span
+              style={{
+                marginTop: 2,
+                fontSize: '0.75rem',
+                color: 'var(--color-text-muted)',
+              }}
+            >
+              {centerLabel}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      </div>
     </div>
   );
 };
