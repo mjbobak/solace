@@ -1,17 +1,12 @@
 import React from 'react';
 
-import { Tooltip } from '@/shared/components/Tooltip';
 import { budgetSummaryTheme } from '@/shared/theme';
 
 import {
-  amountPillClassName,
   compactCardContentHeight,
   formatWholeCurrency,
-  getBarTooltipContent,
   paletteBlue,
   paletteBlueStrong,
-  pillLabelTextClass,
-  pillValueTextClass,
 } from './constants';
 
 interface BudgetUtilizationChartProps {
@@ -34,138 +29,81 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
   spentSummary,
   usedPercent,
   spentWidth,
-  spentForChart,
   remainingBudgetForChart,
   remainingTotal,
-  amountContextLabel,
 }) => {
   const remainingWidth = Math.max(100 - spentWidth, 0);
   const remainingSummary = formatWholeCurrency(remainingBudgetForChart);
   const isOverBudget = remainingTotal < 0;
   const overBudgetSummary = formatWholeCurrency(Math.abs(remainingTotal));
-  const spentFillWidth =
-    spentWidth > 0 ? `max(0px, calc(${spentWidth}% - 4px))` : '0%';
-  const remainingOverlay = isOverBudget ? (
-    <span
-      className={`truncate text-[13px] font-semibold uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryDanger}`}
-    >
-      {`${overBudgetSummary} over`}
-    </span>
-  ) : (
-    <span className={`${amountPillClassName} flex min-w-0 max-w-full truncate`}>
-      <span
-        className={`truncate text-[13px] font-semibold tracking-[0.02em] ${pillValueTextClass}`}
-      >
-        {remainingSummary}
-      </span>
-      <span
-        className={`truncate text-xs font-medium uppercase tracking-[0.12em] ${pillLabelTextClass}`}
-      >
-        Remaining
-      </span>
-    </span>
-  );
+  const usedPercentLabel = `${usedPercent.toFixed(0)}%`;
+  const remainingPercentLabel = `${Math.max(100 - usedPercent, 0).toFixed(0)}%`;
 
   return (
     <div
       className={`flex flex-1 flex-col justify-start pt-0 ${compactCardContentHeight}`}
     >
-      <div className="space-y-1">
-        <div
-          className={`flex flex-wrap items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryTextMuted}`}
-        >
-          <span>
-            <span>{spendBasisLabel}:</span>{' '}
-            <span className={budgetSummaryTheme.summaryText}>
-              {incomeSummary}
-            </span>{' '}
-            income /{' '}
-            <span className={budgetSummaryTheme.summaryText}>
-              {budgetedSummary}
-            </span>{' '}
-            budget /{' '}
-            <span className={budgetSummaryTheme.summaryText}>
-              {spentSummary}
-            </span>{' '}
-            spent
-          </span>
-          <span>
-            <span className={budgetSummaryTheme.summaryText}>
-              {usedPercent.toFixed(0)}%
-            </span>{' '}
-            used
-          </span>
-        </div>
+      <div
+        className={`flex min-h-[2.5rem] flex-wrap items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryTextMuted}`}
+      >
+        <span>
+          <span>{spendBasisLabel}:</span>{' '}
+          <span className={budgetSummaryTheme.summaryText}>{incomeSummary}</span>{' '}
+          income /{' '}
+          <span className={budgetSummaryTheme.summaryText}>
+            {budgetedSummary}
+          </span>{' '}
+          budget /{' '}
+          <span className={budgetSummaryTheme.summaryText}>{spentSummary}</span>{' '}
+          spent
+        </span>
+        <span>
+          <span className={budgetSummaryTheme.summaryText}>
+            {usedPercentLabel}
+          </span>{' '}
+          used
+        </span>
       </div>
 
       <div className="mt-2">
         <div
-          className={`relative h-10 overflow-hidden rounded-2xl ${budgetSummaryTheme.waterfallTrack}`}
+          className={`flex h-14 w-full overflow-hidden rounded-md ${budgetSummaryTheme.waterfallTrack}`}
         >
-          <div className={`absolute inset-0 overflow-hidden rounded-2xl ${paletteBlue}`} />
-          <div
-            className={`absolute inset-y-0.5 left-0.5 overflow-hidden rounded-xl shadow-md ${paletteBlueStrong}`}
-            style={{ width: spentFillWidth }}
-          >
-            <div className="pointer-events-none flex h-full items-center pl-3">
-              <span
-                className={`${amountPillClassName} flex min-w-0 max-w-full truncate`}
-              >
-                <span
-                  className={`truncate text-[13px] font-semibold tracking-[0.02em] ${pillValueTextClass}`}
-                >
-                  {spentSummary}
-                </span>
-                <span
-                  className={`truncate text-xs font-medium uppercase tracking-[0.12em] ${pillLabelTextClass}`}
-                >
-                  Spent
-                </span>
+          {spentWidth > 0 ? (
+            <div
+              className={`flex h-full flex-col justify-center overflow-hidden px-3 ${paletteBlueStrong}`}
+              style={{ width: `${spentWidth}%` }}
+              title="Spent"
+            >
+              <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
+                Spent
+              </span>
+              <span className="truncate text-xs text-gray-800">
+                {`${spentSummary} · ${usedPercentLabel}`}
               </span>
             </div>
-          </div>
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-end pr-3">
-            {remainingOverlay}
-          </div>
-
-          {spentWidth > 0 ? (
-            <Tooltip
-              content={getBarTooltipContent(
-                'Spent',
-                spentForChart,
-                amountContextLabel,
-                usedPercent,
-              )}
-              stacked
-              followCursor
-            >
-              <div
-                className="absolute inset-y-0.5 left-0 cursor-pointer rounded-xl"
-                style={{ width: `${spentWidth}%` }}
-                aria-label="Spent portion"
-              />
-            </Tooltip>
           ) : null}
-
-          {remainingBudgetForChart > 0 ? (
-            <Tooltip
-              content={getBarTooltipContent(
-                'Budgeted but not spent',
-                remainingBudgetForChart,
-                amountContextLabel,
-                Math.max(100 - usedPercent, 0),
-              )}
-              stacked
-              followCursor
+          {remainingWidth > 0 && !isOverBudget ? (
+            <div
+              className={`flex h-full flex-col justify-center overflow-hidden px-3 ${paletteBlue}`}
+              style={{ width: `${remainingWidth}%` }}
+              title="Remaining"
             >
-              <div
-                className="absolute inset-y-0.5 cursor-pointer rounded-xl"
-                style={{ left: `${spentWidth}%`, width: `${remainingWidth}%` }}
-                aria-label="Remaining budget portion"
-              />
-            </Tooltip>
+              <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
+                Remaining
+              </span>
+              <span className="truncate text-xs text-gray-800">
+                {`${remainingSummary} · ${remainingPercentLabel}`}
+              </span>
+            </div>
           ) : null}
         </div>
+
+        {isOverBudget ? (
+          <p className={`mt-2 text-xs ${budgetSummaryTheme.summaryDanger}`}>
+            {`${overBudgetSummary} over budget`}
+          </p>
+        ) : null}
       </div>
     </div>
   );

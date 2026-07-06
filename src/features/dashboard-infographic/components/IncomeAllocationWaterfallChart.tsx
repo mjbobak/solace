@@ -35,6 +35,11 @@ interface IncomeAllocationWaterfallChartProps {
   onStepSelect?: (bucketId: IncomeAllocationBucketId) => void;
   onTotalSelect?: () => void;
   totalActionLabel?: string;
+  /**
+   * 'waterfall' (default) renders one offset bar per step; 'stacked' renders all
+   * steps as adjacent segments in a single row to save vertical space.
+   */
+  variant?: 'waterfall' | 'stacked';
 }
 
 const TOTAL_BAR_CLASS = budgetSummaryTheme.allocationBlue;
@@ -191,6 +196,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
   onStepSelect,
   onTotalSelect,
   totalActionLabel,
+  variant = 'waterfall',
 }) => {
   const totalTrackRef = useRef<HTMLDivElement | null>(null);
   const [trackWidth, setTrackWidth] = useState<number | null>(null);
@@ -243,6 +249,109 @@ export const IncomeAllocationWaterfallChart: React.FC<
     );
   }
 
+  const formatStepAmount = (amount: number) =>
+    valueDisplayPeriod === 'annual'
+      ? formatAnnualAmount(amount)
+      : formatWholeCurrency(amount);
+
+  if (variant === 'stacked') {
+    return (
+      <div className="space-y-3">
+        <div
+          role="group"
+          aria-label={chartAriaLabel}
+          className={`flex h-14 w-full overflow-hidden rounded-md ${TRACK_CLASS_NAME}`}
+        >
+          {positionedSteps.map((step) => {
+            const widthPercent = (step.amount / scaleMax) * 100;
+            if (widthPercent <= 0) {
+              return null;
+            }
+
+            const isInteractive =
+              step.isInteractive === true &&
+              step.bucketId != null &&
+              onStepSelect != null;
+            const segmentClassName = `flex h-full flex-col justify-center overflow-hidden px-3 ${step.fillClassName}`;
+            const segmentBody = (
+              <>
+                <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
+                  {step.label}
+                </span>
+                <span
+                  className={`truncate text-xs ${
+                    step.key === 'essential' || step.key === 'funsies'
+                      ? 'text-gray-800'
+                      : 'text-muted'
+                  }`}
+                >
+                  {`${formatStepAmount(step.amount)} · ${formatIncomePercent(
+                    step.amount,
+                    safeTotalAmount,
+                  )}`}
+                </span>
+              </>
+            );
+
+            if (!isInteractive) {
+              return (
+                <div
+                  key={step.key}
+                  className={segmentClassName}
+                  style={{ width: `${widthPercent}%` }}
+                  title={step.label}
+                >
+                  {segmentBody}
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={step.key}
+                type="button"
+                className={`${segmentClassName} cursor-pointer text-left transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70`}
+                style={{ width: `${widthPercent}%` }}
+                title={step.label}
+                aria-label={
+                  step.actionLabel ?? `Show ${step.label} category breakdown`
+                }
+                onClick={() => onStepSelect(step.bucketId!)}
+              >
+                {segmentBody}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          className={`relative h-14 w-full overflow-hidden rounded-md ${TRACK_CLASS_NAME}`}
+        >
+          <div
+            aria-label={totalBarAriaLabel ?? `${totalLabel} bar`}
+            className={`flex h-full flex-col justify-center overflow-hidden pl-3 ${TOTAL_BAR_CLASS}`}
+            style={{ width: `${(safeTotalAmount / scaleMax) * 100}%` }}
+          >
+            <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
+              {totalLabel}
+            </span>
+            <span className="truncate text-xs text-gray-800">
+              {formatStepAmount(safeTotalAmount)}
+            </span>
+          </div>
+        </div>
+
+        {showOverAllocatedWarning && overAllocatedAmount > 0 ? (
+          <p className="text-xs text-danger">
+            {`Planned allocation exceeds income by ${formatAnnualAmount(
+              overAllocatedAmount,
+            )} annually.`}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <div className="space-y-2.5" role="group" aria-label={chartAriaLabel}>
@@ -276,7 +385,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
               </div>
 
               <div
-                className={`relative h-10 overflow-hidden rounded-2xl ${TRACK_CLASS_NAME}`}
+                className={`relative h-10 overflow-hidden rounded-md ${TRACK_CLASS_NAME}`}
               >
                 <div
                   aria-label={`${step.label} waterfall segment`}
@@ -322,7 +431,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
 
           <div
             ref={totalTrackRef}
-            className={`relative h-10 overflow-hidden rounded-2xl ${TRACK_CLASS_NAME}`}
+            className={`relative h-10 overflow-hidden rounded-md ${TRACK_CLASS_NAME}`}
           >
             <div
               aria-label={totalBarAriaLabel ?? `${totalLabel} waterfall segment`}

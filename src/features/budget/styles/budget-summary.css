@@ -1,42 +1,22 @@
 @layer components {
   .bg-allocation-blue {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-allocation-blue) 90%, white 10%),
-      color-mix(in srgb, var(--color-allocation-blue) 78%, black 22%)
-    );
+    background: var(--color-allocation-blue);
   }
 
   .bg-allocation-blue-strong {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-allocation-blue-strong) 90%, white 10%),
-      color-mix(in srgb, var(--color-allocation-blue-strong) 76%, black 24%)
-    );
+    background: var(--color-allocation-blue-strong);
   }
 
   .bg-allocation-green {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-allocation-green) 90%, white 10%),
-      color-mix(in srgb, var(--color-allocation-green) 78%, black 22%)
-    );
+    background: var(--color-allocation-green);
   }
 
   .bg-allocation-orange {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-allocation-orange) 90%, white 10%),
-      color-mix(in srgb, var(--color-allocation-orange) 80%, black 20%)
-    );
+    background: var(--color-allocation-orange);
   }
 
   .bg-allocation-purple {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-allocation-purple) 90%, white 10%),
-      color-mix(in srgb, var(--color-allocation-purple) 76%, black 24%)
-    );
+    background: var(--color-allocation-purple);
   }
 
   .text-allocation-purple {

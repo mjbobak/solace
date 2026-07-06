@@ -78,7 +78,9 @@ const budgetEntries = [
 ];
 
 function getByExactText(container: HTMLElement, text: string) {
-  return within(container).getByText((_, element) => element?.textContent === text);
+  return within(container).getByText(
+    (_, element) => element?.textContent === text,
+  );
 }
 
 function renderBudgetSummary() {
@@ -133,7 +135,7 @@ describe('BudgetSummary', () => {
     expect(within(budgetCard).getByText('$1,550')).toBeInTheDocument();
     expect(
       within(incomeCard).getByText(
-        'A waterfall view of how your current monthly plan allocates total income across essentials, funsies, and wealth.',
+        'A waterfall view of how your current monthly plan allocates total income across essentials spending, funsies spending, and wealth.',
       ),
     ).toBeInTheDocument();
     expect(
@@ -173,7 +175,9 @@ describe('BudgetSummary', () => {
     expect(
       within(incomeCard).getByRole('button', { name: 'Labels' }),
     ).toHaveAttribute('aria-pressed', 'true');
-    expect(within(incomeCard).getByText('Wealth Breakdown')).toBeInTheDocument();
+    expect(
+      within(incomeCard).getByText('Wealth Breakdown'),
+    ).toBeInTheDocument();
     expect(within(incomeCard).getByText('Wealth Total')).toBeInTheDocument();
     expect(
       within(incomeCard).getByLabelText('Brokerage waterfall segment'),
@@ -258,9 +262,10 @@ describe('BudgetSummary', () => {
     });
 
     expect(
-      within(budgetCard).getByText((_, element) =>
-        element?.textContent ===
-        'Total for completed months: $60,000 income / $44,865 budget / $32,000 spent',
+      within(budgetCard).getByText(
+        (_, element) =>
+          element?.textContent ===
+          'Total for completed months: $60,000 income / $44,865 budget / $32,000 spent',
       ),
     ).toBeInTheDocument();
 
@@ -268,9 +273,9 @@ describe('BudgetSummary', () => {
       within(budgetCard).getByRole('button', { name: 'Show numbers view' }),
     );
 
-    expect(within(budgetCard).getAllByText('Total for completed months')).toHaveLength(
-      4,
-    );
+    expect(
+      within(budgetCard).getAllByText('Total for completed months'),
+    ).toHaveLength(4);
     expect(within(budgetCard).getByText('$44,865')).toBeInTheDocument();
     expect(within(budgetCard).getByText('$32,000')).toBeInTheDocument();
   });

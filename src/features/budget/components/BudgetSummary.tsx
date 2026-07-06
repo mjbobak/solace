@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { BudgetInsightsCard } from '@/features/budget/components/budgetSummary/BudgetInsightsCard';
 import { BudgetUtilizationCard } from '@/features/budget/components/budgetSummary/BudgetUtilizationCard';
@@ -22,6 +22,16 @@ interface BudgetSummaryProps {
   spendBasis: SpendBasis;
 }
 
+const BUDGET_OVERVIEW_COLLAPSED_KEY = 'budget-overview-collapsed';
+
+function getStoredCollapsed(): boolean {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+  // Default to collapsed until the user explicitly opens it.
+  return window.localStorage.getItem(BUDGET_OVERVIEW_COLLAPSED_KEY) !== 'false';
+}
+
 export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const {
     budgetEntries,
@@ -35,7 +45,20 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
 
   const [budgetUtilizationView, setBudgetUtilizationView] =
     useState<SummaryView>('chart');
-  const [isInsightsCollapsed, setIsInsightsCollapsed] = useState(true);
+  // Persisted so the overview keeps its open/closed state as the user navigates
+  // between pages (the view unmounts on navigation) and across reloads.
+  const [isInsightsCollapsed, setIsInsightsCollapsed] =
+    useState(getStoredCollapsed);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.localStorage.setItem(
+      BUDGET_OVERVIEW_COLLAPSED_KEY,
+      String(isInsightsCollapsed),
+    );
+  }, [isInsightsCollapsed]);
 
   const completedMonths = getCompletedMonthsForYear(planningYear);
   const comparisonIncome = scaleAnnualAmountForSpendBasis({

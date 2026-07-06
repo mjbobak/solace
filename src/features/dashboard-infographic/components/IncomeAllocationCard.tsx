@@ -88,7 +88,9 @@ function isExplicitInvestmentEntry(entry: BudgetEntry): boolean {
   return entry.isInvestment === true;
 }
 
-function buildAllocationEntries(budgetEntries: BudgetEntry[]): AllocationEntries {
+function buildAllocationEntries(
+  budgetEntries: BudgetEntry[],
+): AllocationEntries {
   return budgetEntries.reduce<AllocationEntries>(
     (totals, entry) => {
       totals.totalBudgeted += entry.budgeted;
@@ -126,7 +128,8 @@ function buildAllocationTotals(
 function buildGroupedCategorySteps(
   entries: BudgetEntry[],
   fillClassName: string,
-  getGroupLabel: (entry: BudgetEntry) => string = (entry) => entry.expenseCategory,
+  getGroupLabel: (entry: BudgetEntry) => string = (entry) =>
+    entry.expenseCategory,
 ): IncomeAllocationWaterfallStep[] {
   const groupedAmounts = new Map<string, number>();
 
@@ -210,9 +213,8 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   onToggleCollapsed,
   embedded = false,
 }) => {
-  const [selectedBucket, setSelectedBucket] = useState<DrilldownBucketId | null>(
-    null,
-  );
+  const [selectedBucket, setSelectedBucket] =
+    useState<DrilldownBucketId | null>(null);
   const [detailGrouping, setDetailGrouping] =
     useState<DetailGrouping>('categories');
   const [valueDisplayPeriod, setValueDisplayPeriod] = useState<
@@ -260,7 +262,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   let selectedBucketTotal: number | null = null;
   let selectedBucketLabel: string | null = null;
   let detailDescription =
-    'A waterfall view of how your current monthly plan allocates total income across essentials, funsies, and wealth.';
+    'A waterfall view of how your current monthly plan allocates total income across essentials spending, funsies spending, and wealth.';
 
   if (selectedBucket != null) {
     selectedBucketLabel = BUCKET_CONFIG[selectedBucket].label;
@@ -283,11 +285,10 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
       detailSteps = buildGroupedCategorySteps(
         allocationEntries[selectedBucket as AllocationBucketId],
         BUCKET_CONFIG[selectedBucket].fillClassName,
-        detailGrouping === 'labels'
-          ? (entry) => entry.expenseLabel
-          : undefined,
+        detailGrouping === 'labels' ? (entry) => entry.expenseLabel : undefined,
       );
-      selectedBucketTotal = allocationTotals[selectedBucket as AllocationBucketId];
+      selectedBucketTotal =
+        allocationTotals[selectedBucket as AllocationBucketId];
       if (detailGrouping === 'labels') {
         detailDescription = `Individual ${selectedBucketLabel.toLowerCase()} line items within your current monthly allocation.`;
       } else {
@@ -312,7 +313,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
     >
       <div
         className={`flex items-start justify-between gap-3 ${
-          isCollapsed ? '' : 'mb-4'
+          isCollapsed ? '' : 'mb-3'
         }`}
       >
         <div className="flex items-center gap-3">
@@ -366,71 +367,72 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
       </div>
 
       {isCollapsed ? null : (
-      <div className="space-y-4">
-        {isDetailView && selectedBucketLabel ? (
-          <div className="flex flex-col gap-4 border-b pb-4 section-divider lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <h4 className="text-sm font-semibold text-app">
-                {selectedBucketLabel} Breakdown
-              </h4>
-              <p className="text-sm text-muted">{detailDescription}</p>
+        <div className="space-y-2">
+          {isDetailView && selectedBucketLabel ? (
+            <div className="flex flex-col gap-4 border-b pb-4 section-divider lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h4 className="text-sm font-semibold text-app">
+                  {selectedBucketLabel} Breakdown
+                </h4>
+                <p className="text-sm text-muted">{detailDescription}</p>
+              </div>
+              <ToggleButtonGroup
+                value={detailGrouping}
+                options={DETAIL_GROUPING_OPTIONS}
+                onChange={setDetailGrouping}
+                className="w-full lg:w-auto"
+              />
             </div>
-            <ToggleButtonGroup
-              value={detailGrouping}
-              options={DETAIL_GROUPING_OPTIONS}
-              onChange={setDetailGrouping}
-              className="w-full lg:w-auto"
-            />
-          </div>
-        ) : (
-          <p className="text-sm text-muted">
-            {detailDescription}
-          </p>
-        )}
+          ) : (
+            <p className="min-h-[2.5rem] text-sm text-muted">
+              {detailDescription}
+            </p>
+          )}
 
-        <IncomeAllocationWaterfallChart
-          steps={isDetailView ? detailSteps : overviewSteps}
-          totalLabel={
-            isDetailView && selectedBucketLabel
-              ? `${selectedBucketLabel} Total`
-              : 'Total Income'
-          }
-          totalAmount={
-            isDetailView && selectedBucketTotal != null
-              ? selectedBucketTotal
-              : monthlyIncome
-          }
-          valueDisplayPeriod={valueDisplayPeriod}
-          chartAriaLabel={
-            isDetailView && selectedBucketLabel
-              ? `${selectedBucketLabel} allocation waterfall chart`
-              : 'Income allocation waterfall chart'
-          }
-          totalBarAriaLabel={
-            isDetailView && selectedBucketLabel
-              ? `${selectedBucketLabel} total waterfall segment`
-              : 'Total income waterfall segment'
-          }
-          showOverAllocatedWarning={!isDetailView}
-          onStepSelect={(bucketId) => {
-            if (bucketId === 'savings') {
-              return;
+          <IncomeAllocationWaterfallChart
+            variant={isDetailView ? 'waterfall' : 'stacked'}
+            steps={isDetailView ? detailSteps : overviewSteps}
+            totalLabel={
+              isDetailView && selectedBucketLabel
+                ? `${selectedBucketLabel} Total`
+                : 'Total Income'
             }
+            totalAmount={
+              isDetailView && selectedBucketTotal != null
+                ? selectedBucketTotal
+                : monthlyIncome
+            }
+            valueDisplayPeriod={valueDisplayPeriod}
+            chartAriaLabel={
+              isDetailView && selectedBucketLabel
+                ? `${selectedBucketLabel} allocation waterfall chart`
+                : 'Income allocation waterfall chart'
+            }
+            totalBarAriaLabel={
+              isDetailView && selectedBucketLabel
+                ? `${selectedBucketLabel} total waterfall segment`
+                : 'Total income waterfall segment'
+            }
+            showOverAllocatedWarning={!isDetailView}
+            onStepSelect={(bucketId) => {
+              if (bucketId === 'savings') {
+                return;
+              }
 
-            setSelectedBucket(bucketId);
-            setDetailGrouping(getDefaultDetailGrouping(bucketId));
-          }}
-          onTotalSelect={
-            isDetailView
-              ? () => {
-                  setSelectedBucket(null);
-                  setDetailGrouping('categories');
-                }
-              : undefined
-          }
-          totalActionLabel={isDetailView ? 'Back to allocation' : undefined}
-        />
-      </div>
+              setSelectedBucket(bucketId);
+              setDetailGrouping(getDefaultDetailGrouping(bucketId));
+            }}
+            onTotalSelect={
+              isDetailView
+                ? () => {
+                    setSelectedBucket(null);
+                    setDetailGrouping('categories');
+                  }
+                : undefined
+            }
+            totalActionLabel={isDetailView ? 'Back to allocation' : undefined}
+          />
+        </div>
       )}
     </div>
   );
