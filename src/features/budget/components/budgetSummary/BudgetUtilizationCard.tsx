@@ -1,12 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LuWallet } from 'react-icons/lu';
 
 import { budgetSummaryTheme } from '@/shared/theme';
 
 import { BudgetUtilizationChart } from './BudgetUtilizationChart';
 import { BudgetUtilizationNumbers } from './BudgetUtilizationNumbers';
-import { cardIconClass, getCardVariants, type SummaryView } from './constants';
+import { getCardVariants, type SummaryView } from './constants';
 import { SummaryCardHeader } from './SummaryCardChrome';
 
 interface BudgetUtilizationCardProps {
@@ -56,7 +55,6 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
   const body = (
     <>
       <SummaryCardHeader
-        icon={<LuWallet className={cardIconClass} />}
         title="Budget Utilization"
         currentView={view}
         onToggle={onToggle}

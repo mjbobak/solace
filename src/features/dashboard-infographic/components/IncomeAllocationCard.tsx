@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  LuCalendar,
-  LuChevronDown,
-  LuChevronRight,
-  LuWallet,
-} from 'react-icons/lu';
+import { LuChevronDown, LuChevronRight } from 'react-icons/lu';
 
 import type { BudgetEntry } from '@/features/budget/types/budgetView';
 import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
@@ -298,12 +293,6 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   }
 
   const isDetailView = selectedBucket != null;
-  const nextValueDisplayPeriod =
-    valueDisplayPeriod === 'monthly' ? 'annual' : 'monthly';
-  const valueToggleLabel =
-    valueDisplayPeriod === 'monthly'
-      ? 'Show yearly values'
-      : 'Show monthly values';
 
   return (
     <div
@@ -312,32 +301,26 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
       className={embedded ? className : `surface-card p-5 ${className}`}
     >
       <div
-        className={`flex items-start justify-between gap-3 ${
+        className={`flex items-center justify-between gap-3 ${
           isCollapsed ? '' : 'mb-3'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <div className={budgetSummaryTheme.iconContainer}>
-            <LuWallet className={budgetSummaryTheme.icon} />
-          </div>
-          <h3
-            className={`text-sm font-semibold uppercase tracking-wider ${budgetSummaryTheme.summaryTitle}`}
-          >
-            Income Allocation
-          </h3>
-        </div>
+        <h3
+          className={`text-sm font-semibold uppercase tracking-wider ${budgetSummaryTheme.summaryTitle}`}
+        >
+          Income Allocation
+        </h3>
 
         <div className="flex items-center gap-2">
           {!isCollapsed ? (
-            <button
-              type="button"
-              className={budgetSummaryTheme.controlButton}
-              onClick={() => setValueDisplayPeriod(nextValueDisplayPeriod)}
-              aria-label={valueToggleLabel}
-              title={valueToggleLabel}
-            >
-              <LuCalendar className="h-4 w-4" />
-            </button>
+            <ToggleButtonGroup
+              value={valueDisplayPeriod}
+              options={[
+                { value: 'monthly', label: 'Monthly' },
+                { value: 'annual', label: 'Annual' },
+              ]}
+              onChange={setValueDisplayPeriod}
+            />
           ) : null}
           {onToggleCollapsed ? (
             <button

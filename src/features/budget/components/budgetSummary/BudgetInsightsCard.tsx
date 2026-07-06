@@ -46,9 +46,7 @@ export const BudgetInsightsCard: React.FC<BudgetInsightsCardProps> = ({
           <div className={cardIconContainerClass}>
             <LuChartColumn className={cardIconClass} />
           </div>
-          <h3
-            className={`text-sm font-semibold uppercase tracking-wider ${budgetSummaryTheme.summaryTitle}`}
-          >
+          <h3 className={`text-lg font-bold ${budgetSummaryTheme.summaryTitle}`}>
             Budget Overview
           </h3>
         </div>

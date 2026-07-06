@@ -278,13 +278,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
                 <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
                   {step.label}
                 </span>
-                <span
-                  className={`truncate text-xs ${
-                    step.key === 'essential' || step.key === 'funsies'
-                      ? 'text-gray-800'
-                      : 'text-muted'
-                  }`}
-                >
+                <span className="truncate text-xs text-gray-800">
                   {`${formatStepAmount(step.amount)} · ${formatIncomePercent(
                     step.amount,
                     safeTotalAmount,
