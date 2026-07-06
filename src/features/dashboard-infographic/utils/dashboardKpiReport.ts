@@ -350,15 +350,21 @@ export function buildEmergencyRunwaySummary({
   projection,
   budgetEntries,
   emergencyFundBalance,
+  includeFunsies = false,
 }: {
   projection: IncomeYearProjection | null;
   budgetEntries: BudgetEntry[] | null;
   emergencyFundBalance?: number | null;
+  /** When true, the baseline covers essential + funsies; otherwise essentials only. */
+  includeFunsies?: boolean;
 }): EmergencyRunwaySummary {
   const resolvedEmergencyFundBalance =
     emergencyFundBalance ?? projection?.emergencyFundBalance ?? null;
+  const expensePredicate = includeFunsies
+    ? isLivingExpense
+    : isEssentialLivingExpense;
   const monthlyEssentialExpenses = budgetEntries
-    ? getBudgetedAmount(budgetEntries, isEssentialLivingExpense)
+    ? getBudgetedAmount(budgetEntries, expensePredicate)
     : null;
   const baselineMonths =
     resolvedEmergencyFundBalance === null ||

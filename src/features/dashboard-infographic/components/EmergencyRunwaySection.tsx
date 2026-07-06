@@ -9,6 +9,7 @@ import { useBudgetData } from '@/features/budget/hooks/useBudgetData';
 import type { SpendBasis } from '@/features/budget/types/budgetView';
 import { incomeApiService } from '@/features/income/services/incomeApiService';
 import type { IncomeYearProjection } from '@/features/income/types/income';
+import { ToggleButtonGroup } from '@/shared/components/ToggleButtonGroup';
 
 import type { Period } from '../types/infographic';
 import { buildEmergencyRunwaySummary } from '../utils/dashboardKpiReport';
@@ -30,6 +31,9 @@ export const EmergencyRunwaySection: React.FC<
   );
   const [incomeError, setIncomeError] = useState<string | null>(null);
   const [isIncomeLoading, setIsIncomeLoading] = useState(true);
+  const [baselineScope, setBaselineScope] = useState<'essential' | 'both'>(
+    'essential',
+  );
   const {
     budgetEntries,
     isLoading: isBudgetLoading,
@@ -74,8 +78,9 @@ export const EmergencyRunwaySection: React.FC<
       buildEmergencyRunwaySummary({
         projection,
         budgetEntries: budgetError ? null : budgetEntries,
+        includeFunsies: baselineScope === 'both',
       }),
-    [budgetEntries, budgetError, projection],
+    [baselineScope, budgetEntries, budgetError, projection],
   );
 
   const narrative = `These runway scenarios reuse the report inputs: your emergency fund balance, your monthly essential budget, and the income streams shown in the source list. Year-level annual adjustments stay outside the runway model.`;
@@ -84,9 +89,20 @@ export const EmergencyRunwaySection: React.FC<
 
   return (
     <ScrollAnimatedSection className="space-y-8 border-t section-divider px-6 py-12">
-      <div>
-        <h2 className="mb-4 text-2xl font-bold text-app">Emergency Runway</h2>
-        <SectionNarrative text={narrative} highlight={true} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="mb-4 text-2xl font-bold text-app">Emergency Runway</h2>
+          <SectionNarrative text={narrative} highlight={true} />
+        </div>
+        <ToggleButtonGroup
+          value={baselineScope}
+          onChange={setBaselineScope}
+          options={[
+            { value: 'essential', label: 'Essential' },
+            { value: 'both', label: 'Essential + Funsies' },
+          ]}
+          className="w-full sm:w-auto"
+        />
       </div>
 
       {error ? (
@@ -116,7 +132,9 @@ export const EmergencyRunwaySection: React.FC<
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted">
-                  Essential budget / month
+                  {baselineScope === 'both'
+                    ? 'Essential + funsies budget / month'
+                    : 'Essential budget / month'}
                 </p>
                 <p className="mt-2 text-2xl font-bold text-app">
                   {runwaySummary.monthlyEssentialExpenses === null
@@ -133,8 +151,9 @@ export const EmergencyRunwaySection: React.FC<
                 {formatRunwayLabel(runwaySummary.baselineMonths)}
               </p>
               <p className="mt-2 text-sm text-muted">
-                Based on the same emergency fund balance and monthly essential
-                expenses shown in report mode.
+                {baselineScope === 'both'
+                  ? 'Based on your emergency fund balance and monthly essential + funsies expenses.'
+                  : 'Based on the same emergency fund balance and monthly essential expenses shown in report mode.'}
               </p>
             </div>
           </div>

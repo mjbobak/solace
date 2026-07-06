@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { budgetSummaryTheme } from '@/shared/theme';
 
@@ -44,11 +44,6 @@ interface IncomeAllocationWaterfallChartProps {
 
 const TOTAL_BAR_CLASS = budgetSummaryTheme.allocationBlue;
 const TRACK_CLASS_NAME = budgetSummaryTheme.waterfallTrack;
-const VALUE_PILL_CLASS_NAME = budgetSummaryTheme.waterfallValuePill;
-const INSIDE_LABEL_MIN_WIDTH_PERCENT = 8;
-const OUTSIDE_LABEL_GAP_PX = 8;
-const MONTHLY_LABEL_MIN_WIDTH_PX = 148;
-const ANNUAL_LABEL_MIN_WIDTH_PX = 176;
 
 function sanitizeAmount(amount: number): number {
   if (!Number.isFinite(amount) || amount <= 0) {
@@ -96,93 +91,6 @@ function buildSteps(
   });
 }
 
-function getLabelPlacement({
-  leftPercent,
-  widthPercent,
-  trackWidth,
-  valueDisplayPeriod,
-}: {
-  leftPercent: number;
-  widthPercent: number;
-  trackWidth: number | null;
-  valueDisplayPeriod: 'monthly' | 'annual';
-}): 'inside' | 'outside-left' | 'outside-right' {
-  if (trackWidth == null || trackWidth <= 0) {
-    return widthPercent >= INSIDE_LABEL_MIN_WIDTH_PERCENT
-      ? 'inside'
-      : leftPercent + widthPercent > 82
-        ? 'outside-left'
-        : 'outside-right';
-  }
-
-  const minimumLabelWidth =
-    valueDisplayPeriod === 'annual'
-      ? ANNUAL_LABEL_MIN_WIDTH_PX
-      : MONTHLY_LABEL_MIN_WIDTH_PX;
-  const segmentWidth = (trackWidth * widthPercent) / 100;
-  const leftSpace = (trackWidth * leftPercent) / 100;
-  const rightSpace = trackWidth - leftSpace - segmentWidth;
-  const outsideRoomRequired = minimumLabelWidth + OUTSIDE_LABEL_GAP_PX;
-
-  if (segmentWidth >= minimumLabelWidth) {
-    return 'inside';
-  }
-
-  if (leftSpace >= outsideRoomRequired) {
-    return 'outside-left';
-  }
-
-  if (rightSpace >= outsideRoomRequired) {
-    return 'outside-left';
-  }
-
-  return segmentWidth >= minimumLabelWidth * 0.8 ? 'inside' : 'outside-left';
-}
-
-function renderBarValueContent(
-  amount: number,
-  valueDisplayPeriod: 'monthly' | 'annual',
-  placement: 'inside' | 'outside-left' | 'outside-right' = 'inside',
-): React.ReactNode {
-  const formattedAmount =
-    valueDisplayPeriod === 'annual'
-      ? formatAnnualAmount(amount)
-      : formatWholeCurrency(amount);
-  const periodLabel = valueDisplayPeriod === 'annual' ? 'ANNUAL' : 'MONTHLY';
-  const isInside = placement === 'inside';
-  const containerClassName = isInside
-    ? 'pointer-events-none absolute inset-y-0.5 flex items-center px-3'
-    : 'pointer-events-none absolute inset-y-1/2 z-10 flex -translate-y-1/2 items-center';
-  const labelClassName = VALUE_PILL_CLASS_NAME;
-  const amountClassName = budgetSummaryTheme.waterfallValueAmount;
-  const periodClassName = isInside
-    ? budgetSummaryTheme.waterfallValuePeriodInside
-    : budgetSummaryTheme.waterfallValuePeriodOutside;
-  const placementStyle =
-    placement === 'outside-right'
-      ? { left: `calc(100% + ${OUTSIDE_LABEL_GAP_PX}px)` }
-      : placement === 'outside-left'
-        ? { right: `calc(100% + ${OUTSIDE_LABEL_GAP_PX}px)` }
-        : undefined;
-
-  return (
-    <div
-      className={containerClassName}
-      style={placementStyle}
-      data-label-placement={placement}
-    >
-      <span className={labelClassName}>
-        <span className={amountClassName}>
-          {formattedAmount}
-        </span>
-        <span className={periodClassName}>
-          {periodLabel}
-        </span>
-      </span>
-    </div>
-  );
-}
-
 export const IncomeAllocationWaterfallChart: React.FC<
   IncomeAllocationWaterfallChartProps
 > = ({
@@ -198,8 +106,6 @@ export const IncomeAllocationWaterfallChart: React.FC<
   totalActionLabel,
   variant = 'waterfall',
 }) => {
-  const totalTrackRef = useRef<HTMLDivElement | null>(null);
-  const [trackWidth, setTrackWidth] = useState<number | null>(null);
   const safeTotalAmount = sanitizeAmount(totalAmount);
   const positionedSteps = buildSteps(steps);
   const stackedAllocation = positionedSteps.reduce(
@@ -208,36 +114,6 @@ export const IncomeAllocationWaterfallChart: React.FC<
   );
   const scaleMax = Math.max(safeTotalAmount, stackedAllocation, 1);
   const overAllocatedAmount = Math.max(stackedAllocation - safeTotalAmount, 0);
-
-  useEffect(() => {
-    const node = totalTrackRef.current;
-
-    if (node == null) {
-      return;
-    }
-
-    const updateTrackWidth = () => {
-      const nextWidth = node.getBoundingClientRect().width;
-      setTrackWidth((currentWidth) =>
-        currentWidth === nextWidth ? currentWidth : nextWidth,
-      );
-    };
-
-    updateTrackWidth();
-
-    if (typeof ResizeObserver === 'undefined') {
-      return;
-    }
-
-    const observer = new ResizeObserver(() => {
-      updateTrackWidth();
-    });
-
-    observer.observe(node);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   if (safeTotalAmount === 0 && stackedAllocation === 0) {
     return (
@@ -352,12 +228,6 @@ export const IncomeAllocationWaterfallChart: React.FC<
         {positionedSteps.map((step) => {
           const leftPercent = (step.offset / scaleMax) * 100;
           const widthPercent = (step.amount / scaleMax) * 100;
-          const labelPlacement = getLabelPlacement({
-            leftPercent,
-            widthPercent,
-            trackWidth,
-            valueDisplayPeriod,
-          });
           const isInteractive =
             step.isInteractive === true &&
             step.bucketId != null &&
@@ -374,7 +244,10 @@ export const IncomeAllocationWaterfallChart: React.FC<
                   {step.label}
                 </p>
                 <p className="mt-1 text-xs text-muted">
-                  {formatIncomePercent(step.amount, safeTotalAmount)}
+                  <span className="text-app">
+                    {formatStepAmount(step.amount)}
+                  </span>{' '}
+                  · {formatIncomePercent(step.amount, safeTotalAmount)}
                 </p>
               </div>
 
@@ -388,13 +261,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
                   }}
-                >
-                  {renderBarValueContent(
-                    step.amount,
-                    valueDisplayPeriod,
-                    labelPlacement,
-                  )}
-                </div>
+                />
                 {isInteractive ? (
                   <button
                     type="button"
@@ -420,11 +287,15 @@ export const IncomeAllocationWaterfallChart: React.FC<
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app">
               {totalLabel}
             </p>
-            <p className="mt-1 text-xs text-muted">100%</p>
+            <p className="mt-1 text-xs text-muted">
+              <span className="text-app">
+                {formatStepAmount(safeTotalAmount)}
+              </span>{' '}
+              · 100%
+            </p>
           </div>
 
           <div
-            ref={totalTrackRef}
             className={`relative h-10 overflow-hidden rounded-md ${TRACK_CLASS_NAME}`}
           >
             <div
@@ -433,9 +304,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
               style={{
                 width: `${(safeTotalAmount / scaleMax) * 100}%`,
               }}
-            >
-              {renderBarValueContent(safeTotalAmount, valueDisplayPeriod)}
-            </div>
+            />
           </div>
 
           {onTotalSelect != null ? (

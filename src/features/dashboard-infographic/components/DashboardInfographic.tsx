@@ -12,7 +12,6 @@ import { DashboardKpiReport } from './DashboardKpiReport';
 import { EmergencyRunwaySection } from './EmergencyRunwaySection';
 import { FinancialHealthSection } from './FinancialHealthSection';
 import { MoneyFlowSection } from './MoneyFlowSection';
-import { SpendingMixSection } from './SpendingMixSection';
 import { SpendingPulseSection } from './SpendingPulseSection';
 
 export type DashboardMode = 'visual' | 'report';
@@ -61,10 +60,6 @@ export const DashboardInfographic: React.FC<DashboardInfographicProps> = ({
 
             <div id="spending-pulse">
               <SpendingPulseSection year={year} />
-            </div>
-
-            <div id="spending-mix">
-              <SpendingMixSection year={year} />
             </div>
 
             <div id="emergency-runway">

@@ -315,6 +315,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
             columns={columns}
             data={budgetData}
             rowKey={(row) => row.id}
+            onRowClick={(row) => handleSelectionChange(row.id)}
             hoverRows
             selectable
             selectedIds={selectedBudgetIds}

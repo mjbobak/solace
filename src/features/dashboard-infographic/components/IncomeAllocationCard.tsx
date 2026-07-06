@@ -257,7 +257,7 @@ export const IncomeAllocationCard: React.FC<IncomeAllocationCardProps> = ({
   let selectedBucketTotal: number | null = null;
   let selectedBucketLabel: string | null = null;
   let detailDescription =
-    'A waterfall view of how your current monthly plan allocates total income across essentials spending, funsies spending, and wealth.';
+    'A waterfall view of how your current monthly plan allocates total income (salary and bonus) across essentials spending, funsies spending, and wealth.';
 
   if (selectedBucket != null) {
     selectedBucketLabel = BUCKET_CONFIG[selectedBucket].label;

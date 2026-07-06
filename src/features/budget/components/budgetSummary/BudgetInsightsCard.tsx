@@ -37,10 +37,15 @@ export const BudgetInsightsCard: React.FC<BudgetInsightsCardProps> = ({
       aria-label="Budget Overview"
       className="surface-card shrink-0"
     >
-      <div
-        className={`flex items-center justify-between gap-3 ${
+      <button
+        type="button"
+        className={`flex w-full items-center justify-between gap-3 text-left ${
           isCollapsed ? '' : 'mb-4'
         }`}
+        onClick={onToggleCollapsed}
+        aria-expanded={!isCollapsed}
+        aria-label={collapseLabel}
+        title={collapseLabel}
       >
         <div className="flex items-center gap-2">
           <div className={cardIconContainerClass}>
@@ -51,21 +56,14 @@ export const BudgetInsightsCard: React.FC<BudgetInsightsCardProps> = ({
           </h3>
         </div>
 
-        <button
-          type="button"
-          className={budgetSummaryTheme.controlButton}
-          onClick={onToggleCollapsed}
-          aria-expanded={!isCollapsed}
-          aria-label={collapseLabel}
-          title={collapseLabel}
-        >
+        <span className={budgetSummaryTheme.controlButton}>
           {isCollapsed ? (
             <LuChevronRight className="h-4 w-4" />
           ) : (
             <LuChevronDown className="h-4 w-4" />
           )}
-        </button>
-      </div>
+        </span>
+      </button>
 
       {isCollapsed ? null : <div className="space-y-6">{children}</div>}
     </motion.div>
