@@ -79,6 +79,7 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       () => new Set(),
     );
     const [plannedAnnualNetIncome, setPlannedAnnualNetIncome] = useState(0);
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
     const normalizeAccrual = true;
 
@@ -107,6 +108,12 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
 
       void loadPlannedIncome();
     }, [planningYear]);
+
+    React.useEffect(() => {
+      if (!isLoadingBudgets) {
+        setHasLoadedOnce(true);
+      }
+    }, [isLoadingBudgets]);
 
     React.useEffect(() => {
       if (error) {
@@ -261,7 +268,10 @@ export const BudgetView = React.forwardRef<BudgetViewHandle, BudgetViewProps>(
       });
     };
 
-    if (isLoadingBudgets) {
+    // Only block the whole view on the very first load. Background refetches
+    // (e.g. the on-focus visibility refresh) update data in place so the summary
+    // keeps its expanded/collapsed state instead of remounting.
+    if (isLoadingBudgets && !hasLoadedOnce) {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-muted">Loading budgets...</div>

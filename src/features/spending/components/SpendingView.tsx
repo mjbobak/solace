@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -164,6 +165,13 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
 
   // Highlighting state for recently modified rows
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set());
+
+  // Portal target in the page header so the bulk bar floats between the title
+  // and the Add Transaction button without shifting the table below it.
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setHeaderSlot(document.getElementById('page-header-slot'));
+  }, []);
 
   // Initialize operations hook for CRUD operations
   const operations = useSpendingOperations(transactions, setTransactions);
@@ -635,27 +643,36 @@ export const SpendingView = React.forwardRef<SpendingViewHandle>((_, ref) => {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col space-y-4">
-      <BulkActionBar
-        selectedCount={selection.selectedCount}
-        itemLabel="transactions"
-        onClearSelection={selection.clearSelection}
-        actions={[]}
-        pendingOperations={getPendingOperationsDisplay()}
-        onSave={handleSave}
-        saveDisabled={bulkOps.isLoading}
-        onDelete={handleBulkDelete}
-      >
-        <BulkBudgetDropdown
-          budgets={allBudgets}
-          onSelectBudget={handleBulkBudgetSelect}
-        />
-        <BulkAccountDropdown
-          accounts={availableAccounts}
-          onSelectAccount={handleBulkAccountSelect}
-        />
-        <BulkSpreadDropdown onSelectSpread={handleBulkSpreadSelect} />
-      </BulkActionBar>
+    <div className="flex h-full min-h-0 flex-col">
+      {headerSlot &&
+        selection.selectedCount > 0 &&
+        createPortal(
+          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
+            <div className="pointer-events-auto w-full max-w-full overflow-x-auto">
+              <BulkActionBar
+                selectedCount={selection.selectedCount}
+                itemLabel="transactions"
+                onClearSelection={selection.clearSelection}
+                actions={[]}
+                pendingOperations={getPendingOperationsDisplay()}
+                onSave={handleSave}
+                saveDisabled={bulkOps.isLoading}
+                onDelete={handleBulkDelete}
+              >
+                <BulkBudgetDropdown
+                  budgets={allBudgets}
+                  onSelectBudget={handleBulkBudgetSelect}
+                />
+                <BulkAccountDropdown
+                  accounts={availableAccounts}
+                  onSelectAccount={handleBulkAccountSelect}
+                />
+                <BulkSpreadDropdown onSelectSpread={handleBulkSpreadSelect} />
+              </BulkActionBar>
+            </div>
+          </div>,
+          headerSlot,
+        )}
 
       <div className="surface-card flex min-h-0 flex-1 flex-col">
         <div className="mb-4">
