@@ -58,14 +58,15 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
       isCollapsed={isInsightsCollapsed}
       onToggleCollapsed={() => setIsInsightsCollapsed(!isInsightsCollapsed)}
     >
-      <IncomeAllocationCard
-        embedded
-        monthlyIncome={income}
-        budgetEntries={budgetEntries}
-      />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+        <IncomeAllocationCard
+          embedded
+          monthlyIncome={income}
+          budgetEntries={budgetEntries}
+        />
 
-      <div className="section-divider border-t pt-6">
-        <BudgetUtilizationCard
+        <div className="section-divider border-t pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <BudgetUtilizationCard
           embedded
           view={budgetUtilizationView}
           onToggle={() =>
@@ -88,6 +89,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
           remainingForChart={remainingForChart}
           remainingTotal={budgetUtilizationTotals.remaining}
         />
+        </div>
       </div>
     </BudgetInsightsCard>
   );
