@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { BudgetInsightsCard } from '@/features/budget/components/budgetSummary/BudgetInsightsCard';
 import { BudgetUtilizationCard } from '@/features/budget/components/budgetSummary/BudgetUtilizationCard';
-import { formatWholeCurrency, type SummaryView } from '@/features/budget/components/budgetSummary/constants';
+import { formatWholeCurrency } from '@/features/budget/components/budgetSummary/constants';
 import type { BudgetTotals } from '@/features/budget/hooks/useBudgetCalculations';
 import type { BudgetEntry, SpendBasis } from '@/features/budget/types/budgetView';
 import { IncomeAllocationCard } from '@/features/dashboard-infographic/components/IncomeAllocationCard';
@@ -43,8 +43,6 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
     spendBasis,
   } = props;
 
-  const [budgetUtilizationView, setBudgetUtilizationView] =
-    useState<SummaryView>('chart');
   // Persisted so the overview keeps its open/closed state as the user navigates
   // between pages (the view unmounts on navigation) and across reloads.
   const [isInsightsCollapsed, setIsInsightsCollapsed] =
@@ -69,12 +67,10 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
   const budgetedForChart =
     budgetUtilizationTotals.spent + budgetUtilizationTotals.remaining;
   const spentForChart = budgetUtilizationTotals.spent;
-  const remainingForChart = budgetUtilizationTotals.remaining;
   const usedPercent =
     budgetedForChart > 0 ? (budgetUtilizationTotals.spent / budgetedForChart) * 100 : 0;
   const spendBasisLabel = getSpendBasisLabel(spendBasis);
   const remainingBudgetForChart = Math.max(budgetedForChart - spentForChart, 0);
-  const spentWidth = Math.min(usedPercent, 100);
 
   return (
     <BudgetInsightsCard
@@ -91,25 +87,13 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = (props) => {
         <div className="section-divider border-t pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
           <BudgetUtilizationCard
           embedded
-          view={budgetUtilizationView}
-          onToggle={() =>
-            setBudgetUtilizationView((current) =>
-              current === 'chart' ? 'numbers' : 'chart',
-            )
-          }
           showFilteredBadge={isBudgetFiltered}
           spendBasisLabel={spendBasisLabel}
           incomeSummary={formatWholeCurrency(comparisonIncome)}
           budgetedSummary={formatWholeCurrency(budgetedForChart)}
           spentSummary={formatWholeCurrency(spentForChart)}
           usedPercent={usedPercent}
-          spentWidth={spentWidth}
-          spentForChart={spentForChart}
           remainingBudgetForChart={remainingBudgetForChart}
-          amountContextLabel={spendBasisLabel}
-          income={comparisonIncome}
-          budgetedForChart={budgetedForChart}
-          remainingForChart={remainingForChart}
           remainingTotal={budgetUtilizationTotals.remaining}
         />
         </div>

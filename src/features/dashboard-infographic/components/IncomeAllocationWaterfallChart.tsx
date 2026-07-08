@@ -256,7 +256,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
               >
                 <div
                   aria-label={`${step.label} waterfall segment`}
-                  className={`absolute inset-y-0.5 rounded-xl shadow-md ${step.fillClassName}`}
+                  className={`absolute inset-y-0 ${step.fillClassName}`}
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
@@ -265,7 +265,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
                 {isInteractive ? (
                   <button
                     type="button"
-                    className={`absolute inset-y-0.5 rounded-xl focus:outline-none ${budgetSummaryTheme.waterfallInteractiveOverlay}`}
+                    className={`absolute inset-y-0 focus:outline-none ${budgetSummaryTheme.waterfallInteractiveOverlay}`}
                     style={{
                       left: `${leftPercent}%`,
                       width: `${widthPercent}%`,
@@ -300,7 +300,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
           >
             <div
               aria-label={totalBarAriaLabel ?? `${totalLabel} waterfall segment`}
-              className={`absolute inset-y-0.5 left-0 rounded-xl shadow-md ${TOTAL_BAR_CLASS}`}
+              className={`absolute inset-y-0 left-0 ${TOTAL_BAR_CLASS}`}
               style={{
                 width: `${(safeTotalAmount / scaleMax) * 100}%`,
               }}
@@ -310,7 +310,7 @@ export const IncomeAllocationWaterfallChart: React.FC<
           {onTotalSelect != null ? (
             <button
               type="button"
-              className={`absolute inset-0 rounded-2xl focus:outline-none ${budgetSummaryTheme.waterfallTotalOverlay}`}
+              className={`absolute inset-0 rounded-md focus:outline-none ${budgetSummaryTheme.waterfallTotalOverlay}`}
               aria-label={totalActionLabel ?? totalLabel}
               onClick={onTotalSelect}
             />

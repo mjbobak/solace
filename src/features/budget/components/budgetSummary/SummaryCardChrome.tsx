@@ -58,8 +58,8 @@ export const CurrencyStack: React.FC<CurrencyStackProps> = ({
 
 interface SummaryCardHeaderProps {
   title: string;
-  currentView: SummaryView;
-  onToggle: () => void;
+  currentView?: SummaryView;
+  onToggle?: () => void;
   showFilteredBadge?: boolean;
   isCollapsed?: boolean;
   onToggleCollapsed?: () => void;
@@ -100,7 +100,7 @@ export const SummaryCardHeader: React.FC<SummaryCardHeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        {!isCollapsed ? (
+        {!isCollapsed && currentView && onToggle ? (
           <ToggleButtonGroup
             value={currentView}
             options={[

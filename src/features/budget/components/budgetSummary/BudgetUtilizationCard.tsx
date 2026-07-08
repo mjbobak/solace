@@ -4,26 +4,17 @@ import { motion } from 'framer-motion';
 import { budgetSummaryTheme } from '@/shared/theme';
 
 import { BudgetUtilizationChart } from './BudgetUtilizationChart';
-import { BudgetUtilizationNumbers } from './BudgetUtilizationNumbers';
-import { getCardVariants, type SummaryView } from './constants';
+import { getCardVariants } from './constants';
 import { SummaryCardHeader } from './SummaryCardChrome';
 
 interface BudgetUtilizationCardProps {
-  view: SummaryView;
-  onToggle: () => void;
   showFilteredBadge: boolean;
   spendBasisLabel: string;
   incomeSummary: string;
   budgetedSummary: string;
   spentSummary: string;
   usedPercent: number;
-  spentWidth: number;
-  spentForChart: number;
   remainingBudgetForChart: number;
-  amountContextLabel: string;
-  income: number;
-  budgetedForChart: number;
-  remainingForChart: number;
   remainingTotal: number;
   isCollapsed?: boolean;
   onToggleCollapsed?: () => void;
@@ -32,21 +23,13 @@ interface BudgetUtilizationCardProps {
 }
 
 export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
-  view,
-  onToggle,
   showFilteredBadge,
   spendBasisLabel,
   incomeSummary,
   budgetedSummary,
   spentSummary,
   usedPercent,
-  spentWidth,
-  spentForChart,
   remainingBudgetForChart,
-  amountContextLabel,
-  income,
-  budgetedForChart,
-  remainingForChart,
   remainingTotal,
   isCollapsed = false,
   onToggleCollapsed,
@@ -56,35 +39,20 @@ export const BudgetUtilizationCard: React.FC<BudgetUtilizationCardProps> = ({
     <>
       <SummaryCardHeader
         title="Budget Utilization"
-        currentView={view}
-        onToggle={onToggle}
         showFilteredBadge={showFilteredBadge}
         isCollapsed={isCollapsed}
         onToggleCollapsed={onToggleCollapsed}
       />
 
-      {isCollapsed ? null : view === 'chart' ? (
+      {isCollapsed ? null : (
         <BudgetUtilizationChart
           spendBasisLabel={spendBasisLabel}
           incomeSummary={incomeSummary}
           budgetedSummary={budgetedSummary}
           spentSummary={spentSummary}
           usedPercent={usedPercent}
-          spentWidth={spentWidth}
-          spentForChart={spentForChart}
           remainingBudgetForChart={remainingBudgetForChart}
           remainingTotal={remainingTotal}
-          amountContextLabel={amountContextLabel}
-        />
-      ) : (
-        <BudgetUtilizationNumbers
-          income={income}
-          budgetedForChart={budgetedForChart}
-          spentForChart={spentForChart}
-          remainingForChart={remainingForChart}
-          remainingTotal={remainingTotal}
-          usedPercent={usedPercent}
-          amountContextLabel={amountContextLabel}
         />
       )}
     </>

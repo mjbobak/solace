@@ -2,12 +2,7 @@ import React from 'react';
 
 import { budgetSummaryTheme } from '@/shared/theme';
 
-import {
-  compactCardContentHeight,
-  formatWholeCurrency,
-  paletteBlue,
-  paletteBlueStrong,
-} from './constants';
+import { compactCardContentHeight, formatWholeCurrency } from './constants';
 
 interface BudgetUtilizationChartProps {
   spendBasisLabel: string;
@@ -15,11 +10,27 @@ interface BudgetUtilizationChartProps {
   budgetedSummary: string;
   spentSummary: string;
   usedPercent: number;
-  spentWidth: number;
-  spentForChart: number;
   remainingBudgetForChart: number;
   remainingTotal: number;
-  amountContextLabel: string;
+}
+
+const GAUGE_RADIUS = 80;
+const GAUGE_CENTER_X = 100;
+const GAUGE_CENTER_Y = 100;
+const GAUGE_STROKE = 18;
+
+function gaugePoint(fraction: number): { x: number; y: number } {
+  const angle = Math.PI * (1 - fraction);
+  return {
+    x: GAUGE_CENTER_X + GAUGE_RADIUS * Math.cos(angle),
+    y: GAUGE_CENTER_Y - GAUGE_RADIUS * Math.sin(angle),
+  };
+}
+
+function gaugeArc(fraction: number): string {
+  const start = gaugePoint(0);
+  const end = gaugePoint(Math.min(Math.max(fraction, 0), 1));
+  return `M ${start.x} ${start.y} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${end.x} ${end.y}`;
 }
 
 export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
@@ -28,82 +39,99 @@ export const BudgetUtilizationChart: React.FC<BudgetUtilizationChartProps> = ({
   budgetedSummary,
   spentSummary,
   usedPercent,
-  spentWidth,
   remainingBudgetForChart,
   remainingTotal,
 }) => {
-  const remainingWidth = Math.max(100 - spentWidth, 0);
-  const remainingSummary = formatWholeCurrency(remainingBudgetForChart);
   const isOverBudget = remainingTotal < 0;
-  const overBudgetSummary = formatWholeCurrency(Math.abs(remainingTotal));
+  const spentFraction = Math.min(Math.max(usedPercent, 0) / 100, 1);
   const usedPercentLabel = `${usedPercent.toFixed(0)}%`;
-  const remainingPercentLabel = `${Math.max(100 - usedPercent, 0).toFixed(0)}%`;
+  const remainingSummary = formatWholeCurrency(Math.abs(remainingBudgetForChart));
+  const spentColor = isOverBudget
+    ? 'var(--color-danger)'
+    : 'var(--color-allocation-blue-strong)';
+
+  const values = [
+    { label: 'Income', value: incomeSummary },
+    { label: 'Budgeted', value: budgetedSummary },
+    { label: 'Spent', value: spentSummary },
+    {
+      label: isOverBudget ? 'Over budget' : 'Remaining',
+      value: remainingSummary,
+      danger: isOverBudget,
+    },
+  ];
 
   return (
     <div
-      className={`flex flex-1 flex-col justify-start pt-0 ${compactCardContentHeight}`}
+      className={`flex flex-1 flex-col gap-4 pt-1 sm:flex-row sm:items-center ${compactCardContentHeight}`}
     >
-      <div
-        className={`flex min-h-[2.5rem] flex-wrap items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryTextMuted}`}
-      >
-        <span>
-          <span>{spendBasisLabel}:</span>{' '}
-          <span className={budgetSummaryTheme.summaryText}>{incomeSummary}</span>{' '}
-          income /{' '}
-          <span className={budgetSummaryTheme.summaryText}>
-            {budgetedSummary}
-          </span>{' '}
-          budget /{' '}
-          <span className={budgetSummaryTheme.summaryText}>{spentSummary}</span>{' '}
-          spent
-        </span>
-        <span>
-          <span className={budgetSummaryTheme.summaryText}>
-            {usedPercentLabel}
-          </span>{' '}
-          used
+      <div className="flex shrink-0 flex-col items-center sm:w-[46%]">
+        <div className="relative w-full max-w-[240px]">
+          <svg viewBox="0 0 200 116" className="w-full">
+            <path
+              d={gaugeArc(1)}
+              fill="none"
+              stroke="var(--color-allocation-blue)"
+              strokeWidth={GAUGE_STROKE}
+              strokeLinecap="round"
+            >
+              <title>{`Remaining · ${remainingSummary}`}</title>
+            </path>
+            {spentFraction > 0 ? (
+              <path
+                d={gaugeArc(spentFraction)}
+                fill="none"
+                stroke={spentColor}
+                strokeWidth={GAUGE_STROKE}
+                strokeLinecap="round"
+              >
+                <title>{`Spent · ${spentSummary}`}</title>
+              </path>
+            ) : null}
+          </svg>
+          <div className="absolute inset-x-0 bottom-1 flex flex-col items-center">
+            <span
+              className={`text-3xl font-bold ${
+                isOverBudget
+                  ? budgetSummaryTheme.summaryDanger
+                  : budgetSummaryTheme.summaryValue
+              }`}
+            >
+              {usedPercentLabel}
+            </span>
+            <span
+              className={`text-[11px] uppercase tracking-[0.14em] ${budgetSummaryTheme.summaryTextMuted}`}
+            >
+              of budget used
+            </span>
+          </div>
+        </div>
+        <span
+          className={`mt-1 text-[11px] uppercase tracking-[0.12em] ${budgetSummaryTheme.summaryTextMuted}`}
+        >
+          {spendBasisLabel}
         </span>
       </div>
 
-      <div className="mt-2">
-        <div
-          className={`flex h-14 w-full overflow-hidden rounded-md ${budgetSummaryTheme.waterfallTrack}`}
-        >
-          {spentWidth > 0 ? (
-            <div
-              className={`flex h-full flex-col justify-center overflow-hidden px-3 ${paletteBlueStrong}`}
-              style={{ width: `${spentWidth}%` }}
-              title="Spent"
+      <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-3">
+        {values.map(({ label, value, danger }) => (
+          <div key={label}>
+            <p
+              className={`text-[11px] uppercase tracking-[0.12em] ${budgetSummaryTheme.summaryTextMuted}`}
             >
-              <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
-                Spent
-              </span>
-              <span className="truncate text-xs text-gray-800">
-                {`${spentSummary} · ${usedPercentLabel}`}
-              </span>
-            </div>
-          ) : null}
-          {remainingWidth > 0 && !isOverBudget ? (
-            <div
-              className={`flex h-full flex-col justify-center overflow-hidden px-3 ${paletteBlue}`}
-              style={{ width: `${remainingWidth}%` }}
-              title="Remaining"
+              {label}
+            </p>
+            <p
+              className={`text-lg font-bold ${
+                danger
+                  ? budgetSummaryTheme.summaryDanger
+                  : budgetSummaryTheme.summaryValue
+              }`}
             >
-              <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-app">
-                Remaining
-              </span>
-              <span className="truncate text-xs text-gray-800">
-                {`${remainingSummary} · ${remainingPercentLabel}`}
-              </span>
-            </div>
-          ) : null}
-        </div>
-
-        {isOverBudget ? (
-          <p className={`mt-2 text-xs ${budgetSummaryTheme.summaryDanger}`}>
-            {`${overBudgetSummary} over budget`}
-          </p>
-        ) : null}
+              {value}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );
